@@ -7,18 +7,18 @@ import { IconSearch } from '../icons';
 export const Card = ({ children, style, onPress, padding = 14 }) => {
   const { theme: T } = useTheme();
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
       activeOpacity={onPress ? 0.7 : 1}
       onPress={onPress}
       style={[
-        { 
-          backgroundColor: T.surface, 
-          borderRadius: 16, 
-          padding,
+        {
+          backgroundColor: T.surface,
           borderWidth: 1,
           borderColor: T.borderSoft,
-        }, 
-        style
+          borderRadius: 14,
+          padding,
+        },
+        style,
       ]}
     >
       {children}
@@ -48,27 +48,31 @@ export const Btn = ({ children, variant = 'primary', size = 'md', onPress, full,
   } else if (variant === 'tonal') {
     bg = danger ? T.badSoft : T.accentSoft;
     color = danger ? T.bad : T.accent;
+  } else if (variant === 'surface') {
+    bg = T.surface;
+    color = T.text;
+    border = T.borderSoft;
   }
 
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled}
+      activeOpacity={0.8}
       style={[
         {
           height: sizes.h,
           paddingHorizontal: sizes.px,
           borderRadius: 12,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
           backgroundColor: bg,
           borderWidth: 1,
           borderColor: border,
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: full ? '100%' : undefined,
           opacity: disabled ? 0.5 : 1,
-          width: full ? '100%' : 'auto',
         },
-        style
+        style,
       ]}
     >
       <Text style={{ color, fontSize: sizes.fs, fontWeight: '600' }}>{children}</Text>
@@ -81,15 +85,18 @@ export const TextInput = ({ value, onChangeText, placeholder, secureTextEntry, l
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   return (
-    <View style={[styles.inputContainer, error && { borderColor: T.bad }]}>
+    <View style={[
+      styles.inputContainer,
+      { borderColor: error ? T.bad : T.borderSoft }
+    ]}>
       {leading && <View style={{ marginRight: 8 }}>{leading}</View>}
       <RNTextInput
-        style={styles.input}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor={T.textFaint}
         secureTextEntry={secureTextEntry}
+        style={styles.input}
       />
       {trailing && <View style={{ marginLeft: 8 }}>{trailing}</View>}
     </View>
@@ -120,9 +127,10 @@ export const Logo = ({ size = 24 }) => {
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       <Image 
         source={require('../assets/iorbitdigitaltechnologies_logo.jpeg')} 
-        style={{ width: size, height: size, borderRadius: 4 }} 
+        style={{ width: size, height: size, borderRadius: size * 0.2 }}
+        resizeMode="contain"
       />
-      <Text style={{ marginLeft: 8, fontSize: size * 0.7, fontWeight: '700', color: T.text }}>
+      <Text style={{ fontSize: size * 0.7, fontWeight: '700', color: T.text, marginLeft: 10 }}>
         iOrbit <Text style={{ color: T.textDim, fontWeight: '500' }}>Admin</Text>
       </Text>
     </View>
@@ -130,28 +138,37 @@ export const Logo = ({ size = 24 }) => {
 };
 
 // --- Avatar ---
-export const Avatar = ({ initials, size = 36, color }) => {
+export const Avatar = ({ initials, name, size = 36, color }) => {
   const { theme: T } = useTheme();
   const bgColor = color || T.accent;
+  const displayInitials = initials || (name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : '?');
+  
   return (
     <View style={{
-      width: size, height: size, borderRadius: size / 3,
-      backgroundColor: bgColor, alignItems: 'center', justifyContent: 'center'
+      width: size,
+      height: size,
+      borderRadius: size * 0.32,
+      backgroundColor: bgColor,
+      alignItems: 'center',
+      justifyContent: 'center',
     }}>
-      <Text style={{ color: '#fff', fontSize: size * 0.4, fontWeight: '700' }}>{initials}</Text>
+      <Text style={{ color: '#fff', fontSize: size * 0.4, fontWeight: '700' }}>{displayInitials}</Text>
     </View>
   );
 };
 
 // --- Section Header ---
-export const SectionHeader = ({ title, count }) => {
+export const SectionHeader = ({ title, count, subtitle }) => {
   const { theme: T } = useTheme();
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-      <Text style={{ fontSize: 11, fontWeight: '700', color: T.textDim, letterSpacing: 1 }}>{title.toUpperCase()}</Text>
-      {count !== undefined && (
-        <Text style={{ fontSize: 11, color: T.textFaint }}>{count}</Text>
-      )}
+    <View style={{ marginBottom: 12 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <Text style={{ fontSize: 11, fontWeight: '700', color: T.textDim, letterSpacing: 1 }}>{title.toUpperCase()}</Text>
+        {count !== undefined && (
+          <Text style={{ fontSize: 11, color: T.textFaint, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' }}>{count}</Text>
+        )}
+      </View>
+      {subtitle && <Text style={{ fontSize: 12, color: T.textDim, marginTop: 2 }}>{subtitle}</Text>}
     </View>
   );
 };
@@ -170,29 +187,48 @@ export const RoleBadge = ({ role }) => {
 
   return (
     <View style={{
-      backgroundColor: r.bg, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4,
-      borderWidth: 1, borderColor: 'transparent'
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      borderRadius: 999,
+      backgroundColor: r.bg,
     }}>
-      <Text style={{ color: r.color, fontSize: 10, fontWeight: '700' }}>{r.label}</Text>
+      <View style={{ width: 5, height: 5, borderRadius: 99, backgroundColor: r.color }} />
+      <Text style={{
+        color: r.color,
+        fontSize: 9.5,
+        fontWeight: '700',
+        fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+      }}>{r.label}</Text>
     </View>
   );
 };
 
 // --- Search Bar ---
-export const SearchBar = ({ placeholder, value, onChange, trailing }) => {
+export const SearchBar = ({ placeholder, value, onChange, onChangeText, trailing }) => {
   const { theme: T } = useTheme();
+  const handleChange = onChangeText || onChange;
+  
   return (
     <View style={{
-      flexDirection: 'row', alignItems: 'center', backgroundColor: T.surface,
-      borderRadius: 12, paddingHorizontal: 10, height: 40, borderWidth: 1, borderColor: T.borderSoft
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: T.surface,
+      borderWidth: 1,
+      borderColor: T.borderSoft,
+      borderRadius: 12,
+      paddingHorizontal: 12,
+      height: 44,
     }}>
       <IconSearch size={18} color={T.textDim} />
-      <RNTextInput
-        style={{ flex: 1, marginLeft: 8, color: T.text, fontSize: 14 }}
-        placeholder={placeholder || "Search"}
-        placeholderTextColor={T.textFaint}
+      <RNTextInput 
         value={value}
-        onChangeText={onChange}
+        onChangeText={handleChange}
+        placeholder={placeholder}
+        placeholderTextColor={T.textFaint}
+        style={{ flex: 1, color: T.text, fontSize: 14, marginLeft: 8, padding: 0 }}
       />
       {trailing}
     </View>
@@ -200,21 +236,29 @@ export const SearchBar = ({ placeholder, value, onChange, trailing }) => {
 };
 
 // --- Chip ---
-export const Chip = ({ children, on, color, onClick }) => {
+export const Chip = ({ children, active, on, color, onPress, onClick }) => {
   const { theme: T } = useTheme();
-  const bg = on ? (color || T.accent) : T.surface;
-  const border = on ? (color || T.accent) : T.borderSoft;
-  const textColor = on ? '#fff' : T.text;
+  const isActive = active || on;
+  const handlePress = onPress || onClick;
+  
+  const bg = isActive ? (color || T.accent) : T.surface;
+  const border = isActive ? (color || T.accent) : T.borderSoft;
+  const textColor = isActive ? '#fff' : T.text;
 
   return (
     <TouchableOpacity 
-      onPress={onClick}
+      onPress={handlePress}
       style={{
-        backgroundColor: bg, paddingHorizontal: 12, paddingVertical: 6,
-        borderRadius: 20, borderWidth: 1, borderColor: border, marginRight: 8
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 999,
+        backgroundColor: bg,
+        borderWidth: 1,
+        borderColor: border,
+        marginRight: 8,
       }}
     >
-      <Text style={{ color: textColor, fontSize: 12, fontWeight: '600' }}>{children}</Text>
+      <Text style={{ fontSize: 12, fontWeight: '600', color: textColor }}>{children}</Text>
     </TouchableOpacity>
   );
 };
@@ -228,7 +272,6 @@ const createStyles = (T) => StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 12,
     height: 44,
-    borderColor: T.borderSoft,
   },
   input: {
     flex: 1,

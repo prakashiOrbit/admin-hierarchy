@@ -37,7 +37,8 @@ export const ShiftsScreen = ({ onNewNurse, onNewShift }) => {
           <SectionHeader title={mode === 'shifts' ? "CURRENT SHIFTS" : "REGISTERED NURSES"} count={mode === 'shifts' ? filteredShifts.length : filteredNurses.length} />
           
           <Btn 
-            type="primary" 
+            variant="primary" 
+            size="sm"
             style={styles.newBtn} 
             onPress={mode === 'shifts' ? onNewShift : onNewNurse}
           >
@@ -86,7 +87,7 @@ export const ShiftsScreen = ({ onNewNurse, onNewShift }) => {
               return (
                 <Card key={n.id}>
                   <View style={styles.itemRow}>
-                    <Avatar size={40} label={n.initials} />
+                    <Avatar size={40} initials={n.initials} />
                     
                     <View style={styles.infoBox}>
                       <View style={styles.titleRow}>

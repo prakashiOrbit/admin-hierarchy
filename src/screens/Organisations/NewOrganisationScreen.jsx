@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import { Card, Field, TextInput, Btn } from '../../components/Shared';
-import { IconBuilding, IconUser, IconMail, IconLocation, IconPhone } from '../../icons';
+import { IconBuilding, IconUser, IconMail, IconLocation, IconPhone, IconShield } from '../../icons';
 
 export const NewOrganisationScreen = ({ onCancel }) => {
   const { theme: T } = useTheme();
@@ -51,104 +51,124 @@ export const NewOrganisationScreen = ({ onCancel }) => {
   };
 
   return (
-    
-      
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Helper Banner */}
-        
-          
-          
+        <View style={styles.banner}>
+          <IconShield color={T.accent} size={20} />
+          <Text style={styles.bannerText}>
             Onboarding a new tenant. Configure the primary identity and contact details for the new organisation.
           </Text>
         </View>
 
         {/* Identity Section */}
-        
-          IDENTITY</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>IDENTITY</Text>
           
-          
-             updateRoot('orgName', v.toUpperCase())}
+          <Field label="Org Unique ID">
+            <TextInput 
+              value={form.orgName} 
+              onChangeText={(v) => updateRoot('orgName', v.toUpperCase())}
               placeholder="e.g. APOLLO_ORG_TEST129"
             />
           </Field>
 
-          
-             updateRoot('businessName', v)}
+          <Field label="Business Name">
+            <TextInput 
+              value={form.businessName} 
+              onChangeText={(v) => updateRoot('businessName', v)}
               placeholder="e.g. Apollo Hospitals"
             />
           </Field>
 
-          
-            
-              {form.orgType}</Text>
+          <Field label="Org Type">
+            <Card style={styles.selectCard}>
+              <Text style={styles.selectText}>{form.orgType}</Text>
             </Card>
           </Field>
         </View>
 
         {/* Contact Section */}
-        
-          CONTACT PERSON</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>CONTACT PERSON</Text>
           
-          
-             updateContact('name', v)}
+          <Field label="Contact Name">
+            <TextInput 
+              value={form.myContact.name} 
+              onChangeText={(v) => updateContact('name', v)}
               placeholder="Full name"
-              leading={}
+              leading={<IconUser size={18} color={T.textDim} />}
             />
           </Field>
 
-          
-             updateContact('email', v)}
+          <Field label="Email Address">
+            <TextInput 
+              value={form.myContact.email} 
+              onChangeText={(v) => updateContact('email', v)}
               placeholder="admin@organisation.com"
-              leading={}
+              leading={<IconMail size={18} color={T.textDim} />}
             />
           </Field>
 
-          
-             updateContact('phone', v)}
+          <Field label="Phone Number">
+            <TextInput 
+              value={form.myContact.phone} 
+              onChangeText={(v) => updateContact('phone', v)}
               placeholder="+91 98000 00000"
-              leading={}
+              leading={<IconPhone size={18} color={T.textDim} />}
             />
           </Field>
         </View>
 
         {/* Address Section */}
-        
-          OFFICE ADDRESS</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>OFFICE ADDRESS</Text>
           
-          
-             updateAddress('street1', v)}
+          <Field label="Street Address">
+            <TextInput 
+              value={form.myAddress.street1} 
+              onChangeText={(v) => updateAddress('street1', v)}
               placeholder="123 Main St"
-              leading={}
+              leading={<IconLocation size={18} color={T.textDim} />}
             />
           </Field>
 
-          
-            
-              
-                 updateAddress('city', v)}
+          <View style={styles.row}>
+            <View style={{ flex: 1 }}>
+              <Field label="City">
+                <TextInput 
+                  value={form.myAddress.city} 
+                  onChangeText={(v) => updateAddress('city', v)}
                   placeholder="Bangalore"
                 />
               </Field>
             </View>
-            
-              
-                 updateAddress('state', v)}
+            <View style={{ flex: 1 }}>
+              <Field label="State">
+                <TextInput 
+                  value={form.myAddress.state} 
+                  onChangeText={(v) => updateAddress('state', v)}
                   placeholder="Karnataka"
                 />
               </Field>
             </View>
           </View>
 
-          
-            
-              
-                 updateAddress('country', v)}
+          <View style={styles.row}>
+            <View style={{ flex: 1 }}>
+              <Field label="Country">
+                <TextInput 
+                  value={form.myAddress.country} 
+                  onChangeText={(v) => updateAddress('country', v)}
                   placeholder="India"
                 />
               </Field>
             </View>
-            
-              
-                 updateAddress('pincode', v)}
+            <View style={{ flex: 1 }}>
+              <Field label="Pincode">
+                <TextInput 
+                  value={form.myAddress.pincode} 
+                  onChangeText={(v) => updateAddress('pincode', v)}
                   placeholder="560001"
                 />
               </Field>
@@ -157,9 +177,14 @@ export const NewOrganisationScreen = ({ onCancel }) => {
         </View>
 
         {/* Actions */}
-        
-          Cancel</Btn>
-          
+        <View style={styles.actionRow}>
+          <Btn variant="ghost" full style={{ flex: 1 }} onPress={onCancel}>Cancel</Btn>
+          <Btn 
+            full 
+            style={{ flex: 1.5 }} 
+            onPress={handleCreate} 
+            disabled={!isFormValid}
+          >
             Create organisation
           </Btn>
         </View>
@@ -220,4 +245,3 @@ const createStyles = (T) => StyleSheet.create({
     marginTop: 8,
   },
 });
-

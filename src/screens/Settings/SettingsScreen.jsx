@@ -67,7 +67,7 @@ export const SettingsScreen = ({ onLogout }) => {
           style={styles.logoutBtn} 
           onPress={onLogout}
         >
-          <IconLogout size={18} color={T.error} />
+          <IconLogout size={18} color={T.bad} />
            Log out
         </Btn>
 

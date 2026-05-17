@@ -32,7 +32,7 @@ export const WardsScreen = ({ onNewWard, onNewBed }) => {
           <SectionHeader title="Hospital Wards" subtitle={`${filtered.length} units`} />
           <Btn 
             variant="primary" 
-            size="small" 
+            size="sm" 
             style={styles.newBtn}
             onPress={onNewWard}
           >

@@ -5,7 +5,7 @@ import { Card, SectionHeader, Btn } from '../../components/Shared';
 import { IconShield, IconPlus, IconChevron } from '../../icons';
 import { ROLES_LIST } from '../../data/mock';
 
-export const RolesScreen = ({ onSelectRole }) => {
+export const RolesScreen = ({ onSelectRole, onCreate }) => {
   const { theme: T } = useTheme();
   const styles = createStyles(T);
 
@@ -16,9 +16,9 @@ export const RolesScreen = ({ onSelectRole }) => {
           <SectionHeader title="Access Roles" subtitle="RBAC Configuration" />
           <Btn 
             variant="primary" 
-            size="small" 
+            size="sm" 
             style={styles.newBtn}
-            onPress={() => {}}
+            onPress={onCreate}
           >
             <IconPlus size={14} color="#FFF" />
              New role

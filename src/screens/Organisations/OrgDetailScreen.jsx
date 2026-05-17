@@ -53,7 +53,7 @@ export const OrgDetailScreen = ({ orgId }) => {
           <Card style={styles.listCard}>
             {USERS.filter(u => u.role === 'ORG_OWNER' || u.role === 'ORG_ADMIN').slice(0, 2).map((user, i) => (
               <View key={user.id} style={[styles.listItem, i > 0 && styles.listBorder]}>
-                <Avatar size={36} label={user.initials} />
+                <Avatar size={36} initials={user.initials} />
                 <View style={styles.listItemContent}>
                   <Text style={styles.userName}>{user.name}</Text>
                   <Text style={styles.userEmail}>{user.email}</Text>

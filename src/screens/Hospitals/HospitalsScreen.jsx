@@ -6,7 +6,7 @@ import { StatusPill } from '../../components/StatusPill';
 import { IconHospital, IconFilter, IconBed, IconDoor, IconPulse, IconPlus } from '../../icons';
 import { HOSPITALS } from '../../data/mock';
 
-export const HospitalsScreen = ({ onInvite }) => {
+export const HospitalsScreen = ({ onProvision }) => {
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const [query, setQuery] = useState('');
@@ -51,9 +51,10 @@ export const HospitalsScreen = ({ onInvite }) => {
           <SectionHeader title="HOSPITALS" count={filtered.length} />
           
           <Btn 
-            type="primary" 
+            variant="primary" 
+            size="sm"
             style={styles.newBtn} 
-            onPress={onInvite}
+            onPress={onProvision}
           >
             <IconPlus size={14} color="#fff" /> New Hospital
           </Btn>

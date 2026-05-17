@@ -32,7 +32,8 @@ export const HospAdminsScreen = ({ onSelectUser, onInvite }) => {
           <SectionHeader title="ADMINISTRATORS" count={admins.length} />
           
           <Btn 
-            type="primary" 
+            variant="primary" 
+            size="sm"
             style={styles.newBtn} 
             onPress={onInvite}
           >
@@ -44,7 +45,7 @@ export const HospAdminsScreen = ({ onSelectUser, onInvite }) => {
           {admins.map(u => (
             <Card key={u.id} onPress={() => onSelectUser(u.id)}>
               <View style={styles.userRow}>
-                <Avatar label={u.initials} size={40} />
+                <Avatar initials={u.initials} size={40} />
                 <View style={styles.userInfo}>
                   <View style={styles.titleRow}>
                     <Text style={styles.userName}>{u.name}</Text>

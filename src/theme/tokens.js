@@ -35,5 +35,3 @@ export const LightTheme = {
   goodSoft:  'rgba(16,185,129,0.1)',
   badSoft:   'rgba(239,68,68,0.1)',
 };
-
-export 

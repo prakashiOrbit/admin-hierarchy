@@ -16,49 +16,58 @@ export const DoctorsScreen = ({ onNewDoctor, onSelectDoctor }) => {
   ].filter(d => d.name.toLowerCase().includes(query.toLowerCase()) || d.code.toLowerCase().includes(query.toLowerCase()));
 
   return (
-    
-      
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Search */}
-        
-          
+        <View style={{ marginBottom: 16 }}>
+          <SearchBar 
+            placeholder="Search doctors..."
+            value={query}
+            onChangeText={setQuery}
+          />
         </View>
 
-        
+        <View style={styles.headerRow}>
+          <SectionHeader title="MEDICAL STAFF" count={doctors.length} />
           
-          
-             New Doctor
+          <Btn 
+            variant="primary" 
+            style={styles.newBtn} 
+            onPress={onNewDoctor}
+          >
+            <IconPlus size={14} color="#fff" /> New Doctor
           </Btn>
         </View>
 
         {/* List */}
-        
+        <View style={styles.list}>
           {doctors.map(d => (
-             onSelectDoctor(d.id)}>
-              
-                
-                
-                  
-                    Dr. {d.name}</Text>
-                    
-                      {d.type}</Text>
+            <Card key={d.id} onPress={() => onSelectDoctor(d.id)}>
+              <View style={styles.doctorRow}>
+                <Avatar initials={d.initials} size={44} />
+                <View style={styles.doctorInfo}>
+                  <View style={styles.titleRow}>
+                    <Text style={styles.doctorName}>Dr. {d.name}</Text>
+                    <View style={styles.typeBadge}>
+                      <Text style={styles.typeText}>{d.type}</Text>
                     </View>
                   </View>
-                  {d.code} · {d.experience}y exp</Text>
+                  <Text style={styles.doctorMeta}>{d.code} · {d.experience}y exp</Text>
                   
-                  
-                    
-                    {d.speciality.join(', ')}</Text>
+                  <View style={styles.specRow}>
+                    <IconActivity size={12} color={T.textDim} />
+                    <Text style={styles.specText}>{d.speciality.join(', ')}</Text>
                   </View>
                 </View>
-                
+                <IconChevron size={20} color={T.textFaint} />
               </View>
             </Card>
           ))}
           {doctors.length === 0 && (
-            
-              
-              No doctors found</Text>
-              Onboard a new medical professional to your hospital.</Text>
+            <View style={styles.emptyState}>
+              <IconStethoscope size={48} color={T.textFaint} />
+              <Text style={styles.emptyTitle}>No doctors found</Text>
+              <Text style={styles.emptyHint}>Onboard a new medical professional to your hospital.</Text>
             </View>
           )}
         </View>

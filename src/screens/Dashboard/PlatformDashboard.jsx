@@ -207,7 +207,7 @@ export const PlatformDashboard = ({ navigation }) => {
     switch (activeTab) {
       case 'home': return <HomeContent onNavigate={handleTabChange} />;
       case 'orgs': return <OrganisationsScreen onSelectOrg={(id) => setSelectedOrgId(id)} />;
-      case 'new': return <NewOrganisationScreen onComplete={() => handleTabChange('home')} />;
+      case 'new': return <NewOrganisationScreen onCancel={() => handleTabChange('home')} />;
       case 'settings': return <SettingsScreen onLogout={() => navigation.replace('Login')} />;
       default: return <HomeContent onNavigate={handleTabChange} />;
     }

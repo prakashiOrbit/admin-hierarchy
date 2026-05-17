@@ -4,7 +4,7 @@ import { useTheme } from '../../theme/ThemeContext';
 import { Card, SectionHeader, SearchBar, Btn } from '../../components/Shared';
 import { IconCpu, IconActivity, IconPlus, IconChevron } from '../../icons';
 
-export const DeviceTypesScreen = ({ onInvite }) => {
+export const DeviceTypesScreen = ({ onCreate }) => {
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const [query, setQuery] = useState('');
@@ -30,9 +30,9 @@ export const DeviceTypesScreen = ({ onInvite }) => {
           <SectionHeader title="Hardware Profiles" subtitle="Supported IoMT devices" />
           <Btn 
             variant="primary" 
-            size="small" 
+            size="sm" 
             style={styles.newBtn}
-            onPress={() => {}}
+            onPress={onCreate}
           >
             <IconPlus size={14} color="#FFF" />
              New Type

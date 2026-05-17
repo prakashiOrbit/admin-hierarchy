@@ -4,7 +4,7 @@ import { useTheme } from '../../theme/ThemeContext';
 import { Card, SectionHeader, SearchBar, Avatar, RoleBadge, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
 import { IconPlus, IconChevron } from '../../icons';
-import { USERS, ROLES } from '../../data/mock';
+import { USERS } from '../../data/mock';
 
 export const OrgAdminsScreen = ({ onSelectUser, onInvite }) => {
   const { theme: T } = useTheme();
@@ -17,36 +17,45 @@ export const OrgAdminsScreen = ({ onSelectUser, onInvite }) => {
   );
 
   return (
-    
-      
-        
-          
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={{ marginBottom: 16 }}>
+          <SearchBar 
+            placeholder="Search administrators..."
+            value={query}
+            onChange={setQuery}
+          />
         </View>
 
-        
+        <View style={styles.headerRow}>
+          <SectionHeader title="ADMINISTRATORS" count={admins.length} />
           
-          
-             Create Org Admin
+          <Btn 
+            variant="primary" 
+            size="sm"
+            style={styles.newBtn} 
+            onPress={onInvite}
+          >
+            <IconPlus size={14} color="#fff" /> Create Org Admin
           </Btn>
         </View>
 
-        
+        <View style={styles.list}>
           {admins.map(u => (
-             onSelectUser(u.id)}
-            >
-              
-                
-                
-                  
-                    {u.name}</Text>
-                    
+            <Card key={u.id} onPress={() => onSelectUser(u.id)}>
+              <View style={styles.userRow}>
+                <Avatar initials={u.initials} size={40} />
+                <View style={styles.userInfo}>
+                  <View style={styles.titleRow}>
+                    <Text style={styles.userName}>{u.name}</Text>
+                    <RoleBadge role={u.role} />
                   </View>
-                  {u.email}</Text>
-                  
-                    
+                  <Text style={styles.userEmail}>{u.email}</Text>
+                  <View style={styles.badgesRow}>
+                    <StatusPill status={u.status} />
                   </View>
                 </View>
-                
+                <IconChevron size={16} color={T.textFaint} />
               </View>
             </Card>
           ))}

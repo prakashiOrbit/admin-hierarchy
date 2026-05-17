@@ -18,6 +18,7 @@ import { UserDetailScreen } from '../Users/UserDetailScreen';
 import { InviteOrgAdminScreen } from '../Organisations/InviteOrgAdminScreen';
 import { OrgAdminsScreen } from '../Organisations/OrgAdminsScreen';
 import { RoleDetailScreen } from '../Roles/RoleDetailScreen';
+import { CreateRoleScreen } from '../Roles/CreateRoleScreen';
 import { CreateHospitalScreen } from '../Hospitals/CreateHospitalScreen';
 import { DeviceTypesScreen } from '../Devices/DeviceTypesScreen';
 import { CreateDeviceTypeScreen } from '../Devices/CreateDeviceTypeScreen';
@@ -172,6 +173,7 @@ export const OrgDashboard = ({ navigation, route }) => {
   const [isInvitingAdmin, setIsInvitingAdmin] = useState(false);
   const [isProvisioningHospital, setIsProvisioningHospital] = useState(false);
   const [isCreatingDeviceType, setIsCreatingDeviceType] = useState(false);
+  const [isCreatingRole, setIsCreatingRole] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const drawerAnim = React.useRef(new Animated.Value(-width)).current;
 
@@ -181,6 +183,7 @@ export const OrgDashboard = ({ navigation, route }) => {
       if (isInvitingAdmin) { setIsInvitingAdmin(false); return true; }
       if (isProvisioningHospital) { setIsProvisioningHospital(false); return true; }
       if (isCreatingDeviceType) { setIsCreatingDeviceType(false); return true; }
+      if (isCreatingRole) { setIsCreatingRole(false); return true; }
       if (selectedUserId) { setSelectedUserId(null); return true; }
       if (selectedRoleId) { setSelectedRoleId(null); return true; }
       if (activeTab !== 'home') { handleTabChange('home'); return true; }
@@ -188,7 +191,7 @@ export const OrgDashboard = ({ navigation, route }) => {
     };
     const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
     return () => backHandler.remove();
-  }, [drawerOpen, activeTab, selectedUserId, isInvitingAdmin, selectedRoleId, isProvisioningHospital, isCreatingDeviceType]);
+  }, [drawerOpen, activeTab, selectedUserId, isInvitingAdmin, selectedRoleId, isProvisioningHospital, isCreatingDeviceType, isCreatingRole]);
 
   const toggleDrawer = () => {
     const toValue = drawerOpen ? -width : 0;
@@ -202,6 +205,7 @@ export const OrgDashboard = ({ navigation, route }) => {
     setIsInvitingAdmin(false);
     setIsProvisioningHospital(false);
     setIsCreatingDeviceType(false);
+    setIsCreatingRole(false);
     setActiveTab(tabId);
   };
 
@@ -217,13 +221,16 @@ export const OrgDashboard = ({ navigation, route }) => {
 
   const renderContent = () => {
     if (isInvitingAdmin) {
-      return <InviteOrgAdminScreen onBack={() => setIsInvitingAdmin(false)} />;
+      return <InviteOrgAdminScreen onCancel={() => setIsInvitingAdmin(false)} />;
     }
     if (isProvisioningHospital) {
-      return <CreateHospitalScreen onBack={() => setIsProvisioningHospital(false)} />;
+      return <CreateHospitalScreen onCancel={() => setIsProvisioningHospital(false)} />;
     }
     if (isCreatingDeviceType) {
-      return <CreateDeviceTypeScreen onBack={() => setIsCreatingDeviceType(false)} />;
+      return <CreateDeviceTypeScreen onCancel={() => setIsCreatingDeviceType(false)} />;
+    }
+    if (isCreatingRole) {
+      return <CreateRoleScreen onCancel={() => setIsCreatingRole(false)} />;
     }
     if (selectedUserId) {
       return <UserDetailScreen userId={selectedUserId} onBack={() => setSelectedUserId(null)} />;
@@ -234,11 +241,11 @@ export const OrgDashboard = ({ navigation, route }) => {
 
     switch (activeTab) {
       case 'home': return <OrgHomeContent role={role} />;
-      case 'admins': return <OrgAdminsScreen onInvite={() => setIsInvitingAdmin(true)} />;
+      case 'admins': return <OrgAdminsScreen onInvite={() => setIsInvitingAdmin(true)} onSelectUser={setSelectedUserId} />;
       case 'hospitals': return <HospitalsScreen onProvision={() => setIsProvisioningHospital(true)} />;
       case 'types': return <DeviceTypesScreen onCreate={() => setIsCreatingDeviceType(true)} />;
       case 'users': return <UsersScreen onSelectUser={setSelectedUserId} />;
-      case 'roles': return <RolesScreen onSelectRole={setSelectedRoleId} />;
+      case 'roles': return <RolesScreen onSelectRole={setSelectedRoleId} onCreate={() => setIsCreatingRole(true)} />;
       case 'summary': return <OrgSummaryScreen />;
       default: return <OrgHomeContent role={role} />;
     }
@@ -248,6 +255,7 @@ export const OrgDashboard = ({ navigation, route }) => {
     if (isInvitingAdmin) return "Invite Org Admin";
     if (isProvisioningHospital) return "Create Hospital";
     if (isCreatingDeviceType) return "Create Device Type";
+    if (isCreatingRole) return "Create New Role";
     if (selectedUserId) return "User Details";
     if (selectedRoleId) return "Role Details";
 
@@ -302,8 +310,8 @@ export const OrgDashboard = ({ navigation, route }) => {
 
       <TopBar 
         title={getTitle()} 
-        leading={ (selectedUserId || isInvitingAdmin || selectedRoleId || isProvisioningHospital || isCreatingDeviceType) ? <IconBack /> : <IconMenu /> }
-        onLeadingPress={(selectedUserId || isInvitingAdmin || selectedRoleId || isProvisioningHospital || isCreatingDeviceType) ? () => { setSelectedUserId(null); setIsInvitingAdmin(false); setSelectedRoleId(null); setIsProvisioningHospital(false); setIsCreatingDeviceType(false); } : toggleDrawer}
+        leading={ (selectedUserId || isInvitingAdmin || selectedRoleId || isProvisioningHospital || isCreatingDeviceType || isCreatingRole) ? <IconBack /> : <IconMenu /> }
+        onLeadingPress={(selectedUserId || isInvitingAdmin || selectedRoleId || isProvisioningHospital || isCreatingDeviceType || isCreatingRole) ? () => { setSelectedUserId(null); setIsInvitingAdmin(false); setSelectedRoleId(null); setIsProvisioningHospital(false); setIsCreatingDeviceType(false); setIsCreatingRole(false); } : toggleDrawer}
         onNotificationPress={() => console.log('Notifications')}
         onProfilePress={() => navigation.replace('Login')}
       />
@@ -314,8 +322,8 @@ export const OrgDashboard = ({ navigation, route }) => {
 
       <BottomNav 
         items={footerItems} 
-        activeTab={activeTab} 
-        onTabChange={handleTabChange} 
+        active={activeTab} 
+        onChange={handleTabChange} 
       />
     </View>
   );

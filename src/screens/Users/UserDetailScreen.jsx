@@ -62,9 +62,9 @@ export const UserDetailScreen = ({ userId, onBack }) => {
           <Text style={styles.btnText}>{u.status === 'ACTIVE' ? 'Deactivate user' : 'Reactivate user'}</Text>
         </Btn>
 
-        <Btn variant="surface" style={[styles.secondaryBtn, { borderColor: T.errorSoft }]}>
-          <IconTrash size={16} color={T.error} />
-          <Text style={[styles.btnText, { color: T.error }]}>Delete user</Text>
+        <Btn variant="surface" style={[styles.secondaryBtn, { borderColor: T.badSoft }]}>
+          <IconTrash size={16} color={T.bad} />
+          <Text style={[styles.btnText, { color: T.bad }]}>Delete user</Text>
         </Btn>
       </ScrollView>
     </View>

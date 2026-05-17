@@ -62,7 +62,7 @@ export const LoginScreen = ({ navigation }) => {
 
   if (state === 'twofa') {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.twofaContent}>
           <TouchableOpacity onPress={() => setState('idle')} style={styles.backBtn}>
             <IconBack size={20} color={T.textDim} />
@@ -87,8 +87,14 @@ export const LoginScreen = ({ navigation }) => {
             ))}
           </View>
 
-          <Btn onPress={handleVerify} loading={state === 'loading'} style={{ marginTop: 32 }}>
-            Verify and continue
+          <Btn 
+            full 
+            size="lg" 
+            onPress={handleVerify} 
+            disabled={state === 'loading'} 
+            style={{ marginTop: 32 }}
+          >
+            {state === 'loading' ? 'Verifying...' : 'Verify and continue'}
           </Btn>
           <TouchableOpacity style={styles.resendBtn}>
             <Text style={styles.resendText}>Resend code</Text>
@@ -99,7 +105,7 @@ export const LoginScreen = ({ navigation }) => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
           <View style={styles.header}>
@@ -116,7 +122,7 @@ export const LoginScreen = ({ navigation }) => {
                 value={username}
                 onChangeText={setUsername}
                 placeholder="Enter your username"
-                icon={<IconUser size={20} color={T.textFaint} />}
+                leading={<IconUser size={20} color={T.textFaint} />}
               />
             </Field>
 
@@ -126,7 +132,7 @@ export const LoginScreen = ({ navigation }) => {
                 onChangeText={setPassword}
                 secureTextEntry={!showPw}
                 placeholder="••••••••"
-                icon={<IconLock size={20} color={T.textFaint} />}
+                leading={<IconLock size={20} color={T.textFaint} />}
                 trailing={
                   <TouchableOpacity onPress={() => setShowPw(!showPw)}>
                     {showPw ? <IconEyeOff size={20} color={T.textFaint} /> : <IconEye size={20} color={T.textFaint} />}
@@ -145,13 +151,20 @@ export const LoginScreen = ({ navigation }) => {
               <Text style={styles.forgotText}>Forgot password?</Text>
             </TouchableOpacity>
 
-            <Btn onPress={handleLogin} loading={state === 'loading'} style={{ marginTop: 12 }}>
+            <Btn 
+              full 
+              size="lg" 
+              onPress={handleLogin} 
+              disabled={state === 'loading'} 
+              style={{ marginTop: 12 }}
+            >
               {state === 'loading' ? 'Signing in...' : 'Sign in'}
             </Btn>
           </View>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>v3.0.0-PROD</Text>
+            <Text style={styles.poweredBy}>Powered by</Text>
+            <Logo size={18} />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -214,8 +227,14 @@ const createStyles = (T) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 20,
+    gap: 8,
+    paddingVertical: 32,
+    marginTop: 'auto',
+  },
+  poweredBy: {
+    fontSize: 12,
+    color: T.textFaint,
+    fontWeight: '500',
   },
   footerText: {
     fontSize: 11,

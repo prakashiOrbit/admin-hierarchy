@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import { Card, Field, TextInput, Btn } from '../../components/Shared';
-import { IconUser, IconMail, IconBuilding } from '../../icons';
+import { IconUser, IconMail, IconBuilding, IconShield } from '../../icons';
 
 export const CreateHospAdminScreen = ({ onCancel, orgName = 'APOLLO_ORG_TEST131', hospCode = 'HOSP111' }) => {
   const { theme: T } = useTheme();
@@ -28,76 +28,89 @@ export const CreateHospAdminScreen = ({ onCancel, orgName = 'APOLLO_ORG_TEST131'
   };
 
   return (
-    
-      
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Helper Banner */}
-        
-          
-          
+        <View style={styles.banner}>
+          <IconShield color={T.accent} size={20} />
+          <Text style={styles.bannerText}>
             Inviting a new Hospital Administrator for {hospCode}. They will manage wards, devices, and clinical staff for this unit.
           </Text>
         </View>
 
         {/* User Identity Section */}
-        
-          USER IDENTITY</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>USER IDENTITY</Text>
           
-          
-             updateForm('userName', v.toLowerCase())}
+          <Field label="Username">
+            <TextInput 
+              value={form.userName} 
+              onChangeText={(v) => updateForm('userName', v.toLowerCase())}
               placeholder="e.g. apollo_admin121"
-              leading={}
+              leading={<IconUser size={18} color={T.textDim} />}
             />
           </Field>
 
-          
-            
-              
-                 updateForm('firstName', v)}
+          <View style={styles.row}>
+            <View style={{ flex: 1 }}>
+              <Field label="First Name">
+                <TextInput 
+                  value={form.firstName} 
+                  onChangeText={(v) => updateForm('firstName', v)}
                   placeholder="Apollo"
                 />
               </Field>
             </View>
-            
-              
-                 updateForm('lastName', v)}
+            <View style={{ flex: 1 }}>
+              <Field label="Last Name">
+                <TextInput 
+                  value={form.lastName} 
+                  onChangeText={(v) => updateForm('lastName', v)}
                   placeholder="Admin"
                 />
               </Field>
             </View>
           </View>
 
-          
-            
-              
-                
-                {form.orgName}</Text>
+          <Field label="Organization">
+            <Card style={styles.disabledCard}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <IconBuilding size={16} color={T.textFaint} />
+                <Text style={styles.disabledText}>{form.orgName}</Text>
               </View>
             </Card>
           </Field>
         </View>
 
         {/* Contact Section */}
-        
-          CONTACT DETAILS</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>CONTACT DETAILS</Text>
           
-          
-             updateForm('contactEmail', v.toLowerCase())}
+          <Field label="Contact Email">
+            <TextInput 
+              value={form.contactEmail} 
+              onChangeText={(v) => updateForm('contactEmail', v.toLowerCase())}
               placeholder="e.g. apollo_admin121@mailinator.com"
-              leading={}
+              leading={<IconMail size={18} color={T.textDim} />}
             />
           </Field>
         </View>
 
-        
-          
+        <View style={styles.infoBox}>
+          <Text style={styles.infoText}>
             The new Hospital Administrator will have full control over {hospCode} and will be able to manage clinical workflows.
           </Text>
         </View>
 
         {/* Actions */}
-        
-          Cancel</Btn>
-          
+        <View style={styles.actionRow}>
+          <Btn variant="ghost" full style={{ flex: 1 }} onPress={onCancel}>Cancel</Btn>
+          <Btn 
+            full 
+            style={{ flex: 1.5 }} 
+            onPress={handleCreate} 
+            disabled={!isFormValid}
+          >
             Create Hosp Admin
           </Btn>
         </View>
@@ -156,7 +169,7 @@ const createStyles = (T) => StyleSheet.create({
   },
   infoBox: {
     padding: 12,
-    background: T.surface,
+    backgroundColor: T.surface,
     borderRadius: 12,
     borderWidth: 1,
     borderStyle: 'dashed',

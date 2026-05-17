@@ -37,7 +37,7 @@ export const DevicesScreen = ({ onNewGateway, onNewDevice }) => {
           <SectionHeader title={mode === 'gateways' ? "IoT Gateways" : "Medical Devices"} />
           <Btn 
             variant="primary" 
-            size="small" 
+            size="sm" 
             style={styles.newBtn}
             onPress={mode === 'gateways' ? onNewGateway : onNewDevice}
           >

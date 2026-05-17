@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import { Card, Field, TextInput, Btn } from '../../components/Shared';
-import { IconHospital, IconUser, IconMail, IconLocation, IconPhone } from '../../icons';
+import { IconHospital, IconUser, IconMail, IconLocation, IconPhone, IconShield } from '../../icons';
 
 export const CreateHospitalScreen = ({ onCancel }) => {
   const { theme: T } = useTheme();
@@ -52,103 +52,125 @@ export const CreateHospitalScreen = ({ onCancel }) => {
   };
 
   return (
-    
-      
-        
-          
-          
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.banner}>
+          <IconShield color={T.accent} size={20} />
+          <Text style={styles.bannerText}>
             Provisioning a new hospital. The primary contact will be invited Hospital Owner (HOSP_OWNER).
           </Text>
         </View>
 
         {/* Identity Section */}
-        
-          HOSPITAL IDENTITY</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>HOSPITAL IDENTITY</Text>
           
-          
-             updateRoot('hospitalCode', v.toUpperCase())}
+          <Field label="Hospital Code">
+            <TextInput 
+              value={form.hospitalCode} 
+              onChangeText={(v) => updateRoot('hospitalCode', v.toUpperCase())}
               placeholder="e.g. CLV-MAIN"
             />
           </Field>
 
-          
-             updateRoot('hospitalName', v)}
+          <Field label="Hospital Name">
+            <TextInput 
+              value={form.hospitalName} 
+              onChangeText={(v) => updateRoot('hospitalName', v)}
               placeholder="e.g. City General Hospital"
             />
           </Field>
 
-          
-             updateRoot('description', v)}
+          <Field label="Description">
+            <TextInput 
+              value={form.description} 
+              onChangeText={(v) => updateRoot('description', v)}
               placeholder="e.g. Main city branch"
             />
           </Field>
         </View>
 
         {/* Contact Section */}
-        
-          PRIMARY CONTACT (OWNER)</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>PRIMARY CONTACT (OWNER)</Text>
           
-          
-             updateContact('name', v)}
+          <Field label="Full Name">
+            <TextInput 
+              value={form.myContact.name} 
+              onChangeText={(v) => updateContact('name', v)}
               placeholder="Full name"
-              leading={}
+              leading={<IconUser size={18} color={T.textDim} />}
             />
           </Field>
 
-          
-             updateContact('email', v.toLowerCase())}
+          <Field label="Email Address">
+            <TextInput 
+              value={form.myContact.email} 
+              onChangeText={(v) => updateContact('email', v.toLowerCase())}
               placeholder="owner@hospital.com"
-              leading={}
+              leading={<IconMail size={18} color={T.textDim} />}
             />
           </Field>
 
-          
-             updateContact('phone', v)}
+          <Field label="Phone Number">
+            <TextInput 
+              value={form.myContact.phone} 
+              onChangeText={(v) => updateContact('phone', v)}
               placeholder="+91 98000 00000"
-              leading={}
+              leading={<IconPhone size={18} color={T.textDim} />}
             />
           </Field>
         </View>
 
         {/* Address Section */}
-        
-          PHYSICAL ADDRESS</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>PHYSICAL ADDRESS</Text>
           
-          
-             updateAddress('street1', v)}
+          <Field label="Street Address">
+            <TextInput 
+              value={form.myAddress.street1} 
+              onChangeText={(v) => updateAddress('street1', v)}
               placeholder="123 Health Ave"
-              leading={}
+              leading={<IconLocation size={18} color={T.textDim} />}
             />
           </Field>
 
-          
-            
-              
-                 updateAddress('city', v)}
+          <View style={styles.row}>
+            <View style={{ flex: 1 }}>
+              <Field label="City">
+                <TextInput 
+                  value={form.myAddress.city} 
+                  onChangeText={(v) => updateAddress('city', v)}
                   placeholder="Metropolis"
                 />
               </Field>
             </View>
-            
-              
-                 updateAddress('state', v)}
+            <View style={{ flex: 1 }}>
+              <Field label="State">
+                <TextInput 
+                  value={form.myAddress.state} 
+                  onChangeText={(v) => updateAddress('state', v)}
                   placeholder="NY"
                 />
               </Field>
             </View>
           </View>
 
-          
-            
-              
-                 updateAddress('country', v)}
+          <View style={styles.row}>
+            <View style={{ flex: 1 }}>
+              <Field label="Country">
+                <TextInput 
+                  value={form.myAddress.country} 
+                  onChangeText={(v) => updateAddress('country', v)}
                   placeholder="USA"
                 />
               </Field>
             </View>
-            
-              
-                 updateAddress('pincode', v)}
+            <View style={{ flex: 1 }}>
+              <Field label="Pincode">
+                <TextInput 
+                  value={form.myAddress.pincode} 
+                  onChangeText={(v) => updateAddress('pincode', v)}
                   placeholder="10001"
                 />
               </Field>
@@ -157,9 +179,14 @@ export const CreateHospitalScreen = ({ onCancel }) => {
         </View>
 
         {/* Actions */}
-        
-          Cancel</Btn>
-          
+        <View style={styles.actionRow}>
+          <Btn variant="ghost" full style={{ flex: 1 }} onPress={onCancel}>Cancel</Btn>
+          <Btn 
+            full 
+            style={{ flex: 1.5 }} 
+            onPress={handleCreate} 
+            disabled={!isFormValid}
+          >
             Create Hospital
           </Btn>
         </View>

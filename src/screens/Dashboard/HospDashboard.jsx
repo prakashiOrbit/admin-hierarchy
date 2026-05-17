@@ -26,6 +26,7 @@ import { DoctorsScreen } from '../Users/DoctorsScreen';
 import { CreateDoctorScreen } from '../Users/CreateDoctorScreen';
 import { DoctorDetailScreen } from '../Users/DoctorDetailScreen';
 import { ShiftsScreen } from '../Common/ShiftsScreen';
+import { CreateShiftScreen } from '../Common/CreateShiftScreen';
 import { CreateNurseScreen } from '../Users/CreateNurseScreen';
 import { AssignmentScreen } from '../Common/AssignmentScreen';
 
@@ -272,37 +273,37 @@ export const HospDashboard = ({ navigation, route }) => {
 
   const renderContent = () => {
     if (isInvitingHospAdmin) {
-      return <CreateHospAdminScreen onBack={() => setIsInvitingHospAdmin(false)} hospCode="CLV-MAIN" />;
+      return <CreateHospAdminScreen onCancel={() => setIsInvitingHospAdmin(false)} hospCode="CLV-MAIN" />;
     }
     if (isProvisioningWard) {
-      return <CreateWardScreen onBack={() => setIsProvisioningWard(false)} hospCode="CLV-MAIN" />;
+      return <CreateWardScreen onCancel={() => setIsProvisioningWard(false)} hospCode="CLV-MAIN" />;
     }
     if (selectedWardForBed) {
-      return <CreateBedScreen onBack={() => setSelectedWardForBed(null)} wardCode={selectedWardForBed} hospCode="CLV-MAIN" />;
+      return <CreateBedScreen onCancel={() => setSelectedWardForBed(null)} wardCode={selectedWardForBed} hospCode="CLV-MAIN" />;
     }
     if (isProvisioningGateway) {
-      return <CreateGatewayScreen onBack={() => setIsProvisioningGateway(false)} hospCode="CLV-MAIN" />;
+      return <CreateGatewayScreen onCancel={() => setIsProvisioningGateway(false)} hospCode="CLV-MAIN" />;
     }
     if (isProvisioningDevice) {
-      return <CreateDeviceScreen onBack={() => setIsProvisioningDevice(false)} hospCode="CLV-MAIN" />;
+      return <CreateDeviceScreen onCancel={() => setIsProvisioningDevice(false)} hospCode="CLV-MAIN" />;
     }
     if (isRegisteringPatient) {
-      return <CreatePatientScreen onBack={() => setIsRegisteringPatient(false)} hospCode="CLV-MAIN" />;
+      return <CreatePatientScreen onCancel={() => setIsRegisteringPatient(false)} hospCode="CLV-MAIN" />;
     }
     if (isCreatingDoctor) {
-      return <CreateDoctorScreen onBack={() => setIsCreatingDoctor(false)} hospCode="CLV-MAIN" />;
+      return <CreateDoctorScreen onCancel={() => setIsCreatingDoctor(false)} hospCode="CLV-MAIN" />;
     }
     if (isCreatingNurse) {
-      return <CreateNurseScreen onBack={() => setIsCreatingNurse(false)} hospCode="CLV-MAIN" />;
+      return <CreateNurseScreen onCancel={() => setIsCreatingNurse(false)} hospCode="CLV-MAIN" />;
     }
     if (isCreatingShift) {
-      return <CreateShiftScreen onBack={() => setIsCreatingShift(false)} />;
+      return <CreateShiftScreen onCancel={() => setIsCreatingShift(false)} />;
     }
     if (assignmentData) {
       return <AssignmentScreen 
         initialPatientId={assignmentData.patientId} 
         initialDoctorId={assignmentData.doctorId}
-        onBack={() => setAssignmentData(null)} 
+        onCancel={() => setAssignmentData(null)} 
       />;
     }
     if (selectedUserId) {
@@ -438,8 +439,8 @@ export const HospDashboard = ({ navigation, route }) => {
 
       <BottomNav 
         items={footerItems} 
-        activeTab={activeTab} 
-        onTabChange={handleTabChange} 
+        active={activeTab} 
+        onChange={handleTabChange} 
       />
     </View>
   );

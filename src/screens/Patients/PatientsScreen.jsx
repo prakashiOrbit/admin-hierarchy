@@ -51,7 +51,7 @@ export const PatientsScreen = ({ onNewPatient, onSelectPatient }) => {
           <SectionHeader title="Patients" subtitle={`${filtered.length} found`} />
           <Btn 
             variant="primary" 
-            size="small" 
+            size="sm" 
             style={styles.newBtn}
             onPress={onNewPatient}
           >

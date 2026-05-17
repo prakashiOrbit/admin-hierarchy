@@ -1,17 +1,19 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { IconBack, IconDashboard, IconGlobe, IconPlus, IconSettings, IconUsers, IconShield, IconChart, IconHospital, IconBell, IconUser } from '../icons';
 
 // --- Top Bar ---
 export const TopBar = ({ title, subtitle, onLeadingPress, leading, onNotificationPress, onProfilePress }) => {
   const { theme: T } = useTheme();
+  const insets = useSafeAreaInsets();
   const styles = createStyles(T);
   
   return (
-    <View style={styles.topBar}>
+    <View style={[styles.topBar, { paddingTop: insets.top, height: 56 + insets.top }]}>
       <TouchableOpacity onPress={onLeadingPress} style={styles.iconBtn}>
-        {leading}
+        {leading && React.cloneElement(leading, { color: T.text })}
       </TouchableOpacity>
       <View style={{ flex: 1, marginLeft: 4 }}>
         <Text style={styles.topTitle}>{title}</Text>
@@ -34,6 +36,7 @@ export const TopBar = ({ title, subtitle, onLeadingPress, leading, onNotificatio
 // --- Bottom Nav ---
 export const BottomNav = ({ active, onChange, items }) => {
   const { theme: T } = useTheme();
+  const insets = useSafeAreaInsets();
   const styles = createStyles(T);
 
   const defaultItems = [
@@ -44,9 +47,10 @@ export const BottomNav = ({ active, onChange, items }) => {
   ];
 
   const displayItems = items || defaultItems;
+  const pb = Math.max(insets.bottom, 8);
 
   return (
-    <View style={styles.bottomNav}>
+    <View style={[styles.bottomNav, { paddingBottom: pb, height: 56 + pb }]}>
       {displayItems.map((item) => {
         const isActive = active === item.id;
         return (
