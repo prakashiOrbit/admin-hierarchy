@@ -1,20 +1,25 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform, Alert } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
+import { userApi } from '../../services/api';
 import { Card, Field, TextInput, Btn } from '../../components/Shared';
 import { IconUser, IconMail, IconBuilding, IconShield } from '../../icons';
 
 export const InviteOrgAdminScreen = ({ onCancel }) => {
   const { theme: T } = useTheme();
+  const { user, token } = useAuth();
   const styles = createStyles(T);
   
   const [form, setForm] = useState({
     userName: '',
     firstName: '',
     lastName: '',
-    orgName: 'APOLLO_ORG_TEST129',
+    orgName: user?.orgName || 'APOLLO_ORG_TEST129',
     contactEmail: ''
   });
+
+  const [loading, setLoading] = useState(false);
 
   const updateForm = (key, value) => {
     setForm(prev => ({ ...prev, [key]: value }));
@@ -22,9 +27,18 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
 
   const isFormValid = form.userName && form.firstName && form.lastName && form.contactEmail;
 
-  const handleCreate = () => {
-    console.log('Invite Payload:', JSON.stringify(form, null, 2));
-    // Implementation for API call to /api/user/create-org-admin goes here
+  const handleCreate = async () => {
+    setLoading(true);
+    try {
+      await userApi.createOrgAdmin(form, token);
+      Alert.alert('Success', 'Organisation Administrator invited successfully', [
+        { text: 'OK', onPress: onCancel }
+      ]);
+    } catch (err) {
+      Alert.alert('Error', err.message || 'Failed to invite administrator');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -98,20 +112,20 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
 
         <View style={styles.infoBox}>
           <Text style={styles.infoText}>
-            Invite link is one-time use, valid 7 days. The new user sets their own password and configures 2FA on first sign-in.
+            The new user will receive an invitation email. They will set their own password and configure 2FA on first sign-in.
           </Text>
         </View>
 
         {/* Actions */}
         <View style={styles.actionRow}>
-          <Btn variant="ghost" full style={{ flex: 1 }} onPress={onCancel}>Cancel</Btn>
+          <Btn variant="ghost" full style={{ flex: 1 }} onPress={onCancel} disabled={loading}>Cancel</Btn>
           <Btn 
             full 
             style={{ flex: 1.5 }} 
             onPress={handleCreate} 
-            disabled={!isFormValid}
+            disabled={!isFormValid || loading}
           >
-            Send invitation
+            {loading ? 'Inviting...' : 'Send invitation'}
           </Btn>
         </View>
       </ScrollView>

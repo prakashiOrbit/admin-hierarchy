@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform, Alert } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
+import { organisationApi } from '../../services/api';
 import { Card, Field, TextInput, Btn } from '../../components/Shared';
 import { IconBuilding, IconUser, IconMail, IconLocation, IconPhone, IconShield } from '../../icons';
 
@@ -25,6 +27,9 @@ export const NewOrganisationScreen = ({ onCancel }) => {
     }
   });
 
+  const { token } = useAuth();
+  const [loading, setLoading] = useState(false);
+
   const updateRoot = (key, value) => {
     setForm(prev => ({ ...prev, [key]: value }));
   };
@@ -45,9 +50,18 @@ export const NewOrganisationScreen = ({ onCancel }) => {
 
   const isFormValid = form.orgName && form.businessName && form.myContact.email;
 
-  const handleCreate = () => {
-    console.log('Sending Payload:', JSON.stringify(form, null, 2));
-    // Implementation for API call to /api/organisation/create goes here
+  const handleCreate = async () => {
+    setLoading(true);
+    try {
+      await organisationApi.create(form, token);
+      Alert.alert('Success', 'Organisation created successfully', [
+        { text: 'OK', onPress: onCancel }
+      ]);
+    } catch (err) {
+      Alert.alert('Error', err.message || 'Failed to create organisation');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -183,9 +197,9 @@ export const NewOrganisationScreen = ({ onCancel }) => {
             full 
             style={{ flex: 1.5 }} 
             onPress={handleCreate} 
-            disabled={!isFormValid}
+            disabled={!isFormValid || loading}
           >
-            Create organisation
+            {loading ? 'Creating...' : 'Create organisation'}
           </Btn>
         </View>
       </ScrollView>

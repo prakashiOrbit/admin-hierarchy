@@ -10,6 +10,7 @@ import { OrgDashboard } from './src/screens/Dashboard/OrgDashboard';
 import { HospDashboard } from './src/screens/Dashboard/HospDashboard';
 
 import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
+import { AuthProvider } from './src/context/AuthContext';
 
 const Stack = createNativeStackNavigator();
 
@@ -38,11 +39,13 @@ function AppContent() {
 function App() {
   return (
     <SafeAreaProvider>
-      <ThemeProvider>
-        <NavigationContainer>
-          <AppContent />
-        </NavigationContainer>
-      </ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <NavigationContainer>
+            <AppContent />
+          </NavigationContainer>
+        </ThemeProvider>
+      </AuthProvider>
     </SafeAreaProvider>
   );
 }

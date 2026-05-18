@@ -1,103 +1,154 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
+import { authApi } from '../../services/api';
 import { Logo, Field, TextInput, Btn } from '../../components/Shared';
-import { IconUser, IconLock, IconEye, IconEyeOff, IconShield, IconBack } from '../../icons';
+import { IconUser, IconLock, IconEye, IconEyeOff, IconShield, IconBack, IconMail } from '../../icons';
 
 export const LoginScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   
-  const [username, setUsername] = useState('iorbit');
-  const [password, setPassword] = useState('iorbitpass');
+  const [username, setUsername] = useState('apollo_test129@mailinator.com');
+  const [password, setPassword] = useState('$Y#f#XTmSp2r');
   const [error, setError] = useState(null);
   const [showPw, setShowPw] = useState(false);
-  const [state, setState] = useState('idle');
+  const [state, setState] = useState('idle'); // idle, loading, twofa, emailVerify
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otpValue, setOtpValue] = useState('');
+  const [pendingOrg, setPendingOrg] = useState(null);
 
-  const VALID_USERS = {
-    'iorbit':      { pass: 'iorbitpass', role: 'PLATFORM_ADMIN', skip2fa: true },
-    'org.owner': { pass: 'iorbitpass',  role: 'ORG_OWNER',      skip2fa: false },
-    'org.admin': { pass: 'iorbitpass',  role: 'ORG_ADMIN',      skip2fa: false },
-    'hosp.owner': { pass: 'iorbitpass',  role: 'HOSP_OWNER',     skip2fa: false },
-    'hosp.admin': { pass: 'iorbitpass',  role: 'HOSP_ADMIN',     skip2fa: false },
-  };
+  const { login } = useAuth();
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setError(null);
-    const user = VALID_USERS[username];
-
-    if (!user || user.pass !== password) {
-      setError('Invalid username or password');
-      return;
-    }
-
     setState('loading');
 
-    setTimeout(() => {
-      if (user.skip2fa) {
-        setState('idle');
-        navigation.replace('PlatformDashboard', { role: user.role });
-      } else {
+    try {
+      const response = await authApi.login(username, password);
+      console.log('Login Response:', JSON.stringify(response));
+      
+      // Platform User (iorbit) logs in directly if successful
+      if (response.code === "200" && response.token) {
+        login(response);
+        if (response.orgName === 'SYSTEM' || username === 'iorbit') {
+          navigation.replace('PlatformDashboard', { role: 'PLATFORM_ADMIN' });
+          return;
+        } else if (response.hospitalCode) {
+          navigation.replace('HospDashboard', { role: 'HOSP_ADMIN' });
+          return;
+        } else {
+          navigation.replace('OrgDashboard', { role: 'ORG_ADMIN' });
+          return;
+        }
+      }
+
+      // Only for non-platform users, check for verification codes
+      if (response.code === "600" || response.message?.toLowerCase().includes('email')) {
+        setPendingOrg(response.orgName);
+        setState('emailVerify');
+        console.log('Transitioning to emailVerify state');
+      } else if (response.code === "601" || response.message?.toLowerCase().includes('2-factor') || response.message?.toLowerCase().includes('2fa')) {
+        setPendingOrg(response.orgName);
         setState('twofa');
-      }
-    }, 1200);
-  };
-
-  const handleVerify = () => {
-    setState('loading');
-    setTimeout(() => {
-      setState('idle');
-      const user = VALID_USERS[username];
-      if (user.role === 'HOSP_OWNER' || user.role === 'HOSP_ADMIN') {
-        navigation.replace('HospDashboard', { role: user.role });
+        console.log('Transitioning to twofa state');
       } else {
-        navigation.replace('OrgDashboard', { role: user.role });
+        throw new Error(response.message || 'Login failed');
       }
-    }, 1000);
+    } catch (err) {
+      setError(err.message || 'Invalid username or password');
+      setState('idle');
+    } finally {
+      if (state === 'loading') setState('idle');
+    }
   };
 
+  const handleVerifyEmail = async () => {
+    setState('loading');
+    try {
+      await authApi.verifyEmail(pendingOrg || 'UNKNOWN', username, otpValue);
+      Alert.alert('Success', 'Email verified successfully. Please login again.', [
+        { text: 'OK', onPress: () => { setState('idle'); setOtpValue(''); } }
+      ]);
+    } catch (err) {
+      Alert.alert('Verification Failed', err.message);
+    } finally {
+      setState('idle');
+    }
+  };
 
-  if (state === 'twofa') {
+  const handleVerify2fa = async () => {
+    setState('loading');
+    try {
+      const response = await authApi.verify2fa(pendingOrg || 'UNKNOWN', username, otpValue);
+      login(response);
+      
+      if (response.orgName === 'SYSTEM') {
+        navigation.replace('PlatformDashboard', { role: 'PLATFORM_ADMIN' });
+      } else if (response.hospitalCode) {
+        navigation.replace('HospDashboard', { role: 'HOSP_ADMIN' });
+      } else {
+        // This handles both ORG_OWNER and ORG_ADMIN
+        navigation.replace('OrgDashboard', { role: 'ORG_ADMIN' });
+      }
+    } catch (err) {
+      Alert.alert('2FA Failed', err.message);
+      setState('twofa');
+    } finally {
+      if (state === 'loading') setState('twofa');
+    }
+  };
+
+  if (state === 'twofa' || state === 'emailVerify') {
+    const isEmail = state === 'emailVerify';
     return (
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.twofaContent}>
           <TouchableOpacity onPress={() => setState('idle')} style={styles.backBtn}>
             <IconBack size={20} color={T.textDim} />
-            <Text style={styles.backText}>Back</Text>
+            <Text style={styles.backText}>Back to Login</Text>
           </TouchableOpacity>
 
           <View style={styles.header}>
             <View style={styles.shieldIcon}>
-              <IconShield size={32} color={T.accent} />
+              {isEmail ? <IconMail size={32} color={T.accent} /> : <IconShield size={32} color={T.accent} />}
             </View>
-            <Text style={styles.title}>Verify it's you</Text>
+            <Text style={styles.title}>{isEmail ? 'Verify Email' : 'Two-Factor Auth'}</Text>
             <Text style={styles.subtitle}>
-              We sent a 6-digit code to <Text style={styles.mono}>•••• 4421</Text>. It expires in 5:00.
+              {isEmail 
+                ? `Enter the 6-digit code sent to your email for ${pendingOrg}.`
+                : `Enter the security code from your authenticator app for ${pendingOrg}.`}
             </Text>
           </View>
 
-          <View style={styles.otpContainer}>
-            {otp.map((v, i) => (
-              <View key={i} style={styles.otpBox}>
-                <Text style={styles.otpText}>{v || '•'}</Text>
-              </View>
-            ))}
+          <View style={styles.form}>
+            <Field label="Security Code">
+              <TextInput
+                value={otpValue}
+                onChangeText={setOtpValue}
+                placeholder="000000"
+                keyboardType="number-pad"
+                maxLength={6}
+                style={{ textAlign: 'center', fontSize: 24, letterSpacing: 8 }}
+              />
+            </Field>
+
+            <Btn 
+              full 
+              size="lg" 
+              onPress={isEmail ? handleVerifyEmail : handleVerify2fa} 
+              disabled={state === 'loading' || otpValue.length < 6} 
+              style={{ marginTop: 24 }}
+            >
+              {state === 'loading' ? 'Verifying...' : 'Verify and continue'}
+            </Btn>
           </View>
 
-          <Btn 
-            full 
-            size="lg" 
-            onPress={handleVerify} 
-            disabled={state === 'loading'} 
-            style={{ marginTop: 32 }}
-          >
-            {state === 'loading' ? 'Verifying...' : 'Verify and continue'}
-          </Btn>
           <TouchableOpacity style={styles.resendBtn}>
-            <Text style={styles.resendText}>Resend code</Text>
+            <Text style={styles.resendText}>Didn't receive a code? Resend</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -236,11 +287,6 @@ const createStyles = (T) => StyleSheet.create({
     color: T.textFaint,
     fontWeight: '500',
   },
-  footerText: {
-    fontSize: 11,
-    color: T.textFaint,
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-  },
   twofaContent: {
     flex: 1,
     padding: 24,
@@ -264,34 +310,10 @@ const createStyles = (T) => StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 20,
   },
-  mono: {
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-    color: T.text,
-  },
-  otpContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 24,
-  },
-  otpBox: {
-    width: 45,
-    height: 54,
-    borderWidth: 1,
-    borderColor: T.borderSoft,
-    backgroundColor: T.surface,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  otpText: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: T.text,
-  },
   resendBtn: {
     alignItems: 'center',
     padding: 12,
-    marginTop: 8,
+    marginTop: 16,
   },
   resendText: {
     color: T.accent,

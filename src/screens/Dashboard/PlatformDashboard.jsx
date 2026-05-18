@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, Platform, BackHandler } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import { Card } from '../../components/Shared';
 import { TopBar, BottomNav } from '../../components/Navigation';
 import { OrganisationsScreen } from '../Organisations/OrganisationsScreen';
@@ -16,7 +17,6 @@ import {
 } from '../../icons';
 
 const { width } = Dimensions.get('window');
-const isTablet = width >= 768;
 
 const StatCard = ({ label, value, delta, icon, color, accent }) => {
   const { theme: T } = useTheme();
@@ -43,6 +43,7 @@ const StatCard = ({ label, value, delta, icon, color, accent }) => {
 
 const HomeContent = ({ onNavigate }) => {
   const { theme: T } = useTheme();
+  const { user } = useAuth();
   const styles = createStyles(T);
   const recentActivity = [
     { id: '1', icon: <IconHospital />, color: T.good, text: 'Cleveland Clinic onboarded', time: '2h ago', meta: 'cleveland-clinic' },
@@ -57,7 +58,7 @@ const HomeContent = ({ onNavigate }) => {
       <View style={styles.greetingHeader}>
         <View>
           <Text style={styles.date}>SAT, 16 MAY</Text>
-          <Text style={styles.greeting}>Good morning, Marcus</Text>
+          <Text style={styles.greeting}>Good morning, {user?.userName || 'User'}</Text>
           <Text style={styles.status}>
             <Text style={{ color: T.good, fontWeight: '700' }}>Platform health is nominal</Text> · 0 incidents
           </Text>
@@ -153,6 +154,7 @@ const HomeContent = ({ onNavigate }) => {
 export const PlatformDashboard = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { theme: T } = useTheme();
+  const { user, logout } = useAuth();
   const styles = createStyles(T);
   const [activeTab, setActiveTab] = useState('home');
   const [selectedOrgId, setSelectedOrgId] = useState(null);
@@ -184,7 +186,7 @@ export const PlatformDashboard = ({ navigation }) => {
     return () => backHandler.remove();
   }, [drawerOpen, selectedOrgId, activeTab]);
 
-  const toggleDrawer = () => {
+  const toggleDrawer = React.useCallback(() => {
     const toValue = drawerOpen ? -width : 0;
     Animated.timing(drawerAnim, {
       toValue,
@@ -192,7 +194,7 @@ export const PlatformDashboard = ({ navigation }) => {
       useNativeDriver: true,
     }).start();
     setDrawerOpen(!drawerOpen);
-  };
+  }, [drawerOpen, drawerAnim]);
 
   const handleTabChange = (tabId) => {
     setSelectedOrgId(null);
@@ -208,7 +210,7 @@ export const PlatformDashboard = ({ navigation }) => {
       case 'home': return <HomeContent onNavigate={handleTabChange} />;
       case 'orgs': return <OrganisationsScreen onSelectOrg={(id) => setSelectedOrgId(id)} />;
       case 'new': return <NewOrganisationScreen onCancel={() => handleTabChange('home')} />;
-      case 'settings': return <SettingsScreen onLogout={() => navigation.replace('Login')} />;
+      case 'settings': return <SettingsScreen onLogout={() => { logout(); navigation.replace('Login'); }} />;
       default: return <HomeContent onNavigate={handleTabChange} />;
     }
   };
@@ -244,10 +246,10 @@ export const PlatformDashboard = ({ navigation }) => {
         <View style={{ flex: 1, paddingTop: insets.top }}>
           <View style={styles.drawerHeader}>
             <View style={styles.avatarLarge}>
-              <Text style={styles.avatarLargeText}>MA</Text>
+              <Text style={styles.avatarLargeText}>{user?.userName?.substring(0, 2).toUpperCase() || 'US'}</Text>
             </View>
-            <Text style={styles.drawerName}>Marcus Admin</Text>
-            <Text style={styles.drawerRole}>Platform Administrator</Text>
+            <Text style={styles.drawerName}>{user?.userName || 'User'}</Text>
+            <Text style={styles.drawerRole}>{user?.orgName === 'SYSTEM' ? 'Platform Administrator' : 'Administrator'}</Text>
           </View>
           
           <ScrollView style={styles.drawerMenu}>
@@ -309,11 +311,6 @@ const createStyles = (T) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: T.bg,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 16,
   },
   scrollContent: {
     padding: 16,

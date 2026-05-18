@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, Platform, BackHandler } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, Btn } from '../../components/Shared';
-import { TopBar, BottomNav, NavItem } from '../../components/Navigation';
+import { TopBar, BottomNav } from '../../components/Navigation';
 import { StatusPill } from '../../components/StatusPill';
 import { 
   IconHospital, IconUsers, IconPulse, IconGateway, IconShield, IconChart,
@@ -67,6 +68,7 @@ const PulseWave = ({ color }) => (
 
 const HospHomeContent = ({ role, onNavigate }) => {
   const { theme: T } = useTheme();
+  const { user } = useAuth();
   const styles = createStyles(T);
   const isOwner = role === 'HOSP_OWNER';
 
@@ -79,8 +81,8 @@ const HospHomeContent = ({ role, onNavigate }) => {
     <ScrollView contentContainerStyle={styles.scrollContent}>
       {/* Greeting */}
       <View style={styles.greetingHeader}>
-        <Text style={styles.date}>FRI, 16 MAY · CLEVELAND MAIN</Text>
-        <Text style={styles.greeting}>{isOwner ? 'Good morning, Dr. Bhatt' : 'Good morning, Tomás'}</Text>
+        <Text style={styles.date}>FRI, 16 MAY · {user?.hospitalCode || 'HOSPITAL'}</Text>
+        <Text style={styles.greeting}>Good morning, {user?.userName || 'User'}</Text>
         <Text style={styles.status}>
           <Text style={{ color: T.good, fontWeight: '600' }}>4 wards</Text> at full staff · 1 device alert
         </Text>
@@ -195,6 +197,7 @@ export const HospDashboard = ({ navigation, route }) => {
   
   const insets = useSafeAreaInsets();
   const { theme: T, isDark, toggleTheme } = useTheme();
+  const { user, logout } = useAuth();
   const styles = createStyles(T);
   const [activeTab, setActiveTab] = useState('home');
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -238,11 +241,11 @@ export const HospDashboard = ({ navigation, route }) => {
     return () => backHandler.remove();
   }, [drawerOpen, activeTab, isInvitingHospAdmin, selectedUserId, isProvisioningWard, selectedWardForBed, isProvisioningGateway, isProvisioningDevice, isRegisteringPatient, selectedPatientId, isCreatingDoctor, selectedDoctorId, isCreatingNurse, isCreatingShift, assignmentData]);
 
-  const toggleDrawer = () => {
+  const toggleDrawer = React.useCallback(() => {
     const toValue = drawerOpen ? -width : 0;
     Animated.timing(drawerAnim, { toValue, duration: 250, useNativeDriver: true }).start();
     setDrawerOpen(!drawerOpen);
-  };
+  }, [drawerOpen, drawerAnim]);
 
   const handleTabChange = (tabId) => {
     setIsInvitingHospAdmin(false);
@@ -381,7 +384,7 @@ export const HospDashboard = ({ navigation, route }) => {
       <Animated.View style={[styles.drawer, { transform: [{ translateX: drawerAnim }] }]}>
         <View style={{ flex: 1, paddingTop: insets.top }}>
           <View style={styles.drawerHeader}>
-            <Text style={styles.drawerName}>{isOwner ? 'Dr. Anika Bhatt' : 'Tomás Herrera'}</Text>
+            <Text style={styles.drawerName}>{user?.userName || 'User'}</Text>
             <Text style={styles.drawerRole}>{isOwner ? 'Hospital Owner' : 'Hospital Administrator'}</Text>
           </View>
           <ScrollView style={styles.drawerMenu}>
@@ -402,7 +405,7 @@ export const HospDashboard = ({ navigation, route }) => {
             
             <TouchableOpacity 
               style={[styles.drawerItem, { marginTop: 'auto' }]} 
-              onPress={() => navigation.replace('Login')}
+              onPress={() => { logout(); navigation.replace('Login'); }}
             >
               <IconLogout size={20} color={T.bad} />
               <Text style={[styles.drawerItemText, { color: T.bad }]}>Log out</Text>
@@ -430,7 +433,7 @@ export const HospDashboard = ({ navigation, route }) => {
           setAssignmentData(null);
         } : toggleDrawer}
         onNotificationPress={() => console.log('Notifications')}
-        onProfilePress={() => { handleTabChange('home'); setActiveTab('home'); }}
+        onProfilePress={() => { logout(); navigation.replace('Login'); }}
       />
 
       <View style={{ flex: 1 }}>

@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, Platform, BackHandler } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, Btn } from '../../components/Shared';
-import { TopBar, BottomNav, NavItem } from '../../components/Navigation';
+import { TopBar, BottomNav } from '../../components/Navigation';
 import { StatusPill } from '../../components/StatusPill';
 import { 
   IconHospital, IconUsers, IconPulse, IconGateway, IconShield, IconChart,
@@ -50,6 +51,7 @@ const StatCard = ({ label, value, delta, icon, color, accent }) => {
 
 const OrgHomeContent = ({ role }) => {
   const { theme: T } = useTheme();
+  const { user } = useAuth();
   const styles = createStyles(T);
   const isOwner = role === 'ORG_OWNER';
   
@@ -57,8 +59,8 @@ const OrgHomeContent = ({ role }) => {
     <ScrollView contentContainerStyle={styles.scrollContent}>
       {/* Greeting */}
       <View style={styles.greetingHeader}>
-        <Text style={styles.date}>FRI, 16 MAY · CLEVELAND CLINIC</Text>
-        <Text style={styles.greeting}>{isOwner ? 'Good morning, Priya' : 'Good morning, James'}</Text>
+        <Text style={styles.date}>FRI, 16 MAY · {user?.orgName || 'ORGANISATION'}</Text>
+        <Text style={styles.greeting}>Good morning, {user?.userName || 'User'}</Text>
         <Text style={styles.status}>
           <Text style={{ color: T.good, fontWeight: '600' }}>14 hospitals</Text> online · 2 alerts pending
         </Text>
@@ -166,6 +168,7 @@ export const OrgDashboard = ({ navigation, route }) => {
 
   const insets = useSafeAreaInsets();
   const { theme: T, isDark, toggleTheme } = useTheme();
+  const { user, logout } = useAuth();
   const styles = createStyles(T);
   const [activeTab, setActiveTab] = useState('home');
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -193,11 +196,11 @@ export const OrgDashboard = ({ navigation, route }) => {
     return () => backHandler.remove();
   }, [drawerOpen, activeTab, selectedUserId, isInvitingAdmin, selectedRoleId, isProvisioningHospital, isCreatingDeviceType, isCreatingRole]);
 
-  const toggleDrawer = () => {
+  const toggleDrawer = React.useCallback(() => {
     const toValue = drawerOpen ? -width : 0;
     Animated.timing(drawerAnim, { toValue, duration: 250, useNativeDriver: true }).start();
     setDrawerOpen(!drawerOpen);
-  };
+  }, [drawerOpen, drawerAnim]);
 
   const handleTabChange = (tabId) => {
     setSelectedUserId(null);
@@ -278,7 +281,7 @@ export const OrgDashboard = ({ navigation, route }) => {
       <Animated.View style={[styles.drawer, { transform: [{ translateX: drawerAnim }] }]}>
         <View style={{ flex: 1, paddingTop: insets.top }}>
           <View style={styles.drawerHeader}>
-            <Text style={styles.drawerName}>{isOwner ? 'Priya Raghunathan' : 'James O’Sullivan'}</Text>
+            <Text style={styles.drawerName}>{user?.userName || 'User'}</Text>
             <Text style={styles.drawerRole}>{isOwner ? 'Organisation Owner' : 'Organisation Administrator'}</Text>
           </View>
           <ScrollView style={styles.drawerMenu}>
@@ -299,7 +302,7 @@ export const OrgDashboard = ({ navigation, route }) => {
             
             <TouchableOpacity 
               style={[styles.drawerItem, { marginTop: 'auto' }]} 
-              onPress={() => navigation.replace('Login')}
+              onPress={() => { logout(); navigation.replace('Login'); }}
             >
               <IconLogout size={20} color={T.bad} />
               <Text style={[styles.drawerItemText, { color: T.bad }]}>Log out</Text>
@@ -313,7 +316,7 @@ export const OrgDashboard = ({ navigation, route }) => {
         leading={ (selectedUserId || isInvitingAdmin || selectedRoleId || isProvisioningHospital || isCreatingDeviceType || isCreatingRole) ? <IconBack /> : <IconMenu /> }
         onLeadingPress={(selectedUserId || isInvitingAdmin || selectedRoleId || isProvisioningHospital || isCreatingDeviceType || isCreatingRole) ? () => { setSelectedUserId(null); setIsInvitingAdmin(false); setSelectedRoleId(null); setIsProvisioningHospital(false); setIsCreatingDeviceType(false); setIsCreatingRole(false); } : toggleDrawer}
         onNotificationPress={() => console.log('Notifications')}
-        onProfilePress={() => navigation.replace('Login')}
+        onProfilePress={() => { logout(); navigation.replace('Login'); }}
       />
 
       <View style={{ flex: 1 }}>
