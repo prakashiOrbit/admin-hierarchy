@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator, Alert } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
+import { organisationApi } from '../../services/api';
 import { Card, Field, TextInput, Btn } from '../../components/Shared';
 import { IconHospital, IconUser, IconMail, IconLocation, IconPhone, IconShield } from '../../icons';
 
 export const CreateHospitalScreen = ({ onCancel }) => {
   const { theme: T } = useTheme();
+  const { user, token } = useAuth();
   const styles = createStyles(T);
   
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     hospitalName: '',
     hospitalCode: '',
@@ -46,9 +50,23 @@ export const CreateHospitalScreen = ({ onCancel }) => {
 
   const isFormValid = form.hospitalName && form.hospitalCode && form.myContact.email;
 
-  const handleCreate = () => {
-    console.log('Create Hospital Payload:', JSON.stringify(form, null, 2));
-    // Implementation for API call to /api/{orgName}/hospital/create
+  const handleCreate = async () => {
+    if (!user?.orgName) {
+      Alert.alert('Error', 'Organisation name not found');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await organisationApi.createHospital(user.orgName, form, token);
+      Alert.alert('Success', 'Hospital created successfully', [
+        { text: 'OK', onPress: onCancel }
+      ]);
+    } catch (error) {
+      Alert.alert('Error', error.message || 'Failed to create hospital');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -180,14 +198,14 @@ export const CreateHospitalScreen = ({ onCancel }) => {
 
         {/* Actions */}
         <View style={styles.actionRow}>
-          <Btn variant="ghost" full style={{ flex: 1 }} onPress={onCancel}>Cancel</Btn>
+          <Btn variant="ghost" full style={{ flex: 1 }} onPress={onCancel} disabled={loading}>Cancel</Btn>
           <Btn 
             full 
             style={{ flex: 1.5 }} 
             onPress={handleCreate} 
-            disabled={!isFormValid}
+            disabled={!isFormValid || loading}
           >
-            Create Hospital
+            {loading ? <ActivityIndicator color="#FFF" size="small" /> : 'Create Hospital'}
           </Btn>
         </View>
       </ScrollView>

@@ -17,7 +17,6 @@ export const LoginScreen = ({ navigation }) => {
   const [error, setError] = useState(null);
   const [showPw, setShowPw] = useState(false);
   const [state, setState] = useState('idle'); // idle, loading, twofa, emailVerify
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [otpValue, setOtpValue] = useState('');
   const [pendingOrg, setPendingOrg] = useState(null);
 
@@ -34,14 +33,19 @@ export const LoginScreen = ({ navigation }) => {
       // Platform User (iorbit) logs in directly if successful
       if (response.code === "200" && response.token) {
         login(response);
+        
+        const roles = response.roles || response.userData?.roles || [];
+        const isOrgOwner = roles.includes('ORG_OWNER');
+        const isHospOwner = roles.includes('HOSP_OWNER');
+        
         if (response.orgName === 'SYSTEM' || username === 'iorbit') {
           navigation.replace('PlatformDashboard', { role: 'PLATFORM_ADMIN' });
           return;
         } else if (response.hospitalCode) {
-          navigation.replace('HospDashboard', { role: 'HOSP_ADMIN' });
+          navigation.replace('HospDashboard', { role: isHospOwner ? 'HOSP_OWNER' : 'HOSP_ADMIN' });
           return;
         } else {
-          navigation.replace('OrgDashboard', { role: 'ORG_ADMIN' });
+          navigation.replace('OrgDashboard', { role: isOrgOwner ? 'ORG_OWNER' : 'ORG_ADMIN' });
           return;
         }
       }
@@ -50,11 +54,9 @@ export const LoginScreen = ({ navigation }) => {
       if (response.code === "600" || response.message?.toLowerCase().includes('email')) {
         setPendingOrg(response.orgName);
         setState('emailVerify');
-        console.log('Transitioning to emailVerify state');
       } else if (response.code === "601" || response.message?.toLowerCase().includes('2-factor') || response.message?.toLowerCase().includes('2fa')) {
         setPendingOrg(response.orgName);
         setState('twofa');
-        console.log('Transitioning to twofa state');
       } else {
         throw new Error(response.message || 'Login failed');
       }
@@ -86,13 +88,16 @@ export const LoginScreen = ({ navigation }) => {
       const response = await authApi.verify2fa(pendingOrg || 'UNKNOWN', username, otpValue);
       login(response);
       
+      const roles = response.roles || response.userData?.roles || [];
+      const isOrgOwner = roles.includes('ORG_OWNER');
+      const isHospOwner = roles.includes('HOSP_OWNER');
+
       if (response.orgName === 'SYSTEM') {
         navigation.replace('PlatformDashboard', { role: 'PLATFORM_ADMIN' });
       } else if (response.hospitalCode) {
-        navigation.replace('HospDashboard', { role: 'HOSP_ADMIN' });
+        navigation.replace('HospDashboard', { role: isHospOwner ? 'HOSP_OWNER' : 'HOSP_ADMIN' });
       } else {
-        // This handles both ORG_OWNER and ORG_ADMIN
-        navigation.replace('OrgDashboard', { role: 'ORG_ADMIN' });
+        navigation.replace('OrgDashboard', { role: isOrgOwner ? 'ORG_OWNER' : 'ORG_ADMIN' });
       }
     } catch (err) {
       Alert.alert('2FA Failed', err.message);

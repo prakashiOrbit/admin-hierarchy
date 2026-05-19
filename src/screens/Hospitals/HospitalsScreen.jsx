@@ -1,39 +1,75 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, ActivityIndicator, RefreshControl } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
+import { organisationApi } from '../../services/api';
 import { Card, SectionHeader, SearchBar, Chip, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
 import { IconHospital, IconFilter, IconBed, IconDoor, IconPulse, IconPlus } from '../../icons';
-import { HOSPITALS } from '../../data/mock';
 
-export const HospitalsScreen = ({ onProvision }) => {
+export const HospitalsScreen = ({ onProvision, onSelect }) => {
   const { theme: T } = useTheme();
+  const { user, token } = useAuth();
   const styles = createStyles(T);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('All');
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [hospitals, setHospitals] = useState([]);
+  const [error, setError] = useState(null);
 
-  const filtered = HOSPITALS.filter(h => 
-    h.name.toLowerCase().includes(query.toLowerCase()) &&
+  const fetchHospitals = useCallback(async (showLoading = true) => {
+    if (!user?.orgName) return;
+    if (showLoading) setLoading(true);
+    setError(null);
+    try {
+      const response = await organisationApi.listHospitals(user.orgName, token);
+      setHospitals(Array.isArray(response) ? response : []);
+    } catch (err) {
+      console.error('Fetch hospitals error:', err);
+      setError(err.message || 'Failed to load hospitals');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [user?.orgName, token]);
+
+  useEffect(() => {
+    fetchHospitals();
+  }, [fetchHospitals]);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchHospitals(false);
+  };
+
+  const filtered = hospitals.filter(h => 
+    (h.hospitalName?.toLowerCase().includes(query.toLowerCase()) || 
+     h.hospitalCode?.toLowerCase().includes(query.toLowerCase())) &&
     (filter === 'All' || h.status === filter.toUpperCase())
   );
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Search & Filter */}
-        <View style={{ marginBottom: 16 }}>
-          <SearchBar 
-            placeholder="Search hospitals..."
-            value={query}
-            onChangeText={setQuery}
-            trailing={
-              <TouchableOpacity style={styles.filterBtn}>
-                <IconFilter size={18} color={T.textDim} />
-              </TouchableOpacity>
-            }
-          />
-        </View>
+      <View style={{ padding: 16, paddingBottom: 0 }}>
+        <SearchBar 
+          placeholder="Search hospitals..."
+          value={query}
+          onChangeText={setQuery}
+          trailing={
+            <TouchableOpacity style={styles.filterBtn}>
+              <IconFilter size={18} color={T.textDim} />
+            </TouchableOpacity>
+          }
+        />
+      </View>
 
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={T.accent} />
+        }
+      >
         {/* Chips */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
           {['All', 'Active', 'Inactive'].map((f) => (
@@ -42,7 +78,7 @@ export const HospitalsScreen = ({ onProvision }) => {
               active={filter === f} 
               onPress={() => setFilter(f)}
             >
-              {f} · {f === 'All' ? HOSPITALS.length : HOSPITALS.filter(h => h.status === f.toUpperCase()).length}
+              {f} · {f === 'All' ? hospitals.length : hospitals.filter(h => h.status === f.toUpperCase()).length}
             </Chip>
           ))}
         </ScrollView>
@@ -61,39 +97,64 @@ export const HospitalsScreen = ({ onProvision }) => {
         </View>
 
         {/* List */}
-        <View style={styles.list}>
-          {filtered.map(h => (
-            <Card key={h.id}>
-              <View style={styles.orgHeader}>
-                <View style={styles.orgAvatar}>
-                  <IconHospital size={24} color="#fff" />
-                </View>
-                <View style={styles.orgInfo}>
-                  <View style={styles.titleRow}>
-                    <Text style={styles.orgTitle}>{h.name}</Text>
-                    <StatusPill status={h.status} />
+        {loading && !refreshing ? (
+          <View style={styles.center}>
+            <ActivityIndicator size="large" color={T.accent} />
+          </View>
+        ) : error ? (
+          <View style={styles.center}>
+            <Text style={[styles.errorText, { color: T.bad }]}>{error}</Text>
+            <Btn variant="surface" size="sm" onPress={() => fetchHospitals()} style={{ marginTop: 12 }}>
+              Retry
+            </Btn>
+          </View>
+        ) : filtered.length === 0 ? (
+          <View style={styles.center}>
+            <IconHospital size={48} color={T.textFaint} />
+            <Text style={[styles.emptyText, { color: T.textDim }]}>
+              {query ? 'No matching hospitals found' : 'No hospitals provisioned yet'}
+            </Text>
+            {!query && (
+              <Btn variant="tonal" size="sm" onPress={onProvision} style={{ marginTop: 16 }}>
+                Provision First Hospital
+              </Btn>
+            )}
+          </View>
+        ) : (
+          <View style={styles.list}>
+            {filtered.map((h, idx) => (
+              <Card key={h.id || idx} onPress={() => onSelect?.(h)}>
+                <View style={styles.orgHeader}>
+                  <View style={styles.orgAvatar}>
+                    <IconHospital size={24} color="#fff" />
                   </View>
-                  <Text style={styles.orgName}>{h.code} · {h.city}</Text>
-                  
-                  <View style={styles.statsRow}>
-                    <View style={styles.statItem}>
-                      <IconBed size={14} color={T.textDim} />
-                      <Text style={styles.statValue}>{h.beds}</Text>
+                  <View style={styles.orgInfo}>
+                    <View style={styles.titleRow}>
+                      <Text style={styles.orgTitle}>{h.hospitalName}</Text>
+                      <StatusPill status={h.status || 'ACTIVE'} />
                     </View>
-                    <View style={styles.statItem}>
-                      <IconDoor size={14} color={T.textDim} />
-                      <Text style={styles.statValue}>{h.wards}</Text>
-                    </View>
-                    <View style={styles.statItem}>
-                      <IconPulse size={14} color={T.textDim} />
-                      <Text style={styles.statValue}>{h.devices}</Text>
+                    <Text style={styles.orgName}>{h.hospitalCode} · {h.myAddress?.city || '—'}</Text>
+                    
+                    <View style={styles.statsRow}>
+                      <View style={styles.statItem}>
+                        <IconBed size={14} color={T.textDim} />
+                        <Text style={styles.statValue}>{h.beds || 0}</Text>
+                      </View>
+                      <View style={styles.statItem}>
+                        <IconDoor size={14} color={T.textDim} />
+                        <Text style={styles.statValue}>{h.wards || 0}</Text>
+                      </View>
+                      <View style={styles.statItem}>
+                        <IconPulse size={14} color={T.textDim} />
+                        <Text style={styles.statValue}>{h.devices || 0}</Text>
+                      </View>
                     </View>
                   </View>
                 </View>
-              </View>
-            </Card>
-          ))}
-        </View>
+              </Card>
+            ))}
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -176,5 +237,20 @@ const createStyles = (T) => StyleSheet.create({
     fontWeight: '600',
     color: T.text,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+  },
+  center: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+  },
+  errorText: {
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  emptyText: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 12,
   },
 });

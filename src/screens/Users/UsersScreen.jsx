@@ -1,48 +1,102 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, ActivityIndicator, RefreshControl } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
-import { Card, SectionHeader, SearchBar, Chip, Avatar, RoleBadge } from '../../components/Shared';
+import { useAuth } from '../../context/AuthContext';
+import { userApi } from '../../services/api';
+import { Card, SectionHeader, SearchBar, Chip, Avatar, RoleBadge, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
 import { IconFilter, IconPlus, IconUsers } from '../../icons';
-import { USERS, ROLES } from '../../data/mock';
 
 export const UsersScreen = ({ onSelectUser }) => {
   const { theme: T } = useTheme();
+  const { user, token } = useAuth();
   const styles = createStyles(T);
   const [query, setQuery] = useState('');
   const [tab, setTab] = useState('all');
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [error, setError] = useState(null);
 
-  const filtered = USERS.filter(u => 
-    u.name.toLowerCase().includes(query.toLowerCase()) &&
-    (tab === 'all' || u.role === tab)
-  );
+  const fetchUsers = useCallback(async (showLoading = true) => {
+    if (!user?.orgName) return;
+    if (showLoading) setLoading(true);
+    setError(null);
+    try {
+      const [admins, owners, hospAdmins] = await Promise.all([
+        userApi.listOrgAdmins(user.orgName, token),
+        userApi.listHospOwners(user.orgName, token),
+        userApi.listAllHospAdmins(user.orgName, token)
+      ]);
+      
+      // Combine and ensure roles are set correctly for categorization
+      const allUsers = [
+        ...(Array.isArray(admins) ? admins.map(u => ({ ...u, role: u.role || 'ORG_ADMIN' })) : []),
+        ...(Array.isArray(owners) ? owners.map(u => ({ ...u, role: u.role || 'HOSP_OWNER' })) : []),
+        ...(Array.isArray(hospAdmins) ? hospAdmins.map(u => ({ ...u, role: u.role || 'HOSP_ADMIN' })) : [])
+      ];
+      
+      setUsers(allUsers);
+    } catch (err) {
+      console.error('Fetch users error:', err);
+      setError(err.message || 'Failed to load users');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [user?.orgName, token]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchUsers(false);
+  };
+
+  const getRole = (u) => u.role || (u.roles && u.roles[0]) || 'USER';
+
+  const filtered = users.filter(u => {
+    const role = getRole(u);
+    const matchesSearch = (u.userName?.toLowerCase().includes(query.toLowerCase()) || 
+                           u.email?.toLowerCase().includes(query.toLowerCase()));
+    
+    if (!matchesSearch) return false;
+    if (tab === 'all') return true;
+    if (tab === 'DOCTOR') return (role === 'DOCTOR' || role === 'NURSE');
+    return role === tab;
+  });
 
   const tabs = [
-    { id: 'all', label: 'All', count: USERS.length },
-    { id: 'ORG_OWNER', label: 'Org Owners', count: USERS.filter(u => u.role === 'ORG_OWNER').length },
-    { id: 'ORG_ADMIN', label: 'Org Admins', count: USERS.filter(u => u.role === 'ORG_ADMIN').length },
-    { id: 'HOSP_OWNER', label: 'Hosp Owners', count: USERS.filter(u => u.role === 'HOSP_OWNER').length },
-    { id: 'HOSP_ADMIN', label: 'Hosp Admins', count: USERS.filter(u => u.role === 'HOSP_ADMIN').length },
-    { id: 'DOCTOR', label: 'Clinical', count: USERS.filter(u => u.role === 'DOCTOR' || u.role === 'NURSE').length },
+    { id: 'all', label: 'All', count: users.length },
+    { id: 'ORG_ADMIN', label: 'Org Admins', count: users.filter(u => getRole(u) === 'ORG_ADMIN').length },
+    { id: 'HOSP_OWNER', label: 'Hosp Owners', count: users.filter(u => getRole(u) === 'HOSP_OWNER').length },
+    { id: 'HOSP_ADMIN', label: 'Hosp Admins', count: users.filter(u => getRole(u) === 'HOSP_ADMIN').length },
+    { id: 'DOCTOR', label: 'Clinical', count: users.filter(u => ['DOCTOR', 'NURSE'].includes(getRole(u))).length },
   ];
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Search & Filter */}
-        <View style={{ marginBottom: 20 }}>
-          <SearchBar
-            value={query}
-            onChangeText={setQuery}
-            placeholder="Search users by name or email..."
-            trailing={
-              <TouchableOpacity style={styles.filterBtn}>
-                <IconFilter size={20} color={T.textDim} />
-              </TouchableOpacity>
-            }
-          />
-        </View>
+      <View style={{ padding: 16, paddingBottom: 0 }}>
+        <SearchBar
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Search users..."
+          trailing={
+            <TouchableOpacity style={styles.filterBtn}>
+              <IconFilter size={20} color={T.textDim} />
+            </TouchableOpacity>
+          }
+        />
+      </View>
 
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={T.accent} />
+        }
+      >
         {/* Chips */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
           {tabs.map((t) => (
@@ -59,44 +113,52 @@ export const UsersScreen = ({ onSelectUser }) => {
         <SectionHeader title="System Users" subtitle={`${filtered.length} members`} />
 
         {/* List */}
-        <View style={styles.list}>
-          {filtered.map(u => (
-            <Card 
-              key={u.id} 
-              onPress={() => onSelectUser?.(u.id)}
-            >
-              <View style={styles.userRow}>
-                <Avatar name={u.name} size={42} />
-                <View style={styles.userInfo}>
-                  <View style={styles.titleRow}>
-                    <Text style={styles.userName} numberOfLines={1}>{u.name}</Text>
-                    <StatusPill status={u.status} />
-                  </View>
-                  <Text style={styles.userEmail}>{u.email}</Text>
-                  
-                  <View style={styles.badgesRow}>
-                    <RoleBadge role={u.role} />
-                    {u.hospital !== '—' && (
-                      <Text style={styles.hospitalText}>{u.hospital}</Text>
-                    )}
+        {loading && !refreshing ? (
+          <View style={styles.center}>
+            <ActivityIndicator size="large" color={T.accent} />
+          </View>
+        ) : error ? (
+          <View style={styles.center}>
+            <Text style={[styles.errorText, { color: T.bad }]}>{error}</Text>
+            <Btn variant="surface" size="sm" onPress={() => fetchUsers()} style={{ marginTop: 12 }}>
+              Retry
+            </Btn>
+          </View>
+        ) : (
+          <View style={styles.list}>
+            {filtered.map((u, idx) => (
+              <Card 
+                key={u.id || idx} 
+                onPress={() => onSelectUser?.(u.id)}
+              >
+                <View style={styles.userRow}>
+                  <Avatar name={u.userName} size={42} />
+                  <View style={styles.userInfo}>
+                    <View style={styles.titleRow}>
+                      <Text style={styles.userName} numberOfLines={1}>{u.userName}</Text>
+                      <StatusPill status={u.status || 'ACTIVE'} />
+                    </View>
+                    <Text style={styles.userEmail}>{u.email || 'No email'}</Text>
+                    
+                    <View style={styles.badgesRow}>
+                      <RoleBadge role={getRole(u)} />
+                      {u.hospitalCode && (
+                        <Text style={styles.hospitalText}>{u.hospitalCode}</Text>
+                      )}
+                    </View>
                   </View>
                 </View>
+              </Card>
+            ))}
+            {filtered.length === 0 && (
+              <View style={styles.emptyState}>
+                <IconUsers size={48} color={T.textFaint} />
+                <Text style={styles.emptyTitle}>No users match</Text>
+                <Text style={styles.emptyHint}>Try a different filter or search term.</Text>
               </View>
-            </Card>
-          ))}
-          {filtered.length === 0 && (
-            <View style={styles.emptyState}>
-              <IconUsers size={48} color={T.textFaint} />
-              <Text style={styles.emptyTitle}>No users match</Text>
-              <Text style={styles.emptyHint}>Try a different filter or invite someone new.</Text>
-              
-              <TouchableOpacity style={styles.inviteBtn}>
-                <IconPlus size={16} color={T.accent} />
-                <Text style={styles.inviteBtnText}>Invite user</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
+            )}
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -156,6 +218,16 @@ const createStyles = (T) => StyleSheet.create({
     color: T.textDim,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
+  center: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+  },
+  errorText: {
+    fontSize: 14,
+    textAlign: 'center',
+  },
   emptyState: {
     padding: 40,
     alignItems: 'center',
@@ -173,20 +245,5 @@ const createStyles = (T) => StyleSheet.create({
     color: T.textDim,
     textAlign: 'center',
     lineHeight: 18,
-  },
-  inviteBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-    backgroundColor: T.accentSoft,
-    marginTop: 8,
-  },
-  inviteBtnText: {
-    color: T.accent,
-    fontSize: 13,
-    fontWeight: '600',
   },
 });

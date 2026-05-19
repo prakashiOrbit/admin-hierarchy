@@ -27,7 +27,9 @@ export const OrganisationsScreen = ({ onSelectOrg }) => {
     setError(null);
     try {
       const response = await organisationApi.listAll(token);
-      setOrgs(Array.isArray(response.data) ? response.data : []);
+      // Backend might return array directly or wrapped in { data: [] }
+      const orgList = Array.isArray(response) ? response : (Array.isArray(response.data) ? response.data : []);
+      setOrgs(orgList);
     } catch (err) {
       setError(err.message || 'Failed to load organisations');
     } finally {
@@ -111,7 +113,7 @@ export const OrganisationsScreen = ({ onSelectOrg }) => {
         {/* List */}
         <View style={styles.list}>
           {filteredOrgs.map(org => (
-            <Card key={org.id} style={styles.orgCard} onPress={() => onSelectOrg?.(org.id)}>
+            <Card key={org.id} style={styles.orgCard} onPress={() => onSelectOrg?.(org)}>
               <View style={styles.orgHeader}>
                 <View style={styles.orgAvatar}>
                   <Text style={styles.orgAvatarText}>

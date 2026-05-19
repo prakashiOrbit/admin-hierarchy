@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform, Alert, ActivityIndicator } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
+import { userApi } from '../../services/api';
 import { Card, Field, TextInput, Btn } from '../../components/Shared';
 import { IconUser, IconMail, IconBuilding, IconShield } from '../../icons';
 
-export const CreateHospAdminScreen = ({ onCancel, orgName = 'APOLLO_ORG_TEST131', hospCode = 'HOSP111' }) => {
+export const CreateHospAdminScreen = ({ onCancel, hospCode = 'HOSP111' }) => {
   const { theme: T } = useTheme();
+  const { user, token } = useAuth();
   const styles = createStyles(T);
   
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     userName: '',
     firstName: '',
     lastName: '',
-    orgName: orgName,
+    orgName: user?.orgName || '',
     contactEmail: ''
   });
 
@@ -22,9 +26,23 @@ export const CreateHospAdminScreen = ({ onCancel, orgName = 'APOLLO_ORG_TEST131'
 
   const isFormValid = form.userName && form.firstName && form.lastName && form.contactEmail;
 
-  const handleCreate = () => {
-    console.log('Hosp Admin Invite Payload:', JSON.stringify(form, null, 2));
-    // Implementation for API call to /api/{orgName}/{hospCode}/user/create-hospital-admin
+  const handleCreate = async () => {
+    if (!user?.orgName) {
+      Alert.alert('Error', 'Organisation name not found');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await userApi.createHospAdmin(user.orgName, hospCode, form, token);
+      Alert.alert('Success', 'Hospital Administrator created successfully', [
+        { text: 'OK', onPress: onCancel }
+      ]);
+    } catch (err) {
+      Alert.alert('Error', err.message || 'Failed to create hospital administrator');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -104,14 +122,14 @@ export const CreateHospAdminScreen = ({ onCancel, orgName = 'APOLLO_ORG_TEST131'
 
         {/* Actions */}
         <View style={styles.actionRow}>
-          <Btn variant="ghost" full style={{ flex: 1 }} onPress={onCancel}>Cancel</Btn>
+          <Btn variant="ghost" full style={{ flex: 1 }} onPress={onCancel} disabled={loading}>Cancel</Btn>
           <Btn 
             full 
             style={{ flex: 1.5 }} 
             onPress={handleCreate} 
-            disabled={!isFormValid}
+            disabled={!isFormValid || loading}
           >
-            Create Hosp Admin
+            {loading ? <ActivityIndicator color="#FFF" size="small" /> : 'Create Hosp Admin'}
           </Btn>
         </View>
       </ScrollView>

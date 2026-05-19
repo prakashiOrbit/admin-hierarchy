@@ -1,15 +1,42 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, Avatar, RoleBadge, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
-import { IconHospital, IconUsers, IconPulse, IconLock } from '../../icons';
-import { ORGS, HOSPITALS, USERS } from '../../data/mock';
+import { IconHospital, IconUsers, IconPulse, IconLock, IconUserPlus } from '../../icons';
+import { organisationApi, userApi } from '../../services/api';
 
-export const OrgDetailScreen = ({ orgId }) => {
+export const OrgDetailScreen = ({ org, onInviteOwner }) => {
   const { theme: T } = useTheme();
+  const { token } = useAuth();
   const styles = createStyles(T);
-  const org = ORGS.find(o => o.id === orgId) || ORGS[0];
+  
+  const [hospitals, setHospitals] = useState([]);
+  const [owners, setOwners] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!org?.orgName) return;
+      setLoading(true);
+      try {
+        const [hospData, ownerData] = await Promise.all([
+          organisationApi.listHospitals(org.orgName, token),
+          userApi.listOrgOwners(org.orgName, token)
+        ]);
+        setHospitals(Array.isArray(hospData) ? hospData : []);
+        setOwners(Array.isArray(ownerData) ? ownerData : []);
+      } catch (err) {
+        console.error('Fetch org details error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [org?.orgName, token]);
+
+  const initials = (org.businessName || org.orgName || '??').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 
   return (
     <View style={styles.container}>
@@ -18,17 +45,15 @@ export const OrgDetailScreen = ({ orgId }) => {
         <Card style={styles.headerCard}>
           <View style={styles.headerTop}>
             <View style={styles.orgAvatar}>
-              <Text style={styles.orgAvatarText}>
-                {org.display.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
-              </Text>
+              <Text style={styles.orgAvatarText}>{initials}</Text>
             </View>
             <View style={styles.headerInfo}>
               <View style={styles.titleRow}>
-                <Text style={styles.orgTitle}>{org.display}</Text>
-                <StatusPill status={org.status} />
+                <Text style={styles.orgTitle} numberOfLines={1}>{org.businessName || org.orgName}</Text>
+                <StatusPill status={org.deleted ? 'INACTIVE' : 'ACTIVE'} />
               </View>
-              <Text style={styles.orgName}>{org.name}</Text>
-              <Text style={styles.orgMeta}>{org.type} · {org.locale}</Text>
+              <Text style={styles.orgName}>{org.orgName}</Text>
+              <Text style={styles.orgMeta}>{org.orgType || 'ORGANISATION'} · {org.locale || 'en-IN'}</Text>
             </View>
           </View>
         </Card>
@@ -36,9 +61,9 @@ export const OrgDetailScreen = ({ orgId }) => {
         {/* Stats Grid */}
         <View style={styles.statsGrid}>
           {[
-            { label: 'Hospitals', value: org.hospitals, color: T.accent },
-            { label: 'Users', value: org.users.toLocaleString(), color: '#2DD4BF' },
-            { label: 'Devices', value: org.devices.toLocaleString(), color: '#22D3EE' },
+            { label: 'Hospitals', value: hospitals.length, color: T.accent },
+            { label: 'Owners', value: owners.length, color: '#2DD4BF' },
+            { label: 'Devices', value: '0', color: '#22D3EE' },
           ].map((stat, i) => (
             <View key={stat.label} style={styles.statBox}>
               <Text style={styles.statLabel}>{stat.label.toUpperCase()}</Text>
@@ -49,42 +74,58 @@ export const OrgDetailScreen = ({ orgId }) => {
 
         {/* Org Owners */}
         <View style={styles.section}>
-          <SectionHeader title="ORGANISATION ADMINS" />
+          <SectionHeader title="ORGANISATION OWNERS" count={owners.length} />
           <Card style={styles.listCard}>
-            {USERS.filter(u => u.role === 'ORG_OWNER' || u.role === 'ORG_ADMIN').slice(0, 2).map((user, i) => (
-              <View key={user.id} style={[styles.listItem, i > 0 && styles.listBorder]}>
-                <Avatar size={36} initials={user.initials} />
-                <View style={styles.listItemContent}>
-                  <Text style={styles.userName}>{user.name}</Text>
-                  <Text style={styles.userEmail}>{user.email}</Text>
+            {loading ? (
+              <ActivityIndicator color={T.accent} style={{ padding: 20 }} />
+            ) : owners.length > 0 ? (
+              owners.map((user, i) => (
+                <View key={user.id || i} style={[styles.listItem, i > 0 && styles.listBorder]}>
+                  <Avatar name={user.userName} size={36} />
+                  <View style={styles.listItemContent}>
+                    <Text style={styles.userName}>{user.userName}</Text>
+                    <Text style={styles.userEmail}>{user.email || 'No email'}</Text>
+                  </View>
+                  <RoleBadge role={user.role || 'ORG_OWNER'} />
                 </View>
-                <RoleBadge role={user.role} />
+              ))
+            ) : (
+              <View style={styles.emptyItem}>
+                <Text style={styles.emptyText}>No owners assigned yet</Text>
               </View>
-            ))}
+            )}
           </Card>
         </View>
 
         {/* Hospitals */}
         <View style={styles.section}>
-          <SectionHeader title="HOSPITALS" />
+          <SectionHeader title="HOSPITALS" count={hospitals.length} />
           <Card style={styles.listCard}>
-            {HOSPITALS.slice(0, 4).map((hosp, i) => (
-              <View key={hosp.id} style={[styles.listItem, i > 0 && styles.listBorder]}>
-                <View style={styles.hospIcon}>
-                  <IconHospital size={16} color={T.accent} />
+            {loading ? (
+              <ActivityIndicator color={T.accent} style={{ padding: 20 }} />
+            ) : hospitals.length > 0 ? (
+              hospitals.map((hosp, i) => (
+                <View key={hosp.id || i} style={[styles.listItem, i > 0 && styles.listBorder]}>
+                  <View style={styles.hospIcon}>
+                    <IconHospital size={16} color={T.accent} />
+                  </View>
+                  <View style={styles.listItemContent}>
+                    <Text style={styles.hospName}>{hosp.hospitalName}</Text>
+                    <Text style={styles.hospMeta}>{hosp.hospitalCode} · {hosp.beds || 0} beds</Text>
+                  </View>
+                  <StatusPill status={hosp.status || 'ACTIVE'} />
                 </View>
-                <View style={styles.listItemContent}>
-                  <Text style={styles.hospName}>{hosp.name}</Text>
-                  <Text style={styles.hospMeta}>{hosp.code} · {hosp.beds} beds</Text>
-                </View>
-                <StatusPill status="ACTIVE" />
+              ))
+            ) : (
+              <View style={styles.emptyItem}>
+                <Text style={styles.emptyText}>No hospitals provisioned yet</Text>
               </View>
-            ))}
+            )}
           </Card>
         </View>
 
-        <Btn type="outline" style={styles.actionBtn}>
-          <IconLock size={16} color={T.accent} /> Create Org Owner for this organisation
+        <Btn variant="surface" style={styles.actionBtn} onPress={onInviteOwner}>
+          <IconUserPlus size={16} color={T.accent} /> Invite Organisation Owner
         </Btn>
       </ScrollView>
     </View>
@@ -135,6 +176,7 @@ const createStyles = (T) => StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: T.text,
+    flex: 1,
   },
   orgName: {
     fontSize: 12,
@@ -226,5 +268,14 @@ const createStyles = (T) => StyleSheet.create({
     marginTop: 8,
     flexDirection: 'row',
     gap: 8,
+    justifyContent: 'center',
+  },
+  emptyItem: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 13,
+    color: T.textFaint,
   },
 });

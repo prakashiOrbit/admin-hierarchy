@@ -6,16 +6,16 @@ import { userApi } from '../../services/api';
 import { Card, Field, TextInput, Btn } from '../../components/Shared';
 import { IconUser, IconMail, IconBuilding, IconShield } from '../../icons';
 
-export const InviteOrgAdminScreen = ({ onCancel }) => {
+export const CreateOrgOwnerScreen = ({ onCancel, presetOrgName }) => {
   const { theme: T } = useTheme();
-  const { user, token } = useAuth();
+  const { token } = useAuth();
   const styles = createStyles(T);
   
   const [form, setForm] = useState({
     userName: '',
     firstName: '',
     lastName: '',
-    orgName: user?.orgName || 'APOLLO_ORG_TEST129',
+    orgName: presetOrgName || '',
     contactEmail: ''
   });
 
@@ -25,22 +25,17 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
     setForm(prev => ({ ...prev, [key]: value }));
   };
 
-  const isFormValid = form.userName && form.firstName && form.lastName && form.contactEmail;
+  const isFormValid = form.userName && form.firstName && form.lastName && form.contactEmail && form.orgName;
 
   const handleCreate = async () => {
-    if (!user?.orgName) {
-      Alert.alert('Error', 'Organisation name not found');
-      return;
-    }
-
     setLoading(true);
     try {
-      await userApi.createOrgAdmin(form, token);
-      Alert.alert('Success', 'Organisation Administrator invited successfully', [
+      await userApi.createOrgOwner(form, token);
+      Alert.alert('Success', 'Organisation Owner invited successfully', [
         { text: 'OK', onPress: onCancel }
       ]);
     } catch (err) {
-      Alert.alert('Error', err.message || 'Failed to invite administrator');
+      Alert.alert('Error', err.message || 'Failed to invite organisation owner');
     } finally {
       setLoading(false);
     }
@@ -53,19 +48,19 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
         <View style={styles.banner}>
           <IconShield color={T.accent} size={20} />
           <Text style={styles.bannerText}>
-            Inviting a new Organisation Administrator. They will have full administrative control over this organisation's resources.
+            Inviting a new Organisation Owner. They will have primary administrative control over the selected organisation.
           </Text>
         </View>
 
         {/* User Identity Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>USER IDENTITY</Text>
+          <Text style={styles.sectionTitle}>OWNER IDENTITY</Text>
           
           <Field label="Username">
             <TextInput 
               value={form.userName} 
               onChangeText={(v) => updateForm('userName', v.toLowerCase())}
-              placeholder="e.g. apollo_admin129@apollo.com"
+              placeholder="e.g. j.doe"
               leading={<IconUser size={18} color={T.textDim} />}
             />
           </Field>
@@ -76,7 +71,7 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
                 <TextInput 
                   value={form.firstName} 
                   onChangeText={(v) => updateForm('firstName', v)}
-                  placeholder="Apollo"
+                  placeholder="First name"
                 />
               </Field>
             </View>
@@ -85,19 +80,28 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
                 <TextInput 
                   value={form.lastName} 
                   onChangeText={(v) => updateForm('lastName', v)}
-                  placeholder="Admin"
+                  placeholder="Last name"
                 />
               </Field>
             </View>
           </View>
 
-          <Field label="Organization">
-            <Card style={styles.disabledCard}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <IconBuilding size={16} color={T.textFaint} />
-                <Text style={styles.disabledText}>{form.orgName}</Text>
-              </View>
-            </Card>
+          <Field label="Organisation Name">
+            {presetOrgName ? (
+              <Card style={styles.disabledCard}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <IconBuilding size={16} color={T.textFaint} />
+                  <Text style={styles.disabledText}>{form.orgName}</Text>
+                </View>
+              </Card>
+            ) : (
+              <TextInput 
+                value={form.orgName} 
+                onChangeText={(v) => updateForm('orgName', v.toUpperCase())}
+                placeholder="ORG_UNIQUE_ID"
+                leading={<IconBuilding size={18} color={T.textDim} />}
+              />
+            )}
           </Field>
         </View>
 
@@ -109,7 +113,7 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
             <TextInput 
               value={form.contactEmail} 
               onChangeText={(v) => updateForm('contactEmail', v.toLowerCase())}
-              placeholder="e.g. apollo_admin129@apollo.com"
+              placeholder="owner@organisation.com"
               leading={<IconMail size={18} color={T.textDim} />}
             />
           </Field>
@@ -117,7 +121,7 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
 
         <View style={styles.infoBox}>
           <Text style={styles.infoText}>
-            The new user will receive an invitation email. They will set their own password and configure 2FA on first sign-in.
+            The new owner will receive an invitation email to set their password and complete their profile.
           </Text>
         </View>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, Platform, BackHandler } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, Platform, BackHandler, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -10,7 +10,7 @@ import {
   IconHospital, IconUsers, IconPulse, IconGateway, IconShield, IconChart,
   IconAlert, IconChevron, IconMenu, IconSettings, IconDashboard, IconBack, IconUser, IconMoon, IconLogout, IconCpu
 } from '../../icons';
-import { HOSPITALS } from '../../data/mock';
+import { organisationApi } from '../../services/api';
 import { HospitalsScreen } from '../Hospitals/HospitalsScreen';
 import { UsersScreen } from '../Users/UsersScreen';
 import { RolesScreen } from '../Roles/RolesScreen';
@@ -23,6 +23,7 @@ import { CreateRoleScreen } from '../Roles/CreateRoleScreen';
 import { CreateHospitalScreen } from '../Hospitals/CreateHospitalScreen';
 import { DeviceTypesScreen } from '../Devices/DeviceTypesScreen';
 import { CreateDeviceTypeScreen } from '../Devices/CreateDeviceTypeScreen';
+import { DeviceTypeDetailScreen } from '../Devices/DeviceTypeDetailScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -51,18 +52,43 @@ const StatCard = ({ label, value, delta, icon, color, accent }) => {
 
 const OrgHomeContent = ({ role }) => {
   const { theme: T } = useTheme();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const styles = createStyles(T);
   const isOwner = role === 'ORG_OWNER';
+  
+  const [hospitals, setHospitals] = useState([]);
+  const [admins, setAdmins] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user?.orgName) return;
+      try {
+        const [hospData, adminData] = await Promise.all([
+          organisationApi.listHospitals(user.orgName, token),
+          userApi.listOrgAdmins(user.orgName, token)
+        ]);
+        setHospitals(Array.isArray(hospData) ? hospData : []);
+        setAdmins((Array.isArray(adminData) ? adminData : []).filter(u => u.roles?.includes('ORG_ADMIN') || u.role === 'ORG_ADMIN'));
+      } catch (err) {
+        console.error('Home fetch data error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [user?.orgName, token]);
+
+  const activeHospitals = hospitals.filter(h => h.status === 'ACTIVE').length;
   
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>
       {/* Greeting */}
       <View style={styles.greetingHeader}>
-        <Text style={styles.date}>FRI, 16 MAY · {user?.orgName || 'ORGANISATION'}</Text>
+        <Text style={styles.date}>{new Date().toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()} · {user?.orgName || 'ORGANISATION'}</Text>
         <Text style={styles.greeting}>Good morning, {user?.userName || 'User'}</Text>
         <Text style={styles.status}>
-          <Text style={{ color: T.good, fontWeight: '600' }}>14 hospitals</Text> online · 2 alerts pending
+          <Text style={{ color: T.good, fontWeight: '600' }}>{hospitals.length} hospitals</Text> provisioned · {activeHospitals} online
         </Text>
       </View>
 
@@ -70,13 +96,13 @@ const OrgHomeContent = ({ role }) => {
       <View style={styles.grid}>
         <StatCard 
           label="Hospitals" 
-          value="14" 
+          value={loading ? '...' : hospitals.length.toString()} 
           delta={0} 
           icon={<IconHospital />} color={T.accent} 
         />
         <StatCard 
           label="Admins" 
-          value="28" 
+          value={loading ? '...' : admins.length.toString()} 
           delta={3} 
           icon={<IconUsers />} color="#2DD4BF" accent="rgba(45,212,191,.14)" 
         />
@@ -101,13 +127,10 @@ const OrgHomeContent = ({ role }) => {
             <IconAlert size={20} color={T.warn} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.alertTitle}>2 hospitals need attention</Text>
+            <Text style={styles.alertTitle}>Monitoring system active</Text>
             <Text style={styles.alertText}>
-              Marymount Hospital is inactive · Gateway GW-CLV-005 offline at PED 5W
+              All hospital gateways are communicating correctly. No critical alerts in the last 24h.
             </Text>
-            <TouchableOpacity style={{ marginTop: 8 }}>
-              <Text style={styles.reviewLink}>Review →</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </Card>
@@ -116,27 +139,33 @@ const OrgHomeContent = ({ role }) => {
       <View style={styles.section}>
         <SectionHeader title="TOP HOSPITALS" />
         <View style={styles.list}>
-          {HOSPITALS.slice(0, 3).map(h => (
-            <Card key={h.id} style={{ backgroundColor: T.surface }}>
-              <View style={styles.listItem}>
-                <View style={styles.hospIcon}>
-                  <IconHospital size={20} color={T.accent} />
-                </View>
-                <View style={styles.listItemContent}>
-                  <View style={styles.titleRow}>
-                    <Text style={styles.hospName}>{h.name}</Text>
-                    <StatusPill status="ACTIVE" />
+          {loading ? (
+            <ActivityIndicator color={T.accent} style={{ padding: 20 }} />
+          ) : hospitals.length === 0 ? (
+            <Text style={{ color: T.textDim, fontSize: 13, textAlign: 'center', padding: 20 }}>No hospitals found</Text>
+          ) : (
+            hospitals.slice(0, 3).map((h, i) => (
+              <Card key={h.id || i} style={{ backgroundColor: T.surface }}>
+                <View style={styles.listItem}>
+                  <View style={styles.hospIcon}>
+                    <IconHospital size={20} color={T.accent} />
                   </View>
-                  <View style={styles.hospMetaRow}>
-                    <Text style={styles.hospMetaText}>{h.code}</Text>
-                    <Text style={styles.hospMetaText}>{h.beds} beds</Text>
-                    <Text style={styles.hospMetaText}>{h.devices} dev</Text>
+                  <View style={styles.listItemContent}>
+                    <View style={styles.titleRow}>
+                      <Text style={styles.hospName}>{h.hospitalName}</Text>
+                      <StatusPill status={h.status || 'ACTIVE'} />
+                    </View>
+                    <View style={styles.hospMetaRow}>
+                      <Text style={styles.hospMetaText}>{h.hospitalCode}</Text>
+                      <Text style={styles.hospMetaText}>{h.beds || 0} beds</Text>
+                      <Text style={styles.hospMetaText}>{h.devices || 0} dev</Text>
+                    </View>
                   </View>
+                  <IconChevron size={16} color={T.textFaint} />
                 </View>
-                <IconChevron size={16} color={T.textFaint} />
-              </View>
-            </Card>
-          ))}
+              </Card>
+            ))
+          )}
         </View>
       </View>
 
@@ -175,7 +204,9 @@ export const OrgDashboard = ({ navigation, route }) => {
   const [selectedRoleId, setSelectedRoleId] = useState(null);
   const [isInvitingAdmin, setIsInvitingAdmin] = useState(false);
   const [isProvisioningHospital, setIsProvisioningHospital] = useState(false);
+  const [selectedHospital, setSelectedHospital] = useState(null);
   const [isCreatingDeviceType, setIsCreatingDeviceType] = useState(false);
+  const [selectedDeviceType, setSelectedDeviceType] = useState(null);
   const [isCreatingRole, setIsCreatingRole] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const drawerAnim = React.useRef(new Animated.Value(-width)).current;
@@ -185,7 +216,9 @@ export const OrgDashboard = ({ navigation, route }) => {
       if (drawerOpen) { toggleDrawer(); return true; }
       if (isInvitingAdmin) { setIsInvitingAdmin(false); return true; }
       if (isProvisioningHospital) { setIsProvisioningHospital(false); return true; }
+      if (selectedHospital) { setSelectedHospital(null); return true; }
       if (isCreatingDeviceType) { setIsCreatingDeviceType(false); return true; }
+      if (selectedDeviceType) { setSelectedDeviceType(null); return true; }
       if (isCreatingRole) { setIsCreatingRole(false); return true; }
       if (selectedUserId) { setSelectedUserId(null); return true; }
       if (selectedRoleId) { setSelectedRoleId(null); return true; }
@@ -194,7 +227,7 @@ export const OrgDashboard = ({ navigation, route }) => {
     };
     const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
     return () => backHandler.remove();
-  }, [drawerOpen, activeTab, selectedUserId, isInvitingAdmin, selectedRoleId, isProvisioningHospital, isCreatingDeviceType, isCreatingRole]);
+  }, [drawerOpen, activeTab, selectedUserId, isInvitingAdmin, selectedRoleId, isProvisioningHospital, selectedHospital, isCreatingDeviceType, selectedDeviceType, isCreatingRole]);
 
   const toggleDrawer = React.useCallback(() => {
     const toValue = drawerOpen ? -width : 0;
@@ -207,7 +240,9 @@ export const OrgDashboard = ({ navigation, route }) => {
     setSelectedRoleId(null);
     setIsInvitingAdmin(false);
     setIsProvisioningHospital(false);
+    setSelectedHospital(null);
     setIsCreatingDeviceType(false);
+    setSelectedDeviceType(null);
     setIsCreatingRole(false);
     setActiveTab(tabId);
   };
@@ -232,6 +267,9 @@ export const OrgDashboard = ({ navigation, route }) => {
     if (isCreatingDeviceType) {
       return <CreateDeviceTypeScreen onCancel={() => setIsCreatingDeviceType(false)} />;
     }
+    if (selectedDeviceType) {
+      return <DeviceTypeDetailScreen deviceType={selectedDeviceType} onBack={() => setSelectedDeviceType(null)} />;
+    }
     if (isCreatingRole) {
       return <CreateRoleScreen onCancel={() => setIsCreatingRole(false)} />;
     }
@@ -246,7 +284,7 @@ export const OrgDashboard = ({ navigation, route }) => {
       case 'home': return <OrgHomeContent role={role} />;
       case 'admins': return <OrgAdminsScreen onInvite={() => setIsInvitingAdmin(true)} onSelectUser={setSelectedUserId} />;
       case 'hospitals': return <HospitalsScreen onProvision={() => setIsProvisioningHospital(true)} />;
-      case 'types': return <DeviceTypesScreen onCreate={() => setIsCreatingDeviceType(true)} />;
+      case 'types': return <DeviceTypesScreen onCreate={() => setIsCreatingDeviceType(true)} onSelect={setSelectedDeviceType} />;
       case 'users': return <UsersScreen onSelectUser={setSelectedUserId} />;
       case 'roles': return <RolesScreen onSelectRole={setSelectedRoleId} onCreate={() => setIsCreatingRole(true)} />;
       case 'summary': return <OrgSummaryScreen />;
@@ -258,6 +296,7 @@ export const OrgDashboard = ({ navigation, route }) => {
     if (isInvitingAdmin) return "Invite Org Admin";
     if (isProvisioningHospital) return "Create Hospital";
     if (isCreatingDeviceType) return "Create Device Type";
+    if (selectedDeviceType) return "Device Type Details";
     if (isCreatingRole) return "Create New Role";
     if (selectedUserId) return "User Details";
     if (selectedRoleId) return "Role Details";
@@ -313,11 +352,12 @@ export const OrgDashboard = ({ navigation, route }) => {
 
       <TopBar 
         title={getTitle()} 
-        leading={ (selectedUserId || isInvitingAdmin || selectedRoleId || isProvisioningHospital || isCreatingDeviceType || isCreatingRole) ? <IconBack /> : <IconMenu /> }
-        onLeadingPress={(selectedUserId || isInvitingAdmin || selectedRoleId || isProvisioningHospital || isCreatingDeviceType || isCreatingRole) ? () => { setSelectedUserId(null); setIsInvitingAdmin(false); setSelectedRoleId(null); setIsProvisioningHospital(false); setIsCreatingDeviceType(false); setIsCreatingRole(false); } : toggleDrawer}
+        leading={ (selectedUserId || isInvitingAdmin || selectedRoleId || isProvisioningHospital || selectedHospital || isCreatingDeviceType || selectedDeviceType || isCreatingRole) ? <IconBack /> : <IconMenu /> }
+        onLeadingPress={(selectedUserId || isInvitingAdmin || selectedRoleId || isProvisioningHospital || selectedHospital || isCreatingDeviceType || selectedDeviceType || isCreatingRole) ? () => { setSelectedUserId(null); setIsInvitingAdmin(false); setSelectedRoleId(null); setIsProvisioningHospital(false); setSelectedHospital(null); setIsCreatingDeviceType(false); setSelectedDeviceType(null); setIsCreatingRole(false); } : toggleDrawer}
         onNotificationPress={() => console.log('Notifications')}
         onProfilePress={() => { logout(); navigation.replace('Login'); }}
       />
+
 
       <View style={{ flex: 1 }}>
         {renderContent()}

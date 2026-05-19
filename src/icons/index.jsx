@@ -85,6 +85,14 @@ export const IconUser = (p) => (
   </I>
 );
 
+export const IconUserPlus = (p) => (
+  <I {...p}>
+    <Path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+    <Circle cx="8.5" cy="7" r="4" />
+    <Path d="M20 8v6M23 11h-6" />
+  </I>
+);
+
 export const IconLock = (p) => (
   <I {...p}>
     <Rect x="3" y="11" width="18" height="11" rx="2" />

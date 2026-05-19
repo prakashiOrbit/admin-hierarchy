@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator, Alert } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
+import { deviceApi } from '../../services/api';
 import { Card, Field, TextInput, Btn } from '../../components/Shared';
 import { IconCpu, IconActivity, IconShield, IconBuilding } from '../../icons';
 
-export const CreateDeviceTypeScreen = ({ onCancel, orgName = 'APOLLO_ORG_TEST129' }) => {
+export const CreateDeviceTypeScreen = ({ onCancel }) => {
   const { theme: T } = useTheme();
+  const { user, token } = useAuth();
   const styles = createStyles(T);
   
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     deviceType: '',
     category: 'PMS',
@@ -24,9 +28,23 @@ export const CreateDeviceTypeScreen = ({ onCancel, orgName = 'APOLLO_ORG_TEST129
 
   const isFormValid = form.deviceType && form.deviceProfile && form.deviceVendor;
 
-  const handleCreate = () => {
-    console.log('Create Device Type Payload:', JSON.stringify(form, null, 2));
-    // Implementation for API call to /api/{orgName}/devicetype/create
+  const handleCreate = async () => {
+    if (!user?.orgName) {
+      Alert.alert('Error', 'Organisation name not found');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await deviceApi.createType(user.orgName, form, token);
+      Alert.alert('Success', 'Device Type created successfully', [
+        { text: 'OK', onPress: onCancel }
+      ]);
+    } catch (error) {
+      Alert.alert('Error', error.message || 'Failed to create device type');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -120,14 +138,14 @@ export const CreateDeviceTypeScreen = ({ onCancel, orgName = 'APOLLO_ORG_TEST129
 
         {/* Actions */}
         <View style={styles.actionRow}>
-          <Btn variant="surface" style={{ flex: 1 }} onPress={onCancel}>Cancel</Btn>
+          <Btn variant="surface" style={{ flex: 1 }} onPress={onCancel} disabled={loading}>Cancel</Btn>
           <Btn 
             variant="primary" 
             style={{ flex: 2 }} 
-            disabled={!isFormValid}
+            disabled={!isFormValid || loading}
             onPress={handleCreate}
           >
-            Create Type
+            {loading ? <ActivityIndicator color="#FFF" size="small" /> : 'Create Type'}
           </Btn>
         </View>
       </ScrollView>

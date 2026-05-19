@@ -9,7 +9,8 @@ import { OrganisationsScreen } from '../Organisations/OrganisationsScreen';
 import { NewOrganisationScreen } from '../Organisations/NewOrganisationScreen';
 import { OrgDetailScreen } from '../Organisations/OrgDetailScreen';
 import { SettingsScreen } from '../Settings/SettingsScreen';
-import { ORGS } from '../../data/mock';
+import { CreateOrgOwnerScreen } from '../Organisations/CreateOrgOwnerScreen';
+import { organisationApi, summaryApi, userApi } from '../../services/api';
 
 import { 
   IconGlobe, IconHospital, IconUsers, IconPulse, IconPlus, 
@@ -43,21 +44,141 @@ const StatCard = ({ label, value, delta, icon, color, accent }) => {
 
 const HomeContent = ({ onNavigate }) => {
   const { theme: T } = useTheme();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const styles = createStyles(T);
-  const recentActivity = [
-    { id: '1', icon: <IconHospital />, color: T.good, text: 'Cleveland Clinic onboarded', time: '2h ago', meta: 'cleveland-clinic' },
-    { id: '2', icon: <IconPlus />, color: T.accent, text: 'Akron General hospital created', time: '4h ago', meta: 'CLV-AKR' },
-    { id: '3', icon: <IconAlert />, color: T.warn, text: 'Gateway GW-CLV-005 flagged offline', time: '8h ago', meta: '12d uptime lost' },
-    { id: '4', icon: <IconUser />, color: '#A78BFA', text: 'Org owner created for Aurora Health', time: '1d ago', meta: 'p.raghunathan' },
-  ];
+  
+  const [summary, setSummary] = useState(null);
+  const [orgsCount, setOrgsCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [activities, setActivities] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // Fetch summary and orgs separately to handle failures independently
+        const summaryPromise = summaryApi.getPlatformSummary(token).catch(err => {
+          console.error('Summary API error:', err);
+          return null;
+        });
+        
+        const orgsPromise = organisationApi.listAll(token).catch(err => {
+          console.error('Orgs API error:', err);
+          return [];
+        });
+
+        const [summaryData, orgsData] = await Promise.all([summaryPromise, orgsPromise]);
+        
+        const orgList = Array.isArray(orgsData) ? orgsData : (Array.isArray(orgsData.data) ? orgsData.data : []);
+        setOrgsCount(orgList.length);
+
+        // Generate dynamic activity from orgList
+        const dynamicActivities = orgList.slice(0, 4).map((org, index) => ({
+          id: `org-${org.id || index}`,
+          icon: <IconGlobe />,
+          color: index % 2 === 0 ? T.good : T.accent,
+          text: `${org.businessName || org.orgName} onboarded`,
+          time: `${index + 1}d ago`,
+          meta: org.orgName
+        }));
+
+        // Add a system activity if we have summary data
+        if (summaryData && summaryData.stats) {
+          dynamicActivities.unshift({
+            id: 'sys-1',
+            icon: <IconPulse />,
+            color: '#22D3EE',
+            text: 'Platform summary report generated',
+            time: 'Just now',
+            meta: 'System'
+          });
+        }
+
+        setActivities(dynamicActivities);
+
+        // Check if summaryData has valid stats object as provided by user
+        if (summaryData && summaryData.stats) {
+          setSummary(summaryData);
+          console.log('Platform Dashboard using backend stats:', summaryData.stats);
+        } else if (orgList.length > 0) {
+          // Manual aggregation fallback if summary is missing or zero
+          console.log('Summary stats missing, attempting manual aggregation...');
+          
+          let totalHospitals = 0;
+          let totalUsers = 0;
+
+          // Attempt to aggregate hospitals for each organization
+          const hospitalPromises = orgList.map(org => {
+            console.log(`Fetching hospitals for org: ${org.orgName}`);
+            return organisationApi.listHospitals(org.orgName, token).catch((err) => {
+              console.error(`Failed to fetch hospitals for ${org.orgName}:`, err);
+              return [];
+            });
+          });
+          
+          // Attempt to aggregate at least some users (Admins + Owners)
+          const userPromises = orgList.flatMap(org => [
+            userApi.listOrgAdmins(org.orgName, token).catch(() => []),
+            userApi.listHospOwners(org.orgName, token).catch(() => []),
+            userApi.listAllHospAdmins(org.orgName, token).catch(() => [])
+          ]);
+
+          const [allHospitalsList, allUsersList] = await Promise.all([
+            Promise.all(hospitalPromises),
+            Promise.all(userPromises)
+          ]);
+
+          allHospitalsList.forEach((list, index) => {
+            const count = Array.isArray(list) ? list.length : 0;
+            console.log(`Org [${orgList[index].orgName}] has ${count} hospitals`);
+            totalHospitals += count;
+          });
+
+          // For users, we need to be careful about duplicates if a user has multiple roles
+          const uniqueUsers = new Set();
+          allUsersList.forEach(list => {
+            if (Array.isArray(list)) {
+              list.forEach(u => {
+                if (u.userName) uniqueUsers.add(u.userName);
+              });
+            }
+          });
+          totalUsers = uniqueUsers.size;
+
+          console.log(`Manual aggregation complete. Totals - Orgs: ${orgList.length}, Hosp: ${totalHospitals}, Users: ${totalUsers}`);
+
+          setSummary({
+            stats: {
+              totalHospitals: totalHospitals,
+              totalUsers: totalUsers,
+              totalOrganisations: orgList.length
+            },
+            devices: summaryData?.devices || 0
+          });
+        }
+        
+        console.log('Platform Dashboard Final Data:', { 
+          orgs: orgList.length, 
+          summary: summaryData,
+          calculatedSummary: {
+            orgs: orgList.length,
+          }
+        });
+      } catch (err) {
+        console.error('Fetch platform data error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [token]);
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>
       {/* Greeting Section */}
       <View style={styles.greetingHeader}>
         <View>
-          <Text style={styles.date}>SAT, 16 MAY</Text>
+          <Text style={styles.date}>{new Date().toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()}</Text>
           <Text style={styles.greeting}>Good morning, {user?.userName || 'User'}</Text>
           <Text style={styles.status}>
             <Text style={{ color: T.good, fontWeight: '700' }}>Platform health is nominal</Text> · 0 incidents
@@ -68,19 +189,27 @@ const HomeContent = ({ onNavigate }) => {
       {/* Stats Grid */}
       <View style={styles.grid}>
         <StatCard 
-          label="Organisations" value="57" delta={4} 
+          label="Organisations" 
+          value={loading ? '...' : (summary?.stats?.totalOrganisations ?? orgsCount).toString()} 
+          delta={0} 
           icon={<IconGlobe />} color="#A78BFA" accent="rgba(167,139,250,.14)" 
         />
         <StatCard 
-          label="Hospitals" value="231" delta={5} 
+          label="Hospitals" 
+          value={loading ? '...' : (summary?.stats?.totalHospitals ?? summary?.hospitals ?? summary?.hospCount ?? '0').toString()} 
+          delta={0} 
           icon={<IconHospital />} color={T.accent} 
         />
         <StatCard 
-          label="Users" value="4,118" delta={3} 
+          label="Users" 
+          value={loading ? '...' : (summary?.stats?.totalUsers ?? summary?.users ?? summary?.userCount ?? '0').toString()} 
+          delta={0} 
           icon={<IconUsers />} color="#2DD4BF" accent="rgba(45,212,191,.14)" 
         />
         <StatCard 
-          label="Active devices" value="5,031" delta={1} 
+          label="Active devices" 
+          value={loading ? '...' : (summary?.devices ?? summary?.deviceCount ?? summary?.totalDevices ?? '0').toString()} 
+          delta={0} 
           icon={<IconPulse />} color="#22D3EE" accent="rgba(34,211,238,.14)" 
         />
       </View>
@@ -133,7 +262,7 @@ const HomeContent = ({ onNavigate }) => {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>RECENT ACTIVITY</Text>
         <Card style={styles.activityCard} padding={0}>
-          {recentActivity.map((item, index) => (
+          {activities.length > 0 ? activities.map((item, index) => (
             <View key={item.id} style={[styles.activityItem, index !== 0 && styles.activityBorder]}>
               <View style={[styles.activityIcon, { backgroundColor: `${item.color}15` }]}>
                 {React.cloneElement(item.icon, { color: item.color, size: 14 })}
@@ -144,7 +273,11 @@ const HomeContent = ({ onNavigate }) => {
               </View>
               <Text style={styles.activityTime}>{item.time}</Text>
             </View>
-          ))}
+          )) : (
+            <View style={styles.activityItem}>
+              <Text style={styles.activityText}>{loading ? 'Loading...' : 'No recent activity'}</Text>
+            </View>
+          )}
         </Card>
       </View>
     </ScrollView>
@@ -157,7 +290,8 @@ export const PlatformDashboard = ({ navigation }) => {
   const { user, logout } = useAuth();
   const styles = createStyles(T);
   const [activeTab, setActiveTab] = useState('home');
-  const [selectedOrgId, setSelectedOrgId] = useState(null);
+  const [selectedOrg, setSelectedOrg] = useState(null);
+  const [isInvitingOwner, setIsInvitingOwner] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const drawerAnim = React.useRef(new Animated.Value(-width)).current;
 
@@ -167,8 +301,12 @@ export const PlatformDashboard = ({ navigation }) => {
         toggleDrawer();
         return true;
       }
-      if (selectedOrgId) {
-        setSelectedOrgId(null);
+      if (isInvitingOwner) {
+        setIsInvitingOwner(false);
+        return true;
+      }
+      if (selectedOrg) {
+        setSelectedOrg(null);
         return true;
       }
       if (activeTab !== 'home') {
@@ -184,7 +322,7 @@ export const PlatformDashboard = ({ navigation }) => {
     );
 
     return () => backHandler.remove();
-  }, [drawerOpen, selectedOrgId, activeTab]);
+  }, [drawerOpen, selectedOrg, activeTab, isInvitingOwner]);
 
   const toggleDrawer = React.useCallback(() => {
     const toValue = drawerOpen ? -width : 0;
@@ -197,28 +335,42 @@ export const PlatformDashboard = ({ navigation }) => {
   }, [drawerOpen, drawerAnim]);
 
   const handleTabChange = (tabId) => {
-    setSelectedOrgId(null);
+    setSelectedOrg(null);
+    setIsInvitingOwner(false);
     setActiveTab(tabId);
   };
 
   const renderContent = () => {
-    if (selectedOrgId) {
-      return <OrgDetailScreen orgId={selectedOrgId} onBack={() => setSelectedOrgId(null)} />;
+    if (isInvitingOwner) {
+      return <CreateOrgOwnerScreen 
+        onCancel={() => setIsInvitingOwner(false)} 
+        presetOrgName={selectedOrg?.orgName} 
+      />;
+    }
+
+    if (selectedOrg) {
+      return <OrgDetailScreen 
+        org={selectedOrg} 
+        onBack={() => setSelectedOrg(null)} 
+        onInviteOwner={() => setIsInvitingOwner(true)}
+      />;
     }
 
     switch (activeTab) {
       case 'home': return <HomeContent onNavigate={handleTabChange} />;
-      case 'orgs': return <OrganisationsScreen onSelectOrg={(id) => setSelectedOrgId(id)} />;
-      case 'new': return <NewOrganisationScreen onCancel={() => handleTabChange('home')} />;
+      case 'orgs': return <OrganisationsScreen onSelectOrg={(org) => setSelectedOrg(org)} />;
+      case 'new': return <NewOrganisationScreen onCancel={() => handleTabChange('home')} onSuccess={() => handleTabChange('orgs')} />;
       case 'settings': return <SettingsScreen onLogout={() => { logout(); navigation.replace('Login'); }} />;
       default: return <HomeContent onNavigate={handleTabChange} />;
     }
   };
 
   const getTitle = () => {
-    if (selectedOrgId) {
-      const org = ORGS.find(o => o.id === selectedOrgId);
-      return org?.display || "Organisation Detail";
+    if (isInvitingOwner) {
+      return "Invite Owner";
+    }
+    if (selectedOrg) {
+      return "Organisation Detail";
     }
 
     switch (activeTab) {
@@ -289,8 +441,11 @@ export const PlatformDashboard = ({ navigation }) => {
 
       <TopBar 
         title={getTitle()} 
-        leading={selectedOrgId ? <IconBack /> : <IconMenu />}
-        onLeadingPress={selectedOrgId ? () => setSelectedOrgId(null) : toggleDrawer}
+        leading={(selectedOrg || isInvitingOwner) ? <IconBack /> : <IconMenu />}
+        onLeadingPress={(selectedOrg || isInvitingOwner) ? () => {
+          if (isInvitingOwner) setIsInvitingOwner(false);
+          else setSelectedOrg(null);
+        } : toggleDrawer}
         onNotificationPress={() => console.log('Notifications')}
         onProfilePress={() => handleTabChange('settings')}
       />

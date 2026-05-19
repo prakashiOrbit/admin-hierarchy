@@ -1,31 +1,69 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, ActivityIndicator, RefreshControl } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
+import { deviceApi } from '../../services/api';
 import { Card, SectionHeader, SearchBar, Btn } from '../../components/Shared';
 import { IconCpu, IconActivity, IconPlus, IconChevron } from '../../icons';
 
-export const DeviceTypesScreen = ({ onCreate }) => {
+export const DeviceTypesScreen = ({ onCreate, onSelect = () => {} }) => {
   const { theme: T } = useTheme();
+  const { user, token } = useAuth();
   const styles = createStyles(T);
   const [query, setQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [types, setTypes] = useState([]);
+  const [error, setError] = useState(null);
 
-  const types = [
-    { id: '1', name: 'Comen-V4', category: 'PMS', vendor: 'Comen', firmware: '1.0.0' },
-    { id: '2', name: 'iT-V4-Pro', category: 'PMS', vendor: 'iOrbit', firmware: '2.4.1' },
-    { id: '3', name: 'SmartECG-90', category: 'ECG', vendor: 'BioTech', firmware: '1.2.0' },
-  ].filter(t => t.name.toLowerCase().includes(query.toLowerCase()));
+  const fetchTypes = useCallback(async (showLoading = true) => {
+    if (!user?.orgName) return;
+    if (showLoading) setLoading(true);
+    setError(null);
+    try {
+      const response = await deviceApi.listTypes(user.orgName, token);
+      // Assuming response is an array of device types
+      setTypes(Array.isArray(response) ? response : []);
+    } catch (err) {
+      console.error('Fetch device types error:', err);
+      setError(err.message || 'Failed to load device types');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [user?.orgName, token]);
+
+  useEffect(() => {
+    fetchTypes();
+  }, [fetchTypes]);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchTypes(false);
+  };
+
+  const filteredTypes = types.filter(t => 
+    t.deviceType?.toLowerCase().includes(query.toLowerCase()) ||
+    t.deviceVendor?.toLowerCase().includes(query.toLowerCase()) ||
+    t.category?.toLowerCase().includes(query.toLowerCase())
+  );
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={{ marginBottom: 20 }}>
-          <SearchBar
-            value={query}
-            onChangeText={setQuery}
-            placeholder="Search device profiles..."
-          />
-        </View>
+      <View style={{ padding: 16, paddingBottom: 0 }}>
+        <SearchBar
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Search device profiles..."
+        />
+      </View>
 
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={T.accent} />
+        }
+      >
         <View style={styles.headerRow}>
           <SectionHeader title="Hardware Profiles" subtitle="Supported IoMT devices" />
           <Btn 
@@ -39,27 +77,52 @@ export const DeviceTypesScreen = ({ onCreate }) => {
           </Btn>
         </View>
 
-        <View style={styles.list}>
-          {types.map(t => (
-            <Card key={t.id}>
-              <View style={styles.typeRow}>
-                <View style={styles.typeIcon}>
-                  <IconCpu size={20} color={T.accent} />
-                </View>
-                <View style={styles.typeInfo}>
-                  <View style={styles.titleRow}>
-                    <Text style={styles.typeName}>{t.name}</Text>
-                    <View style={styles.categoryBadge}>
-                      <Text style={styles.categoryText}>{t.category}</Text>
-                    </View>
+        {loading && !refreshing ? (
+          <View style={styles.center}>
+            <ActivityIndicator size="large" color={T.accent} />
+          </View>
+        ) : error ? (
+          <View style={styles.center}>
+            <Text style={[styles.errorText, { color: T.bad }]}>{error}</Text>
+            <Btn variant="surface" size="sm" onPress={() => fetchTypes()} style={{ marginTop: 12 }}>
+              Retry
+            </Btn>
+          </View>
+        ) : filteredTypes.length === 0 ? (
+          <View style={styles.center}>
+            <IconCpu size={48} color={T.textFaint} />
+            <Text style={[styles.emptyText, { color: T.textDim }]}>
+              {query ? 'No matching device types found' : 'No hardware profiles defined'}
+            </Text>
+            {!query && (
+              <Btn variant="tonal" size="sm" onPress={onCreate} style={{ marginTop: 16 }}>
+                Create First Profile
+              </Btn>
+            )}
+          </View>
+        ) : (
+          <View style={styles.list}>
+            {filteredTypes.map((t, idx) => (
+              <Card key={t.id || idx} onPress={() => onSelect?.(t)}>
+                <View style={styles.typeRow}>
+                  <View style={styles.typeIcon}>
+                    <IconCpu size={20} color={T.accent} />
                   </View>
-                  <Text style={styles.typeMeta}>{t.vendor} · v{t.firmware}</Text>
+                  <View style={styles.typeInfo}>
+                    <View style={styles.titleRow}>
+                      <Text style={styles.typeName}>{t.deviceType}</Text>
+                      <View style={styles.categoryBadge}>
+                        <Text style={styles.categoryText}>{t.category}</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.typeMeta}>{t.deviceVendor} · v{t.deviceFirmware}</Text>
+                  </View>
+                  <IconChevron size={18} color={T.textFaint} />
                 </View>
-                <IconChevron size={18} color={T.textFaint} />
-              </View>
-            </Card>
-          ))}
-        </View>
+              </Card>
+            ))}
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -67,7 +130,7 @@ export const DeviceTypesScreen = ({ onCreate }) => {
 
 const createStyles = (T) => StyleSheet.create({
   container: { flex: 1 },
-  scrollContent: { padding: 16 },
+  scrollContent: { padding: 16, flexGrow: 1 },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   newBtn: { flexDirection: 'row', gap: 4, height: 32, paddingHorizontal: 10 },
   list: { gap: 10 },
@@ -79,4 +142,7 @@ const createStyles = (T) => StyleSheet.create({
   categoryBadge: { backgroundColor: T.accentSoft, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
   categoryText: { fontSize: 9, color: T.accent, fontWeight: '700', fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
   typeMeta: { fontSize: 12, color: T.textDim, marginTop: 4 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 40 },
+  errorText: { fontSize: 14, textAlign: 'center' },
+  emptyText: { fontSize: 14, textAlign: 'center', marginTop: 12 },
 });

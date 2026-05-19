@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform, Alert, TouchableOpacity, Modal } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { organisationApi } from '../../services/api';
 import { Card, Field, TextInput, Btn } from '../../components/Shared';
-import { IconBuilding, IconUser, IconMail, IconLocation, IconPhone, IconShield } from '../../icons';
+import { IconBuilding, IconUser, IconMail, IconLocation, IconPhone, IconShield, IconChevron } from '../../icons';
 
-export const NewOrganisationScreen = ({ onCancel }) => {
+export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
   const { theme: T } = useTheme();
   const styles = createStyles(T);
+  const [showTypePicker, setShowTypePicker] = useState(false);
   const [form, setForm] = useState({
     orgName: '',
     orgType: 'HOSPITAL',
@@ -26,6 +27,8 @@ export const NewOrganisationScreen = ({ onCancel }) => {
       pincode: '',
     }
   });
+
+  const orgTypes = ['HOSPITAL', 'CLINIC', 'LAB', 'PHARMACY', 'RESEARCH', 'OTHER'];
 
   const { token } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -55,7 +58,7 @@ export const NewOrganisationScreen = ({ onCancel }) => {
     try {
       await organisationApi.create(form, token);
       Alert.alert('Success', 'Organisation created successfully', [
-        { text: 'OK', onPress: onCancel }
+        { text: 'OK', onPress: () => onSuccess ? onSuccess() : onCancel() }
       ]);
     } catch (err) {
       Alert.alert('Error', err.message || 'Failed to create organisation');
@@ -96,8 +99,9 @@ export const NewOrganisationScreen = ({ onCancel }) => {
           </Field>
 
           <Field label="Org Type">
-            <Card style={styles.selectCard}>
+            <Card style={styles.selectCard} onPress={() => setShowTypePicker(true)}>
               <Text style={styles.selectText}>{form.orgType}</Text>
+              <IconChevron size={18} color={T.textDim} />
             </Card>
           </Field>
         </View>
@@ -203,6 +207,39 @@ export const NewOrganisationScreen = ({ onCancel }) => {
           </Btn>
         </View>
       </ScrollView>
+
+      {/* Org Type Modal */}
+      <Modal visible={showTypePicker} transparent animationType="fade">
+        <TouchableOpacity 
+          style={styles.modalOverlay} 
+          activeOpacity={1} 
+          onPress={() => setShowTypePicker(false)}
+        >
+          <Card style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Select Organisation Type</Text>
+            {orgTypes.map((type) => (
+              <TouchableOpacity 
+                key={type} 
+                style={[
+                  styles.typeOption,
+                  form.orgType === type && { backgroundColor: T.accentSoft }
+                ]}
+                onPress={() => {
+                  updateRoot('orgType', type);
+                  setShowTypePicker(false);
+                }}
+              >
+                <Text style={[
+                  styles.typeOptionText,
+                  form.orgType === type && { color: T.accent, fontWeight: '700' }
+                ]}>
+                  {type}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </Card>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };
@@ -241,13 +278,17 @@ const createStyles = (T) => StyleSheet.create({
     marginBottom: 16,
   },
   selectCard: {
-    height: 44,
-    justifyContent: 'center',
+    height: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: T.surface,
+    paddingHorizontal: 12,
   },
   selectText: {
     color: T.text,
     fontSize: 14,
+    fontWeight: '500',
   },
   row: {
     flexDirection: 'row',
@@ -257,5 +298,31 @@ const createStyles = (T) => StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
     marginTop: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  modalContent: {
+    padding: 16,
+    maxHeight: '80%',
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: T.text,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  typeOption: {
+    padding: 14,
+    borderRadius: 8,
+    marginBottom: 4,
+  },
+  typeOptionText: {
+    fontSize: 14,
+    color: T.text,
   },
 });
