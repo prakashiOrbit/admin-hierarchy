@@ -5,7 +5,7 @@ import { Card, SectionHeader, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
 import { IconCpu, IconActivity, IconShield, IconBuilding, IconChevron, IconBack } from '../../icons';
 
-export const DeviceTypeDetailScreen = ({ deviceType, onBack }) => {
+export const DeviceTypeDetailScreen = ({ deviceType, onBack, onEdit }) => {
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   
@@ -80,7 +80,7 @@ export const DeviceTypeDetailScreen = ({ deviceType, onBack }) => {
           <Btn variant="surface" style={{ flex: 1 }} onPress={onBack}>
             Back to List
           </Btn>
-          <Btn variant="primary" style={{ flex: 1 }} onPress={() => console.log('Edit Device Type')}>
+          <Btn variant="primary" style={{ flex: 1 }} onPress={onEdit}>
             Edit Profile
           </Btn>
         </View>

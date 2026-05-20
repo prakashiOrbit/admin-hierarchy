@@ -6,7 +6,7 @@ import { userApi } from '../../services/api';
 import { Card, Field, TextInput, Btn } from '../../components/Shared';
 import { IconUser, IconMail, IconBuilding, IconShield } from '../../icons';
 
-export const CreateHospAdminScreen = ({ onCancel, hospCode = 'HOSP111' }) => {
+export const CreateHospAdminScreen = ({ onCancel }) => {
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
   const styles = createStyles(T);
@@ -34,7 +34,7 @@ export const CreateHospAdminScreen = ({ onCancel, hospCode = 'HOSP111' }) => {
 
     setLoading(true);
     try {
-      await userApi.createHospAdmin(user.orgName, hospCode, form, token);
+      await userApi.createHospAdmin(user.orgName, user.hospitalCode, form, token);
       Alert.alert('Success', 'Hospital Administrator created successfully', [
         { text: 'OK', onPress: onCancel }
       ]);
@@ -52,7 +52,7 @@ export const CreateHospAdminScreen = ({ onCancel, hospCode = 'HOSP111' }) => {
         <View style={styles.banner}>
           <IconShield color={T.accent} size={20} />
           <Text style={styles.bannerText}>
-            Inviting a new Hospital Administrator for {hospCode}. They will manage wards, devices, and clinical staff for this unit.
+            Inviting a new Hospital Administrator for {user?.hospitalCode}. They will manage wards, devices, and clinical staff for this unit.
           </Text>
         </View>
 
@@ -116,7 +116,7 @@ export const CreateHospAdminScreen = ({ onCancel, hospCode = 'HOSP111' }) => {
 
         <View style={styles.infoBox}>
           <Text style={styles.infoText}>
-            The new Hospital Administrator will have full control over {hospCode} and will be able to manage clinical workflows.
+            The new Hospital Administrator will have full control over {user?.hospitalCode} and will be able to manage clinical workflows.
           </Text>
         </View>
 

@@ -3,47 +3,46 @@ import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator } from 
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, Avatar, Btn } from '../../components/Shared';
-import { StatusPill } from '../../components/StatusPill';
-import { IconStethoscope, IconUser, IconCalendar, IconEdit, IconLocation, IconPhone, IconMail, IconPlus, IconClock } from '../../icons';
-import { doctorApi } from '../../services/api';
+import { IconUser, IconEdit, IconMail, IconPhone, IconLocation, IconClock, IconBed } from '../../icons';
+import { nurseApi } from '../../services/api';
 import { StaffShiftSheet } from '../../components/StaffShiftSheet';
-import { BulkAssignSheet } from '../../components/BulkAssignSheet';
+import { NurseActionsSheet } from '../../components/NurseActionsSheet';
 
-export const DoctorDetailScreen = ({ doctorId: doctorCode, onBack, onAssign, onEdit }) => {
+export const NurseDetailScreen = ({ nurseId: nurseCode, onBack, onEdit }) => {
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user, token } = useAuth();
 
-  const [doctor, setDoctor] = useState(null);
+  const [nurse, setNurse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showShiftSheet, setShowShiftSheet] = useState(false);
-  const [showBulkAssign, setShowBulkAssign] = useState(false);
+  const [showActions, setShowActions] = useState(false);
 
   useEffect(() => {
-    if (!doctorCode || !user?.orgName || !user?.hospitalCode) return;
-    doctorApi.getDetail(user.orgName, user.hospitalCode, doctorCode, token)
-      .then(setDoctor)
+    if (!nurseCode || !user?.orgName || !user?.hospitalCode) return;
+    nurseApi.getDetail(user.orgName, user.hospitalCode, nurseCode, token)
+      .then(setNurse)
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
-  }, [doctorCode, user?.orgName, user?.hospitalCode, token]);
+  }, [nurseCode, user?.orgName, user?.hospitalCode, token]);
 
   if (loading) {
     return <View style={styles.center}><ActivityIndicator color={T.accent} /></View>;
   }
 
-  if (error || !doctor) {
+  if (error || !nurse) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorText}>{error || 'Doctor not found.'}</Text>
+        <Text style={styles.errorText}>{error || 'Nurse not found.'}</Text>
         <Btn variant="surface" style={{ marginTop: 16 }} onPress={onBack}>Go Back</Btn>
       </View>
     );
   }
 
-  const d = doctor;
-  const initials = `${d.firstName?.[0] || ''}${d.lastName?.[0] || ''}`.toUpperCase();
-  const specialities = Array.isArray(d.doctorSpeciality) ? d.doctorSpeciality : [];
+  const n = nurse;
+  const initials = `${n.firstName?.[0] || ''}${n.lastName?.[0] || ''}`.toUpperCase();
+  const specialities = Array.isArray(n.nurseSpeciality) ? n.nurseSpeciality : [];
 
   return (
     <View style={styles.container}>
@@ -52,11 +51,11 @@ export const DoctorDetailScreen = ({ doctorId: doctorCode, onBack, onAssign, onE
           <View style={styles.profileHeader}>
             <Avatar initials={initials} size={64} />
             <View style={styles.profileInfo}>
-              <Text style={styles.doctorName}>Dr. {d.firstName} {d.lastName}</Text>
-              <Text style={styles.doctorCode}>{d.doctorCode} · {d.doctorType || 'DOCTOR'}</Text>
+              <Text style={styles.nurseName}>{n.firstName} {n.lastName}</Text>
+              <Text style={styles.nurseCode}>{n.nurseCode} · {n.nurseType || 'REGISTERED'}</Text>
               <View style={styles.badgesRow}>
                 <View style={styles.expBadge}>
-                  <Text style={styles.expText}>{d.doctorExperience}y Experience</Text>
+                  <Text style={styles.expText}>{n.nurseExperience}y Experience</Text>
                 </View>
               </View>
             </View>
@@ -66,35 +65,20 @@ export const DoctorDetailScreen = ({ doctorId: doctorCode, onBack, onAssign, onE
         <SectionHeader title="Clinical Profile" />
         <Card style={{ marginBottom: 24, padding: 16 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-            <IconStethoscope size={16} color={T.accent} />
-            <Text style={{ fontSize: 11, fontWeight: '700', color: T.textDim, letterSpacing: 0.5 }}>SPECIALTIES</Text>
+            <IconUser size={16} color={T.accent} />
+            <Text style={{ fontSize: 11, fontWeight: '700', color: T.textDim, letterSpacing: 0.5 }}>SPECIALITIES</Text>
           </View>
           <Text style={{ fontSize: 14, color: T.text, lineHeight: 20 }}>
             {specialities.length > 0 ? specialities.join(', ') : '—'}
           </Text>
         </Card>
 
-        <View style={styles.vitalsGrid}>
-          {[
-            { l: 'BORN', v: d.birthDate || '—', i: <IconCalendar size={14} color={T.accent} /> },
-            { l: 'GENDER', v: d.gender || '—', i: <IconUser size={14} color={T.accent} /> },
-          ].map((v, i) => (
-            <View key={i} style={styles.vitalBox}>
-              <View style={styles.vitalHeader}>
-                {v.i}
-                <Text style={styles.vitalLabel}>{v.l}</Text>
-              </View>
-              <Text style={styles.vitalValue}>{v.v}</Text>
-            </View>
-          ))}
-        </View>
-
         <SectionHeader title="Contact Information" />
         <Card style={styles.detailsCard}>
           {[
-            { l: 'Work Email', v: d.myContact?.email || '—', i: <IconMail size={16} color={T.textDim} /> },
-            { l: 'Direct Phone', v: d.myContact?.phone || '—', i: <IconPhone size={16} color={T.textDim} /> },
-            { l: 'City', v: d.myAddress?.city || '—', i: <IconLocation size={16} color={T.textDim} /> },
+            { l: 'Email', v: n.myContact?.email || '—', i: <IconMail size={16} color={T.textDim} /> },
+            { l: 'Phone', v: n.myContact?.phone || '—', i: <IconPhone size={16} color={T.textDim} /> },
+            { l: 'City', v: n.myAddress?.city || '—', i: <IconLocation size={16} color={T.textDim} /> },
           ].map((row, i) => (
             <View key={i} style={[styles.detailItem, i > 0 && styles.itemBorder]}>
               <View style={styles.detailIcon}>{row.i}</View>
@@ -107,19 +91,19 @@ export const DoctorDetailScreen = ({ doctorId: doctorCode, onBack, onAssign, onE
         </Card>
 
         <View style={styles.actionGrid}>
-          <Btn variant="surface" style={styles.actionBtn} onPress={() => onEdit?.(d)}>
+          <Btn variant="surface" style={styles.actionBtn} onPress={() => onEdit?.(n)}>
             <IconEdit size={16} color={T.text} />
             <Text style={styles.btnText}>Edit Profile</Text>
           </Btn>
-          <Btn variant="surface" style={styles.actionBtn} onPress={() => setShowBulkAssign(true)}>
-            <IconPlus size={16} color={T.text} />
-            <Text style={styles.btnText}>Assign Patients</Text>
+          <Btn variant="surface" style={styles.actionBtn} onPress={() => setShowShiftSheet(true)}>
+            <IconClock size={16} color={T.text} />
+            <Text style={styles.btnText}>Assign Shift</Text>
           </Btn>
         </View>
 
-        <Btn variant="surface" style={[styles.secondaryBtn, { marginTop: 8 }]} onPress={() => setShowShiftSheet(true)}>
-          <IconClock size={16} color={T.text} />
-          <Text style={styles.btnText}>Assign to Shift</Text>
+        <Btn variant="surface" style={[styles.secondaryBtn, { marginTop: 8 }]} onPress={() => setShowActions(true)}>
+          <IconBed size={16} color={T.text} />
+          <Text style={styles.btnText}>Nurse Actions</Text>
         </Btn>
 
         <Btn variant="surface" style={[styles.secondaryBtn, { marginTop: 8 }]} onPress={() => onBack?.()}>
@@ -128,17 +112,16 @@ export const DoctorDetailScreen = ({ doctorId: doctorCode, onBack, onAssign, onE
       </ScrollView>
 
       <StaffShiftSheet
-        staffCode={d.doctorCode}
-        staffType="doctor"
-        staffName={`Dr. ${d.firstName} ${d.lastName}`}
+        staffCode={n.nurseCode}
+        staffType="nurse"
+        staffName={`${n.firstName} ${n.lastName}`}
         visible={showShiftSheet}
         onClose={() => setShowShiftSheet(false)}
       />
-      <BulkAssignSheet
-        doctorCode={d.doctorCode}
-        doctorName={`Dr. ${d.firstName} ${d.lastName}`}
-        visible={showBulkAssign}
-        onClose={() => setShowBulkAssign(false)}
+      <NurseActionsSheet
+        nurse={n}
+        visible={showActions}
+        onClose={() => setShowActions(false)}
       />
     </View>
   );
@@ -149,19 +132,14 @@ const createStyles = (T) => StyleSheet.create({
   scrollContent: { padding: 16, paddingBottom: 40 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   errorText: { color: T.error || '#ef4444', fontSize: 14, textAlign: 'center' },
-  profileCard: { backgroundColor: 'rgba(59,130,246,0.03)', borderColor: 'rgba(59,130,246,0.1)', marginBottom: 24 },
+  profileCard: { backgroundColor: 'rgba(167,139,250,0.03)', borderColor: 'rgba(167,139,250,0.1)', marginBottom: 24 },
   profileHeader: { flexDirection: 'row', gap: 16, alignItems: 'center' },
   profileInfo: { flex: 1 },
-  doctorName: { fontSize: 18, fontWeight: '700', color: T.text },
-  doctorCode: { fontSize: 12, color: T.textDim, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', marginTop: 2 },
+  nurseName: { fontSize: 18, fontWeight: '700', color: T.text },
+  nurseCode: { fontSize: 12, color: T.textDim, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', marginTop: 2 },
   badgesRow: { flexDirection: 'row', gap: 8, marginTop: 8, alignItems: 'center' },
   expBadge: { backgroundColor: T.accentSoft, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4 },
   expText: { fontSize: 10, color: T.accent, fontWeight: '700', fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
-  vitalsGrid: { flexDirection: 'row', gap: 10, marginBottom: 12 },
-  vitalBox: { flex: 1, backgroundColor: T.surface, borderWidth: 1, borderColor: T.borderSoft, borderRadius: 12, padding: 12 },
-  vitalHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
-  vitalLabel: { fontSize: 10, fontWeight: '700', color: T.textDim, letterSpacing: 0.5 },
-  vitalValue: { fontSize: 14, fontWeight: '700', color: T.text, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
   detailsCard: { backgroundColor: T.surface, marginBottom: 24 },
   detailItem: { flexDirection: 'row', gap: 12, padding: 14 },
   itemBorder: { borderTopWidth: 1, borderTopColor: T.borderSoft },

@@ -1,114 +1,138 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, SearchBar, Btn, Chip, Avatar } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
-import { IconClock, IconPlus, IconChevron, IconStethoscope, IconUser, IconActivity, IconFilter } from '../../icons';
-import { SHIFTS, NURSES } from '../../data/mock';
+import { IconClock, IconPlus, IconChevron } from '../../icons';
+import { shiftApi, nurseApi } from '../../services/api';
 
-export const ShiftsScreen = ({ onNewNurse, onNewShift }) => {
+export const ShiftsScreen = ({ onNewNurse, onNewShift, onSelectNurse, onSelectShift }) => {
   const { theme: T } = useTheme();
   const styles = createStyles(T);
+  const { user, token } = useAuth();
+
+  const [shifts, setShifts] = useState([]);
+  const [nurses, setNurses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [query, setQuery] = useState('');
   const [mode, setMode] = useState('shifts');
 
-  const filteredShifts = SHIFTS.filter(s => s.wardCode.toLowerCase().includes(query.toLowerCase()));
-  const filteredNurses = NURSES.filter(n => (n.firstName + n.lastName).toLowerCase().includes(query.toLowerCase()) || n.nurseCode.toLowerCase().includes(query.toLowerCase()));
+  useEffect(() => {
+    if (!user?.orgName || !user?.hospitalCode) return;
+    Promise.all([
+      shiftApi.listAll(user.orgName, user.hospitalCode, token),
+      nurseApi.listAll(user.orgName, user.hospitalCode, token),
+    ])
+      .then(([s, n]) => {
+        setShifts(Array.isArray(s) ? s : []);
+        setNurses(Array.isArray(n) ? n : []);
+      })
+      .catch(e => setError(e.message || 'Failed to load shifts'))
+      .finally(() => setLoading(false));
+  }, [user?.orgName, user?.hospitalCode, token]);
+
+  const filteredShifts = shifts.filter(s =>
+    s.wardCode?.toLowerCase().includes(query.toLowerCase()) ||
+    s.shiftName?.toLowerCase().includes(query.toLowerCase())
+  );
+
+  const filteredNurses = nurses.filter(n =>
+    `${n.firstName} ${n.lastName}`.toLowerCase().includes(query.toLowerCase()) ||
+    n.nurseCode?.toLowerCase().includes(query.toLowerCase())
+  );
+
+  const formatTime = (dt) => {
+    if (!dt) return '—';
+    try { return new Date(dt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch { return dt; }
+  };
+
+  if (loading) {
+    return <View style={styles.center}><ActivityIndicator color={T.accent} /></View>;
+  }
+
+  if (error) {
+    return <View style={styles.center}><Text style={styles.errorText}>{error}</Text></View>;
+  }
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Search */}
         <View style={{ marginBottom: 20 }}>
-          <SearchBar 
-            placeholder={mode === 'shifts' ? "Search by ward..." : "Search nurses..."}
+          <SearchBar
+            placeholder={mode === 'shifts' ? 'Search by ward or shift name...' : 'Search nurses...'}
             value={query}
             onChangeText={setQuery}
           />
         </View>
 
-        {/* Mode Toggle */}
         <View style={styles.modeRow}>
           <Chip active={mode === 'shifts'} onPress={() => setMode('shifts')}>Active Shifts</Chip>
           <Chip active={mode === 'nurses'} onPress={() => setMode('nurses')}>Nursing Staff</Chip>
         </View>
 
         <View style={styles.headerRow}>
-          <SectionHeader title={mode === 'shifts' ? "CURRENT SHIFTS" : "REGISTERED NURSES"} count={mode === 'shifts' ? filteredShifts.length : filteredNurses.length} />
-          
-          <Btn 
-            variant="primary" 
-            size="sm"
-            style={styles.newBtn} 
-            onPress={mode === 'shifts' ? onNewShift : onNewNurse}
-          >
-            <IconPlus size={14} color="#fff" /> {mode === 'shifts' ? 'Assign Shift' : 'Onboard Nurse'}
+          <SectionHeader
+            title={mode === 'shifts' ? 'CURRENT SHIFTS' : 'REGISTERED NURSES'}
+            count={mode === 'shifts' ? filteredShifts.length : filteredNurses.length}
+          />
+          <Btn variant="primary" size="sm" style={styles.newBtn} onPress={mode === 'shifts' ? onNewShift : onNewNurse}>
+            <IconPlus size={14} color="#fff" /> {mode === 'shifts' ? 'New Shift' : 'Onboard Nurse'}
           </Btn>
         </View>
 
-        {/* List */}
         <View style={styles.list}>
           {mode === 'shifts' ? (
-            filteredShifts.map(s => {
-              const nurse = NURSES.find(n => n.id === s.nurseId);
-              return (
-                <Card key={s.id}>
-                  <View style={styles.itemRow}>
-                    <View style={styles.iconBox}>
-                      <IconClock size={20} color={T.accent} />
-                    </View>
-                    
-                    <View style={styles.infoBox}>
-                      <View style={styles.titleRow}>
-                        <Text style={styles.itemName}>{s.wardCode}</Text>
-                        <StatusPill status={s.status} />
-                      </View>
-                      <Text style={styles.itemMeta}>{s.type} · {s.time}</Text>
-                      {nurse && (
-                        <View style={styles.assignmentRow}>
-                          <View style={styles.smallAvatar}>
-                            <Text style={styles.smallAvatarText}>{nurse.initials}</Text>
-                          </View>
-                          <View>
-                            <Text style={styles.assignmentText}>Nurse {nurse.firstName} {nurse.lastName}</Text>
-                            <Text style={styles.specText}>{nurse.speciality} Specialist</Text>
-                          </View>
-                        </View>
-                      )}
-                    </View>
-                    <IconChevron size={16} color={T.textFaint} />
+            filteredShifts.map(s => (
+              <Card key={s.shiftCode || s.shiftId} onPress={() => onSelectShift?.(s.shiftCode)}>
+                <View style={styles.itemRow}>
+                  <View style={styles.iconBox}>
+                    <IconClock size={20} color={T.accent} />
                   </View>
-                </Card>
-              );
-            })
+                  <View style={styles.infoBox}>
+                    <View style={styles.titleRow}>
+                      <Text style={styles.itemName}>{s.shiftName || s.shiftCode}</Text>
+                      <StatusPill status={s.status} />
+                    </View>
+                    <Text style={styles.itemMeta}>
+                      {s.wardCode} · {formatTime(s.startTime)} – {formatTime(s.endTime)}
+                    </Text>
+                  </View>
+                  <IconChevron size={16} color={T.textFaint} />
+                </View>
+              </Card>
+            ))
           ) : (
             filteredNurses.map(n => {
-              const activeShift = SHIFTS.find(s => s.nurseId === n.id && s.status === 'ON_GOING');
+              const initials = `${n.firstName?.[0] || ''}${n.lastName?.[0] || ''}`.toUpperCase();
+              const specialities = Array.isArray(n.nurseSpeciality) ? n.nurseSpeciality : [];
               return (
-                <Card key={n.id}>
+                <Card key={n.nurseCode || n.nurseId} onPress={() => onSelectNurse?.(n.nurseCode)}>
                   <View style={styles.itemRow}>
-                    <Avatar size={40} initials={n.initials} />
-                    
+                    <Avatar size={40} initials={initials} />
                     <View style={styles.infoBox}>
                       <View style={styles.titleRow}>
                         <Text style={styles.itemName}>{n.firstName} {n.lastName}</Text>
-                        <StatusPill status={activeShift ? 'ON_SHIFT' : 'OFF_DUTY'} />
                       </View>
-                      <Text style={styles.itemMeta}>{n.nurseCode} · {n.speciality} · {n.experience}y exp</Text>
-                      
-                      {activeShift ? (
-                        <View style={styles.currentShiftBadge}>
-                          <Text style={styles.currentShiftText}>ON SHIFT: {activeShift.wardCode}</Text>
-                        </View>
-                      ) : (
-                        <Text style={styles.emailText}>{n.email}</Text>
-                      )}
+                      <Text style={styles.itemMeta}>
+                        {n.nurseCode} · {specialities[0] || '—'} · {n.nurseExperience}y exp
+                      </Text>
+                      <Text style={styles.emailText}>{n.myContact?.email || ''}</Text>
                     </View>
                     <IconChevron size={16} color={T.textFaint} />
                   </View>
                 </Card>
               );
             })
+          )}
+
+          {mode === 'shifts' && filteredShifts.length === 0 && (
+            <View style={styles.emptyState}>
+              <IconClock size={48} color={T.textFaint} />
+              <Text style={styles.emptyTitle}>No shifts found</Text>
+              <Text style={styles.emptyHint}>Create a shift to assign nursing staff to wards.</Text>
+            </View>
           )}
         </View>
       </ScrollView>
@@ -119,6 +143,8 @@ export const ShiftsScreen = ({ onNewNurse, onNewShift }) => {
 const createStyles = (T) => StyleSheet.create({
   container: { flex: 1 },
   scrollContent: { padding: 16 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  errorText: { color: T.error || '#ef4444', fontSize: 14, textAlign: 'center', padding: 16 },
   modeRow: { flexDirection: 'row', marginBottom: 20 },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   newBtn: { flexDirection: 'row', gap: 4, height: 32, paddingHorizontal: 10 },
@@ -129,12 +155,8 @@ const createStyles = (T) => StyleSheet.create({
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 },
   itemName: { fontSize: 14, fontWeight: '600', color: T.text },
   itemMeta: { fontSize: 11.5, color: T.textDim, marginTop: 4, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
-  assignmentRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10, padding: 8, backgroundColor: T.surface2, borderRadius: 8 },
-  smallAvatar: { width: 24, height: 24, borderRadius: 12, backgroundColor: T.accent, alignItems: 'center', justifyContent: 'center' },
-  smallAvatarText: { fontSize: 10, color: '#fff', fontWeight: '700' },
-  assignmentText: { fontSize: 11, color: T.text, fontWeight: '600' },
-  specText: { fontSize: 9, color: T.textDim, marginTop: 1 },
   emailText: { fontSize: 11, color: T.textFaint, marginTop: 4 },
-  currentShiftBadge: { alignSelf: 'flex-start', backgroundColor: T.goodSoft, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, marginTop: 6 },
-  currentShiftText: { fontSize: 9, color: T.good, fontWeight: '700', fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
+  emptyState: { padding: 40, alignItems: 'center', justifyContent: 'center' },
+  emptyTitle: { fontSize: 16, fontWeight: '600', color: T.text, marginTop: 12 },
+  emptyHint: { fontSize: 13, color: T.textDim, textAlign: 'center', marginTop: 8, lineHeight: 18 },
 });

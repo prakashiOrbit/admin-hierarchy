@@ -25,7 +25,7 @@ export const OrgAdminsScreen = ({ onSelectUser, onInvite }) => {
       const response = await userApi.listOrgAdmins(user.orgName, token);
       // Assuming response is an array of users, filter for ORG_ADMIN if backend doesn't already
       const filteredAdmins = (Array.isArray(response) ? response : [])
-        .filter(u => u.roles?.includes('ORG_ADMIN') || u.role === 'ORG_ADMIN');
+        .filter(u => u.userRoles?.includes('ORG_ADMIN'));
       setAdmins(filteredAdmins);
     } catch (err) {
       console.error('Fetch admins error:', err);
@@ -105,7 +105,7 @@ export const OrgAdminsScreen = ({ onSelectUser, onInvite }) => {
         ) : (
           <View style={styles.list}>
             {filtered.map((u, idx) => (
-              <Card key={u.id || idx} onPress={() => onSelectUser?.(u.id)}>
+              <Card key={u.userName || idx} onPress={() => onSelectUser?.(u.userName)}>
                 <View style={styles.userRow}>
                   <Avatar name={u.userName} size={40} />
                   <View style={styles.userInfo}>

@@ -1,117 +1,184 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, ActivityIndicator, Alert } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, SearchBar, Btn, Avatar } from '../../components/Shared';
-import { IconStethoscope, IconPatient, IconChevron, IconPlus, IconBack } from '../../icons';
-import { DOCTORS, PATIENTS } from '../../data/mock';
+import { IconStethoscope, IconPatient, IconChevron } from '../../icons';
+import { doctorApi, patientApi, assignmentApi } from '../../services/api';
 
-export const AssignmentScreen = ({ 
-  initialDoctorId, 
-  initialPatientId, 
-  onCancel 
+export const AssignmentScreen = ({
+  initialDoctorId,
+  initialPatientId,
+  onCancel,
+  onSuccess,
 }) => {
   const { theme: T } = useTheme();
   const styles = createStyles(T);
+  const { user, token } = useAuth();
 
-  const [step, setTab] = useState(initialDoctorId ? 'patient' : 'doctor');
-  const [selectedDoctor, setSelectedDoctor] = useState(initialDoctorId ? DOCTORS.find(d => d.id === initialDoctorId) : null);
-  const [selectedPatients, setSelectedPatients] = useState(initialPatientId ? [initialPatientId] : []);
+  const [doctors, setDoctors] = useState([]);
+  const [patients, setPatients] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const [step, setStep] = useState(initialDoctorId ? 'patient' : 'doctor');
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [selectedPatients, setSelectedPatients] = useState(
+    initialPatientId ? [initialPatientId] : []
+  );
   const [query, setQuery] = useState('');
+  const [saving, setSaving] = useState(false);
 
-  const filteredDoctors = DOCTORS.filter(d => 
-    (d.firstName + d.lastName).toLowerCase().includes(query.toLowerCase()) || d.code.toLowerCase().includes(query.toLowerCase())
+  useEffect(() => {
+    if (!user?.orgName || !user?.hospitalCode) return;
+    setLoading(true);
+    setError(null);
+    Promise.all([
+      doctorApi.listAll(user.orgName, user.hospitalCode, token),
+      patientApi.listAll(user.orgName, user.hospitalCode, token),
+    ])
+      .then(([docs, pats]) => {
+        const docList = Array.isArray(docs) ? docs : [];
+        const patList = Array.isArray(pats) ? pats : [];
+        setDoctors(docList);
+        setPatients(patList);
+        if (initialDoctorId) {
+          const found = docList.find(d => d.doctorCode === initialDoctorId);
+          if (found) setSelectedDoctor(found);
+        }
+      })
+      .catch(err => setError(err.message || 'Failed to load data'))
+      .finally(() => setLoading(false));
+  }, [user?.orgName, user?.hospitalCode, token]);
+
+  const filteredDoctors = doctors.filter(d =>
+    (`${d.firstName} ${d.lastName}`).toLowerCase().includes(query.toLowerCase()) ||
+    d.doctorCode?.toLowerCase().includes(query.toLowerCase())
   );
 
-  const filteredPatients = PATIENTS.filter(p => 
-    p.name.toLowerCase().includes(query.toLowerCase()) || p.mrn.toLowerCase().includes(query.toLowerCase())
+  const filteredPatients = patients.filter(p =>
+    (`${p.firstName} ${p.lastName}`).toLowerCase().includes(query.toLowerCase()) ||
+    p.patientCode?.toLowerCase().includes(query.toLowerCase())
   );
 
-  const togglePatient = (id) => {
-    setSelectedPatients(prev => 
-      prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
+  const togglePatient = (code) => {
+    setSelectedPatients(prev =>
+      prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code]
     );
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     if (!selectedDoctor || selectedPatients.length === 0) return;
-    
-    const payload = selectedPatients.map(pId => ({
-      doctorCode: selectedDoctor.code,
-      patientCode: PATIENTS.find(p => p.id === pId)?.mrn
+    if (!user?.orgName || !user?.hospitalCode) return;
+    setSaving(true);
+    const payload = selectedPatients.map(patientCode => ({
+      doctorCode: selectedDoctor.doctorCode,
+      patientCode,
     }));
-    
-    console.log('Assignment Payload:', JSON.stringify(payload, null, 2));
-    // API call to /api/{orgName}/assignment/{hospCode}/assign
-    onCancel();
+    try {
+      await assignmentApi.assign(user.orgName, user.hospitalCode, payload, token);
+      Alert.alert(
+        'Success',
+        `Dr. ${selectedDoctor.lastName} assigned to ${selectedPatients.length} patient(s).`,
+        [{ text: 'OK', onPress: onSuccess || onCancel }]
+      );
+    } catch (e) {
+      Alert.alert('Error', e.message || 'Failed to save assignment.');
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator color={T.accent} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.center}>
+        <Text style={{ color: T.bad, fontSize: 13, textAlign: 'center', marginBottom: 12 }}>{error}</Text>
+        <Btn variant="surface" size="sm" onPress={onCancel}>Go Back</Btn>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      {/* Header Info */}
       <View style={styles.stepperHeader}>
         <View style={styles.stepInfo}>
           <Text style={styles.stepTitle}>
             {step === 'doctor' ? 'Step 1: Select Physician' : 'Step 2: Select Patients'}
           </Text>
           <Text style={styles.stepSubtitle}>
-            {selectedDoctor ? `Assigned to Dr. ${selectedDoctor.lastName}` : 'Choose an attending doctor'}
-            {selectedPatients.length > 0 && ` · ${selectedPatients.length} patients selected`}
+            {selectedDoctor
+              ? `Assigned to Dr. ${selectedDoctor.lastName}`
+              : 'Choose an attending doctor'}
+            {selectedPatients.length > 0 && ` · ${selectedPatients.length} patient(s) selected`}
           </Text>
         </View>
-        
         <View style={styles.progressContainer}>
-           <View style={[styles.progressDot, step === 'doctor' && styles.dotActive]} />
-           <View style={[styles.progressDot, step === 'patient' && styles.dotActive]} />
+          <View style={[styles.progressDot, step === 'doctor' && styles.dotActive]} />
+          <View style={[styles.progressDot, step === 'patient' && styles.dotActive]} />
         </View>
       </View>
 
       <View style={styles.searchWrap}>
-        <SearchBar 
-          placeholder={step === 'doctor' ? "Search doctors..." : "Search patients..."} 
-          value={query} 
-          onChange={setQuery} 
+        <SearchBar
+          placeholder={step === 'doctor' ? 'Search doctors...' : 'Search patients...'}
+          value={query}
+          onChangeText={setQuery}
         />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {step === 'doctor' ? (
           <View style={styles.list}>
-            {filteredDoctors.map(d => (
-              <Card 
-                key={d.id}
-                style={[styles.itemCard, selectedDoctor?.id === d.id && styles.activeCard]}
-                onPress={() => { setSelectedDoctor(d); setTab('patient'); setQuery(''); }}
-              >
-                <View style={styles.row}>
-                  <Avatar initials={d.initials} color={T.accent} />
-                  <View style={styles.info}>
-                    <Text style={styles.name}>
-                      Dr. {d.firstName} {d.lastName}
-                    </Text>
-                    <Text style={styles.meta}>
-                      {d.code} · {d.speciality[0]}
-                    </Text>
+            {filteredDoctors.map(d => {
+              const initials = `${d.firstName?.[0] ?? ''}${d.lastName?.[0] ?? ''}`.toUpperCase();
+              const isActive = selectedDoctor?.doctorCode === d.doctorCode;
+              return (
+                <Card
+                  key={d.doctorCode}
+                  style={[styles.itemCard, isActive && styles.activeCard]}
+                  onPress={() => { setSelectedDoctor(d); setStep('patient'); setQuery(''); }}
+                >
+                  <View style={styles.row}>
+                    <Avatar initials={initials} color={T.accent} />
+                    <View style={styles.info}>
+                      <Text style={styles.name}>Dr. {d.firstName} {d.lastName}</Text>
+                      <Text style={styles.meta}>
+                        {d.doctorCode} · {d.doctorSpeciality?.[0] ?? d.doctorType}
+                      </Text>
+                    </View>
+                    <IconChevron size={20} color={T.textDim} />
                   </View>
-                  <IconChevron size={20} color={T.textDim} />
-                </View>
-              </Card>
-            ))}
+                </Card>
+              );
+            })}
+            {filteredDoctors.length === 0 && (
+              <Text style={styles.emptyText}>No doctors found.</Text>
+            )}
           </View>
         ) : (
           <View style={styles.list}>
             {filteredPatients.map(p => {
-              const isSelected = selectedPatients.includes(p.id);
+              const initials = `${p.firstName?.[0] ?? ''}${p.lastName?.[0] ?? ''}`.toUpperCase();
+              const isSelected = selectedPatients.includes(p.patientCode);
               return (
-                <Card 
-                  key={p.id}
+                <Card
+                  key={p.patientCode}
                   style={[styles.itemCard, isSelected && styles.activeCard]}
-                  onPress={() => togglePatient(p.id)}
+                  onPress={() => togglePatient(p.patientCode)}
                 >
                   <View style={styles.row}>
-                    <Avatar initials={p.initials} color={T.warn} />
+                    <Avatar initials={initials} color={T.warn} />
                     <View style={styles.info}>
-                      <Text style={styles.name}>{p.name}</Text>
-                      <Text style={styles.meta}>{p.mrn} · {p.status}</Text>
+                      <Text style={styles.name}>{p.firstName} {p.lastName}</Text>
+                      <Text style={styles.meta}>{p.patientCode} · {p.patientStatus}</Text>
                     </View>
                     <View style={[styles.checkbox, isSelected && styles.checkboxActive]}>
                       {isSelected && <View style={styles.checkboxInner} />}
@@ -120,26 +187,28 @@ export const AssignmentScreen = ({
                 </Card>
               );
             })}
+            {filteredPatients.length === 0 && (
+              <Text style={styles.emptyText}>No patients found.</Text>
+            )}
           </View>
         )}
       </ScrollView>
 
-      {/* Action Footer */}
       <View style={styles.footer}>
         <View style={styles.actionRow}>
-          <Btn 
-            style={{ flex: 1 }} 
-            variant="ghost" 
-            onPress={step === 'patient' && !initialDoctorId ? () => setTab('doctor') : onCancel}
+          <Btn
+            style={{ flex: 1 }}
+            variant="ghost"
+            onPress={step === 'patient' && !initialDoctorId ? () => { setStep('doctor'); setQuery(''); } : onCancel}
           >
             {step === 'patient' && !initialDoctorId ? 'Back to Doctors' : 'Cancel'}
           </Btn>
-          <Btn 
-            style={{ flex: 2 }} 
-            onPress={handleFinish} 
-            disabled={!selectedDoctor || selectedPatients.length === 0}
+          <Btn
+            style={{ flex: 2 }}
+            onPress={handleFinish}
+            disabled={!selectedDoctor || selectedPatients.length === 0 || saving}
           >
-            Assign {selectedPatients.length || ''} {selectedPatients.length === 1 ? 'Patient' : 'Patients'}
+            {saving ? 'Saving...' : `Assign ${selectedPatients.length || ''} ${selectedPatients.length === 1 ? 'Patient' : 'Patients'}`}
           </Btn>
         </View>
       </View>
@@ -149,6 +218,7 @@ export const AssignmentScreen = ({
 
 const createStyles = (T) => StyleSheet.create({
   container: { flex: 1 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   stepperHeader: { padding: 16, backgroundColor: T.surface, borderBottomWidth: 1, borderBottomColor: T.borderSoft, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   stepInfo: { flex: 1 },
   stepTitle: { fontSize: 16, fontWeight: '700', color: T.text },
@@ -168,6 +238,7 @@ const createStyles = (T) => StyleSheet.create({
   checkbox: { width: 20, height: 20, borderRadius: 10, borderWidth: 1, borderColor: T.border, alignItems: 'center', justifyContent: 'center' },
   checkboxActive: { backgroundColor: T.accent, borderColor: T.accent },
   checkboxInner: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#fff' },
+  emptyText: { color: T.textFaint, fontSize: 13, textAlign: 'center', marginTop: 24 },
   footer: { padding: 16, backgroundColor: T.bg, borderTopWidth: 1, borderTopColor: T.borderSoft },
   actionRow: { flexDirection: 'row', gap: 12 },
 });

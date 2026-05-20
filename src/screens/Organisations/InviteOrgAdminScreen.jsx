@@ -35,7 +35,7 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
 
     setLoading(true);
     try {
-      await userApi.createOrgAdmin(form, token);
+      await userApi.createOrgAdmin(user.orgName, form, token);
       Alert.alert('Success', 'Organisation Administrator invited successfully', [
         { text: 'OK', onPress: onCancel }
       ]);

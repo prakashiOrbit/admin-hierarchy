@@ -1,29 +1,41 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import { Card, Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
 import { IconBed, IconGateway, IconShield } from '../../icons';
+import { bedApi } from '../../services/api';
 
-export const CreateBedScreen = ({ onCancel, wardCode = 'WARD998', hospCode = 'HOSP999' }) => {
+export const CreateBedScreen = ({ onCancel, onSuccess, wardCode }) => {
   const { theme: T } = useTheme();
   const styles = createStyles(T);
-  
+  const { user, token } = useAuth();
+
   const [form, setForm] = useState({
     bedCode: '',
-    wardCode: wardCode,
+    wardCode: wardCode || '',
     bedStatus: 'ACTIVE',
-    gatewayCode: ''
+    gatewayCode: '',
   });
+  const [saving, setSaving] = useState(false);
 
-  const updateForm = (key, value) => {
-    setForm(prev => ({ ...prev, [key]: value }));
-  };
+  const updateForm = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
-  const isFormValid = form.bedCode && form.gatewayCode;
+  const isFormValid = form.bedCode && form.wardCode;
 
-  const handleCreate = () => {
-    console.log('Create Bed Payload:', JSON.stringify(form, null, 2));
-    // API call to /api/{orgName}/bed/{hospCode}/create
+  const handleCreate = async () => {
+    if (!isFormValid || !user?.orgName || !user?.hospitalCode) return;
+    setSaving(true);
+    try {
+      await bedApi.create(user.orgName, user.hospitalCode, form, token);
+      Alert.alert('Success', `Bed ${form.bedCode} provisioned in ward ${form.wardCode}.`, [
+        { text: 'OK', onPress: onSuccess || onCancel },
+      ]);
+    } catch (e) {
+      Alert.alert('Error', e.message || 'Failed to create bed.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -38,7 +50,7 @@ export const CreateBedScreen = ({ onCancel, wardCode = 'WARD998', hospCode = 'HO
 
         <View style={styles.section}>
           <SectionHeader title="Bed Specifications" />
-          
+
           <Field label="Bed Identifier" required>
             <TextInput
               value={form.bedCode}
@@ -52,9 +64,7 @@ export const CreateBedScreen = ({ onCancel, wardCode = 'WARD998', hospCode = 'HO
             <View style={{ flex: 1 }}>
               <Field label="Ward Unit">
                 <Card style={styles.disabledCard} padding={12}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                    <Text style={styles.disabledText}>{wardCode}</Text>
-                  </View>
+                  <Text style={styles.disabledText}>{form.wardCode || '—'}</Text>
                 </Card>
               </Field>
             </View>
@@ -67,7 +77,7 @@ export const CreateBedScreen = ({ onCancel, wardCode = 'WARD998', hospCode = 'HO
             </View>
           </View>
 
-          <Field label="Primary Gateway" required>
+          <Field label="Primary Gateway">
             <TextInput
               value={form.gatewayCode}
               onChangeText={v => updateForm('gatewayCode', v.toUpperCase())}
@@ -79,13 +89,13 @@ export const CreateBedScreen = ({ onCancel, wardCode = 'WARD998', hospCode = 'HO
 
         <View style={styles.actionRow}>
           <Btn variant="surface" style={{ flex: 1 }} onPress={onCancel}>Cancel</Btn>
-          <Btn 
-            variant="primary" 
-            style={{ flex: 2 }} 
-            disabled={!isFormValid}
+          <Btn
+            variant="primary"
+            style={{ flex: 2 }}
+            disabled={!isFormValid || saving}
             onPress={handleCreate}
           >
-            Provision Bed
+            {saving ? 'Provisioning...' : 'Provision Bed'}
           </Btn>
         </View>
       </ScrollView>
@@ -99,7 +109,6 @@ const createStyles = (T) => StyleSheet.create({
   banner: { flexDirection: 'row', backgroundColor: T.accentSoft, padding: 14, borderRadius: 12, gap: 12, alignItems: 'flex-start', marginBottom: 24 },
   bannerText: { flex: 1, fontSize: 13, color: T.text, lineHeight: 18 },
   section: { marginBottom: 24 },
-  sectionTitle: { fontSize: 11, fontWeight: '700', color: T.textDim, letterSpacing: 1, marginBottom: 16 },
   row: { flexDirection: 'row', gap: 12 },
   selectCard: { height: 44, justifyContent: 'center', backgroundColor: T.surface },
   selectText: { color: T.text, fontSize: 14 },

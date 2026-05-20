@@ -11,6 +11,7 @@ import { OrgDetailScreen } from '../Organisations/OrgDetailScreen';
 import { SettingsScreen } from '../Settings/SettingsScreen';
 import { CreateOrgOwnerScreen } from '../Organisations/CreateOrgOwnerScreen';
 import { organisationApi, summaryApi, userApi } from '../../services/api';
+import { NotificationSheet } from '../../components/NotificationSheet';
 
 import { 
   IconGlobe, IconHospital, IconUsers, IconPulse, IconPlus, 
@@ -293,6 +294,7 @@ export const PlatformDashboard = ({ navigation }) => {
   const [selectedOrg, setSelectedOrg] = useState(null);
   const [isInvitingOwner, setIsInvitingOwner] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const drawerAnim = React.useRef(new Animated.Value(-width)).current;
 
   useEffect(() => {
@@ -446,7 +448,7 @@ export const PlatformDashboard = ({ navigation }) => {
           if (isInvitingOwner) setIsInvitingOwner(false);
           else setSelectedOrg(null);
         } : toggleDrawer}
-        onNotificationPress={() => console.log('Notifications')}
+        onNotificationPress={() => setShowNotifications(true)}
         onProfilePress={() => handleTabChange('settings')}
       />
 
@@ -454,9 +456,14 @@ export const PlatformDashboard = ({ navigation }) => {
         {renderContent()}
       </View>
 
-      <BottomNav 
-        active={activeTab} 
-        onChange={handleTabChange} 
+      <BottomNav
+        active={activeTab}
+        onChange={handleTabChange}
+      />
+
+      <NotificationSheet
+        visible={showNotifications}
+        onClose={() => setShowNotifications(false)}
       />
     </View>
   );

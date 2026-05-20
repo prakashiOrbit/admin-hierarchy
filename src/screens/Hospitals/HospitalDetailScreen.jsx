@@ -5,7 +5,7 @@ import { Card, SectionHeader, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
 import { IconHospital, IconUser, IconMail, IconLocation, IconPhone, IconBed, IconDoor, IconPulse, IconBack } from '../../icons';
 
-export const HospitalDetailScreen = ({ hospital, onBack }) => {
+export const HospitalDetailScreen = ({ hospital, onBack, onEdit }) => {
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   
@@ -104,7 +104,7 @@ export const HospitalDetailScreen = ({ hospital, onBack }) => {
           <Btn variant="surface" style={{ flex: 1 }} onPress={onBack}>
             Back to List
           </Btn>
-          <Btn variant="primary" style={{ flex: 1 }} onPress={() => console.log('Manage Hospital')}>
+          <Btn variant="primary" style={{ flex: 1 }} onPress={onEdit}>
             Manage Console
           </Btn>
         </View>

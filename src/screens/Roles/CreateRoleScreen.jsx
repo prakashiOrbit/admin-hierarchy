@@ -1,23 +1,22 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform, TouchableOpacity, Alert } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
-import { Card, Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
-import { IconShield, IconPlus, IconCheck } from '../../icons';
+import { useAuth } from '../../context/AuthContext';
+import { Card, Field, TextInput, Btn } from '../../components/Shared';
+import { IconShield, IconCheck } from '../../icons';
+import { rolesApi } from '../../services/api';
 import { PERMISSION_GROUPS } from '../../data/mock';
 
-export const CreateRoleScreen = ({ onCancel }) => {
+export const CreateRoleScreen = ({ onCancel, onSuccess }) => {
   const { theme: T } = useTheme();
   const styles = createStyles(T);
-  
+  const { user, token } = useAuth();
+
   const [form, setForm] = useState({
-    name: '',
-    description: '',
+    roleName: '',
     permissions: new Set(),
   });
-
-  const updateRoot = (key, value) => {
-    setForm(prev => ({ ...prev, [key]: value }));
-  };
+  const [saving, setSaving] = useState(false);
 
   const togglePermission = (perm) => {
     const next = new Set(form.permissions);
@@ -29,61 +28,62 @@ export const CreateRoleScreen = ({ onCancel }) => {
     setForm(prev => ({ ...prev, permissions: next }));
   };
 
-  const isFormValid = form.name && form.permissions.size > 0;
+  const isFormValid = form.roleName.trim() && form.permissions.size > 0;
 
-  const handleCreate = () => {
-    console.log('Create Role Payload:', JSON.stringify({
-      ...form,
-      permissions: Array.from(form.permissions)
-    }, null, 2));
-    // Implementation for API call to /api/roles/create
+  const handleCreate = async () => {
+    if (!isFormValid || !user?.orgName) return;
+    setSaving(true);
+    const payload = {
+      roleName: form.roleName.trim(),
+      rolePermissions: Array.from(form.permissions),
+    };
+    try {
+      await rolesApi.create(user.orgName, payload, token);
+      Alert.alert('Success', `Role "${form.roleName}" created.`, [
+        { text: 'OK', onPress: onSuccess || onCancel },
+      ]);
+    } catch (e) {
+      Alert.alert('Error', e.message || 'Failed to create role.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Basic Identity */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>ROLE IDENTITY</Text>
-          
-          <Field label="Role Name">
-            <TextInput 
-              value={form.name} 
-              onChangeText={(v) => updateRoot('name', v)}
+
+          <Field label="Role Name" required>
+            <TextInput
+              value={form.roleName}
+              onChangeText={(v) => setForm(prev => ({ ...prev, roleName: v }))}
               placeholder="e.g. Ward Supervisor"
               leading={<IconShield size={18} color={T.textDim} />}
             />
           </Field>
-
-          <Field label="Description (Optional)">
-            <TextInput 
-              value={form.description} 
-              onChangeText={(v) => updateRoot('description', v)}
-              placeholder="Brief purpose of this role"
-            />
-          </Field>
         </View>
 
-        {/* Permissions Selection */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>SELECT PERMISSIONS ({form.permissions.size})</Text>
-          
+
           <View style={styles.permsContainer}>
             {PERMISSION_GROUPS.map((group) => (
-              <Card key={group.id || group.name} style={styles.groupCard}>
+              <Card key={group.name} style={styles.groupCard}>
                 <Text style={styles.groupTitle}>{group.name.toUpperCase()}</Text>
                 <View style={styles.permsList}>
                   {group.perms.map((p) => {
                     const isSelected = form.permissions.has(p);
                     return (
-                      <TouchableOpacity 
-                        key={p} 
+                      <TouchableOpacity
+                        key={p}
                         style={styles.permItem}
                         onPress={() => togglePermission(p)}
                         activeOpacity={0.7}
                       >
                         <View style={[
-                          styles.checkbox, 
+                          styles.checkbox,
                           isSelected && { backgroundColor: T.accent, borderColor: T.accent }
                         ]}>
                           {isSelected && <IconCheck size={12} color="#fff" />}
@@ -98,16 +98,14 @@ export const CreateRoleScreen = ({ onCancel }) => {
           </View>
         </View>
 
-        {/* Actions */}
         <View style={styles.actionRow}>
-          <Btn variant="ghost" full style={{ flex: 1 }} onPress={onCancel}>Cancel</Btn>
-          <Btn 
-            full 
-            style={{ flex: 1.5 }} 
-            onPress={handleCreate} 
-            disabled={!isFormValid}
+          <Btn variant="ghost" style={{ flex: 1 }} onPress={onCancel}>Cancel</Btn>
+          <Btn
+            style={{ flex: 1.5 }}
+            onPress={handleCreate}
+            disabled={!isFormValid || saving}
           >
-            Create Role
+            {saving ? 'Creating...' : 'Create Role'}
           </Btn>
         </View>
       </ScrollView>
@@ -126,13 +124,8 @@ const createStyles = (T) => StyleSheet.create({
   permsList: { gap: 12 },
   permItem: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   checkbox: {
-    width: 20,
-    height: 20,
-    borderRadius: 6,
-    borderWidth: 1.5,
-    borderColor: T.border,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 20, height: 20, borderRadius: 6, borderWidth: 1.5,
+    borderColor: T.border, alignItems: 'center', justifyContent: 'center',
     backgroundColor: T.surface,
   },
   permText: { fontSize: 13, color: T.text, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },

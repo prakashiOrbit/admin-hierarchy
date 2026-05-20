@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, Platform, BackHandler } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, Platform, BackHandler, ActivityIndicator } from 'react-native';
+import { summaryApi, deviceApi, patientApi, nurseApi } from '../../services/api';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -10,7 +11,6 @@ import {
   IconHospital, IconUsers, IconPulse, IconGateway, IconShield, IconChart,
   IconAlert, IconChevron, IconMenu, IconSettings, IconDashboard, IconBack, IconUser, IconMoon, IconLogout, IconBed, IconStethoscope, IconDoor, IconPatient, IconPlus, IconClock
 } from '../../icons';
-import { HOSPITALS, NURSES, SHIFTS } from '../../data/mock';
 import { CreateHospAdminScreen } from '../Hospitals/CreateHospAdminScreen';
 import { HospAdminsScreen } from '../Hospitals/HospAdminsScreen';
 import { UserDetailScreen } from '../Users/UserDetailScreen';
@@ -30,6 +30,14 @@ import { ShiftsScreen } from '../Common/ShiftsScreen';
 import { CreateShiftScreen } from '../Common/CreateShiftScreen';
 import { CreateNurseScreen } from '../Users/CreateNurseScreen';
 import { AssignmentScreen } from '../Common/AssignmentScreen';
+import { EditWardScreen } from '../Wards/EditWardScreen';
+import { EditPatientScreen } from '../Patients/EditPatientScreen';
+import { EditDoctorScreen } from '../Users/EditDoctorScreen';
+import { NurseDetailScreen } from '../Users/NurseDetailScreen';
+import { EditNurseScreen } from '../Users/EditNurseScreen';
+import { ShiftDetailScreen } from '../Common/ShiftDetailScreen';
+import { EditShiftScreen } from '../Common/EditShiftScreen';
+import { NotificationSheet } from '../../components/NotificationSheet';
 
 const { width } = Dimensions.get('window');
 
@@ -66,53 +74,78 @@ const PulseWave = ({ color }) => (
   </View>
 );
 
+const DAY_NAMES = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+const MON_NAMES = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
 const HospHomeContent = ({ role, onNavigate }) => {
   const { theme: T } = useTheme();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const styles = createStyles(T);
-  const isOwner = role === 'HOSP_OWNER';
+  const [homeStats, setHomeStats] = useState({ wards: null, beds: null, devices: null, staffing: null, patients: null });
+  const [homeLoading, setHomeLoading] = useState(true);
 
-  const alerts = [
-    { id: 'iT-V4-082', type: 'iT-V4', ward: 'ICU', bed: '3W', battery: 12, status: 'WARN' },
-    { id: 'GW-CLV-005', type: 'Gateway', ward: 'PED', bed: '5W', battery: 100, status: 'OFFLINE' },
-  ];
-  
+  useEffect(() => {
+    if (!user?.orgName || !user?.hospitalCode) { setHomeLoading(false); return; }
+    Promise.all([
+      summaryApi.getHospitalSummary(user.orgName, user.hospitalCode, token).catch(() => null),
+      deviceApi.listAll(user.orgName, user.hospitalCode, token).catch(() => []),
+      patientApi.listAll(user.orgName, user.hospitalCode, token).catch(() => []),
+      nurseApi.listAll(user.orgName, user.hospitalCode, token).catch(() => []),
+    ]).then(([summary, devices, patients, nurses]) => {
+      setHomeStats({
+        wards: summary?.stats?.wards ?? null,
+        beds: summary?.stats?.beds ?? null,
+        devices: Array.isArray(devices) ? devices.length : null,
+        staffing: Array.isArray(nurses) ? nurses.length : null,
+        patients: Array.isArray(patients) ? patients.length : null,
+      });
+    }).finally(() => setHomeLoading(false));
+  }, [user?.orgName, user?.hospitalCode, token]);
+
+  const fmt = (v) => v == null ? '—' : String(v);
+  const now = new Date();
+  const dateStr = `${DAY_NAMES[now.getDay()]}, ${now.getDate()} ${MON_NAMES[now.getMonth()]}`;
+
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>
       {/* Greeting */}
       <View style={styles.greetingHeader}>
-        <Text style={styles.date}>FRI, 16 MAY · {user?.hospitalCode || 'HOSPITAL'}</Text>
+        <Text style={styles.date}>{dateStr} · {user?.hospitalCode || 'HOSPITAL'}</Text>
         <Text style={styles.greeting}>Good morning, {user?.userName || 'User'}</Text>
-        <Text style={styles.status}>
-          <Text style={{ color: T.good, fontWeight: '600' }}>4 wards</Text> at full staff · 1 device alert
-        </Text>
+        {homeLoading ? (
+          <ActivityIndicator size="small" color={T.textDim} style={{ marginTop: 4 }} />
+        ) : (
+          <Text style={styles.status}>
+            {homeStats.wards != null
+              ? <Text style={{ color: T.good, fontWeight: '600' }}>{homeStats.wards} wards</Text>
+              : null}
+            {homeStats.wards != null ? '  ·  ' : null}
+            <Text>{fmt(homeStats.devices)} devices registered</Text>
+          </Text>
+        )}
       </View>
 
       {/* Stats Grid */}
       <View style={styles.grid}>
-        <StatCard 
-          label="Admissions" 
-          value="142" 
-          delta={12} 
-          icon={<IconPatient />} color="#2DD4BF" accent="rgba(45,212,191,.14)" 
+        <StatCard
+          label="Admissions"
+          value={homeLoading ? '…' : fmt(homeStats.patients)}
+          icon={<IconPatient />} color="#2DD4BF" accent="rgba(45,212,191,.14)"
         />
-        <StatCard 
-          label="Active Beds" 
-          value="84" 
-          delta={0} 
-          icon={<IconBed />} color={T.accent} 
+        <StatCard
+          label="Active Beds"
+          value={homeLoading ? '…' : fmt(homeStats.beds)}
+          icon={<IconBed />} color={T.accent}
         />
-        <StatCard 
-          label="Devices" 
-          value="612" 
-          delta={8} 
-          icon={<IconPulse />} color="#22D3EE" accent="rgba(34,211,238,.14)" 
+        <StatCard
+          label="Devices"
+          value={homeLoading ? '…' : fmt(homeStats.devices)}
+          icon={<IconPulse />} color="#22D3EE" accent="rgba(34,211,238,.14)"
         />
-        <StatCard 
-          label="Staffing" 
-          value="24" 
-          delta={-2} 
-          icon={<IconUsers />} color="#A78BFA" accent="rgba(167,139,250,.14)" 
+        <StatCard
+          label="Staffing"
+          value={homeLoading ? '…' : fmt(homeStats.staffing)}
+          icon={<IconUsers />} color="#A78BFA" accent="rgba(167,139,250,.14)"
         />
       </View>
 
@@ -120,13 +153,15 @@ const HospHomeContent = ({ role, onNavigate }) => {
       <Card style={{ marginBottom: 24 }}>
         <View style={styles.sectionHeaderRow}>
           <SectionHeader title="LIVE VITALS" />
-          <Text style={styles.bedsLabel}>● 16 BEDS</Text>
+          {homeStats.beds != null && (
+            <Text style={styles.bedsLabel}>● {homeStats.beds} BEDS</Text>
+          )}
         </View>
         <View style={styles.vitalsGrid}>
           {[
-            { l: 'AVG HR',  v: 78,  u: 'bpm',  c: '#F472B6', ok: true },
-            { l: 'AVG SpO₂', v: 97, u: '%',    c: '#22D3EE', ok: true },
-            { l: 'ALERTS',  v: 1,   u: 'act.', c: T.warn,    ok: false },
+            { l: 'AVG HR',   v: '—', u: 'bpm', c: '#F472B6' },
+            { l: 'AVG SpO₂', v: '—', u: '%',   c: '#22D3EE' },
+            { l: 'ALERTS',   v: '—', u: '',    c: T.warn    },
           ].map((m, i) => (
             <View key={i} style={{ flex: 1 }}>
               <Text style={styles.vitalLabel}>{m.l}</Text>
@@ -152,16 +187,16 @@ const HospHomeContent = ({ role, onNavigate }) => {
         <Card style={styles.listCard}>
           <View style={styles.shiftRow}>
             {[
-              { l: 'Day',     n: 6, c: '#22D3EE' },
-              { l: 'Evening', n: 5, c: '#A78BFA' },
-              { l: 'Night',   n: 4, c: '#60A5FA' },
+              { l: 'Day',     c: '#22D3EE' },
+              { l: 'Evening', c: '#A78BFA' },
+              { l: 'Night',   c: '#60A5FA' },
             ].map((s, i) => (
               <View key={i} style={[styles.shiftBox, { borderColor: T.borderSoft }]}>
                 <View style={styles.shiftHeader}>
                   <View style={[styles.shiftDot, { backgroundColor: s.c }]} />
                   <Text style={[styles.shiftTitle, { color: T.textDim }]}>{s.l.toUpperCase()}</Text>
                 </View>
-                <Text style={styles.shiftCount}>{s.n}</Text>
+                <Text style={styles.shiftCount}>—</Text>
                 <Text style={styles.shiftUnit}>nurses</Text>
               </View>
             ))}
@@ -173,18 +208,9 @@ const HospHomeContent = ({ role, onNavigate }) => {
       <View style={styles.section}>
         <SectionHeader title="DEVICE ALERTS" />
         <Card style={styles.listCard}>
-          {alerts.map((d, i) => (
-            <View key={d.id} style={[styles.alertItem, i > 0 && styles.listBorder]}>
-              <View style={[styles.alertIconBox, { backgroundColor: d.status === 'OFFLINE' ? T.badSoft : T.warnSoft }]}>
-                <IconAlert size={16} color={d.status === 'OFFLINE' ? T.bad : T.warn} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.alertId}>{d.id}</Text>
-                <Text style={styles.alertMeta}>{d.type} · {d.ward}-{d.bed} {d.battery < 30 ? `· battery ${d.battery}%` : ''}</Text>
-              </View>
-              <IconChevron size={16} color={T.textFaint} />
-            </View>
-          ))}
+          <View style={[styles.alertItem, { justifyContent: 'center', paddingVertical: 20 }]}>
+            <Text style={{ color: T.textFaint, fontSize: 13 }}>No active alerts</Text>
+          </View>
         </Card>
       </View>
     </ScrollView>
@@ -213,10 +239,18 @@ export const HospDashboard = ({ navigation, route }) => {
   const [isCreatingNurse, setIsCreatingNurse] = useState(false);
   const [isCreatingShift, setIsCreatingShift] = useState(false);
   const [assignmentData, setAssignmentData] = useState(null);
+  const [selectedWardForEdit, setSelectedWardForEdit] = useState(null);
+  const [selectedPatientForEdit, setSelectedPatientForEdit] = useState(null);
+  const [selectedDoctorForEdit, setSelectedDoctorForEdit] = useState(null);
+  const [selectedNurseId, setSelectedNurseId] = useState(null);
+  const [selectedNurseForEdit, setSelectedNurseForEdit] = useState(null);
+  const [selectedShiftId, setSelectedShiftId] = useState(null);
+  const [selectedShiftForEdit, setSelectedShiftForEdit] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const drawerAnim = React.useRef(new Animated.Value(-width)).current;
 
-  const isDeep = isInvitingHospAdmin || selectedUserId || isProvisioningWard || selectedWardForBed || isProvisioningGateway || isProvisioningDevice || isRegisteringPatient || selectedPatientId || isCreatingDoctor || selectedDoctorId || isCreatingNurse || isCreatingShift || !!assignmentData;
+  const isDeep = isInvitingHospAdmin || selectedUserId || isProvisioningWard || selectedWardForBed || isProvisioningGateway || isProvisioningDevice || isRegisteringPatient || selectedPatientId || isCreatingDoctor || selectedDoctorId || isCreatingNurse || isCreatingShift || !!assignmentData || !!selectedWardForEdit || !!selectedPatientForEdit || !!selectedDoctorForEdit || selectedNurseId || !!selectedNurseForEdit || selectedShiftId || !!selectedShiftForEdit;
 
   useEffect(() => {
     const backAction = () => {
@@ -231,6 +265,13 @@ export const HospDashboard = ({ navigation, route }) => {
       if (isCreatingNurse) { setIsCreatingNurse(false); return true; }
       if (isCreatingShift) { setIsCreatingShift(false); return true; }
       if (assignmentData) { setAssignmentData(null); return true; }
+      if (selectedWardForEdit) { setSelectedWardForEdit(null); return true; }
+      if (selectedPatientForEdit) { setSelectedPatientForEdit(null); return true; }
+      if (selectedDoctorForEdit) { setSelectedDoctorForEdit(null); return true; }
+      if (selectedNurseForEdit) { setSelectedNurseForEdit(null); return true; }
+      if (selectedNurseId) { setSelectedNurseId(null); return true; }
+      if (selectedShiftForEdit) { setSelectedShiftForEdit(null); return true; }
+      if (selectedShiftId) { setSelectedShiftId(null); return true; }
       if (selectedUserId) { setSelectedUserId(null); return true; }
       if (selectedPatientId) { setSelectedPatientId(null); return true; }
       if (selectedDoctorId) { setSelectedDoctorId(null); return true; }
@@ -239,7 +280,7 @@ export const HospDashboard = ({ navigation, route }) => {
     };
     const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
     return () => backHandler.remove();
-  }, [drawerOpen, activeTab, isInvitingHospAdmin, selectedUserId, isProvisioningWard, selectedWardForBed, isProvisioningGateway, isProvisioningDevice, isRegisteringPatient, selectedPatientId, isCreatingDoctor, selectedDoctorId, isCreatingNurse, isCreatingShift, assignmentData]);
+  }, [drawerOpen, activeTab, isInvitingHospAdmin, selectedUserId, isProvisioningWard, selectedWardForBed, isProvisioningGateway, isProvisioningDevice, isRegisteringPatient, selectedPatientId, isCreatingDoctor, selectedDoctorId, isCreatingNurse, isCreatingShift, assignmentData, selectedWardForEdit, selectedPatientForEdit, selectedDoctorForEdit, selectedNurseId, selectedNurseForEdit, selectedShiftId, selectedShiftForEdit]);
 
   const toggleDrawer = React.useCallback(() => {
     const toValue = drawerOpen ? -width : 0;
@@ -261,6 +302,13 @@ export const HospDashboard = ({ navigation, route }) => {
     setIsCreatingNurse(false);
     setIsCreatingShift(false);
     setAssignmentData(null);
+    setSelectedWardForEdit(null);
+    setSelectedPatientForEdit(null);
+    setSelectedDoctorForEdit(null);
+    setSelectedNurseId(null);
+    setSelectedNurseForEdit(null);
+    setSelectedShiftId(null);
+    setSelectedShiftForEdit(null);
     setActiveTab(tabId);
   };
 
@@ -276,22 +324,22 @@ export const HospDashboard = ({ navigation, route }) => {
 
   const renderContent = () => {
     if (isInvitingHospAdmin) {
-      return <CreateHospAdminScreen onCancel={() => setIsInvitingHospAdmin(false)} hospCode="CLV-MAIN" />;
+      return <CreateHospAdminScreen onCancel={() => setIsInvitingHospAdmin(false)} />;
     }
     if (isProvisioningWard) {
-      return <CreateWardScreen onCancel={() => setIsProvisioningWard(false)} hospCode="CLV-MAIN" />;
+      return <CreateWardScreen onCancel={() => setIsProvisioningWard(false)} />;
     }
     if (selectedWardForBed) {
-      return <CreateBedScreen onCancel={() => setSelectedWardForBed(null)} wardCode={selectedWardForBed} hospCode="CLV-MAIN" />;
+      return <CreateBedScreen onCancel={() => setSelectedWardForBed(null)} wardCode={selectedWardForBed} />;
     }
     if (isProvisioningGateway) {
-      return <CreateGatewayScreen onCancel={() => setIsProvisioningGateway(false)} hospCode="CLV-MAIN" />;
+      return <CreateGatewayScreen onCancel={() => setIsProvisioningGateway(false)} />;
     }
     if (isProvisioningDevice) {
-      return <CreateDeviceScreen onCancel={() => setIsProvisioningDevice(false)} hospCode="CLV-MAIN" />;
+      return <CreateDeviceScreen onCancel={() => setIsProvisioningDevice(false)} />;
     }
     if (isRegisteringPatient) {
-      return <CreatePatientScreen onCancel={() => setIsRegisteringPatient(false)} hospCode="CLV-MAIN" />;
+      return <CreatePatientScreen onCancel={() => setIsRegisteringPatient(false)} />;
     }
     if (isCreatingDoctor) {
       return <CreateDoctorScreen onCancel={() => setIsCreatingDoctor(false)} hospCode="CLV-MAIN" />;
@@ -303,32 +351,90 @@ export const HospDashboard = ({ navigation, route }) => {
       return <CreateShiftScreen onCancel={() => setIsCreatingShift(false)} />;
     }
     if (assignmentData) {
-      return <AssignmentScreen 
-        initialPatientId={assignmentData.patientId} 
+      return <AssignmentScreen
+        initialPatientId={assignmentData.patientId}
         initialDoctorId={assignmentData.doctorId}
-        onCancel={() => setAssignmentData(null)} 
+        onCancel={() => setAssignmentData(null)}
+      />;
+    }
+    if (selectedWardForEdit) {
+      return <EditWardScreen
+        ward={selectedWardForEdit}
+        onCancel={() => setSelectedWardForEdit(null)}
+        onSave={() => setSelectedWardForEdit(null)}
+        onDelete={() => setSelectedWardForEdit(null)}
+      />;
+    }
+    if (selectedPatientForEdit) {
+      return <EditPatientScreen
+        patientDetail={selectedPatientForEdit}
+        onCancel={() => setSelectedPatientForEdit(null)}
+        onSave={() => setSelectedPatientForEdit(null)}
+      />;
+    }
+    if (selectedDoctorForEdit) {
+      return <EditDoctorScreen
+        doctor={selectedDoctorForEdit}
+        onCancel={() => setSelectedDoctorForEdit(null)}
+        onSave={() => setSelectedDoctorForEdit(null)}
+      />;
+    }
+    if (selectedNurseForEdit) {
+      return <EditNurseScreen
+        nurse={selectedNurseForEdit}
+        onCancel={() => setSelectedNurseForEdit(null)}
+        onSave={() => setSelectedNurseForEdit(null)}
+      />;
+    }
+    if (selectedNurseId) {
+      return <NurseDetailScreen
+        nurseId={selectedNurseId}
+        onBack={() => setSelectedNurseId(null)}
+        onEdit={(n) => setSelectedNurseForEdit(n)}
+      />;
+    }
+    if (selectedShiftForEdit) {
+      return <EditShiftScreen
+        shift={selectedShiftForEdit}
+        onCancel={() => setSelectedShiftForEdit(null)}
+        onSave={() => setSelectedShiftForEdit(null)}
+        onDelete={() => { setSelectedShiftForEdit(null); setSelectedShiftId(null); }}
+      />;
+    }
+    if (selectedShiftId) {
+      return <ShiftDetailScreen
+        shiftId={selectedShiftId}
+        onBack={() => setSelectedShiftId(null)}
+        onEdit={(s) => setSelectedShiftForEdit(s)}
       />;
     }
     if (selectedUserId) {
       return <UserDetailScreen userId={selectedUserId} onBack={() => setSelectedUserId(null)} />;
     }
     if (selectedPatientId) {
-      return <PatientDetailScreen patientId={selectedPatientId} onBack={() => setSelectedPatientId(null)} 
+      return <PatientDetailScreen
+        patientId={selectedPatientId}
+        onBack={() => setSelectedPatientId(null)}
         onAssign={() => setAssignmentData({ patientId: selectedPatientId })}
+        onEdit={(detail) => setSelectedPatientForEdit(detail)}
       />;
     }
     if (selectedDoctorId) {
-      return <DoctorDetailScreen doctorId={selectedDoctorId} onBack={() => setSelectedDoctorId(null)} 
+      return <DoctorDetailScreen
+        doctorId={selectedDoctorId}
+        onBack={() => setSelectedDoctorId(null)}
         onAssign={() => setAssignmentData({ doctorId: selectedDoctorId })}
+        onEdit={(d) => setSelectedDoctorForEdit(d)}
       />;
     }
 
     switch (activeTab) {
       case 'home': return <HospHomeContent role={role} onNavigate={handleTabChange} />;
       case 'admins': return <HospAdminsScreen onInvite={() => setIsInvitingHospAdmin(true)} onSelectUser={setSelectedUserId} />;
-      case 'wards': return <WardsScreen 
-        onNewWard={() => setIsProvisioningWard(true)} 
-        onNewBed={setSelectedWardForBed} 
+      case 'wards': return <WardsScreen
+        onNewWard={() => setIsProvisioningWard(true)}
+        onNewBed={setSelectedWardForBed}
+        onEditWard={setSelectedWardForEdit}
       />;
       case 'devices': return <DevicesScreen 
         onNewGateway={() => setIsProvisioningGateway(true)}
@@ -342,9 +448,11 @@ export const HospDashboard = ({ navigation, route }) => {
         onNewDoctor={() => setIsCreatingDoctor(true)}
         onSelectDoctor={setSelectedDoctorId}
       />;
-      case 'shifts': return <ShiftsScreen 
+      case 'shifts': return <ShiftsScreen
         onNewNurse={() => setIsCreatingNurse(true)}
         onNewShift={() => setIsCreatingShift(true)}
+        onSelectNurse={setSelectedNurseId}
+        onSelectShift={setSelectedShiftId}
       />;
       default: return <HospHomeContent role={role} onNavigate={handleTabChange} />;
     }
@@ -361,6 +469,13 @@ export const HospDashboard = ({ navigation, route }) => {
     if (isCreatingNurse) return "Onboard Nurse";
     if (isCreatingShift) return "Assign Shift";
     if (assignmentData) return "Clinical Assignment";
+    if (selectedWardForEdit) return "Edit Ward";
+    if (selectedPatientForEdit) return "Edit Patient";
+    if (selectedDoctorForEdit) return "Edit Doctor";
+    if (selectedNurseForEdit) return "Edit Nurse";
+    if (selectedNurseId) return "Nurse Details";
+    if (selectedShiftForEdit) return "Edit Shift";
+    if (selectedShiftId) return "Shift Details";
     if (selectedUserId) return "User Details";
     if (selectedPatientId) return "Patient Details";
     if (selectedDoctorId) return "Doctor Details";
@@ -417,9 +532,9 @@ export const HospDashboard = ({ navigation, route }) => {
       <TopBar 
         title={getTitle()} 
         leading={ isDeep ? <IconBack /> : <IconMenu /> }
-        onLeadingPress={isDeep ? () => { 
-          setIsInvitingHospAdmin(false); 
-          setSelectedUserId(null); 
+        onLeadingPress={isDeep ? () => {
+          setIsInvitingHospAdmin(false);
+          setSelectedUserId(null);
           setSelectedPatientId(null);
           setSelectedDoctorId(null);
           setIsProvisioningWard(false);
@@ -431,8 +546,15 @@ export const HospDashboard = ({ navigation, route }) => {
           setIsCreatingNurse(false);
           setIsCreatingShift(false);
           setAssignmentData(null);
+          setSelectedWardForEdit(null);
+          setSelectedPatientForEdit(null);
+          setSelectedDoctorForEdit(null);
+          setSelectedNurseId(null);
+          setSelectedNurseForEdit(null);
+          setSelectedShiftId(null);
+          setSelectedShiftForEdit(null);
         } : toggleDrawer}
-        onNotificationPress={() => console.log('Notifications')}
+        onNotificationPress={() => setShowNotifications(true)}
         onProfilePress={() => { logout(); navigation.replace('Login'); }}
       />
 
@@ -440,10 +562,15 @@ export const HospDashboard = ({ navigation, route }) => {
         {renderContent()}
       </View>
 
-      <BottomNav 
-        items={footerItems} 
-        active={activeTab} 
-        onChange={handleTabChange} 
+      <BottomNav
+        items={footerItems}
+        active={activeTab}
+        onChange={handleTabChange}
+      />
+
+      <NotificationSheet
+        visible={showNotifications}
+        onClose={() => setShowNotifications(false)}
       />
     </View>
   );

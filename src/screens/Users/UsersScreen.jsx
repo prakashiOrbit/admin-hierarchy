@@ -24,9 +24,9 @@ export const UsersScreen = ({ onSelectUser }) => {
     setError(null);
     try {
       const [admins, owners, hospAdmins] = await Promise.all([
-        userApi.listOrgAdmins(user.orgName, token),
-        userApi.listHospOwners(user.orgName, token),
-        userApi.listAllHospAdmins(user.orgName, token)
+        userApi.listOrgAdmins(user.orgName, token).catch(() => []),
+        userApi.listHospOwners(user.orgName, token).catch(() => []),
+        userApi.listAllHospAdmins(user.orgName, token).catch(() => []),
       ]);
       
       // Combine and ensure roles are set correctly for categorization
@@ -128,8 +128,8 @@ export const UsersScreen = ({ onSelectUser }) => {
           <View style={styles.list}>
             {filtered.map((u, idx) => (
               <Card 
-                key={u.id || idx} 
-                onPress={() => onSelectUser?.(u.id)}
+                key={u.userName || idx}
+                onPress={() => onSelectUser?.(u.userName)}
               >
                 <View style={styles.userRow}>
                   <Avatar name={u.userName} size={42} />

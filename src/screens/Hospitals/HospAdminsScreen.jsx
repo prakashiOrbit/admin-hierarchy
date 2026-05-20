@@ -1,27 +1,43 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, SearchBar, Avatar, RoleBadge, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
 import { IconPlus, IconChevron } from '../../icons';
-import { USERS, ROLES } from '../../data/mock';
+import { userApi } from '../../services/api';
 
 export const HospAdminsScreen = ({ onSelectUser, onInvite }) => {
   const { theme: T } = useTheme();
   const styles = createStyles(T);
+  const { user, token } = useAuth();
+
+  const [admins, setAdmins] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
 
-  // Filter for Hospital Admins and Hospital Owners (excluding current user logic handled by dashboard if needed)
-  const admins = USERS.filter(u => 
-    (u.role === 'HOSP_ADMIN' || u.role === 'HOSP_OWNER') &&
-    u.name.toLowerCase().includes(query.toLowerCase())
+  useEffect(() => {
+    if (!user?.orgName || !user?.hospitalCode) return;
+    userApi.listHospAdminsByHospital(user.orgName, user.hospitalCode, token)
+      .then(setAdmins)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = admins.filter(u =>
+    (`${u.firstName} ${u.lastName}`).toLowerCase().includes(query.toLowerCase()) ||
+    u.userName?.toLowerCase().includes(query.toLowerCase())
   );
+
+  if (loading) {
+    return <View style={styles.center}><ActivityIndicator color={T.accent} /></View>;
+  }
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={{ marginBottom: 20 }}>
-          <SearchBar 
+          <SearchBar
             placeholder="Search administrators..."
             value={query}
             onChangeText={setQuery}
@@ -29,12 +45,11 @@ export const HospAdminsScreen = ({ onSelectUser, onInvite }) => {
         </View>
 
         <View style={styles.headerRow}>
-          <SectionHeader title="ADMINISTRATORS" count={admins.length} />
-          
-          <Btn 
-            variant="primary" 
+          <SectionHeader title="ADMINISTRATORS" count={filtered.length} />
+          <Btn
+            variant="primary"
             size="sm"
-            style={styles.newBtn} 
+            style={styles.newBtn}
             onPress={onInvite}
           >
             <IconPlus size={14} color="#fff" /> Create Hosp Admin
@@ -42,28 +57,32 @@ export const HospAdminsScreen = ({ onSelectUser, onInvite }) => {
         </View>
 
         <View style={styles.list}>
-          {admins.map(u => (
-            <Card key={u.id} onPress={() => onSelectUser(u.id)}>
-              <View style={styles.userRow}>
-                <Avatar initials={u.initials} size={40} />
-                <View style={styles.userInfo}>
-                  <View style={styles.titleRow}>
-                    <Text style={styles.userName}>{u.name}</Text>
-                    <RoleBadge role={u.role} />
+          {filtered.map(u => {
+            const initials = `${u.firstName?.[0] ?? ''}${u.lastName?.[0] ?? ''}`.toUpperCase();
+            const role = u.userRoles?.[0] ?? 'HOSP_ADMIN';
+            return (
+              <Card key={u.userName} onPress={() => onSelectUser(u.userName)}>
+                <View style={styles.userRow}>
+                  <Avatar initials={initials} size={40} />
+                  <View style={styles.userInfo}>
+                    <View style={styles.titleRow}>
+                      <Text style={styles.userName}>{u.firstName} {u.lastName}</Text>
+                      <RoleBadge role={role} />
+                    </View>
+                    <Text style={styles.userEmail}>{u.userName}</Text>
+                    <View style={styles.badgesRow}>
+                      <StatusPill status={u.status ?? 'ACTIVE'} />
+                      {u.hospitalCode && (
+                        <Text style={styles.hospitalText}>{u.hospitalCode}</Text>
+                      )}
+                    </View>
                   </View>
-                  <Text style={styles.userEmail}>{u.email}</Text>
-                  <View style={styles.badgesRow}>
-                    <StatusPill status="ACTIVE" />
-                    {u.hospital !== '—' && (
-                      <Text style={styles.hospitalText}>{u.hospital}</Text>
-                    )}
-                  </View>
+                  <IconChevron size={16} color={T.textFaint} />
                 </View>
-                <IconChevron size={16} color={T.textFaint} />
-              </View>
-            </Card>
-          ))}
-          {admins.length === 0 && (
+              </Card>
+            );
+          })}
+          {filtered.length === 0 && (
             <View style={styles.emptyState}>
               <Text style={styles.emptyText}>No hospital administrators found.</Text>
             </View>
@@ -76,6 +95,7 @@ export const HospAdminsScreen = ({ onSelectUser, onInvite }) => {
 
 const createStyles = (T) => StyleSheet.create({
   container: { flex: 1 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   scrollContent: { padding: 16 },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   newBtn: { flexDirection: 'row', gap: 4, height: 32, paddingHorizontal: 10 },

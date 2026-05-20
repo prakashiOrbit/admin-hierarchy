@@ -11,29 +11,34 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
   const { theme: T } = useTheme();
   const { token } = useAuth();
   const styles = createStyles(T);
-  
+
   const [hospitals, setHospitals] = useState([]);
   const [owners, setOwners] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [hospError, setHospError] = useState(null);
+  const [ownersError, setOwnersError] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!org?.orgName) return;
-      setLoading(true);
-      try {
-        const [hospData, ownerData] = await Promise.all([
-          organisationApi.listHospitals(org.orgName, token),
-          userApi.listOrgOwners(org.orgName, token)
-        ]);
-        setHospitals(Array.isArray(hospData) ? hospData : []);
-        setOwners(Array.isArray(ownerData) ? ownerData : []);
-      } catch (err) {
-        console.error('Fetch org details error:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    if (!org?.orgName) return;
+    setLoading(true);
+    setHospError(null);
+    setOwnersError(null);
+
+    const fetchHospitals = organisationApi.listHospitals(org.orgName, token)
+      .then(data => {
+        const list = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
+        setHospitals(list);
+      })
+      .catch(err => setHospError(err.message || 'Failed to load hospitals'));
+
+    const fetchOwners = userApi.listOrgOwners(org.orgName, token)
+      .then(data => {
+        const list = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
+        setOwners(list);
+      })
+      .catch(err => setOwnersError(err.message || 'Failed to load owners'));
+
+    Promise.all([fetchHospitals, fetchOwners]).finally(() => setLoading(false));
   }, [org?.orgName, token]);
 
   const initials = (org.businessName || org.orgName || '??').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
@@ -61,9 +66,9 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
         {/* Stats Grid */}
         <View style={styles.statsGrid}>
           {[
-            { label: 'Hospitals', value: hospitals.length, color: T.accent },
-            { label: 'Owners', value: owners.length, color: '#2DD4BF' },
-            { label: 'Devices', value: '0', color: '#22D3EE' },
+            { label: 'Hospitals', value: hospError ? '—' : hospitals.length, color: T.accent },
+            { label: 'Owners', value: ownersError ? '—' : owners.length, color: '#2DD4BF' },
+            { label: 'Devices', value: '—', color: '#22D3EE' },
           ].map((stat, i) => (
             <View key={stat.label} style={styles.statBox}>
               <Text style={styles.statLabel}>{stat.label.toUpperCase()}</Text>
@@ -78,6 +83,11 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
           <Card style={styles.listCard}>
             {loading ? (
               <ActivityIndicator color={T.accent} style={{ padding: 20 }} />
+            ) : ownersError ? (
+              <View style={styles.errorItem}>
+                <IconLock size={16} color={T.bad || '#ef4444'} />
+                <Text style={styles.errorItemText}>{ownersError}</Text>
+              </View>
             ) : owners.length > 0 ? (
               owners.map((user, i) => (
                 <View key={user.id || i} style={[styles.listItem, i > 0 && styles.listBorder]}>
@@ -103,6 +113,11 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
           <Card style={styles.listCard}>
             {loading ? (
               <ActivityIndicator color={T.accent} style={{ padding: 20 }} />
+            ) : hospError ? (
+              <View style={styles.errorItem}>
+                <IconLock size={16} color={T.bad || '#ef4444'} />
+                <Text style={styles.errorItemText}>{hospError}</Text>
+              </View>
             ) : hospitals.length > 0 ? (
               hospitals.map((hosp, i) => (
                 <View key={hosp.id || i} style={[styles.listItem, i > 0 && styles.listBorder]}>
@@ -277,5 +292,16 @@ const createStyles = (T) => StyleSheet.create({
   emptyText: {
     fontSize: 13,
     color: T.textFaint,
+  },
+  errorItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 16,
+  },
+  errorItemText: {
+    fontSize: 13,
+    color: T.bad || '#ef4444',
+    flex: 1,
   },
 });

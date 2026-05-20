@@ -1,44 +1,61 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
-import { Card, SectionHeader, Btn } from '../../components/Shared';
-import { IconShield, IconEdit, IconCheck, IconPlus } from '../../icons';
-import { ROLES_LIST, PERMISSION_GROUPS, ROLE_DEFAULT_PERMS } from '../../data/mock';
+import { useAuth } from '../../context/AuthContext';
+import { Card, SectionHeader } from '../../components/Shared';
+import { IconShield, IconCheck } from '../../icons';
+import { rolesApi } from '../../services/api';
+import { PERMISSION_GROUPS } from '../../data/mock';
 
 export const RoleDetailScreen = ({ roleId, onBack }) => {
   const { theme: T } = useTheme();
   const styles = createStyles(T);
-  const role = ROLES_LIST.find(r => r.id === roleId) || ROLES_LIST[0];
-  const assignedPerms = new Set(ROLE_DEFAULT_PERMS[role.id] || []);
+  const { user, token } = useAuth();
+
+  const [role, setRole] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user?.orgName || !roleId) return;
+    rolesApi.getByName(user.orgName, roleId, token)
+      .then(data => setRole(data))
+      .catch(err => console.warn('RoleDetail fetch failed:', err))
+      .finally(() => setLoading(false));
+  }, [user?.orgName, roleId, token]);
+
+  if (loading) {
+    return <View style={styles.center}><ActivityIndicator color={T.accent} /></View>;
+  }
+
+  if (!role) {
+    return (
+      <View style={styles.center}>
+        <Text style={{ color: T.textDim }}>Role not found.</Text>
+      </View>
+    );
+  }
+
+  const assignedPerms = new Set(role.rolePermissions ?? []);
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Role Header */}
         <Card style={styles.headerCard}>
           <View style={styles.headerTop}>
-            <View style={[styles.roleIcon, { backgroundColor: role.color + '22' }]}>
-              <IconShield color={role.color} size={28} />
+            <View style={[styles.roleIcon, { backgroundColor: T.accentSoft }]}>
+              <IconShield color={T.accent} size={28} />
             </View>
             <View style={styles.headerInfo}>
-              <View style={styles.titleRow}>
-                <Text style={styles.roleName}>{role.name}</Text>
-                {role.system && (
-                  <View style={styles.systemBadge}>
-                    <Text style={styles.systemText}>SYSTEM</Text>
-                  </View>
-                )}
-              </View>
-              <Text style={styles.roleMeta}>{role.members} members assigned</Text>
+              <Text style={styles.roleName}>{role.roleName}</Text>
+              <Text style={styles.roleMeta}>{assignedPerms.size} permissions assigned</Text>
             </View>
           </View>
         </Card>
 
-        {/* Permissions Grid */}
         <SectionHeader title="Permissions" count={assignedPerms.size} />
         <View style={styles.permsContainer}>
           {PERMISSION_GROUPS.map((group) => (
-            <Card key={group.id} style={styles.groupCard}>
+            <Card key={group.name} style={styles.groupCard}>
               <Text style={styles.groupTitle}>{group.name.toUpperCase()}</Text>
               <View style={styles.permsList}>
                 {group.perms.map((p) => {
@@ -54,39 +71,6 @@ export const RoleDetailScreen = ({ roleId, onBack }) => {
             </Card>
           ))}
         </View>
-
-        {!role.system && (
-          <View style={styles.actionGroup}>
-            <View style={styles.actionRow}>
-              <Btn 
-                variant="ghost" 
-                style={[styles.secondaryBtn, { flex: 1 }]}
-              >
-                <IconEdit size={16} color={T.text} />
-                <Text style={styles.btnTextBlack}>Edit Details</Text>
-              </Btn>
-              <Btn 
-                variant="ghost" 
-                style={[styles.secondaryBtn, { flex: 1 }]}
-              >
-                <IconShield size={16} color={T.text} />
-                <Text style={styles.btnTextBlack}>Modify Perms</Text>
-              </Btn>
-            </View>
-            <Btn style={{ backgroundColor: T.accent }}>
-              <IconPlus size={18} color="#fff" />
-              <Text style={styles.btnTextWhite}>Assign Member</Text>
-            </Btn>
-          </View>
-        )}
-
-        <Btn 
-          variant="ghost" 
-          onPress={() => onBack?.()}
-          style={{ marginTop: 8 }}
-        >
-          <Text style={{ color: T.textDim }}>Go Back</Text>
-        </Btn>
       </ScrollView>
     </View>
   );
@@ -94,19 +78,13 @@ export const RoleDetailScreen = ({ roleId, onBack }) => {
 
 const createStyles = (T) => StyleSheet.create({
   container: { flex: 1 },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   scrollContent: { padding: 16, paddingBottom: 40 },
-  headerCard: {
-    backgroundColor: T.surface,
-    borderWidth: 1,
-    marginBottom: 24,
-  },
+  headerCard: { backgroundColor: T.surface, borderWidth: 1, marginBottom: 24 },
   headerTop: { flexDirection: 'row', gap: 16, alignItems: 'center' },
   roleIcon: { width: 56, height: 56, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   headerInfo: { flex: 1 },
-  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   roleName: { fontSize: 18, fontWeight: '700', color: T.text },
-  systemBadge: { backgroundColor: T.surface2, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
-  systemText: { fontSize: 9, color: T.textDim, fontWeight: '700', letterSpacing: 0.5, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
   roleMeta: { fontSize: 12, color: T.textDim, marginTop: 4 },
   permsContainer: { gap: 12, marginBottom: 24 },
   groupCard: { backgroundColor: T.surface, borderColor: T.borderSoft },
@@ -115,9 +93,4 @@ const createStyles = (T) => StyleSheet.create({
   permItem: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   permText: { fontSize: 12, color: T.text, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
   permTextDim: { color: T.textFaint },
-  actionGroup: { gap: 10, marginBottom: 10 },
-  actionRow: { flexDirection: 'row', gap: 10 },
-  secondaryBtn: { flexDirection: 'row', gap: 8, height: 44 },
-  btnTextWhite: { color: '#fff', fontWeight: '600', marginLeft: 8 },
-  btnTextBlack: { color: T.text, fontWeight: '600', marginLeft: 8 },
 });

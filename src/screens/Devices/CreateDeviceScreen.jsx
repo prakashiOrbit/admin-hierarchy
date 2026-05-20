@@ -1,30 +1,46 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
-import { Card, Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
-import { IconPulse, IconCpu, IconActivity, IconShield } from '../../icons';
+import { useAuth } from '../../context/AuthContext';
+import { Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
+import { IconCpu, IconActivity, IconShield } from '../../icons';
+import { deviceApi } from '../../services/api';
 
-export const CreateDeviceScreen = ({ onCancel, hospCode = 'HOSP999' }) => {
+const PROTOCOLS = ['BLE', 'WIFI', 'MQTT', 'HL7', 'MODBUS'];
+const VERIFY_TYPES = ['MACADDR', 'SERIAL', 'CERTIFICATE'];
+const USAGE_TYPES = ['Fixed', 'Mobile'];
+
+export const CreateDeviceScreen = ({ onCancel, onSuccess }) => {
   const { theme: T } = useTheme();
   const styles = createStyles(T);
-  
+  const { user, token } = useAuth();
+
   const [form, setForm] = useState({
     deviceCode: '',
-    deviceType: 'Comen-V4',
+    deviceType: '',
     protocol: 'BLE',
     verifyWith: 'MACADDR',
-    usageType: 'Fixed'
+    usageType: 'Fixed',
   });
+  const [saving, setSaving] = useState(false);
 
-  const updateForm = (key, value) => {
-    setForm(prev => ({ ...prev, [key]: value }));
-  };
+  const updateForm = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
   const isFormValid = form.deviceCode && form.deviceType && form.protocol;
 
-  const handleCreate = () => {
-    console.log('Create Device Payload:', JSON.stringify(form, null, 2));
-    // API call to /api/{orgName}/device/{hospCode}/create
+  const handleCreate = async () => {
+    if (!isFormValid || !user?.orgName || !user?.hospitalCode) return;
+    setSaving(true);
+    try {
+      await deviceApi.create(user.orgName, user.hospitalCode, form, token);
+      Alert.alert('Success', `Device ${form.deviceCode} registered.`, [
+        { text: 'OK', onPress: onSuccess || onCancel },
+      ]);
+    } catch (e) {
+      Alert.alert('Error', e.message || 'Failed to create device.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -33,13 +49,13 @@ export const CreateDeviceScreen = ({ onCancel, hospCode = 'HOSP999' }) => {
         <View style={styles.banner}>
           <IconCpu size={24} color={T.accent} />
           <Text style={styles.bannerText}>
-            Provisioning a new clinical monitoring device for {hospCode}. Once created, this device can be assigned to wards and beds.
+            Provisioning a new clinical monitoring device for {user?.hospitalCode}. Once registered, this device can be assigned to a gateway, bed or patient.
           </Text>
         </View>
 
         <View style={styles.section}>
           <SectionHeader title="Device Specifications" />
-          
+
           <Field label="Device Serial / Code" required>
             <TextInput
               value={form.deviceCode}
@@ -49,41 +65,52 @@ export const CreateDeviceScreen = ({ onCancel, hospCode = 'HOSP999' }) => {
             />
           </Field>
 
-          <Field label="Hardware Profile" required>
-            <Card style={styles.selectCard} padding={12}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <IconActivity size={16} color={T.accent} />
-                <Text style={styles.selectText}>{form.deviceType}</Text>
-              </View>
-            </Card>
+          <Field label="Hardware Profile / Model" required>
+            <TextInput
+              value={form.deviceType}
+              onChangeText={v => updateForm('deviceType', v)}
+              placeholder="e.g. Comen-V4, Mindray-T1"
+              leading={<IconActivity size={16} color={T.textFaint} />}
+            />
           </Field>
 
-          <View style={styles.row}>
-            <View style={{ flex: 1 }}>
-              <Field label="Protocol" required>
-                <Card style={styles.selectCard} padding={12}>
-                  <Text style={styles.selectText}>{form.protocol}</Text>
-                </Card>
-              </Field>
+          <Field label="Communication Protocol" required>
+            <View style={styles.optionGrid}>
+              {PROTOCOLS.map(p => (
+                <TouchableOpacity
+                  key={p}
+                  style={[styles.optionBtn, form.protocol === p && styles.optionActive]}
+                  onPress={() => updateForm('protocol', p)}
+                >
+                  <Text style={[styles.optionText, form.protocol === p && styles.optionTextActive]}>{p}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
-            <View style={{ flex: 1 }}>
-              <Field label="Verification">
-                <Card style={styles.selectCard} padding={12}>
-                  <Text style={styles.selectText}>{form.verifyWith}</Text>
-                </Card>
-              </Field>
+          </Field>
+
+          <Field label="Verification Method">
+            <View style={styles.optionGrid}>
+              {VERIFY_TYPES.map(v => (
+                <TouchableOpacity
+                  key={v}
+                  style={[styles.optionBtn, form.verifyWith === v && styles.optionActive]}
+                  onPress={() => updateForm('verifyWith', v)}
+                >
+                  <Text style={[styles.optionText, form.verifyWith === v && styles.optionTextActive]}>{v}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
-          </View>
+          </Field>
 
           <Field label="Usage Type">
-            <View style={{ flexDirection: 'row', gap: 8 }}>
-              {['Fixed', 'Mobile'].map((type) => (
-                <TouchableOpacity 
-                  key={type}
-                  style={[styles.radioBtn, form.usageType === type && styles.radioActive]}
-                  onPress={() => updateForm('usageType', type)}
+            <View style={styles.optionGrid}>
+              {USAGE_TYPES.map(u => (
+                <TouchableOpacity
+                  key={u}
+                  style={[styles.optionBtn, form.usageType === u && styles.optionActive]}
+                  onPress={() => updateForm('usageType', u)}
                 >
-                  <Text style={[styles.radioText, form.usageType === type && styles.radioTextActive]}>{type}</Text>
+                  <Text style={[styles.optionText, form.usageType === u && styles.optionTextActive]}>{u}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -92,13 +119,13 @@ export const CreateDeviceScreen = ({ onCancel, hospCode = 'HOSP999' }) => {
 
         <View style={styles.actionRow}>
           <Btn variant="surface" style={{ flex: 1 }} onPress={onCancel}>Cancel</Btn>
-          <Btn 
-            variant="primary" 
-            style={{ flex: 2 }} 
-            disabled={!isFormValid}
+          <Btn
+            variant="primary"
+            style={{ flex: 2 }}
+            disabled={!isFormValid || saving}
             onPress={handleCreate}
           >
-            Create Device
+            {saving ? 'Registering...' : 'Register Device'}
           </Btn>
         </View>
       </ScrollView>
@@ -112,13 +139,10 @@ const createStyles = (T) => StyleSheet.create({
   banner: { flexDirection: 'row', backgroundColor: T.accentSoft, padding: 14, borderRadius: 12, gap: 12, alignItems: 'flex-start', marginBottom: 24 },
   bannerText: { flex: 1, fontSize: 13, color: T.text, lineHeight: 18 },
   section: { marginBottom: 24 },
-  sectionTitle: { fontSize: 11, fontWeight: '700', color: T.textDim, letterSpacing: 1, marginBottom: 16 },
-  row: { flexDirection: 'row', gap: 12 },
-  selectCard: { height: 44, justifyContent: 'center', backgroundColor: T.surface, borderColor: T.borderSoft },
-  selectText: { color: T.text, fontSize: 14 },
-  radioBtn: { flex: 1, height: 42, borderRadius: 10, borderWidth: 1, borderColor: T.borderSoft, alignItems: 'center', justifyContent: 'center', backgroundColor: T.surface },
-  radioActive: { backgroundColor: T.accent, borderColor: T.accent },
-  radioText: { fontSize: 13, fontWeight: '600', color: T.textDim },
-  radioTextActive: { color: '#fff' },
+  optionGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  optionBtn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, borderWidth: 1, borderColor: T.borderSoft, backgroundColor: T.surface },
+  optionActive: { backgroundColor: T.accent, borderColor: T.accent },
+  optionText: { fontSize: 12, color: T.text, fontWeight: '600' },
+  optionTextActive: { color: '#fff' },
   actionRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
 });

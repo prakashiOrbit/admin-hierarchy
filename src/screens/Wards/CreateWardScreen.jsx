@@ -1,29 +1,41 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import { Card, Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
 import { IconDoor, IconBuilding } from '../../icons';
+import { wardApi } from '../../services/api';
 
-export const CreateWardScreen = ({ onCancel, orgName = 'APOLLO_ORG_TEST129', hospCode = 'HOSP999' }) => {
+export const CreateWardScreen = ({ onCancel, onSuccess }) => {
   const { theme: T } = useTheme();
   const styles = createStyles(T);
-  
+  const { user, token } = useAuth();
+
   const [form, setForm] = useState({
     wardCode: '',
     wardName: '',
     wardType: 'ICU',
-    numberOfBeds: ''
+    numberOfBeds: '',
   });
+  const [saving, setSaving] = useState(false);
 
-  const updateForm = (key, value) => {
-    setForm(prev => ({ ...prev, [key]: value }));
-  };
+  const updateForm = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
   const isFormValid = form.wardCode && form.wardName && form.numberOfBeds;
 
-  const handleCreate = () => {
-    console.log('Create Ward Payload:', JSON.stringify(form, null, 2));
-    // API call to /api/{orgName}/ward/{hospCode}/create
+  const handleCreate = async () => {
+    if (!isFormValid || !user?.orgName || !user?.hospitalCode) return;
+    setSaving(true);
+    try {
+      await wardApi.create(user.orgName, user.hospitalCode, form, token);
+      Alert.alert('Success', `Ward ${form.wardCode} created.`, [
+        { text: 'OK', onPress: onSuccess || onCancel },
+      ]);
+    } catch (e) {
+      Alert.alert('Error', e.message || 'Failed to create ward.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -32,13 +44,13 @@ export const CreateWardScreen = ({ onCancel, orgName = 'APOLLO_ORG_TEST129', hos
         <View style={styles.banner}>
           <IconDoor size={24} color={T.accent} />
           <Text style={styles.bannerText}>
-            Provisioning a new physical ward for {hospCode}. Once created, you can assign individual beds and gateways to this unit.
+            Provisioning a new physical ward for {user?.hospitalCode}. Once created, you can assign individual beds and gateways to this unit.
           </Text>
         </View>
 
         <View style={styles.section}>
           <SectionHeader title="Ward Configuration" />
-          
+
           <Field label="Ward Code" required>
             <TextInput
               value={form.wardCode}
@@ -59,9 +71,7 @@ export const CreateWardScreen = ({ onCancel, orgName = 'APOLLO_ORG_TEST129', hos
             <View style={{ flex: 1 }}>
               <Field label="Type" required>
                 <Card style={styles.selectCard} padding={12}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                    <Text style={styles.selectText}>{form.wardType}</Text>
-                  </View>
+                  <Text style={styles.selectText}>{form.wardType}</Text>
                 </Card>
               </Field>
             </View>
@@ -81,7 +91,7 @@ export const CreateWardScreen = ({ onCancel, orgName = 'APOLLO_ORG_TEST129', hos
             <Card style={styles.disabledCard} padding={12}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <IconBuilding size={16} color={T.textFaint} />
-                <Text style={styles.disabledText}>{hospCode}</Text>
+                <Text style={styles.disabledText}>{user?.hospitalCode}</Text>
               </View>
             </Card>
           </Field>
@@ -89,13 +99,13 @@ export const CreateWardScreen = ({ onCancel, orgName = 'APOLLO_ORG_TEST129', hos
 
         <View style={styles.actionRow}>
           <Btn variant="surface" style={{ flex: 1 }} onPress={onCancel}>Cancel</Btn>
-          <Btn 
-            variant="primary" 
-            style={{ flex: 2 }} 
-            disabled={!isFormValid}
+          <Btn
+            variant="primary"
+            style={{ flex: 2 }}
+            disabled={!isFormValid || saving}
             onPress={handleCreate}
           >
-            Create Ward
+            {saving ? 'Creating...' : 'Create Ward'}
           </Btn>
         </View>
       </ScrollView>
@@ -109,7 +119,6 @@ const createStyles = (T) => StyleSheet.create({
   banner: { flexDirection: 'row', backgroundColor: T.accentSoft, padding: 14, borderRadius: 12, gap: 12, alignItems: 'flex-start', marginBottom: 24 },
   bannerText: { flex: 1, fontSize: 13, color: T.text, lineHeight: 18 },
   section: { marginBottom: 24 },
-  sectionTitle: { fontSize: 11, fontWeight: '700', color: T.textDim, letterSpacing: 1, marginBottom: 16 },
   row: { flexDirection: 'row', gap: 12 },
   selectCard: { height: 44, justifyContent: 'center', backgroundColor: T.surface },
   selectText: { color: T.text, fontSize: 14 },

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, ActivityIndicator, RefreshControl } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { deviceApi } from '../../services/api';
+import { deviceTypeApi } from '../../services/api';
 import { Card, SectionHeader, SearchBar, Btn } from '../../components/Shared';
 import { IconCpu, IconActivity, IconPlus, IconChevron } from '../../icons';
 
@@ -21,7 +21,7 @@ export const DeviceTypesScreen = ({ onCreate, onSelect = () => {} }) => {
     if (showLoading) setLoading(true);
     setError(null);
     try {
-      const response = await deviceApi.listTypes(user.orgName, token);
+      const response = await deviceTypeApi.listTypes(user.orgName, token);
       // Assuming response is an array of device types
       setTypes(Array.isArray(response) ? response : []);
     } catch (err) {
