@@ -22,18 +22,6 @@ function PlatformDashboard({ go }) {
         }    label="Active devices" value="5,031" delta={1}  spark={SPARKS.active}   sparkColor="#22D3EE" accent="rgba(34,211,238,.14)"/>
       </div>
 
-      {/* Live telemetry strip */}
-      
-        ● STREAMING</span>}/>
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ fontSize: 28, fontWeight: 700, color: T.text, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '-.02em' }}>
-              182.4<span style={{ fontSize: 14, color: T.textDim, fontWeight: 500 }}>k</span>
-            </div>
-            <div style={{ fontSize: 11, color: T.textDim, marginTop: 2 }}>vitals events / min</div>
-          </div>
-          
-        </div>
       </Card>
 
       {/* Quick actions */}

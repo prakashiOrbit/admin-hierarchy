@@ -12,10 +12,11 @@ export const LoginScreen = ({ navigation }) => {
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   
-  const [username, setUsername] = useState('apollo_test129@mailinator.com');
-  const [password, setPassword] = useState('$Y#f#XTmSp2r');
+  const [username, setUsername] = useState('iorbit');
+  const [password, setPassword] = useState('iorbitpass');
   const [error, setError] = useState(null);
   const [showPw, setShowPw] = useState(false);
+  const [showOtp, setShowOtp] = useState(false);
   const [state, setState] = useState('idle'); // idle, loading, twofa, emailVerify
   const [otpValue, setOtpValue] = useState('');
   const [pendingOrg, setPendingOrg] = useState(null);
@@ -137,7 +138,14 @@ export const LoginScreen = ({ navigation }) => {
                 placeholder="000000"
                 keyboardType="number-pad"
                 maxLength={6}
+                secureTextEntry={!showOtp}
                 style={{ textAlign: 'center', fontSize: 24, letterSpacing: 8 }}
+                leading={<View style={{ width: 20 }} />}
+                trailing={
+                  <TouchableOpacity onPress={() => setShowOtp(!showOtp)}>
+                    {showOtp ? <IconEyeOff size={20} color={T.textFaint} /> : <IconEye size={20} color={T.textFaint} />}
+                  </TouchableOpacity>
+                }
               />
             </Field>
 

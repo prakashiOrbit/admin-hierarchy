@@ -23,17 +23,22 @@ export const UsersScreen = ({ onSelectUser }) => {
     if (showLoading) setLoading(true);
     setError(null);
     try {
-      const [admins, owners, hospAdmins] = await Promise.all([
+      const [adminsRes, ownersRes, hospAdminsRes] = await Promise.all([
         userApi.listOrgAdmins(user.orgName, token).catch(() => []),
         userApi.listHospOwners(user.orgName, token).catch(() => []),
         userApi.listAllHospAdmins(user.orgName, token).catch(() => []),
       ]);
       
+      const getList = (res) => Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
+      const admins = getList(adminsRes);
+      const owners = getList(ownersRes);
+      const hospAdmins = getList(hospAdminsRes);
+
       // Combine and ensure roles are set correctly for categorization
       const allUsers = [
-        ...(Array.isArray(admins) ? admins.map(u => ({ ...u, role: u.role || 'ORG_ADMIN' })) : []),
-        ...(Array.isArray(owners) ? owners.map(u => ({ ...u, role: u.role || 'HOSP_OWNER' })) : []),
-        ...(Array.isArray(hospAdmins) ? hospAdmins.map(u => ({ ...u, role: u.role || 'HOSP_ADMIN' })) : [])
+        ...admins.map(u => ({ ...u, role: u.role || 'ORG_ADMIN' })),
+        ...owners.map(u => ({ ...u, role: u.role || 'HOSP_OWNER' })),
+        ...hospAdmins.map(u => ({ ...u, role: u.role || 'HOSP_ADMIN' }))
       ];
       
       setUsers(allUsers);

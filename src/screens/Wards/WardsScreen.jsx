@@ -24,9 +24,22 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
 
   useEffect(() => {
     if (!user?.orgName || !user?.hospitalCode) return;
+    setLoading(true);
+    setError(null);
     wardApi.listAll(user.orgName, user.hospitalCode, token)
-      .then(data => setWards(Array.isArray(data) ? data : []))
-      .catch(e => setError(e.message))
+      .then(res => {
+        const list = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : (Array.isArray(res?.wards) ? res.wards : []));
+        setWards(list);
+      })
+      .catch(e => {
+        const msg = (e.message || '').toLowerCase();
+        // If backend throws an error for "no wards" or "not found", treat as empty list
+        if (msg.includes('no_wards') || msg.includes('notfound') || msg.includes('not found') || msg.includes('no wards')) {
+          setWards([]);
+        } else {
+          setError(e.message);
+        }
+      })
       .finally(() => setLoading(false));
   }, [user?.orgName, user?.hospitalCode, token]);
 
@@ -37,23 +50,33 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
     if (!isExpanded && !bedsByWard[wardCode]) {
       setLoadingBeds(prev => ({ ...prev, [wardCode]: true }));
       bedApi.getAllBedsByWard(user.orgName, user.hospitalCode, wardCode, token)
-        .then(beds => setBedsByWard(prev => ({ ...prev, [wardCode]: beds })))
+        .then(res => {
+          const list = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : (Array.isArray(res?.beds) ? res.beds : []));
+          setBedsByWard(prev => ({ ...prev, [wardCode]: list }));
+        })
         .catch(() => setBedsByWard(prev => ({ ...prev, [wardCode]: [] })))
         .finally(() => setLoadingBeds(prev => ({ ...prev, [wardCode]: false })));
     }
   };
 
   const filtered = wards.filter(w =>
-    w.wardName?.toLowerCase().includes(query.toLowerCase()) ||
-    w.wardCode?.toLowerCase().includes(query.toLowerCase())
+    w && (
+      w.wardName?.toLowerCase().includes(query.toLowerCase()) ||
+      w.wardCode?.toLowerCase().includes(query.toLowerCase())
+    )
   );
 
   if (loading) {
-    return <View style={styles.center}><ActivityIndicator color={T.accent} /></View>;
+    return <View style={styles.center}><ActivityIndicator size="large" color={T.accent} /></View>;
   }
 
   if (error) {
-    return <View style={styles.center}><Text style={styles.errorText}>{error}</Text></View>;
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorText}>Failed to load wards: {error}</Text>
+        <Btn variant="surface" size="sm" onPress={() => { setLoading(true); /* trigger useEffect */ }}>Retry</Btn>
+      </View>
+    );
   }
 
   return (
@@ -71,12 +94,13 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
         </View>
 
         <View style={styles.list}>
-          {filtered.map(w => {
+          {filtered.map((w, idx) => {
+            if (!w) return null;
             const isExpanded = expandedWard === w.wardCode;
             const beds = bedsByWard[w.wardCode] || [];
 
             return (
-              <View key={w.wardCode} style={{ marginBottom: 12 }}>
+              <View key={w.wardCode || idx} style={{ marginBottom: 12 }}>
                 <Card>
                   <View style={styles.wardRow}>
                     <TouchableOpacity
@@ -94,7 +118,7 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
                             <Text style={styles.typeText}>{w.wardType}</Text>
                           </View>
                         </View>
-                        <Text style={styles.wardMeta}>{w.wardCode} · {w.numberOfBeds} beds</Text>
+                        <Text style={styles.wardMeta}>{w.wardCode} · {w.numberOfBeds || 0} beds</Text>
                       </View>
                       <View style={{ transform: [{ rotate: isExpanded ? '90deg' : '0deg' }] }}>
                         <IconChevron size={18} color={T.textFaint} />
@@ -119,9 +143,9 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
 
                     {loadingBeds[w.wardCode] ? (
                       <ActivityIndicator size="small" color={T.accent} style={{ marginVertical: 8 }} />
-                    ) : beds.length > 0 ? beds.map(b => (
+                    ) : beds.length > 0 ? beds.map((b, bIdx) => (
                       <TouchableOpacity
-                        key={b.bedCode}
+                        key={b.bedCode || bIdx}
                         style={styles.bedItem}
                         onPress={() => setSelectedBed({ bed: b, wardCode: w.wardCode })}
                         activeOpacity={0.7}
@@ -147,7 +171,13 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
             <View style={styles.emptyState}>
               <IconDoor size={48} color={T.textFaint} />
               <Text style={styles.emptyTitle}>No wards found</Text>
-              <Text style={styles.emptyHint}>Create a ward to start assigning beds and monitoring patients.</Text>
+              <Text style={styles.emptyHint}>
+                We couldn't find any wards for hospital <Text style={{ fontWeight: '600', color: T.text }}>{user?.hospitalCode}</Text>. 
+                Create a ward to start assigning beds and monitoring patients.
+              </Text>
+              <Btn variant="primary" size="md" style={{ marginTop: 24, paddingHorizontal: 32 }} onPress={onNewWard}>
+                <IconPlus size={16} color="#FFF" /> Create New Ward
+              </Btn>
             </View>
           )}
         </View>

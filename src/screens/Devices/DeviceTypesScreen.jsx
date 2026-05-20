@@ -73,7 +73,7 @@ export const DeviceTypesScreen = ({ onCreate, onSelect = () => {} }) => {
             onPress={onCreate}
           >
             <IconPlus size={14} color="#FFF" />
-             New Type
+             New Device Type
           </Btn>
         </View>
 

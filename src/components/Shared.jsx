@@ -81,13 +81,14 @@ export const Btn = ({ children, variant = 'primary', size = 'md', onPress, full,
 };
 
 // --- TextInput ---
-export const TextInput = ({ value, onChangeText, placeholder, secureTextEntry, leading, trailing, error }) => {
+export const TextInput = ({ value, onChangeText, placeholder, secureTextEntry, leading, trailing, error, style, containerStyle, ...props }) => {
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   return (
     <View style={[
       styles.inputContainer,
-      { borderColor: error ? T.bad : T.borderSoft }
+      { borderColor: error ? T.bad : T.borderSoft },
+      containerStyle
     ]}>
       {leading && <View style={{ marginRight: 8 }}>{leading}</View>}
       <RNTextInput
@@ -96,7 +97,8 @@ export const TextInput = ({ value, onChangeText, placeholder, secureTextEntry, l
         placeholder={placeholder}
         placeholderTextColor={T.textFaint}
         secureTextEntry={secureTextEntry}
-        style={styles.input}
+        style={[styles.input, style]}
+        {...props}
       />
       {trailing && <View style={{ marginLeft: 8 }}>{trailing}</View>}
     </View>

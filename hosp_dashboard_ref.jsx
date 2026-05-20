@@ -651,8 +651,8 @@ function SettingsScreen({ role, onLogout, toast }) {
       </Btn>
 
       <div style={{ textAlign: 'center', fontSize: 11, color: T.textFaint, fontFamily: 'JetBrains Mono, monospace', marginTop: 8 }}>
-        iTouch Admin · v3.4.2 · build 28491<br/>
-        © 2026 iOrbit Technologies
+        iTouch Tech Admin<br/>
+        © 2026 iOrbit Digital Technologies
       </div>
 
        setConfirm(false)}

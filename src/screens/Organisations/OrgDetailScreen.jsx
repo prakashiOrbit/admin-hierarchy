@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, Avatar, RoleBadge, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
 import { IconHospital, IconUsers, IconPulse, IconLock, IconUserPlus } from '../../icons';
-import { organisationApi, userApi } from '../../services/api';
+import { organisationApi, userApi, summaryApi } from '../../services/api';
 
 export const OrgDetailScreen = ({ org, onInviteOwner }) => {
   const { theme: T } = useTheme();
@@ -14,6 +14,7 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
 
   const [hospitals, setHospitals] = useState([]);
   const [owners, setOwners] = useState([]);
+  const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [hospError, setHospError] = useState(null);
   const [ownersError, setOwnersError] = useState(null);
@@ -38,7 +39,11 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
       })
       .catch(err => setOwnersError(err.message || 'Failed to load owners'));
 
-    Promise.all([fetchHospitals, fetchOwners]).finally(() => setLoading(false));
+    const fetchSummary = summaryApi.getOrgSummary(org.orgName, token)
+      .then(setSummary)
+      .catch(() => {});
+
+    Promise.all([fetchHospitals, fetchOwners, fetchSummary]).finally(() => setLoading(false));
   }, [org?.orgName, token]);
 
   const initials = (org.businessName || org.orgName || '??').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
@@ -66,9 +71,9 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
         {/* Stats Grid */}
         <View style={styles.statsGrid}>
           {[
-            { label: 'Hospitals', value: hospError ? '—' : hospitals.length, color: T.accent },
-            { label: 'Owners', value: ownersError ? '—' : owners.length, color: '#2DD4BF' },
-            { label: 'Devices', value: '—', color: '#22D3EE' },
+            { label: 'Hospitals', value: summary?.stats?.totalHospitals ?? hospitals.length, color: T.accent },
+            { label: 'Users', value: summary?.stats?.totalUsers ?? owners.length, color: '#2DD4BF' },
+            { label: 'Devices', value: summary?.devices ?? summary?.totalDevices ?? '—', color: '#22D3EE' },
           ].map((stat, i) => (
             <View key={stat.label} style={styles.statBox}>
               <Text style={styles.statLabel}>{stat.label.toUpperCase()}</Text>
@@ -107,41 +112,6 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
           </Card>
         </View>
 
-        {/* Hospitals */}
-        <View style={styles.section}>
-          <SectionHeader title="HOSPITALS" count={hospitals.length} />
-          <Card style={styles.listCard}>
-            {loading ? (
-              <ActivityIndicator color={T.accent} style={{ padding: 20 }} />
-            ) : hospError ? (
-              <View style={styles.errorItem}>
-                <IconLock size={16} color={T.bad || '#ef4444'} />
-                <Text style={styles.errorItemText}>{hospError}</Text>
-              </View>
-            ) : hospitals.length > 0 ? (
-              hospitals.map((hosp, i) => (
-                <View key={hosp.id || i} style={[styles.listItem, i > 0 && styles.listBorder]}>
-                  <View style={styles.hospIcon}>
-                    <IconHospital size={16} color={T.accent} />
-                  </View>
-                  <View style={styles.listItemContent}>
-                    <Text style={styles.hospName}>{hosp.hospitalName}</Text>
-                    <Text style={styles.hospMeta}>{hosp.hospitalCode} · {hosp.beds || 0} beds</Text>
-                  </View>
-                  <StatusPill status={hosp.status || 'ACTIVE'} />
-                </View>
-              ))
-            ) : (
-              <View style={styles.emptyItem}>
-                <Text style={styles.emptyText}>No hospitals provisioned yet</Text>
-              </View>
-            )}
-          </Card>
-        </View>
-
-        <Btn variant="surface" style={styles.actionBtn} onPress={onInviteOwner}>
-          <IconUserPlus size={16} color={T.accent} /> Invite Organisation Owner
-        </Btn>
       </ScrollView>
     </View>
   );

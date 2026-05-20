@@ -24,7 +24,8 @@ export const HospitalsScreen = ({ onProvision, onSelect }) => {
     setError(null);
     try {
       const response = await organisationApi.listHospitals(user.orgName, token);
-      setHospitals(Array.isArray(response) ? response : []);
+      const list = Array.isArray(response) ? response : (Array.isArray(response?.data) ? response.data : []);
+      setHospitals(list);
     } catch (err) {
       console.error('Fetch hospitals error:', err);
       setError(err.message || 'Failed to load hospitals');
@@ -43,10 +44,12 @@ export const HospitalsScreen = ({ onProvision, onSelect }) => {
     fetchHospitals(false);
   };
 
+  const getStatus = (h) => h.status || 'ACTIVE';
+
   const filtered = hospitals.filter(h => 
     (h.hospitalName?.toLowerCase().includes(query.toLowerCase()) || 
      h.hospitalCode?.toLowerCase().includes(query.toLowerCase())) &&
-    (filter === 'All' || h.status === filter.toUpperCase())
+    (filter === 'All' || getStatus(h) === filter.toUpperCase())
   );
 
   return (
@@ -78,7 +81,7 @@ export const HospitalsScreen = ({ onProvision, onSelect }) => {
               active={filter === f} 
               onPress={() => setFilter(f)}
             >
-              {f} · {f === 'All' ? hospitals.length : hospitals.filter(h => h.status === f.toUpperCase()).length}
+              {f} · {f === 'All' ? hospitals.length : hospitals.filter(h => getStatus(h) === f.toUpperCase()).length}
             </Chip>
           ))}
         </ScrollView>

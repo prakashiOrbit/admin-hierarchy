@@ -216,20 +216,6 @@ const HomeContent = ({ onNavigate }) => {
       </View>
 
       <View style={styles.section}>
-        {/* Live Telemetry */}
-        <Card style={styles.telemetryCard}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>LIVE TELEMETRY</Text>
-            <Text style={styles.streaming}>● STREAMING</Text>
-          </View>
-          <View style={styles.telemetryBody}>
-            <View>
-              <Text style={styles.telemetryValue}>182.4<Text style={styles.telemetryUnit}>k</Text></Text>
-              <Text style={styles.telemetryLabel}>vitals events / min</Text>
-            </View>
-            <View style={styles.placeholderGraph} />
-          </View>
-        </Card>
 
         {/* Quick Actions */}
         <View style={styles.section}>
@@ -422,11 +408,7 @@ export const PlatformDashboard = ({ navigation }) => {
               <IconGlobe color={activeTab === 'orgs' ? T.accent : T.textDim} size={20} />
               <Text style={[styles.drawerItemText, activeTab === 'orgs' && { color: T.accent }]}>Organisations</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.drawerItem}>
-              <IconUsers color={T.textDim} size={20} />
-              <Text style={styles.drawerItemText}>Platform Users</Text>
-            </TouchableOpacity>
+
             
             <View style={styles.drawerDivider} />
 

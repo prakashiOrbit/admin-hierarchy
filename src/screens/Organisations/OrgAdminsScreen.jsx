@@ -23,9 +23,8 @@ export const OrgAdminsScreen = ({ onSelectUser, onInvite }) => {
     setError(null);
     try {
       const response = await userApi.listOrgAdmins(user.orgName, token);
-      // Assuming response is an array of users, filter for ORG_ADMIN if backend doesn't already
-      const filteredAdmins = (Array.isArray(response) ? response : [])
-        .filter(u => u.userRoles?.includes('ORG_ADMIN'));
+      const list = Array.isArray(response) ? response : (Array.isArray(response?.data) ? response.data : []);
+      const filteredAdmins = list.filter(u => u.userRoles?.includes('ORG_ADMIN') || u.role === 'ORG_ADMIN');
       setAdmins(filteredAdmins);
     } catch (err) {
       console.error('Fetch admins error:', err);

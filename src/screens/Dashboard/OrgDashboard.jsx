@@ -99,7 +99,7 @@ const OrgHomeContent = ({ role }) => {
     fetchData();
   }, [user?.orgName, token]);
 
-  const activeHospitals = hospitals.filter(h => h.status === 'ACTIVE').length;
+  const activeHospitals = hospitals.filter(h => (h.status || 'ACTIVE') === 'ACTIVE').length;
 
   const onlineDevices = devices.filter(d => ['ACTIVE', 'ONLINE'].includes(d.status)).length;
   const warnDevices   = devices.filter(d => ['WARNING', 'WARN'].includes(d.status)).length;

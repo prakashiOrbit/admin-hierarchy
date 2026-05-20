@@ -24,12 +24,22 @@ export const DevicesScreen = ({ onNewGateway, onNewDevice }) => {
     setLoading(true);
     setError(null);
     try {
-      const [g, d] = await Promise.all([
-        gatewayApi.listAll(user.orgName, user.hospitalCode, token),
-        deviceApi.listAll(user.orgName, user.hospitalCode, token),
+      const [gRes, dRes] = await Promise.all([
+        gatewayApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
+          const msg = (e.message || '').toLowerCase();
+          if (msg.includes('no_gateways') || msg.includes('notfound') || msg.includes('not found') || msg.includes('no gateway')) return [];
+          throw e;
+        }),
+        deviceApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
+          const msg = (e.message || '').toLowerCase();
+          if (msg.includes('no_devices') || msg.includes('notfound') || msg.includes('not found') || msg.includes('no device')) return [];
+          throw e;
+        }),
       ]);
-      setGateways(Array.isArray(g) ? g : []);
-      setDevices(Array.isArray(d) ? d : []);
+      const gList = Array.isArray(gRes) ? gRes : (Array.isArray(gRes?.data) ? gRes.data : []);
+      const dList = Array.isArray(dRes) ? dRes : (Array.isArray(dRes?.data) ? dRes.data : []);
+      setGateways(gList);
+      setDevices(dList);
     } catch (err) {
       setError(err.message || 'Failed to load devices');
     } finally {

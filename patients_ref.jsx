@@ -20,7 +20,7 @@ function Drawer({ open, onClose, role, items, route, onPick, onLogout }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <img src={window.__resources?.itouchLogo || "assets/itouch-logo.png"} alt="" width={32} height={32} style={{ borderRadius: 8 }}/>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: T.text }}>iTouch Admin</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: T.text }}>iTouch Tech Admin</div>
               <div style={{ fontSize: 10.5, color: T.textFaint, fontFamily: 'JetBrains Mono, monospace', marginTop: 1 }}>v3.4.2</div>
             </div>
           </div>

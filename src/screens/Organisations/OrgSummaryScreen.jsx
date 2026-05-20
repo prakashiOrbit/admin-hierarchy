@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { summaryApi } from '../../services/api';
+import { organisationApi, userApi, summaryApi } from '../../services/api';
 import { Card, SectionHeader, Btn } from '../../components/Shared';
 import { IconHospital, IconUsers, IconPulse, IconHeart, IconShield, IconDownload } from '../../icons';
 
@@ -11,6 +11,8 @@ export const OrgSummaryScreen = () => {
   const { user, token } = useAuth();
   const styles = createStyles(T);
   const [summary, setSummary] = useState(null);
+  const [hospitals, setHospitals] = useState([]);
+  const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -18,8 +20,15 @@ export const OrgSummaryScreen = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await summaryApi.getOrgSummary(user.orgName, token);
-      setSummary(data);
+      const [summaryData, hospData, adminData] = await Promise.all([
+        summaryApi.getOrgSummary(user.orgName, token).catch(() => null),
+        organisationApi.listHospitals(user.orgName, token).catch(() => []),
+        userApi.listOrgAdmins(user.orgName, token).catch(() => []),
+      ]);
+      
+      setSummary(summaryData);
+      setHospitals(Array.isArray(hospData) ? hospData : (hospData?.data || []));
+      setAdmins(Array.isArray(adminData) ? adminData : (adminData?.data || []));
     } catch (err) {
       setError(err.message || 'Failed to load summary');
     } finally {
@@ -36,14 +45,14 @@ export const OrgSummaryScreen = () => {
   const stats = [
     {
       label: 'Hospitals',
-      value: fmt(summary?.stats?.totalHospitals ?? summary?.hospitals),
+      value: fmt(summary?.stats?.totalHospitals || summary?.hospitals || hospitals.length),
       sub: '',
       icon: <IconHospital />,
       color: T.accent,
     },
     {
-      label: 'Users',
-      value: fmt(summary?.stats?.totalUsers ?? summary?.users ?? summary?.userCount),
+      label: 'Administrators',
+      value: fmt(summary?.stats?.totalUsers || summary?.users || summary?.userCount || admins.length),
       sub: '',
       icon: <IconUsers />,
       color: '#2DD4BF',

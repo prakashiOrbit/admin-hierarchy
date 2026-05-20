@@ -440,8 +440,7 @@ function UserDetailScreen({ userId, go, role, toast }) {
         }>Reset password</Btn>
       </div>
 
-      } onClick={() => setConfirm('deactivate')}>
-        {u.status === 'ACTIVE' ? 'Deactivate user' : 'Reactivate user'}
+      }
       </Btn>
 
       {(role === 'ORG_OWNER' || role === 'HOSP_OWNER' || role === 'PLATFORM_ADMIN') && (

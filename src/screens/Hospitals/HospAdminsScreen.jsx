@@ -19,7 +19,10 @@ export const HospAdminsScreen = ({ onSelectUser, onInvite }) => {
   useEffect(() => {
     if (!user?.orgName || !user?.hospitalCode) return;
     userApi.listHospAdminsByHospital(user.orgName, user.hospitalCode, token)
-      .then(setAdmins)
+      .then(res => {
+        const list = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
+        setAdmins(list);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);

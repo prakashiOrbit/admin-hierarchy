@@ -1,11 +1,13 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { useTheme } from '../../theme/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, Btn } from '../../components/Shared';
 import { IconUser, IconShield, IconLock, IconMoon, IconGlobe, IconChevron, IconLogout } from '../../icons';
 
 export const SettingsScreen = ({ onLogout }) => {
   const { theme: T, isDark, toggleTheme } = useTheme();
+  const { user } = useAuth();
   const styles = createStyles(T);
   
   return (
@@ -15,7 +17,7 @@ export const SettingsScreen = ({ onLogout }) => {
         
         <Card style={styles.listCard}>
           {[
-            { label: 'Profile', sub: 'Dr. Marcus Chen', icon: <IconUser size={18} color={T.accent} /> },
+            { label: 'Profile', sub: user?.userName || 'User', icon: <IconUser size={18} color={T.accent} /> },
             { label: 'Security', sub: '2FA Active', icon: <IconShield size={18} color={T.accent} /> },
             { label: 'API Keys', sub: 'Manage integrations', icon: <IconLock size={18} color={T.accent} /> },
           ].map((item, i) => (
@@ -72,8 +74,8 @@ export const SettingsScreen = ({ onLogout }) => {
         </Btn>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>iOrbit Admin · v3.4.2 · build 28491</Text>
-          <Text style={styles.footerText}>© 2026 iOrbit Technologies</Text>
+          <Text style={styles.footerText}>iOrbit Tech Admin</Text>
+          <Text style={styles.footerText}>© 2026 iOrbit Digital Technologies</Text>
         </View>
       </ScrollView>
     </View>

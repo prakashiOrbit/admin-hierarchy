@@ -18,7 +18,10 @@ export const UserDetailScreen = ({ userId, onBack }) => {
   useEffect(() => {
     if (!authUser?.orgName || !userId) return;
     userApi.getUserDetails(authUser.orgName, userId, token)
-      .then(setU)
+      .then(res => {
+        const userData = res?.data || res;
+        setU(userData);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [userId]);
@@ -27,16 +30,19 @@ export const UserDetailScreen = ({ userId, onBack }) => {
     return <View style={styles.center}><ActivityIndicator color={T.accent} /></View>;
   }
 
-  if (!u) {
+  if (!u || Object.keys(u).length <= 2) { // Robust check if it's just a status response
     return (
       <View style={styles.center}>
-        <Text style={{ color: T.textDim }}>User not found.</Text>
+        <Text style={{ color: T.textDim }}>User details not available.</Text>
       </View>
     );
   }
 
-  const initials = `${u.firstName?.[0] ?? ''}${u.lastName?.[0] ?? ''}`.toUpperCase();
-  const role = u.userRoles?.[0] ?? '';
+  const firstName = u.firstName || '';
+  const lastName = u.lastName || '';
+  const fullName = (firstName || lastName) ? `${firstName} ${lastName}`.trim() : (u.userName || 'User');
+  const initials = u.initials || `${firstName?.[0] ?? ''}${lastName?.[0] ?? ''}`.toUpperCase() || u.userName?.[0]?.toUpperCase() || 'US';
+  const role = u.role || u.userRoles?.[0] || '';
 
   return (
     <View style={styles.container}>
@@ -45,8 +51,8 @@ export const UserDetailScreen = ({ userId, onBack }) => {
           <View style={styles.profileHeader}>
             <Avatar initials={initials} size={64} />
             <View style={styles.profileInfo}>
-              <Text style={styles.userName}>{u.firstName} {u.lastName}</Text>
-              <Text style={styles.userEmail}>{u.userName}</Text>
+              <Text style={styles.userName}>{fullName}</Text>
+              <Text style={styles.userEmail}>{u.email || u.userName || 'No email'}</Text>
               <View style={styles.badgesRow}>
                 <StatusPill status={u.status ?? 'ACTIVE'} />
                 {role ? <RoleBadge role={role} /> : null}
@@ -58,8 +64,8 @@ export const UserDetailScreen = ({ userId, onBack }) => {
         <Card style={styles.detailsCard}>
           {[
             { l: 'Hospital', v: u.hospitalCode ?? '—', i: <IconHospital size={16} color={T.textDim} /> },
-            { l: 'Username', v: u.userName, i: <IconUser size={16} color={T.textDim} />, mono: true },
-            { l: 'Organisation', v: u.orgName, i: <IconUser size={16} color={T.textDim} />, mono: true },
+            { l: 'Username', v: u.userName ?? '—', i: <IconUser size={16} color={T.textDim} />, mono: true },
+            { l: 'Organisation', v: u.orgName ?? '—', i: <IconUser size={16} color={T.textDim} />, mono: true },
           ].map((row, i) => (
             <View key={i} style={[styles.detailItem, i > 0 && styles.itemBorder]}>
               <View style={styles.detailIcon}>{row.i}</View>
@@ -80,10 +86,6 @@ export const UserDetailScreen = ({ userId, onBack }) => {
           </Btn>
         </View>
 
-        <Btn variant="surface" style={styles.secondaryBtn}>
-          <IconPause size={16} color={T.text} />
-          <Text style={styles.btnText}>{u.status === 'ACTIVE' ? 'Deactivate user' : 'Reactivate user'}</Text>
-        </Btn>
       </ScrollView>
     </View>
   );
