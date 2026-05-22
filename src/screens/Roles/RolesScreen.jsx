@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, Btn } from '../../components/Shared';
@@ -7,6 +8,7 @@ import { IconShield, IconPlus, IconChevron, IconLock } from '../../icons';
 import { rolesApi } from '../../services/api';
 
 export const RolesScreen = ({ onSelectRole, onCreate }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user, token } = useAuth();
@@ -23,11 +25,11 @@ export const RolesScreen = ({ onSelectRole, onCreate }) => {
       const data = await rolesApi.listAll(user.orgName, token);
       setRoles(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(err.message || 'Failed to load roles');
+      setError(err.message || t('common.error'));
     } finally {
       setLoading(false);
     }
-  }, [user?.orgName, token]);
+  }, [user?.orgName, token, t]);
 
   useEffect(() => { fetchRoles(); }, [fetchRoles]);
 
@@ -43,15 +45,15 @@ export const RolesScreen = ({ onSelectRole, onCreate }) => {
           <IconLock size={32} color={isAccessDenied ? T.warn : (T.bad || '#ef4444')} />
         </View>
         <Text style={styles.errorTitle}>
-          {isAccessDenied ? 'Permission Required' : 'Could Not Load Roles'}
+          {isAccessDenied ? t('common.error') : t('common.error')}
         </Text>
         <Text style={styles.errorBody}>
           {isAccessDenied
-            ? 'Your account does not have permission to manage roles. Ask your platform administrator to grant role management access to your account.'
+            ? t('users.go_back')
             : error}
         </Text>
         {!isAccessDenied && (
-          <Btn variant="surface" size="sm" style={{ marginTop: 12 }} onPress={fetchRoles}>Retry</Btn>
+          <Btn variant="surface" size="sm" style={{ marginTop: 12 }} onPress={fetchRoles}>{t('common.retry')}</Btn>
         )}
       </View>
     );
@@ -61,7 +63,7 @@ export const RolesScreen = ({ onSelectRole, onCreate }) => {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.headerRow}>
-          <SectionHeader title="Access Roles" subtitle="RBAC Configuration" />
+          <SectionHeader title={t('dashboard.roles_perms')} subtitle={t('roles_screen.description')} />
           <Btn
             variant="primary"
             size="sm"
@@ -69,7 +71,7 @@ export const RolesScreen = ({ onSelectRole, onCreate }) => {
             onPress={onCreate}
           >
             <IconPlus size={14} color="#FFF" />
-             New role
+             {t('roles_screen.create_role')}
           </Btn>
         </View>
 
@@ -86,7 +88,7 @@ export const RolesScreen = ({ onSelectRole, onCreate }) => {
                 <View style={styles.roleInfo}>
                   <Text style={styles.roleName}>{r.roleName}</Text>
                   <Text style={styles.roleMeta}>
-                    {r.rolePermissions?.length ?? 0} permissions
+                    {r.rolePermissions?.length ?? 0} {t('roles_screen.permissions').toLowerCase()}
                   </Text>
                 </View>
                 <IconChevron size={18} color={T.textFaint} />
@@ -96,8 +98,8 @@ export const RolesScreen = ({ onSelectRole, onCreate }) => {
           {roles.length === 0 && (
             <View style={styles.emptyState}>
               <IconShield size={48} color={T.textFaint} />
-              <Text style={styles.emptyTitle}>No custom roles yet</Text>
-              <Text style={styles.emptyHint}>Create a role to define granular access permissions for your org.</Text>
+              <Text style={styles.emptyTitle}>{t('roles_screen.no_roles')}</Text>
+              <Text style={styles.emptyHint}>{t('roles_screen.description')}</Text>
             </View>
           )}
         </View>

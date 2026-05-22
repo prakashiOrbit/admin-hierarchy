@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, SearchBar, Avatar, RoleBadge, Btn } from '../../components/Shared';
@@ -8,6 +9,7 @@ import { IconPlus, IconChevron } from '../../icons';
 import { userApi } from '../../services/api';
 
 export const HospAdminsScreen = ({ onSelectUser, onInvite }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user, token } = useAuth();
@@ -41,21 +43,21 @@ export const HospAdminsScreen = ({ onSelectUser, onInvite }) => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={{ marginBottom: 20 }}>
           <SearchBar
-            placeholder="Search administrators..."
+            placeholder={t('placeholders.search_admins')}
             value={query}
             onChangeText={setQuery}
           />
         </View>
 
         <View style={styles.headerRow}>
-          <SectionHeader title="ADMINISTRATORS" count={filtered.length} />
+          <SectionHeader title={t('hospital.admins_title')} count={filtered.length} />
           <Btn
             variant="primary"
             size="sm"
             style={styles.newBtn}
             onPress={onInvite}
           >
-            <IconPlus size={14} color="#fff" /> Create Hosp Admin
+            <IconPlus size={14} color="#fff" /> {t('actions.create_hosp_admin')}
           </Btn>
         </View>
 
@@ -87,7 +89,7 @@ export const HospAdminsScreen = ({ onSelectUser, onInvite }) => {
           })}
           {filtered.length === 0 && (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyText}>No hospital administrators found.</Text>
+              <Text style={styles.emptyText}>{t('messages.no_hosp_admins_found')}</Text>
             </View>
           )}
         </View>

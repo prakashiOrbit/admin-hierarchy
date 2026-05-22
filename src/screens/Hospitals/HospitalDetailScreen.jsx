@@ -1,20 +1,22 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { Card, SectionHeader, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
 import { IconHospital, IconUser, IconMail, IconLocation, IconPhone, IconBed, IconDoor, IconPulse, IconBack } from '../../icons';
 
 export const HospitalDetailScreen = ({ hospital, onBack, onEdit }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   
   if (!hospital) return null;
 
   const stats = [
-    { label: 'Beds', value: hospital.beds || 0, icon: <IconBed size={16} /> },
-    { label: 'Wards', value: hospital.wards || 0, icon: <IconDoor size={16} /> },
-    { label: 'Devices', value: hospital.devices || 0, icon: <IconPulse size={16} /> },
+    { label: t('hospital.beds'), value: hospital.beds || 0, icon: <IconBed size={16} /> },
+    { label: t('hospital.wards'), value: hospital.wards || 0, icon: <IconDoor size={16} /> },
+    { label: t('hospital.devices'), value: hospital.devices || 0, icon: <IconPulse size={16} /> },
   ];
 
   const address = hospital.myAddress || {};
@@ -53,20 +55,20 @@ export const HospitalDetailScreen = ({ hospital, onBack, onEdit }) => {
 
         {/* Contact Information */}
         <View style={styles.section}>
-          <SectionHeader title="Primary Contact" />
+          <SectionHeader title={t('hospital.contact_section')} />
           <Card style={styles.infoCard}>
             <View style={styles.infoRow}>
               <IconUser size={18} color={T.textDim} />
               <View>
-                <Text style={styles.infoLabel}>Owner / Admin</Text>
-                <Text style={styles.infoValue}>{contact.name || 'Not assigned'}</Text>
+                <Text style={styles.infoLabel}>{t('hospital.contact_role')}</Text>
+                <Text style={styles.infoValue}>{contact.name || t('messages.not_assigned')}</Text>
               </View>
             </View>
             <View style={styles.divider} />
             <View style={styles.infoRow}>
               <IconMail size={18} color={T.textDim} />
               <View>
-                <Text style={styles.infoLabel}>Email Address</Text>
+                <Text style={styles.infoLabel}>{t('hospital.contact_email')}</Text>
                 <Text style={styles.infoValue}>{contact.email || '—'}</Text>
               </View>
             </View>
@@ -74,7 +76,7 @@ export const HospitalDetailScreen = ({ hospital, onBack, onEdit }) => {
             <View style={styles.infoRow}>
               <IconPhone size={18} color={T.textDim} />
               <View>
-                <Text style={styles.infoLabel}>Phone Number</Text>
+                <Text style={styles.infoLabel}>{t('hospital.contact_phone')}</Text>
                 <Text style={styles.infoValue}>{contact.phone || '—'}</Text>
               </View>
             </View>
@@ -83,12 +85,12 @@ export const HospitalDetailScreen = ({ hospital, onBack, onEdit }) => {
 
         {/* Address */}
         <View style={styles.section}>
-          <SectionHeader title="Location" />
+          <SectionHeader title={t('hospital.address_section')} />
           <Card style={styles.infoCard}>
             <View style={styles.infoRow}>
               <IconLocation size={18} color={T.textDim} />
               <View style={{ flex: 1 }}>
-                <Text style={styles.infoLabel}>Physical Address</Text>
+                <Text style={styles.infoLabel}>{t('hospital.address_street')}</Text>
                 <Text style={styles.infoValue}>
                   {address.street1}{address.street1 ? '\n' : ''}
                   {address.city}, {address.state} {address.pincode}{'\n'}
@@ -102,12 +104,16 @@ export const HospitalDetailScreen = ({ hospital, onBack, onEdit }) => {
         {/* Actions */}
         <View style={styles.actionRow}>
           <Btn variant="surface" style={{ flex: 1 }} onPress={onBack}>
-            Back to List
+            {t('actions.back_to_list')}
           </Btn>
           <Btn variant="primary" style={{ flex: 1 }} onPress={onEdit}>
-            Manage Console
+            {t('actions.manage_console')}
           </Btn>
         </View>
+      </ScrollView>
+    </View>
+  );
+};
       </ScrollView>
     </View>
   );

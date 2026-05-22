@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, SearchBar, Btn, Avatar } from '../../components/Shared';
@@ -7,6 +8,7 @@ import { IconStethoscope, IconPlus, IconChevron, IconActivity } from '../../icon
 import { doctorApi } from '../../services/api';
 
 export const DoctorsScreen = ({ onNewDoctor, onSelectDoctor }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user, token } = useAuth();
@@ -41,13 +43,13 @@ export const DoctorsScreen = ({ onNewDoctor, onSelectDoctor }) => {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={{ marginBottom: 16 }}>
-          <SearchBar placeholder="Search doctors..." value={query} onChangeText={setQuery} />
+          <SearchBar placeholder={t('placeholders.search_doctors')} value={query} onChangeText={setQuery} />
         </View>
 
         <View style={styles.headerRow}>
-          <SectionHeader title="MEDICAL STAFF" count={filtered.length} />
+          <SectionHeader title={t('entity.medical_staff')} count={filtered.length} />
           <Btn variant="primary" style={styles.newBtn} onPress={onNewDoctor}>
-            <IconPlus size={14} color="#fff" /> New Doctor
+            <IconPlus size={14} color="#fff" /> {t('actions.new_doctor')}
           </Btn>
         </View>
 
@@ -61,12 +63,12 @@ export const DoctorsScreen = ({ onNewDoctor, onSelectDoctor }) => {
                   <Avatar initials={initials} size={44} />
                   <View style={styles.doctorInfo}>
                     <View style={styles.titleRow}>
-                      <Text style={styles.doctorName}>Dr. {d.firstName} {d.lastName}</Text>
+                      <Text style={styles.doctorName}>{t('messages.dr_name', { firstName: d.firstName, lastName: d.lastName })}</Text>
                       <View style={styles.typeBadge}>
-                        <Text style={styles.typeText}>{d.doctorType || 'DOCTOR'}</Text>
+                        <Text style={styles.typeText}>{d.doctorType || t('entity.doctor')}</Text>
                       </View>
                     </View>
-                    <Text style={styles.doctorMeta}>{d.doctorCode} · {d.doctorExperience}y exp</Text>
+                    <Text style={styles.doctorMeta}>{d.doctorCode} · {t('entity.years_exp_short', { count: d.doctorExperience })}</Text>
                     {specialities.length > 0 && (
                       <View style={styles.specRow}>
                         <IconActivity size={12} color={T.textDim} />
@@ -83,8 +85,8 @@ export const DoctorsScreen = ({ onNewDoctor, onSelectDoctor }) => {
           {filtered.length === 0 && (
             <View style={styles.emptyState}>
               <IconStethoscope size={48} color={T.textFaint} />
-              <Text style={styles.emptyTitle}>No doctors found</Text>
-              <Text style={styles.emptyHint}>Onboard a new medical professional to your hospital.</Text>
+              <Text style={styles.emptyTitle}>{t('messages.no_doctors_found')}</Text>
+              <Text style={styles.emptyHint}>{t('messages.onboard_doctor_hint')}</Text>
             </View>
           )}
         </View>
@@ -92,6 +94,7 @@ export const DoctorsScreen = ({ onNewDoctor, onSelectDoctor }) => {
     </View>
   );
 };
+
 
 const createStyles = (T) => StyleSheet.create({
   container: { flex: 1 },

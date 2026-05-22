@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, ActivityIndicator, RefreshControl } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { userApi } from '../../services/api';
@@ -8,6 +9,7 @@ import { StatusPill } from '../../components/StatusPill';
 import { IconPlus, IconChevron, IconUsers } from '../../icons';
 
 export const OrgAdminsScreen = ({ onSelectUser, onInvite }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
   const styles = createStyles(T);
@@ -28,12 +30,12 @@ export const OrgAdminsScreen = ({ onSelectUser, onInvite }) => {
       setAdmins(filteredAdmins);
     } catch (err) {
       console.error('Fetch admins error:', err);
-      setError(err.message || 'Failed to load administrators');
+      setError(err.message || t('admins.failed_load'));
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [user?.orgName, token]);
+  }, [user?.orgName, token, t]);
 
   useEffect(() => {
     fetchAdmins();
@@ -53,7 +55,7 @@ export const OrgAdminsScreen = ({ onSelectUser, onInvite }) => {
     <View style={styles.container}>
       <View style={{ padding: 16, paddingBottom: 0 }}>
         <SearchBar 
-          placeholder="Search administrators..."
+          placeholder={t('admins.search_placeholder')}
           value={query}
           onChangeText={setQuery}
         />
@@ -66,7 +68,7 @@ export const OrgAdminsScreen = ({ onSelectUser, onInvite }) => {
         }
       >
         <View style={styles.headerRow}>
-          <SectionHeader title="ADMINISTRATORS" count={filtered.length} />
+          <SectionHeader title={t('admins.title')} count={filtered.length} />
           
           <Btn 
             variant="primary" 
@@ -74,7 +76,7 @@ export const OrgAdminsScreen = ({ onSelectUser, onInvite }) => {
             style={styles.newBtn} 
             onPress={onInvite}
           >
-            <IconPlus size={14} color="#fff" /> Create Org Admin
+            <IconPlus size={14} color="#fff" /> {t('admins.create_admin')}
           </Btn>
         </View>
 
@@ -86,18 +88,18 @@ export const OrgAdminsScreen = ({ onSelectUser, onInvite }) => {
           <View style={styles.center}>
             <Text style={[styles.errorText, { color: T.bad }]}>{error}</Text>
             <Btn variant="surface" size="sm" onPress={() => fetchAdmins()} style={{ marginTop: 12 }}>
-              Retry
+              {t('common.retry')}
             </Btn>
           </View>
         ) : filtered.length === 0 ? (
           <View style={styles.center}>
             <IconUsers size={48} color={T.textFaint} />
             <Text style={[styles.emptyText, { color: T.textDim }]}>
-              {query ? 'No matching administrators found' : 'No administrators provisioned yet'}
+              {query ? t('admins.no_matching') : t('admins.no_provisioned')}
             </Text>
             {!query && (
               <Btn variant="tonal" size="sm" onPress={onInvite} style={{ marginTop: 16 }}>
-                Invite First Admin
+                {t('admins.invite_first')}
               </Btn>
             )}
           </View>
@@ -112,7 +114,7 @@ export const OrgAdminsScreen = ({ onSelectUser, onInvite }) => {
                       <Text style={styles.userName}>{u.userName}</Text>
                       <RoleBadge role={u.role || (u.roles && u.roles[0]) || 'ORG_ADMIN'} />
                     </View>
-                    <Text style={styles.userEmail}>{u.email || 'No email'}</Text>
+                    <Text style={styles.userEmail}>{u.email || t('admins.no_email')}</Text>
                     <View style={styles.badgesRow}>
                       <StatusPill status={u.status || 'ACTIVE'} />
                     </View>

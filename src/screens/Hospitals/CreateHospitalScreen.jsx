@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator, Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { organisationApi } from '../../services/api';
@@ -7,6 +8,7 @@ import { Card, Field, TextInput, Btn } from '../../components/Shared';
 import { IconHospital, IconUser, IconMail, IconLocation, IconPhone, IconShield } from '../../icons';
 
 export const CreateHospitalScreen = ({ onCancel }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
   const styles = createStyles(T);
@@ -52,18 +54,18 @@ export const CreateHospitalScreen = ({ onCancel }) => {
 
   const handleCreate = async () => {
     if (!user?.orgName) {
-      Alert.alert('Error', 'Organisation name not found');
+      Alert.alert(t('alerts.error'), t('alerts.org_not_found'));
       return;
     }
 
     setLoading(true);
     try {
       await organisationApi.createHospital(user.orgName, form, token);
-      Alert.alert('Success', 'Hospital created successfully', [
-        { text: 'OK', onPress: onCancel }
+      Alert.alert(t('alerts.success'), t('alerts.hospital_created'), [
+        { text: t('actions.ok'), onPress: onCancel }
       ]);
     } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to create hospital');
+      Alert.alert(t('alerts.error'), error.message || t('alerts.create_failed'));
     } finally {
       setLoading(false);
     }
@@ -75,66 +77,66 @@ export const CreateHospitalScreen = ({ onCancel }) => {
         <View style={styles.banner}>
           <IconShield color={T.accent} size={20} />
           <Text style={styles.bannerText}>
-            Provisioning a new hospital. The primary contact will be invited Hospital Owner (HOSP_OWNER).
+            {t('hospital.provision_banner')}
           </Text>
         </View>
 
         {/* Identity Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>HOSPITAL IDENTITY</Text>
+          <Text style={styles.sectionTitle}>{t('hospital.identity_section')}</Text>
           
-          <Field label="Hospital Code">
+          <Field label={t('hospital.code')}>
             <TextInput 
               value={form.hospitalCode} 
               onChangeText={(v) => updateRoot('hospitalCode', v.toUpperCase())}
-              placeholder="e.g. CLV-MAIN"
+              placeholder={t('placeholders.hospital_code')}
             />
           </Field>
 
-          <Field label="Hospital Name">
+          <Field label={t('hospital.name')}>
             <TextInput 
               value={form.hospitalName} 
               onChangeText={(v) => updateRoot('hospitalName', v)}
-              placeholder="e.g. City General Hospital"
+              placeholder={t('placeholders.hospital_name')}
             />
           </Field>
 
-          <Field label="Description">
+          <Field label={t('hospital.description')}>
             <TextInput 
               value={form.description} 
               onChangeText={(v) => updateRoot('description', v)}
-              placeholder="e.g. Main city branch"
+              placeholder={t('placeholders.hospital_description')}
             />
           </Field>
         </View>
 
         {/* Contact Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>PRIMARY CONTACT (OWNER)</Text>
+          <Text style={styles.sectionTitle}>{t('hospital.contact_section')}</Text>
           
-          <Field label="Full Name">
+          <Field label={t('hospital.contact_name')}>
             <TextInput 
               value={form.myContact.name} 
               onChangeText={(v) => updateContact('name', v)}
-              placeholder="Full name"
+              placeholder={t('placeholders.contact_name')}
               leading={<IconUser size={18} color={T.textDim} />}
             />
           </Field>
 
-          <Field label="Email Address">
+          <Field label={t('hospital.contact_email')}>
             <TextInput 
               value={form.myContact.email} 
               onChangeText={(v) => updateContact('email', v.toLowerCase())}
-              placeholder="owner@hospital.com"
+              placeholder={t('placeholders.contact_email')}
               leading={<IconMail size={18} color={T.textDim} />}
             />
           </Field>
 
-          <Field label="Phone Number">
+          <Field label={t('hospital.contact_phone')}>
             <TextInput 
               value={form.myContact.phone} 
               onChangeText={(v) => updateContact('phone', v)}
-              placeholder="+91 98000 00000"
+              placeholder={t('placeholders.contact_phone')}
               leading={<IconPhone size={18} color={T.textDim} />}
             />
           </Field>
@@ -142,33 +144,33 @@ export const CreateHospitalScreen = ({ onCancel }) => {
 
         {/* Address Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>PHYSICAL ADDRESS</Text>
+          <Text style={styles.sectionTitle}>{t('hospital.address_section')}</Text>
           
-          <Field label="Street Address">
+          <Field label={t('hospital.address_street')}>
             <TextInput 
               value={form.myAddress.street1} 
               onChangeText={(v) => updateAddress('street1', v)}
-              placeholder="123 Health Ave"
+              placeholder={t('placeholders.address_street')}
               leading={<IconLocation size={18} color={T.textDim} />}
             />
           </Field>
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="City">
+              <Field label={t('hospital.address_city')}>
                 <TextInput 
                   value={form.myAddress.city} 
                   onChangeText={(v) => updateAddress('city', v)}
-                  placeholder="Metropolis"
+                  placeholder={t('placeholders.address_city')}
                 />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="State">
+              <Field label={t('hospital.address_state')}>
                 <TextInput 
                   value={form.myAddress.state} 
                   onChangeText={(v) => updateAddress('state', v)}
-                  placeholder="NY"
+                  placeholder={t('placeholders.address_state')}
                 />
               </Field>
             </View>
@@ -176,20 +178,20 @@ export const CreateHospitalScreen = ({ onCancel }) => {
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="Country">
+              <Field label={t('hospital.address_country')}>
                 <TextInput 
                   value={form.myAddress.country} 
                   onChangeText={(v) => updateAddress('country', v)}
-                  placeholder="USA"
+                  placeholder={t('placeholders.address_country')}
                 />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Pincode">
+              <Field label={t('hospital.address_pincode')}>
                 <TextInput 
                   value={form.myAddress.pincode} 
                   onChangeText={(v) => updateAddress('pincode', v)}
-                  placeholder="10001"
+                  placeholder={t('placeholders.address_pincode')}
                 />
               </Field>
             </View>
@@ -198,14 +200,14 @@ export const CreateHospitalScreen = ({ onCancel }) => {
 
         {/* Actions */}
         <View style={styles.actionRow}>
-          <Btn variant="ghost" full style={{ flex: 1 }} onPress={onCancel} disabled={loading}>Cancel</Btn>
+          <Btn variant="ghost" full style={{ flex: 1 }} onPress={onCancel} disabled={loading}>{t('actions.cancel')}</Btn>
           <Btn 
             full 
             style={{ flex: 1.5 }} 
             onPress={handleCreate} 
             disabled={!isFormValid || loading}
           >
-            {loading ? <ActivityIndicator color="#FFF" size="small" /> : 'Create Hospital'}
+            {loading ? <ActivityIndicator color="#FFF" size="small" /> : t('actions.create')}
           </Btn>
         </View>
       </ScrollView>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader } from '../../components/Shared';
@@ -8,6 +9,7 @@ import { rolesApi } from '../../services/api';
 import { PERMISSION_GROUPS } from '../../data/mock';
 
 export const RoleDetailScreen = ({ roleId, onBack }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user, token } = useAuth();
@@ -30,7 +32,7 @@ export const RoleDetailScreen = ({ roleId, onBack }) => {
   if (!role) {
     return (
       <View style={styles.center}>
-        <Text style={{ color: T.textDim }}>Role not found.</Text>
+        <Text style={{ color: T.textDim }}>{t('roles_screen.no_roles')}</Text>
       </View>
     );
   }
@@ -47,12 +49,12 @@ export const RoleDetailScreen = ({ roleId, onBack }) => {
             </View>
             <View style={styles.headerInfo}>
               <Text style={styles.roleName}>{role.roleName}</Text>
-              <Text style={styles.roleMeta}>{assignedPerms.size} permissions assigned</Text>
+              <Text style={styles.roleMeta}>{assignedPerms.size} {t('roles_screen.permissions').toLowerCase()}</Text>
             </View>
           </View>
         </Card>
 
-        <SectionHeader title="Permissions" count={assignedPerms.size} />
+        <SectionHeader title={t('roles_screen.permissions')} count={assignedPerms.size} />
         <View style={styles.permsContainer}>
           {PERMISSION_GROUPS.map((group) => (
             <Card key={group.name} style={styles.groupCard}>

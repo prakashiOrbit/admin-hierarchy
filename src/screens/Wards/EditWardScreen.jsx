@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Field, TextInput, Btn } from '../../components/Shared';
@@ -9,6 +10,7 @@ import { wardApi } from '../../services/api';
 const WARD_TYPES = ['ICU', 'GENERAL', 'EMERGENCY', 'PEDIATRICS', 'MATERNITY', 'SURGICAL'];
 
 export const EditWardScreen = ({ ward, onCancel, onSave, onDelete }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
   const styles = createStyles(T);
@@ -29,11 +31,11 @@ export const EditWardScreen = ({ ward, onCancel, onSave, onDelete }) => {
     setSaving(true);
     try {
       await wardApi.update(user.orgName, user.hospitalCode, ward.wardCode, form, token);
-      Alert.alert('Success', 'Ward updated successfully.', [
-        { text: 'OK', onPress: () => onSave({ ...ward, ...form }) },
+      Alert.alert(t('alerts.success'), t('alerts.ward_updated'), [
+        { text: t('actions.ok'), onPress: () => onSave({ ...ward, ...form }) },
       ]);
     } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to update ward.');
+      Alert.alert(t('alerts.error'), e.message || t('alerts.update_failed'));
     } finally {
       setSaving(false);
     }
@@ -41,19 +43,19 @@ export const EditWardScreen = ({ ward, onCancel, onSave, onDelete }) => {
 
   const confirmDelete = () => {
     Alert.alert(
-      'Delete Ward',
-      `Permanently delete "${ward.wardName}"? This cannot be undone.`,
+      t('actions.delete_ward'),
+      t('messages.confirm_delete_ward', { wardName: ward.wardName }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('actions.cancel'), style: 'cancel' },
         {
-          text: 'Delete', style: 'destructive',
+          text: t('actions.delete'), style: 'destructive',
           onPress: async () => {
             setDeleting(true);
             try {
               await wardApi.delete(user.orgName, user.hospitalCode, ward.wardCode, token);
               onDelete?.();
             } catch (e) {
-              Alert.alert('Error', e.message || 'Failed to delete ward.');
+              Alert.alert(t('alerts.error'), e.message || t('alerts.delete_failed'));
             } finally {
               setDeleting(false);
             }
@@ -69,14 +71,14 @@ export const EditWardScreen = ({ ward, onCancel, onSave, onDelete }) => {
         <View style={styles.banner}>
           <IconDoor size={24} color={T.accent} />
           <Text style={styles.bannerText}>
-            Editing <Text style={{ fontWeight: '700' }}>{ward.wardCode}</Text>. Ward code cannot be changed.
+            {t('ward.editing_banner', { code: ward.wardCode })}. {t('ward.code_immutable')}
           </Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>WARD IDENTITY</Text>
+          <Text style={styles.sectionTitle}>{t('ward.identity_section')}</Text>
 
-          <Field label="Ward Code">
+          <Field label={t('ward.ward_code')}>
             <Card style={styles.readOnlyCard}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <IconBuilding size={16} color={T.textFaint} />
@@ -85,15 +87,15 @@ export const EditWardScreen = ({ ward, onCancel, onSave, onDelete }) => {
             </Card>
           </Field>
 
-          <Field label="Ward Name" required>
+          <Field label={t('ward.ward_name')} required>
             <TextInput
               value={form.wardName}
               onChangeText={v => updateForm('wardName', v)}
-              placeholder="e.g. Emergency Ward"
+              placeholder={t('placeholders.ward_name')}
             />
           </Field>
 
-          <Field label="Ward Type">
+          <Field label={t('ward.ward_type')}>
             <View style={styles.typeGrid}>
               {WARD_TYPES.map(t => (
                 <TouchableOpacity
@@ -109,11 +111,11 @@ export const EditWardScreen = ({ ward, onCancel, onSave, onDelete }) => {
             </View>
           </Field>
 
-          <Field label="Est. Beds" required>
+          <Field label={t('ward.estimated_beds')} required>
             <TextInput
               value={form.numberOfBeds}
               onChangeText={v => updateForm('numberOfBeds', v.replace(/[^0-9]/g, ''))}
-              placeholder="15"
+              placeholder={t('placeholders.beds_count')}
               keyboardType="numeric"
             />
           </Field>
@@ -121,14 +123,14 @@ export const EditWardScreen = ({ ward, onCancel, onSave, onDelete }) => {
 
         <View style={styles.actionRow}>
           <Btn variant="ghost" style={{ flex: 1 }} onPress={onCancel} disabled={saving || deleting}>
-            Cancel
+            {t('actions.cancel')}
           </Btn>
           <Btn
             style={{ flex: 1.5 }}
             onPress={handleSave}
             disabled={!isFormValid || saving || deleting}
           >
-            {saving ? <ActivityIndicator color="#FFF" size="small" /> : 'Save Changes'}
+            {saving ? <ActivityIndicator color="#FFF" size="small" /> : t('actions.save_changes')}
           </Btn>
         </View>
 
@@ -140,7 +142,7 @@ export const EditWardScreen = ({ ward, onCancel, onSave, onDelete }) => {
         >
           <IconTrash size={16} color={T.bad} />
           <Text style={[styles.deleteBtnText, { color: T.bad }]}>
-            {deleting ? 'Deleting...' : 'Delete Ward'}
+            {deleting ? t('actions.deleting') : t('actions.delete_ward')}
           </Text>
         </Btn>
       </ScrollView>

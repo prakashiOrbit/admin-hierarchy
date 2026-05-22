@@ -1,19 +1,30 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { I18nManager } from 'react-native';
+import i18n from '../i18n';
+import { userApi } from '../services/api';
 
 const AuthContext = createContext(undefined);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
+  const [locale, setLocale] = useState(i18n.language);
 
   const login = (userData) => {
-    setUser({
+    const userProfile = {
       userName: userData.userName,
       orgName: userData.orgName,
       hospitalCode: userData.hospitalCode,
       userData: userData.userData,
-    });
+      preferredLocale: userData.preferredLocale || userData.userData?.preferredLocale,
+    };
+    
+    setUser(userProfile);
     setToken(userData.token);
+
+    if (userProfile.preferredLocale && userProfile.preferredLocale !== i18n.language) {
+      changeLanguage(userProfile.preferredLocale);
+    }
   };
 
   const logout = () => {
@@ -21,8 +32,41 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
   };
 
+  const changeLanguage = async (newLocale) => {
+    const isRTL = newLocale === 'ar';
+    
+    // Update i18n instance
+    i18n.changeLanguage(newLocale);
+    setLocale(newLocale);
+
+    // Handle RTL Flip
+    if (I18nManager.isRTL !== isRTL) {
+      I18nManager.allowRTL(isRTL);
+      I18nManager.forceRTL(isRTL);
+      // Note: In a real device, you usually need to call RNRestart.Restart()
+      // to apply RTL changes globally.
+      console.log(`RTL state changed to: ${isRTL}. App restart recommended.`);
+    }
+
+    if (token && user?.orgName) {
+      try {
+        await userApi.updatePreferredLocale(user.orgName, newLocale, token);
+      } catch (err) {
+        console.error('Failed to update preferred locale on back-end:', err);
+      }
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!token }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      token, 
+      locale,
+      login, 
+      logout, 
+      changeLanguage,
+      isAuthenticated: !!token 
+    }}>
       {children}
     </AuthContext.Provider>
   );

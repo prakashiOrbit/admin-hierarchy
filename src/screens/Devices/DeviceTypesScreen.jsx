@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, ActivityIndicator, RefreshControl } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { deviceTypeApi } from '../../services/api';
@@ -7,6 +8,7 @@ import { Card, SectionHeader, SearchBar, Btn } from '../../components/Shared';
 import { IconCpu, IconActivity, IconPlus, IconChevron } from '../../icons';
 
 export const DeviceTypesScreen = ({ onCreate, onSelect = () => {} }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
   const styles = createStyles(T);
@@ -26,12 +28,12 @@ export const DeviceTypesScreen = ({ onCreate, onSelect = () => {} }) => {
       setTypes(Array.isArray(response) ? response : []);
     } catch (err) {
       console.error('Fetch device types error:', err);
-      setError(err.message || 'Failed to load device types');
+      setError(err.message || t('messages.error_load_device_types'));
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [user?.orgName, token]);
+  }, [user?.orgName, token, t]);
 
   useEffect(() => {
     fetchTypes();
@@ -54,7 +56,7 @@ export const DeviceTypesScreen = ({ onCreate, onSelect = () => {} }) => {
         <SearchBar
           value={query}
           onChangeText={setQuery}
-          placeholder="Search device profiles..."
+          placeholder={t('placeholders.search_device_profiles')}
         />
       </View>
 
@@ -65,7 +67,7 @@ export const DeviceTypesScreen = ({ onCreate, onSelect = () => {} }) => {
         }
       >
         <View style={styles.headerRow}>
-          <SectionHeader title="Hardware Profiles" subtitle="Supported IoMT devices" />
+          <SectionHeader title={t('entity.hardware_profiles')} subtitle={t('entity.hardware_profiles_subtitle')} />
           <Btn 
             variant="primary" 
             size="sm" 
@@ -73,7 +75,7 @@ export const DeviceTypesScreen = ({ onCreate, onSelect = () => {} }) => {
             onPress={onCreate}
           >
             <IconPlus size={14} color="#FFF" />
-             New Device Type
+             {t('actions.new_device_type')}
           </Btn>
         </View>
 
@@ -85,18 +87,18 @@ export const DeviceTypesScreen = ({ onCreate, onSelect = () => {} }) => {
           <View style={styles.center}>
             <Text style={[styles.errorText, { color: T.bad }]}>{error}</Text>
             <Btn variant="surface" size="sm" onPress={() => fetchTypes()} style={{ marginTop: 12 }}>
-              Retry
+              {t('actions.retry')}
             </Btn>
           </View>
         ) : filteredTypes.length === 0 ? (
           <View style={styles.center}>
             <IconCpu size={48} color={T.textFaint} />
             <Text style={[styles.emptyText, { color: T.textDim }]}>
-              {query ? 'No matching device types found' : 'No hardware profiles defined'}
+              {query ? t('messages.no_matching_device_types') : t('messages.no_hardware_profiles')}
             </Text>
             {!query && (
               <Btn variant="tonal" size="sm" onPress={onCreate} style={{ marginTop: 16 }}>
-                Create First Profile
+                {t('actions.create_first_profile')}
               </Btn>
             )}
           </View>

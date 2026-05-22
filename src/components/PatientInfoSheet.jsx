@@ -3,6 +3,7 @@ import {
   View, Text, Modal, TouchableOpacity, TouchableWithoutFeedback,
   StyleSheet, ScrollView, ActivityIndicator, Alert, TextInput as RNTextInput,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -20,6 +21,7 @@ const FIELDS_BY_TYPE = {
 };
 
 export const PatientInfoSheet = ({ patientCode, existingInfos, visible, onClose, onAdded }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const insets = useSafeAreaInsets();
   const { user, token } = useAuth();
@@ -51,9 +53,9 @@ export const PatientInfoSheet = ({ patientCode, existingInfos, visible, onClose,
         { infoType: selectedType, infoData: JSON.stringify(fields) },
         token
       );
-      Alert.alert('Saved', 'Health record added.', [{ text: 'OK', onPress: () => { onAdded?.(); handleClose(); } }]);
+      Alert.alert(t('common.success'), t('patients.record_added'), [{ text: t('common.ok'), onPress: () => { onAdded?.(); handleClose(); } }]);
     } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to save record.');
+      Alert.alert(t('common.error'), e.message || t('patients.save_failed'));
     } finally {
       setSaving(false);
     }
@@ -68,9 +70,9 @@ export const PatientInfoSheet = ({ patientCode, existingInfos, visible, onClose,
   const renderList = () => (
     <>
       <View style={styles.sheetHeader}>
-        <Text style={styles.sheetTitle}>Health Records</Text>
+        <Text style={styles.sheetTitle}>{t('patients.health_records')}</Text>
         <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
-          <Text style={styles.closeBtnText}>Done</Text>
+          <Text style={styles.closeBtnText}>{t('common.done')}</Text>
         </TouchableOpacity>
       </View>
       <Text style={styles.subtitle}>{patientCode}</Text>
@@ -78,20 +80,20 @@ export const PatientInfoSheet = ({ patientCode, existingInfos, visible, onClose,
       <ScrollView style={{ maxHeight: 380 }}>
         {existingInfos && existingInfos.length > 0 && (
           <>
-            <Text style={styles.sectionLabel}>EXISTING RECORDS</Text>
+            <Text style={styles.sectionLabel}>{t('patients.existing_records').toUpperCase()}</Text>
             {existingInfos.map((info, i) => {
               const data = parseInfo(info);
               const entries = Object.entries(data);
               return (
                 <View key={i} style={styles.infoCard}>
-                  <Text style={styles.infoType}>{info.infoType?.replace(/_/g, ' ')}</Text>
+                  <Text style={styles.infoType}>{t(`records.${info.infoType}`).toUpperCase()}</Text>
                   {entries.slice(0, 3).map(([k, v]) => (
                     <Text key={k} style={styles.infoRow}>
-                      <Text style={styles.infoKey}>{k}: </Text>{String(v)}
+                      <Text style={styles.infoKey}>{t(`records.fields.${k}`)}: </Text>{String(v)}
                     </Text>
                   ))}
                   {entries.length > 3 && (
-                    <Text style={styles.infoMore}>+{entries.length - 3} more fields</Text>
+                    <Text style={styles.infoMore}>{t('patients.more_fields', { count: entries.length - 3 })}</Text>
                   )}
                 </View>
               );
@@ -99,13 +101,13 @@ export const PatientInfoSheet = ({ patientCode, existingInfos, visible, onClose,
           </>
         )}
 
-        <Text style={styles.sectionLabel}>ADD RECORD</Text>
+        <Text style={styles.sectionLabel}>{t('patients.add_record').toUpperCase()}</Text>
         {INFO_TYPES.map(type => (
           <TouchableOpacity key={type} style={styles.typeItem} onPress={() => startAdd(type)}>
             <View style={[styles.typeIcon, { backgroundColor: T.accentSoft }]}>
               <IconPlus size={14} color={T.accent} />
             </View>
-            <Text style={styles.typeName}>{type.replace(/_/g, ' ')}</Text>
+            <Text style={styles.typeName}>{t(`records.${type}`)}</Text>
             <IconChevron size={14} color={T.textFaint} />
           </TouchableOpacity>
         ))}
@@ -119,19 +121,19 @@ export const PatientInfoSheet = ({ patientCode, existingInfos, visible, onClose,
       <>
         <View style={styles.sheetHeader}>
           <TouchableOpacity onPress={() => setMode('list')}>
-            <Text style={styles.backText}>‹ Back</Text>
+            <Text style={styles.backText}>‹ {t('common.back')}</Text>
           </TouchableOpacity>
-          <Text style={styles.sheetTitle}>{selectedType?.replace(/_/g, ' ')}</Text>
+          <Text style={styles.sheetTitle}>{t(`records.${selectedType}`)}</Text>
           <View style={{ width: 50 }} />
         </View>
 
         <ScrollView style={{ maxHeight: 320 }} keyboardShouldPersistTaps="handled">
           {fieldList.map(field => (
             <View key={field} style={styles.fieldRow}>
-              <Text style={styles.fieldLabel}>{field}</Text>
+              <Text style={styles.fieldLabel}>{t(`records.fields.${field}`)}</Text>
               <RNTextInput
                 style={[styles.fieldInput, { color: T.text, borderColor: T.borderSoft, backgroundColor: T.surface }]}
-                placeholder={field}
+                placeholder={t(`records.fields.${field}`)}
                 placeholderTextColor={T.textFaint}
                 value={fields[field] || ''}
                 onChangeText={v => setFields(prev => ({ ...prev, [field]: v }))}
@@ -147,7 +149,7 @@ export const PatientInfoSheet = ({ patientCode, existingInfos, visible, onClose,
         >
           {saving
             ? <ActivityIndicator color="#fff" size="small" />
-            : <Text style={styles.saveBtnText}>Save Record</Text>
+            : <Text style={styles.saveBtnText}>{t('patients.save_record')}</Text>
           }
         </TouchableOpacity>
       </>

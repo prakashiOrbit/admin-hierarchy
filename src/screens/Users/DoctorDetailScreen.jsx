@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, Avatar, Btn } from '../../components/Shared';
@@ -10,6 +11,7 @@ import { StaffShiftSheet } from '../../components/StaffShiftSheet';
 import { BulkAssignSheet } from '../../components/BulkAssignSheet';
 
 export const DoctorDetailScreen = ({ doctorId: doctorCode, onBack, onAssign, onEdit }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user, token } = useAuth();
@@ -35,8 +37,8 @@ export const DoctorDetailScreen = ({ doctorId: doctorCode, onBack, onAssign, onE
   if (error || !doctor) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorText}>{error || 'Doctor not found.'}</Text>
-        <Btn variant="surface" style={{ marginTop: 16 }} onPress={onBack}>Go Back</Btn>
+        <Text style={styles.errorText}>{error || t('messages.doctor_not_found')}</Text>
+        <Btn variant="surface" style={{ marginTop: 16 }} onPress={onBack}>{t('actions.go_back')}</Btn>
       </View>
     );
   }
@@ -52,22 +54,22 @@ export const DoctorDetailScreen = ({ doctorId: doctorCode, onBack, onAssign, onE
           <View style={styles.profileHeader}>
             <Avatar initials={initials} size={64} />
             <View style={styles.profileInfo}>
-              <Text style={styles.doctorName}>Dr. {d.firstName} {d.lastName}</Text>
-              <Text style={styles.doctorCode}>{d.doctorCode} · {d.doctorType || 'DOCTOR'}</Text>
+              <Text style={styles.doctorName}>{t('messages.dr_name', { firstName: d.firstName, lastName: d.lastName })}</Text>
+              <Text style={styles.doctorCode}>{d.doctorCode} · {d.doctorType || t('entity.doctor')}</Text>
               <View style={styles.badgesRow}>
                 <View style={styles.expBadge}>
-                  <Text style={styles.expText}>{d.doctorExperience}y Experience</Text>
+                  <Text style={styles.expText}>{t('entity.years_experience', { count: d.doctorExperience })}</Text>
                 </View>
               </View>
             </View>
           </View>
         </Card>
 
-        <SectionHeader title="Clinical Profile" />
+        <SectionHeader title={t('entity.clinical_profile')} />
         <Card style={{ marginBottom: 24, padding: 16 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
             <IconStethoscope size={16} color={T.accent} />
-            <Text style={{ fontSize: 11, fontWeight: '700', color: T.textDim, letterSpacing: 0.5 }}>SPECIALTIES</Text>
+            <Text style={{ fontSize: 11, fontWeight: '700', color: T.textDim, letterSpacing: 0.5 }}>{t('entity.specialties')}</Text>
           </View>
           <Text style={{ fontSize: 14, color: T.text, lineHeight: 20 }}>
             {specialities.length > 0 ? specialities.join(', ') : '—'}
@@ -76,8 +78,8 @@ export const DoctorDetailScreen = ({ doctorId: doctorCode, onBack, onAssign, onE
 
         <View style={styles.vitalsGrid}>
           {[
-            { l: 'BORN', v: d.birthDate || '—', i: <IconCalendar size={14} color={T.accent} /> },
-            { l: 'GENDER', v: d.gender || '—', i: <IconUser size={14} color={T.accent} /> },
+            { l: t('entity.born'), v: d.birthDate || '—', i: <IconCalendar size={14} color={T.accent} /> },
+            { l: t('entity.gender'), v: d.gender || '—', i: <IconUser size={14} color={T.accent} /> },
           ].map((v, i) => (
             <View key={i} style={styles.vitalBox}>
               <View style={styles.vitalHeader}>
@@ -89,12 +91,12 @@ export const DoctorDetailScreen = ({ doctorId: doctorCode, onBack, onAssign, onE
           ))}
         </View>
 
-        <SectionHeader title="Contact Information" />
+        <SectionHeader title={t('entity.contact_information')} />
         <Card style={styles.detailsCard}>
           {[
-            { l: 'Work Email', v: d.myContact?.email || '—', i: <IconMail size={16} color={T.textDim} /> },
-            { l: 'Direct Phone', v: d.myContact?.phone || '—', i: <IconPhone size={16} color={T.textDim} /> },
-            { l: 'City', v: d.myAddress?.city || '—', i: <IconLocation size={16} color={T.textDim} /> },
+            { l: t('entity.work_email'), v: d.myContact?.email || '—', i: <IconMail size={16} color={T.textDim} /> },
+            { l: t('entity.direct_phone'), v: d.myContact?.phone || '—', i: <IconPhone size={16} color={T.textDim} /> },
+            { l: t('entity.city'), v: d.myAddress?.city || '—', i: <IconLocation size={16} color={T.textDim} /> },
           ].map((row, i) => (
             <View key={i} style={[styles.detailItem, i > 0 && styles.itemBorder]}>
               <View style={styles.detailIcon}>{row.i}</View>
@@ -109,38 +111,39 @@ export const DoctorDetailScreen = ({ doctorId: doctorCode, onBack, onAssign, onE
         <View style={styles.actionGrid}>
           <Btn variant="surface" style={styles.actionBtn} onPress={() => onEdit?.(d)}>
             <IconEdit size={16} color={T.text} />
-            <Text style={styles.btnText}>Edit Profile</Text>
+            <Text style={styles.btnText}>{t('actions.edit_profile')}</Text>
           </Btn>
           <Btn variant="surface" style={styles.actionBtn} onPress={() => setShowBulkAssign(true)}>
             <IconPlus size={16} color={T.text} />
-            <Text style={styles.btnText}>Assign Patients</Text>
+            <Text style={styles.btnText}>{t('actions.assign_patients')}</Text>
           </Btn>
         </View>
 
         <Btn variant="surface" style={[styles.secondaryBtn, { marginTop: 8 }]} onPress={() => setShowShiftSheet(true)}>
           <IconClock size={16} color={T.text} />
-          <Text style={styles.btnText}>Assign to Shift</Text>
+          <Text style={styles.btnText}>{t('actions.assign_to_shift')}</Text>
         </Btn>
 
         <Btn variant="surface" style={[styles.secondaryBtn, { marginTop: 8 }]} onPress={() => onBack?.()}>
-          <Text style={styles.btnText}>Return to Staff List</Text>
+          <Text style={styles.btnText}>{t('actions.return_to_staff_list')}</Text>
         </Btn>
       </ScrollView>
 
       <StaffShiftSheet
         staffCode={d.doctorCode}
         staffType="doctor"
-        staffName={`Dr. ${d.firstName} ${d.lastName}`}
+        staffName={t('messages.dr_name', { firstName: d.firstName, lastName: d.lastName })}
         visible={showShiftSheet}
         onClose={() => setShowShiftSheet(false)}
       />
       <BulkAssignSheet
         doctorCode={d.doctorCode}
-        doctorName={`Dr. ${d.firstName} ${d.lastName}`}
+        doctorName={t('messages.dr_name', { firstName: d.firstName, lastName: d.lastName })}
         visible={showBulkAssign}
         onClose={() => setShowBulkAssign(false)}
       />
     </View>
+
   );
 };
 

@@ -4,6 +4,7 @@ import {
   StyleSheet, ScrollView, ActivityIndicator, Alert, TextInput as RNTextInput,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { wardApi, bedApi, patientApi, nurseApi } from '../services/api';
@@ -11,6 +12,7 @@ import { IconDoor, IconBed, IconUser, IconChevron } from '../icons';
 
 export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
   const { theme: T } = useTheme();
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { user, token } = useAuth();
   const styles = createStyles(T);
@@ -73,10 +75,10 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
     setSaving(bed.bedCode);
     try {
       await nurseApi.assignBed(user.orgName, user.hospitalCode, nurse.nurseCode, { bedCode: bed.bedCode }, token);
-      Alert.alert('Assigned', `Bed ${bed.bedCode} assigned to ${nurse.firstName} ${nurse.lastName}.`);
+      Alert.alert(t('actions.assigned'), t('actions.nurse_bed_assigned', { bed: bed.bedCode, name: `${nurse.firstName} ${nurse.lastName}` }));
       handleClose();
     } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to assign bed.');
+      Alert.alert(t('common.error'), e.message || 'Failed to assign bed.');
     } finally { setSaving(null); }
   };
 
@@ -84,10 +86,10 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
     setSaving(patient.patientCode);
     try {
       await nurseApi.admitPatient(user.orgName, user.hospitalCode, nurse.nurseCode, { patientCode: patient.patientCode }, token);
-      Alert.alert('Admitted', `${patient.firstName} ${patient.lastName} admitted by ${nurse.firstName} ${nurse.lastName}.`);
+      Alert.alert(t('actions.admitted'), t('actions.nurse_patient_admitted', { patient: `${patient.firstName} ${patient.lastName}`, nurse: `${nurse.firstName} ${nurse.lastName}` }));
       handleClose();
     } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to admit patient.');
+      Alert.alert(t('common.error'), e.message || 'Failed to admit patient.');
     } finally { setSaving(null); }
   };
 
@@ -108,9 +110,9 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
   const renderMain = () => (
     <>
       <View style={styles.sheetHeader}>
-        <Text style={styles.sheetTitle}>Nurse Actions</Text>
+        <Text style={styles.sheetTitle}>{t('actions.nurse_actions')}</Text>
         <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
-          <Text style={styles.closeBtnText}>Done</Text>
+          <Text style={styles.closeBtnText}>{t('common.done')}</Text>
         </TouchableOpacity>
       </View>
       <Text style={styles.subtitle}>{nurse?.firstName} {nurse?.lastName}</Text>
@@ -120,8 +122,8 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
           <IconBed size={18} color={T.accent} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.actionTitle}>Assign to Bed</Text>
-          <Text style={styles.actionSubtitle}>Pick a ward, then select a bed</Text>
+          <Text style={styles.actionTitle}>{t('actions.assign_to_bed')}</Text>
+          <Text style={styles.actionSubtitle}>{t('actions.pick_ward_bed')}</Text>
         </View>
         <IconChevron size={16} color={T.textFaint} />
       </TouchableOpacity>
@@ -131,8 +133,8 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
           <IconUser size={18} color="#10b981" />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.actionTitle}>Admit Patient</Text>
-          <Text style={styles.actionSubtitle}>Register nurse as admitting caregiver</Text>
+          <Text style={styles.actionTitle}>{t('actions.admit_patient')}</Text>
+          <Text style={styles.actionSubtitle}>{t('actions.register_caregiver')}</Text>
         </View>
         <IconChevron size={16} color={T.textFaint} />
       </TouchableOpacity>
@@ -143,14 +145,14 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
     <>
       <View style={styles.sheetHeader}>
         <TouchableOpacity onPress={() => { setMode('main'); setQuery(''); }}>
-          <Text style={styles.backText}>‹ Back</Text>
+          <Text style={styles.backText}>‹ {t('common.back')}</Text>
         </TouchableOpacity>
-        <Text style={styles.sheetTitle}>Select Ward</Text>
+        <Text style={styles.sheetTitle}>{t('actions.select_ward')}</Text>
         <View style={{ width: 50 }} />
       </View>
       <RNTextInput
         style={[styles.searchInput, { color: T.text, borderColor: T.borderSoft, backgroundColor: T.surface }]}
-        placeholder="Search wards..."
+        placeholder={t('actions.search_wards')}
         placeholderTextColor={T.textFaint}
         value={query}
         onChangeText={setQuery}
@@ -171,7 +173,7 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
               <IconChevron size={14} color={T.textFaint} />
             </TouchableOpacity>
           ))}
-          {filteredWards.length === 0 && <Text style={styles.emptyText}>No wards found.</Text>}
+          {filteredWards.length === 0 && <Text style={styles.emptyText}>{t('actions.no_wards')}</Text>}
         </ScrollView>
       )}
     </>
@@ -181,14 +183,14 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
     <>
       <View style={styles.sheetHeader}>
         <TouchableOpacity onPress={() => { setMode('ward'); setQuery(''); }}>
-          <Text style={styles.backText}>‹ Back</Text>
+          <Text style={styles.backText}>‹ {t('common.back')}</Text>
         </TouchableOpacity>
-        <Text style={styles.sheetTitle}>{selectedWard?.wardCode} Beds</Text>
+        <Text style={styles.sheetTitle}>{t('actions.ward_beds', { code: selectedWard?.wardCode })}</Text>
         <View style={{ width: 50 }} />
       </View>
       <RNTextInput
         style={[styles.searchInput, { color: T.text, borderColor: T.borderSoft, backgroundColor: T.surface }]}
-        placeholder="Search beds..."
+        placeholder={t('actions.search_beds')}
         placeholderTextColor={T.textFaint}
         value={query}
         onChangeText={setQuery}
@@ -217,7 +219,7 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
               <IconChevron size={14} color={T.textFaint} />
             </TouchableOpacity>
           ))}
-          {filteredBeds.length === 0 && <Text style={styles.emptyText}>No beds found.</Text>}
+          {filteredBeds.length === 0 && <Text style={styles.emptyText}>{t('actions.no_beds')}</Text>}
         </ScrollView>
       )}
     </>
@@ -227,14 +229,14 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
     <>
       <View style={styles.sheetHeader}>
         <TouchableOpacity onPress={() => { setMode('main'); setQuery(''); }}>
-          <Text style={styles.backText}>‹ Back</Text>
+          <Text style={styles.backText}>‹ {t('common.back')}</Text>
         </TouchableOpacity>
-        <Text style={styles.sheetTitle}>Admit Patient</Text>
+        <Text style={styles.sheetTitle}>{t('actions.admit_patient')}</Text>
         <View style={{ width: 50 }} />
       </View>
       <RNTextInput
         style={[styles.searchInput, { color: T.text, borderColor: T.borderSoft, backgroundColor: T.surface }]}
-        placeholder="Search patients..."
+        placeholder={t('actions.search_patients')}
         placeholderTextColor={T.textFaint}
         value={query}
         onChangeText={setQuery}
@@ -263,7 +265,7 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
               <IconChevron size={14} color={T.textFaint} />
             </TouchableOpacity>
           ))}
-          {filteredPatients.length === 0 && <Text style={styles.emptyText}>No patients found.</Text>}
+          {filteredPatients.length === 0 && <Text style={styles.emptyText}>{t('actions.no_patients')}</Text>}
         </ScrollView>
       )}
     </>
@@ -292,31 +294,4 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
 };
 
 const createStyles = (T) => StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)' },
-  sheet: {
-    backgroundColor: T.bg, borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    paddingTop: 12, paddingHorizontal: 20,
-    borderTopWidth: 1, borderColor: T.borderSoft,
-  },
-  handle: { width: 36, height: 4, borderRadius: 2, backgroundColor: T.border, alignSelf: 'center', marginBottom: 16 },
-  sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
-  sheetTitle: { fontSize: 17, fontWeight: '700', color: T.text },
-  closeBtn: { paddingHorizontal: 4 },
-  closeBtnText: { fontSize: 15, color: T.accent, fontWeight: '600' },
-  backText: { fontSize: 15, color: T.accent, fontWeight: '600', minWidth: 50 },
-  subtitle: { fontSize: 12, color: T.textDim, marginBottom: 16, fontFamily: 'monospace' },
-  searchInput: { height: 40, borderRadius: 10, borderWidth: 1, paddingHorizontal: 12, fontSize: 14, marginBottom: 10 },
-  actionItem: {
-    flexDirection: 'row', alignItems: 'center', gap: 14, padding: 16,
-    borderRadius: 12, borderWidth: 1, borderColor: T.borderSoft,
-    backgroundColor: T.surface, marginBottom: 10,
-  },
-  actionIcon: { width: 40, height: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  actionTitle: { fontSize: 15, fontWeight: '600', color: T.text },
-  actionSubtitle: { fontSize: 12, color: T.textDim, marginTop: 2 },
-  listItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: T.borderSoft },
-  listIcon: { width: 40, height: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  listName: { fontSize: 14, fontWeight: '600', color: T.text },
-  listMeta: { fontSize: 11, color: T.textDim, marginTop: 2, fontFamily: 'monospace' },
-  emptyText: { color: T.textFaint, fontSize: 13, textAlign: 'center', paddingVertical: 24 },
-});
+...

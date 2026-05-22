@@ -11,6 +11,7 @@ import { HospDashboard } from './src/screens/Dashboard/HospDashboard';
 
 import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 import { AuthProvider } from './src/context/AuthContext';
+import './src/i18n';
 
 const Stack = createNativeStackNavigator();
 

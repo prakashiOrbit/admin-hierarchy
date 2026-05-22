@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, ActivityIndicator, RefreshControl } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { userApi } from '../../services/api';
@@ -8,6 +9,7 @@ import { StatusPill } from '../../components/StatusPill';
 import { IconFilter, IconPlus, IconUsers } from '../../icons';
 
 export const UsersScreen = ({ onSelectUser }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
   const styles = createStyles(T);
@@ -44,12 +46,12 @@ export const UsersScreen = ({ onSelectUser }) => {
       setUsers(allUsers);
     } catch (err) {
       console.error('Fetch users error:', err);
-      setError(err.message || 'Failed to load users');
+      setError(err.message || t('common.error'));
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [user?.orgName, token]);
+  }, [user?.orgName, token, t]);
 
   useEffect(() => {
     fetchUsers();
@@ -74,11 +76,11 @@ export const UsersScreen = ({ onSelectUser }) => {
   });
 
   const tabs = [
-    { id: 'all', label: 'All', count: users.length },
-    { id: 'ORG_ADMIN', label: 'Org Admins', count: users.filter(u => getRole(u) === 'ORG_ADMIN').length },
-    { id: 'HOSP_OWNER', label: 'Hosp Owners', count: users.filter(u => getRole(u) === 'HOSP_OWNER').length },
-    { id: 'HOSP_ADMIN', label: 'Hosp Admins', count: users.filter(u => getRole(u) === 'HOSP_ADMIN').length },
-    { id: 'DOCTOR', label: 'Clinical', count: users.filter(u => ['DOCTOR', 'NURSE'].includes(getRole(u))).length },
+    { id: 'all', label: t('users.all_types', 'All'), count: users.length },
+    { id: 'ORG_ADMIN', label: t('dashboard.org_admins', 'Org Admins'), count: users.filter(u => getRole(u) === 'ORG_ADMIN').length },
+    { id: 'HOSP_OWNER', label: t('dashboard.hosp_owner', 'Hosp Owners'), count: users.filter(u => getRole(u) === 'HOSP_OWNER').length },
+    { id: 'HOSP_ADMIN', label: t('dashboard.hosp_administrator', 'Hosp Admins'), count: users.filter(u => getRole(u) === 'HOSP_ADMIN').length },
+    { id: 'DOCTOR', label: t('dashboard.medical_staff', 'Clinical'), count: users.filter(u => ['DOCTOR', 'NURSE'].includes(getRole(u))).length },
   ];
 
   return (
@@ -87,7 +89,7 @@ export const UsersScreen = ({ onSelectUser }) => {
         <SearchBar
           value={query}
           onChangeText={setQuery}
-          placeholder="Search users..."
+          placeholder={t('users.search_placeholder', 'Search users...')}
           trailing={
             <TouchableOpacity style={styles.filterBtn}>
               <IconFilter size={20} color={T.textDim} />
@@ -115,7 +117,7 @@ export const UsersScreen = ({ onSelectUser }) => {
           ))}
         </ScrollView>
 
-        <SectionHeader title="System Users" subtitle={`${filtered.length} members`} />
+        <SectionHeader title={t('dashboard.users', 'System Users')} subtitle={`${filtered.length} ${t('dashboard.registered_users', 'members').replace(/\d+ /, '')}`} />
 
         {/* List */}
         {loading && !refreshing ? (
@@ -126,7 +128,7 @@ export const UsersScreen = ({ onSelectUser }) => {
           <View style={styles.center}>
             <Text style={[styles.errorText, { color: T.bad }]}>{error}</Text>
             <Btn variant="surface" size="sm" onPress={() => fetchUsers()} style={{ marginTop: 12 }}>
-              Retry
+              {t('common.retry', 'Retry')}
             </Btn>
           </View>
         ) : (
@@ -143,7 +145,7 @@ export const UsersScreen = ({ onSelectUser }) => {
                       <Text style={styles.userName} numberOfLines={1}>{u.userName}</Text>
                       <StatusPill status={u.status || 'ACTIVE'} />
                     </View>
-                    <Text style={styles.userEmail}>{u.email || 'No email'}</Text>
+                    <Text style={styles.userEmail}>{u.email || t('users.no_email', 'No email')}</Text>
                     
                     <View style={styles.badgesRow}>
                       <RoleBadge role={getRole(u)} />
@@ -158,8 +160,8 @@ export const UsersScreen = ({ onSelectUser }) => {
             {filtered.length === 0 && (
               <View style={styles.emptyState}>
                 <IconUsers size={48} color={T.textFaint} />
-                <Text style={styles.emptyTitle}>No users match</Text>
-                <Text style={styles.emptyHint}>Try a different filter or search term.</Text>
+                <Text style={styles.emptyTitle}>{t('users.no_users', 'No users match')}</Text>
+                <Text style={styles.emptyHint}>{t('users.no_users_hint', 'Try a different filter or search term.')}</Text>
               </View>
             )}
           </View>

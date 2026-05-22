@@ -3,6 +3,7 @@ import {
   View, Text, Modal, TouchableOpacity, TouchableWithoutFeedback,
   StyleSheet, ScrollView, ActivityIndicator, Alert, TextInput as RNTextInput,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -10,6 +11,7 @@ import { shiftApi } from '../services/api';
 import { IconClock, IconChevron, IconCheck } from '../icons';
 
 export const StaffShiftSheet = ({ staffCode, staffType, staffName, visible, onClose }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const insets = useSafeAreaInsets();
   const { user, token } = useAuth();
@@ -42,9 +44,9 @@ export const StaffShiftSheet = ({ staffCode, staffType, staffName, visible, onCl
       } else {
         await shiftApi.assignNurse(user.orgName, user.hospitalCode, payload, token);
       }
-      Alert.alert('Assigned', `${staffName} assigned to ${shift.shiftName || shift.shiftCode}.`);
+      Alert.alert(t('common.success'), t('shifts.staff_assigned_msg', { name: staffName, shift: shift.shiftName || shift.shiftCode }));
     } catch (e) {
-      Alert.alert('Error', e.message || 'Assignment failed.');
+      Alert.alert(t('common.error'), e.message || t('shifts.assignment_failed'));
     } finally {
       setSaving(null);
     }
@@ -79,9 +81,9 @@ export const StaffShiftSheet = ({ staffCode, staffType, staffName, visible, onCl
       <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 24) }]}>
         <View style={styles.handle} />
         <View style={styles.sheetHeader}>
-          <Text style={styles.sheetTitle}>Assign to Shift</Text>
+          <Text style={styles.sheetTitle}>{t('shifts.assign_to_shift')}</Text>
           <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
-            <Text style={styles.closeBtnText}>Done</Text>
+            <Text style={styles.closeBtnText}>{t('common.done')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -89,7 +91,7 @@ export const StaffShiftSheet = ({ staffCode, staffType, staffName, visible, onCl
 
         <RNTextInput
           style={[styles.searchInput, { color: T.text, borderColor: T.borderSoft, backgroundColor: T.surface }]}
-          placeholder="Search shifts..."
+          placeholder={t('shifts.search_shifts')}
           placeholderTextColor={T.textFaint}
           value={query}
           onChangeText={setQuery}
@@ -122,7 +124,7 @@ export const StaffShiftSheet = ({ staffCode, staffType, staffName, visible, onCl
               </TouchableOpacity>
             ))}
             {filtered.length === 0 && !loading && (
-              <Text style={styles.emptyText}>No shifts available.</Text>
+              <Text style={styles.emptyText}>{t('shifts.no_shifts')}</Text>
             )}
           </ScrollView>
         )}

@@ -9,6 +9,7 @@ import { IconUser, IconLock, IconEye, IconEyeOff, IconShield, IconBack, IconMail
 
 export const LoginScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   
@@ -73,11 +74,11 @@ export const LoginScreen = ({ navigation }) => {
     setState('loading');
     try {
       await authApi.verifyEmail(pendingOrg || 'UNKNOWN', username, otpValue);
-      Alert.alert('Success', 'Email verified successfully. Please login again.', [
+      Alert.alert(t('common.success'), 'Email verified successfully. Please login again.', [
         { text: 'OK', onPress: () => { setState('idle'); setOtpValue(''); } }
       ]);
     } catch (err) {
-      Alert.alert('Verification Failed', err.message);
+      Alert.alert(t('common.error'), err.message);
     } finally {
       setState('idle');
     }
@@ -101,7 +102,7 @@ export const LoginScreen = ({ navigation }) => {
         navigation.replace('OrgDashboard', { role: isOrgOwner ? 'ORG_OWNER' : 'ORG_ADMIN' });
       }
     } catch (err) {
-      Alert.alert('2FA Failed', err.message);
+      Alert.alert(t('common.error'), err.message);
       setState('twofa');
     } finally {
       if (state === 'loading') setState('twofa');
@@ -115,23 +116,23 @@ export const LoginScreen = ({ navigation }) => {
         <View style={styles.twofaContent}>
           <TouchableOpacity onPress={() => setState('idle')} style={styles.backBtn}>
             <IconBack size={20} color={T.textDim} />
-            <Text style={styles.backText}>Back to Login</Text>
+            <Text style={styles.backText}>{t('auth.back_to_login')}</Text>
           </TouchableOpacity>
 
           <View style={styles.header}>
             <View style={styles.shieldIcon}>
               {isEmail ? <IconMail size={32} color={T.accent} /> : <IconShield size={32} color={T.accent} />}
             </View>
-            <Text style={styles.title}>{isEmail ? 'Verify Email' : 'Two-Factor Auth'}</Text>
+            <Text style={styles.title}>{t(isEmail ? 'auth.verify_email' : 'auth.two_fa')}</Text>
             <Text style={styles.subtitle}>
               {isEmail 
-                ? `Enter the 6-digit code sent to your email for ${pendingOrg}.`
-                : `Enter the security code from your authenticator app for ${pendingOrg}.`}
+                ? t('auth.otp_email_hint', { org: pendingOrg })
+                : t('auth.otp_2fa_hint', { org: pendingOrg })}
             </Text>
           </View>
 
           <View style={styles.form}>
-            <Field label="Security Code">
+            <Field label={t('auth.security_code')}>
               <TextInput
                 value={otpValue}
                 onChangeText={setOtpValue}
@@ -156,12 +157,12 @@ export const LoginScreen = ({ navigation }) => {
               disabled={state === 'loading' || otpValue.length < 6} 
               style={{ marginTop: 24 }}
             >
-              {state === 'loading' ? 'Verifying...' : 'Verify and continue'}
+              {state === 'loading' ? t('auth.verifying') : t('auth.verify_continue')}
             </Btn>
           </View>
 
           <TouchableOpacity style={styles.resendBtn}>
-            <Text style={styles.resendText}>Didn't receive a code? Resend</Text>
+            <Text style={styles.resendText}>{t('auth.resend_code')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -175,27 +176,27 @@ export const LoginScreen = ({ navigation }) => {
           <View style={styles.header}>
             <Logo size={48} />
             <View style={{ marginTop: 24 }}>
-              <Text style={styles.title}>Welcome back</Text>
-              <Text style={styles.subtitle}>Sign in to manage your IoMT estate.</Text>
+              <Text style={styles.title}>{t('auth.welcome_back')}</Text>
+              <Text style={styles.subtitle}>{t('auth.subtitle')}</Text>
             </View>
           </View>
 
           <View style={styles.form}>
-            <Field label="Username">
+            <Field label={t('auth.username')}>
               <TextInput
                 value={username}
                 onChangeText={setUsername}
-                placeholder="Enter your username"
+                placeholder={t('auth.username_placeholder')}
                 leading={<IconUser size={20} color={T.textFaint} />}
               />
             </Field>
 
-            <Field label="Password">
+            <Field label={t('auth.password')}>
               <TextInput
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPw}
-                placeholder="••••••••"
+                placeholder={t('auth.password_placeholder')}
                 leading={<IconLock size={20} color={T.textFaint} />}
                 trailing={
                   <TouchableOpacity onPress={() => setShowPw(!showPw)}>
@@ -212,7 +213,7 @@ export const LoginScreen = ({ navigation }) => {
             )}
 
             <TouchableOpacity style={styles.forgotBtn}>
-              <Text style={styles.forgotText}>Forgot password?</Text>
+              <Text style={styles.forgotText}>{t('auth.forgot_password')}</Text>
             </TouchableOpacity>
 
             <Btn 
@@ -222,12 +223,12 @@ export const LoginScreen = ({ navigation }) => {
               disabled={state === 'loading'} 
               style={{ marginTop: 12 }}
             >
-              {state === 'loading' ? 'Signing in...' : 'Sign in'}
+              {state === 'loading' ? t('auth.signing_in') : t('auth.sign_in')}
             </Btn>
           </View>
 
           <View style={styles.footer}>
-            <Text style={styles.poweredBy}>Powered by</Text>
+            <Text style={styles.poweredBy}>{t('common.powered_by')}</Text>
             <Logo size={18} />
           </View>
         </ScrollView>

@@ -1,10 +1,18 @@
+import i18n from '../i18n';
+
 const BASE_URL = 'http://139.59.46.163:8080/api';
 
 export const apiRequest = async (endpoint, options = {}) => {
-  const url = `${BASE_URL}${endpoint}`;
+  let url = `${BASE_URL}${endpoint}`;
+  
+  if (options.params) {
+    const searchParams = new URLSearchParams(options.params);
+    url += `?${searchParams.toString()}`;
+  }
   
   const headers = {
     'Content-Type': 'application/json',
+    'X-Locale': i18n.language || 'en',
     ...options.headers,
   };
 
@@ -166,6 +174,13 @@ export const userApi = {
     return apiRequest(`/${orgName}/user/${userName}`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
+    });
+  },
+  updatePreferredLocale: (orgName, locale, token) => {
+    return apiRequest(`/${orgName}/user/locale`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${token}` },
+      params: { locale }, // Note: Back-end expects this as a @RequestParam
     });
   },
 };

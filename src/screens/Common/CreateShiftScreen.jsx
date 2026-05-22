@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
@@ -7,6 +8,7 @@ import { IconClock, IconDoor } from '../../icons';
 import { wardApi, shiftApi } from '../../services/api';
 
 export const CreateShiftScreen = ({ onCancel, onSuccess }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user, token } = useAuth();
@@ -53,11 +55,11 @@ export const CreateShiftScreen = ({ onCancel, onSuccess }) => {
     };
     try {
       await shiftApi.create(user.orgName, user.hospitalCode, payload, token);
-      Alert.alert('Success', `Shift ${form.shiftCode} created.`, [
-        { text: 'OK', onPress: onSuccess || onCancel },
+      Alert.alert(t('common.success'), t('alerts.shift_created', { code: form.shiftCode }), [
+        { text: t('common.done'), onPress: onSuccess || onCancel },
       ]);
     } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to create shift.');
+      Alert.alert(t('common.error'), e.message || t('alerts.shift_create_failed'));
     } finally {
       setSaving(false);
     }
@@ -69,45 +71,45 @@ export const CreateShiftScreen = ({ onCancel, onSuccess }) => {
         <View style={styles.banner}>
           <IconClock size={20} color={T.accent} />
           <Text style={styles.bannerText}>
-            Creating a new clinical shift for {user?.hospitalCode}. Nurses can be assigned to the shift after creation.
+            {t('shift.create_banner', { hospital: user?.hospitalCode })}
           </Text>
         </View>
 
         <View style={styles.section}>
-          <SectionHeader title="Shift Details" />
+          <SectionHeader title={t('shift.details')} />
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="Shift Code" required>
-                <TextInput value={form.shiftCode} onChangeText={v => updateForm('shiftCode', v.toUpperCase())} placeholder="SHF-DAY-01" />
+              <Field label={t('shift.code')} required>
+                <TextInput value={form.shiftCode} onChangeText={v => updateForm('shiftCode', v.toUpperCase())} placeholder={t('shift.code_placeholder')} />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Shift Name" required>
-                <TextInput value={form.shiftName} onChangeText={v => updateForm('shiftName', v)} placeholder="Morning Shift" />
+              <Field label={t('shift.name')} required>
+                <TextInput value={form.shiftName} onChangeText={v => updateForm('shiftName', v)} placeholder={t('shift.name_placeholder')} />
               </Field>
             </View>
           </View>
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="Start Time">
-                <TextInput value={form.startTime} onChangeText={v => updateForm('startTime', v)} placeholder="08:00" leading={<IconClock size={16} color={T.textDim} />} />
+              <Field label={t('shift.start_time')}>
+                <TextInput value={form.startTime} onChangeText={v => updateForm('startTime', v)} placeholder={t('shift.time_placeholder')} leading={<IconClock size={16} color={T.textDim} />} />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="End Time">
-                <TextInput value={form.endTime} onChangeText={v => updateForm('endTime', v)} placeholder="16:00" leading={<IconClock size={16} color={T.textDim} />} />
+              <Field label={t('shift.end_time')}>
+                <TextInput value={form.endTime} onChangeText={v => updateForm('endTime', v)} placeholder={t('shift.time_placeholder')} leading={<IconClock size={16} color={T.textDim} />} />
               </Field>
             </View>
           </View>
         </View>
 
         <View style={styles.section}>
-          <SectionHeader title="Ward Assignment" />
+          <SectionHeader title={t('shift.ward_assignment')} />
           {wardsLoading ? (
             <ActivityIndicator color={T.accent} />
           ) : (
-            <Field label="Select Ward" required>
+            <Field label={t('shift.select_ward')} required>
               <View style={styles.pickerGrid}>
                 {wards.map(w => (
                   <TouchableOpacity
@@ -122,7 +124,7 @@ export const CreateShiftScreen = ({ onCancel, onSuccess }) => {
                   </TouchableOpacity>
                 ))}
                 {wards.length === 0 && (
-                  <Text style={{ color: T.textFaint, fontSize: 12 }}>No wards available. Create a ward first.</Text>
+                  <Text style={{ color: T.textFaint, fontSize: 12 }}>{t('shift.no_wards_available')}</Text>
                 )}
               </View>
             </Field>
@@ -130,9 +132,9 @@ export const CreateShiftScreen = ({ onCancel, onSuccess }) => {
         </View>
 
         <View style={styles.actionRow}>
-          <Btn variant="soft" style={{ flex: 1 }} onPress={onCancel}>Cancel</Btn>
+          <Btn variant="soft" style={{ flex: 1 }} onPress={onCancel}>{t('common.cancel')}</Btn>
           <Btn style={{ flex: 1 }} onPress={handleCreate} disabled={!isFormValid || saving}>
-            {saving ? 'Creating...' : 'Create Shift'}
+            {saving ? t('actions.creating') : t('actions.create_shift')}
           </Btn>
         </View>
       </ScrollView>

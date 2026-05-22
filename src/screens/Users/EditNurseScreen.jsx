@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
@@ -9,6 +10,7 @@ import { nurseApi } from '../../services/api';
 const NURSE_TYPES = ['REGISTERED', 'LICENSED', 'PRACTITIONER', 'SPECIALIST'];
 
 export const EditNurseScreen = ({ nurse, onCancel, onSave }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
   const styles = createStyles(T);
@@ -44,9 +46,9 @@ export const EditNurseScreen = ({ nurse, onCancel, onSave }) => {
     };
     try {
       await nurseApi.update(user.orgName, user.hospitalCode, nurse.nurseCode, payload, token);
-      Alert.alert('Saved', 'Nurse profile updated.', [{ text: 'OK', onPress: () => onSave?.() }]);
+      Alert.alert(t('common.success'), t('users.nurse_updated'), [{ text: t('common.done'), onPress: () => onSave?.() }]);
     } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to update nurse.');
+      Alert.alert(t('common.error'), e.message || t('users.update_failed_nurse'));
     } finally {
       setSaving(false);
     }
@@ -58,14 +60,14 @@ export const EditNurseScreen = ({ nurse, onCancel, onSave }) => {
         <View style={styles.banner}>
           <IconUser size={24} color={T.accent} />
           <Text style={styles.bannerText}>
-            Editing <Text style={{ fontWeight: '700' }}>{nurse.nurseCode}</Text>. Staff code cannot be changed.
+            {t('users.editing')} <Text style={{ fontWeight: '700' }}>{nurse.nurseCode}</Text>. {t('users.immutable_code_staff')}
           </Text>
         </View>
 
         <View style={styles.section}>
-          <SectionHeader title="Staff Identity" />
+          <SectionHeader title={t('users.staff_identity')} />
 
-          <Field label="Staff Code">
+          <Field label={t('users.staff_code')}>
             <Card style={styles.readOnlyCard}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <IconBuilding size={16} color={T.textFaint} />
@@ -76,18 +78,18 @@ export const EditNurseScreen = ({ nurse, onCancel, onSave }) => {
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="First Name" required>
+              <Field label={t('users.first_name')} required>
                 <TextInput value={form.firstName} onChangeText={v => set('firstName', v)} placeholder="Lena" />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Last Name" required>
+              <Field label={t('users.last_name')} required>
                 <TextInput value={form.lastName} onChangeText={v => set('lastName', v)} placeholder="Kowalski" />
               </Field>
             </View>
           </View>
 
-          <Field label="Speciality (comma-separated)">
+          <Field label={t('users.speciality_csv')}>
             <TextInput
               value={form.nurseSpeciality}
               onChangeText={v => set('nurseSpeciality', v)}
@@ -97,7 +99,7 @@ export const EditNurseScreen = ({ nurse, onCancel, onSave }) => {
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="Experience (Years)">
+              <Field label={t('users.experience')}>
                 <TextInput
                   value={form.nurseExperience}
                   onChangeText={v => set('nurseExperience', v.replace(/[^0-9]/g, ''))}
@@ -107,7 +109,7 @@ export const EditNurseScreen = ({ nurse, onCancel, onSave }) => {
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Gender">
+              <Field label={t('users.gender')}>
                 <View style={styles.row}>
                   {['MALE', 'FEMALE'].map(g => (
                     <TouchableOpacity
@@ -123,15 +125,15 @@ export const EditNurseScreen = ({ nurse, onCancel, onSave }) => {
             </View>
           </View>
 
-          <Field label="Nurse Type">
+          <Field label={t('users.type')}>
             <View style={styles.typeGrid}>
-              {NURSE_TYPES.map(t => (
+              {NURSE_TYPES.map(t_item => (
                 <TouchableOpacity
-                  key={t}
-                  style={[styles.typeBtn, form.nurseType === t && styles.typeBtnActive]}
-                  onPress={() => set('nurseType', t)}
+                  key={t_item}
+                  style={[styles.typeBtn, form.nurseType === t_item && styles.typeBtnActive]}
+                  onPress={() => set('nurseType', t_item)}
                 >
-                  <Text style={[styles.typeText, form.nurseType === t && styles.typeTextActive]}>{t}</Text>
+                  <Text style={[styles.typeText, form.nurseType === t_item && styles.typeTextActive]}>{t_item}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -139,8 +141,8 @@ export const EditNurseScreen = ({ nurse, onCancel, onSave }) => {
         </View>
 
         <View style={styles.section}>
-          <SectionHeader title="Contact" />
-          <Field label="Email" required>
+          <SectionHeader title={t('users.contact')} />
+          <Field label={t('users.email')} required>
             <TextInput
               value={form.email}
               onChangeText={v => set('email', v.toLowerCase())}
@@ -149,7 +151,7 @@ export const EditNurseScreen = ({ nurse, onCancel, onSave }) => {
               leading={<IconMail size={16} color={T.textFaint} />}
             />
           </Field>
-          <Field label="Phone">
+          <Field label={t('users.phone')}>
             <TextInput
               value={form.phone}
               onChangeText={v => set('phone', v)}
@@ -161,9 +163,9 @@ export const EditNurseScreen = ({ nurse, onCancel, onSave }) => {
         </View>
 
         <View style={styles.actionRow}>
-          <Btn variant="ghost" style={{ flex: 1 }} onPress={onCancel} disabled={saving}>Cancel</Btn>
+          <Btn variant="ghost" style={{ flex: 1 }} onPress={onCancel} disabled={saving}>{t('common.cancel')}</Btn>
           <Btn style={{ flex: 1.5 }} onPress={handleSave} disabled={!isValid || saving}>
-            {saving ? <ActivityIndicator color="#FFF" size="small" /> : 'Save Changes'}
+            {saving ? <ActivityIndicator color="#FFF" size="small" /> : t('users.save_changes')}
           </Btn>
         </View>
       </ScrollView>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, ActivityIndicator, Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
@@ -9,6 +10,7 @@ import { shiftApi, wardApi } from '../../services/api';
 const STATUSES = ['ACTIVE', 'INACTIVE', 'COMPLETED'];
 
 export const EditShiftScreen = ({ shift, onCancel, onSave, onDelete }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
   const styles = createStyles(T);
@@ -63,9 +65,9 @@ export const EditShiftScreen = ({ shift, onCancel, onSave, onDelete }) => {
     };
     try {
       await shiftApi.update(user.orgName, user.hospitalCode, shift.shiftCode, payload, token);
-      Alert.alert('Saved', 'Shift updated.', [{ text: 'OK', onPress: () => onSave?.() }]);
+      Alert.alert(t('common.saved'), t('alerts.shift_updated'), [{ text: t('common.done'), onPress: () => onSave?.() }]);
     } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to update shift.');
+      Alert.alert(t('common.error'), e.message || t('alerts.shift_update_failed'));
     } finally {
       setSaving(false);
     }
@@ -73,19 +75,19 @@ export const EditShiftScreen = ({ shift, onCancel, onSave, onDelete }) => {
 
   const confirmDelete = () => {
     Alert.alert(
-      'Delete Shift',
-      `Permanently delete "${shift.shiftName || shift.shiftCode}"?`,
+      t('alerts.delete_shift'),
+      t('alerts.confirm_delete_shift', { name: shift.shiftName || shift.shiftCode }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Delete', style: 'destructive',
+          text: t('common.delete'), style: 'destructive',
           onPress: async () => {
             setDeleting(true);
             try {
               await shiftApi.delete(user.orgName, user.hospitalCode, shift.shiftCode, token);
               onDelete?.();
             } catch (e) {
-              Alert.alert('Error', e.message || 'Failed to delete shift.');
+              Alert.alert(t('common.error'), e.message || t('alerts.shift_delete_failed'));
             } finally {
               setDeleting(false);
             }
@@ -101,14 +103,14 @@ export const EditShiftScreen = ({ shift, onCancel, onSave, onDelete }) => {
         <View style={styles.banner}>
           <IconClock size={24} color={T.accent} />
           <Text style={styles.bannerText}>
-            Editing <Text style={{ fontWeight: '700' }}>{shift.shiftCode}</Text>. Shift code cannot be changed.
+            {t('shift.edit_banner', { code: shift.shiftCode })}
           </Text>
         </View>
 
         <View style={styles.section}>
-          <SectionHeader title="Shift Identity" />
+          <SectionHeader title={t('shift.identity')} />
 
-          <Field label="Shift Code">
+          <Field label={t('shift.code')}>
             <Card style={styles.readOnlyCard}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <IconBuilding size={16} color={T.textFaint} />
@@ -117,34 +119,34 @@ export const EditShiftScreen = ({ shift, onCancel, onSave, onDelete }) => {
             </Card>
           </Field>
 
-          <Field label="Shift Name" required>
-            <TextInput value={form.shiftName} onChangeText={v => set('shiftName', v)} placeholder="Morning Shift" />
+          <Field label={t('shift.name')} required>
+            <TextInput value={form.shiftName} onChangeText={v => set('shiftName', v)} placeholder={t('shift.name_placeholder')} />
           </Field>
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="Start Time">
+              <Field label={t('shift.start_time')}>
                 <TextInput
                   value={form.startTime}
                   onChangeText={v => set('startTime', v)}
-                  placeholder="08:00"
+                  placeholder={t('shift.time_placeholder')}
                   leading={<IconClock size={16} color={T.textFaint} />}
                 />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="End Time">
+              <Field label={t('shift.end_time')}>
                 <TextInput
                   value={form.endTime}
                   onChangeText={v => set('endTime', v)}
-                  placeholder="16:00"
+                  placeholder={t('shift.time_placeholder')}
                   leading={<IconClock size={16} color={T.textFaint} />}
                 />
               </Field>
             </View>
           </View>
 
-          <Field label="Status">
+          <Field label={t('shift.status')}>
             <View style={styles.statusRow}>
               {STATUSES.map(s => (
                 <TouchableOpacity
@@ -152,7 +154,9 @@ export const EditShiftScreen = ({ shift, onCancel, onSave, onDelete }) => {
                   style={[styles.statusBtn, form.status === s && styles.statusBtnActive]}
                   onPress={() => set('status', s)}
                 >
-                  <Text style={[styles.statusText, form.status === s && styles.statusTextActive]}>{s}</Text>
+                  <Text style={[styles.statusText, form.status === s && styles.statusTextActive]}>
+                    {t(`shift.status_${s.toLowerCase()}`)}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -160,11 +164,11 @@ export const EditShiftScreen = ({ shift, onCancel, onSave, onDelete }) => {
         </View>
 
         <View style={styles.section}>
-          <SectionHeader title="Ward Assignment" />
+          <SectionHeader title={t('shift.ward_assignment')} />
           {wardsLoading ? (
             <ActivityIndicator color={T.accent} />
           ) : (
-            <Field label="Ward" required>
+            <Field label={t('shift.ward')} required>
               <View style={styles.wardGrid}>
                 {wards.map(w => (
                   <TouchableOpacity
@@ -179,7 +183,7 @@ export const EditShiftScreen = ({ shift, onCancel, onSave, onDelete }) => {
                   </TouchableOpacity>
                 ))}
                 {wards.length === 0 && (
-                  <Text style={{ color: T.textFaint, fontSize: 12 }}>No wards available.</Text>
+                  <Text style={{ color: T.textFaint, fontSize: 12 }}>{t('shift.no_wards')}</Text>
                 )}
               </View>
             </Field>
@@ -187,9 +191,9 @@ export const EditShiftScreen = ({ shift, onCancel, onSave, onDelete }) => {
         </View>
 
         <View style={styles.actionRow}>
-          <Btn variant="ghost" style={{ flex: 1 }} onPress={onCancel} disabled={saving || deleting}>Cancel</Btn>
+          <Btn variant="ghost" style={{ flex: 1 }} onPress={onCancel} disabled={saving || deleting}>{t('common.cancel')}</Btn>
           <Btn style={{ flex: 1.5 }} onPress={handleSave} disabled={!isValid || saving || deleting}>
-            {saving ? <ActivityIndicator color="#FFF" size="small" /> : 'Save Changes'}
+            {saving ? <ActivityIndicator color="#FFF" size="small" /> : t('actions.save_changes')}
           </Btn>
         </View>
 
@@ -201,7 +205,7 @@ export const EditShiftScreen = ({ shift, onCancel, onSave, onDelete }) => {
         >
           <IconTrash size={16} color={T.bad} />
           <Text style={[styles.deleteBtnText, { color: T.bad }]}>
-            {deleting ? 'Deleting...' : 'Delete Shift'}
+            {deleting ? t('actions.deleting') : t('actions.delete_shift')}
           </Text>
         </Btn>
       </ScrollView>

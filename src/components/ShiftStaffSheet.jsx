@@ -3,6 +3,7 @@ import {
   View, Text, Modal, TouchableOpacity, TouchableWithoutFeedback,
   StyleSheet, ScrollView, ActivityIndicator, Alert, TextInput as RNTextInput,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -11,6 +12,7 @@ import { shiftApi, nurseApi, doctorApi } from '../services/api';
 import { IconUser, IconStethoscope, IconChevron } from '../icons';
 
 export const ShiftStaffSheet = ({ shiftCode, shiftName, staffType, visible, onClose, onAssigned }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const insets = useSafeAreaInsets();
   const { user, token } = useAuth();
@@ -46,10 +48,10 @@ export const ShiftStaffSheet = ({ shiftCode, shiftName, staffType, visible, onCl
       } else {
         await shiftApi.assignNurse(user.orgName, user.hospitalCode, payload, token);
       }
-      Alert.alert('Assigned', `${person.firstName} ${person.lastName} added to ${shiftName || shiftCode}.`);
+      Alert.alert(t('common.success'), t('shifts.staff_assigned', { name: `${person.firstName} ${person.lastName}`, shift: shiftName || shiftCode }));
       onAssigned?.();
     } catch (e) {
-      Alert.alert('Error', e.message || 'Assignment failed.');
+      Alert.alert(t('common.error'), e.message || t('shifts.assignment_failed'));
     } finally {
       setSaving(null);
     }
@@ -80,17 +82,17 @@ export const ShiftStaffSheet = ({ shiftCode, shiftName, staffType, visible, onCl
         <View style={styles.handle} />
         <View style={styles.sheetHeader}>
           <Text style={styles.sheetTitle}>
-            Add {isDoctor ? 'Doctor' : 'Nurse'}
+            {isDoctor ? t('shifts.add_doctor') : t('shifts.add_nurse')}
           </Text>
           <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
-            <Text style={styles.closeBtnText}>Done</Text>
+            <Text style={styles.closeBtnText}>{t('common.done')}</Text>
           </TouchableOpacity>
         </View>
         <Text style={styles.subtitle}>{shiftName || shiftCode}</Text>
 
         <RNTextInput
           style={[styles.searchInput, { color: T.text, borderColor: T.borderSoft, backgroundColor: T.surface }]}
-          placeholder={isDoctor ? 'Search doctors...' : 'Search nurses...'}
+          placeholder={isDoctor ? t('shifts.search_doctors') : t('shifts.search_nurses')}
           placeholderTextColor={T.textFaint}
           value={query}
           onChangeText={setQuery}
@@ -116,7 +118,7 @@ export const ShiftStaffSheet = ({ shiftCode, shiftName, staffType, visible, onCl
                   }
                   <View style={{ flex: 1, marginLeft: 12 }}>
                     <Text style={styles.personName}>
-                      {isDoctor ? 'Dr. ' : ''}{p.firstName} {p.lastName}
+                      {isDoctor ? t('common.dr_prefix') : ''}{p.firstName} {p.lastName}
                     </Text>
                     <Text style={styles.personMeta}>{code}</Text>
                   </View>
@@ -125,7 +127,7 @@ export const ShiftStaffSheet = ({ shiftCode, shiftName, staffType, visible, onCl
               );
             })}
             {filtered.length === 0 && !loading && (
-              <Text style={styles.emptyText}>No {isDoctor ? 'doctors' : 'nurses'} found.</Text>
+              <Text style={styles.emptyText}>{isDoctor ? t('shifts.no_doctors') : t('shifts.no_nurses')}</Text>
             )}
           </ScrollView>
         )}

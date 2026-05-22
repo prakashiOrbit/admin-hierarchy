@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, Alert, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { userApi } from '../../services/api';
@@ -7,6 +8,7 @@ import { Card, Field, TextInput, Btn } from '../../components/Shared';
 import { IconUser, IconMail, IconBuilding, IconShield } from '../../icons';
 
 export const CreateHospAdminScreen = ({ onCancel }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
   const styles = createStyles(T);
@@ -28,18 +30,18 @@ export const CreateHospAdminScreen = ({ onCancel }) => {
 
   const handleCreate = async () => {
     if (!user?.orgName) {
-      Alert.alert('Error', 'Organisation name not found');
+      Alert.alert(t('alerts.error'), t('alerts.org_not_found'));
       return;
     }
 
     setLoading(true);
     try {
       await userApi.createHospAdmin(user.orgName, user.hospitalCode, form, token);
-      Alert.alert('Success', 'Hospital Administrator created successfully', [
-        { text: 'OK', onPress: onCancel }
+      Alert.alert(t('alerts.success'), t('alerts.hosp_admin_created'), [
+        { text: t('actions.ok'), onPress: onCancel }
       ]);
     } catch (err) {
-      Alert.alert('Error', err.message || 'Failed to create hospital administrator');
+      Alert.alert(t('alerts.error'), err.message || t('alerts.create_hosp_admin_failed'));
     } finally {
       setLoading(false);
     }
@@ -52,26 +54,26 @@ export const CreateHospAdminScreen = ({ onCancel }) => {
         <View style={styles.banner}>
           <IconShield color={T.accent} size={20} />
           <Text style={styles.bannerText}>
-            Inviting a new Hospital Administrator for {user?.hospitalCode}. They will manage wards, devices, and clinical staff for this unit.
+            {t('hosp_admin.invite_banner', { hospitalCode: user?.hospitalCode })}
           </Text>
         </View>
 
         {/* User Identity Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>USER IDENTITY</Text>
+          <Text style={styles.sectionTitle}>{t('hosp_admin.identity_section')}</Text>
           
-          <Field label="Username">
+          <Field label={t('hosp_admin.username')}>
             <TextInput 
               value={form.userName} 
               onChangeText={(v) => updateForm('userName', v.toLowerCase())}
-              placeholder="e.g. apollo_admin121"
+              placeholder={t('placeholders.username')}
               leading={<IconUser size={18} color={T.textDim} />}
             />
           </Field>
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="First Name">
+              <Field label={t('hosp_admin.first_name')}>
                 <TextInput 
                   value={form.firstName} 
                   onChangeText={(v) => updateForm('firstName', v)}
@@ -80,7 +82,7 @@ export const CreateHospAdminScreen = ({ onCancel }) => {
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Last Name">
+              <Field label={t('hosp_admin.last_name')}>
                 <TextInput 
                   value={form.lastName} 
                   onChangeText={(v) => updateForm('lastName', v)}
@@ -90,7 +92,7 @@ export const CreateHospAdminScreen = ({ onCancel }) => {
             </View>
           </View>
 
-          <Field label="Organization">
+          <Field label={t('hosp_admin.organization')}>
             <Card style={styles.disabledCard}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <IconBuilding size={16} color={T.textFaint} />
@@ -102,9 +104,9 @@ export const CreateHospAdminScreen = ({ onCancel }) => {
 
         {/* Contact Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>CONTACT DETAILS</Text>
+          <Text style={styles.sectionTitle}>{t('hosp_admin.contact_section')}</Text>
           
-          <Field label="Contact Email">
+          <Field label={t('hosp_admin.contact_email')}>
             <TextInput 
               value={form.contactEmail} 
               onChangeText={(v) => updateForm('contactEmail', v.toLowerCase())}
@@ -116,20 +118,20 @@ export const CreateHospAdminScreen = ({ onCancel }) => {
 
         <View style={styles.infoBox}>
           <Text style={styles.infoText}>
-            The new Hospital Administrator will have full control over {user?.hospitalCode} and will be able to manage clinical workflows.
+            {t('hosp_admin.info_text', { hospitalCode: user?.hospitalCode })}
           </Text>
         </View>
 
         {/* Actions */}
         <View style={styles.actionRow}>
-          <Btn variant="ghost" full style={{ flex: 1 }} onPress={onCancel} disabled={loading}>Cancel</Btn>
+          <Btn variant="ghost" full style={{ flex: 1 }} onPress={onCancel} disabled={loading}>{t('actions.cancel')}</Btn>
           <Btn 
             full 
             style={{ flex: 1.5 }} 
             onPress={handleCreate} 
             disabled={!isFormValid || loading}
           >
-            {loading ? <ActivityIndicator color="#FFF" size="small" /> : 'Create Hosp Admin'}
+            {loading ? <ActivityIndicator color="#FFF" size="small" /> : t('actions.create')}
           </Btn>
         </View>
       </ScrollView>

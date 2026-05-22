@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, ActivityIndicator, RefreshControl } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { organisationApi } from '../../services/api';
@@ -8,6 +9,7 @@ import { StatusPill } from '../../components/StatusPill';
 import { IconHospital, IconFilter, IconBed, IconDoor, IconPulse, IconPlus } from '../../icons';
 
 export const HospitalsScreen = ({ onProvision, onSelect }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
   const styles = createStyles(T);
@@ -28,12 +30,12 @@ export const HospitalsScreen = ({ onProvision, onSelect }) => {
       setHospitals(list);
     } catch (err) {
       console.error('Fetch hospitals error:', err);
-      setError(err.message || 'Failed to load hospitals');
+      setError(err.message || t('messages.failed_load_hospitals'));
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [user?.orgName, token]);
+  }, [user?.orgName, token, t]);
 
   useEffect(() => {
     fetchHospitals();
@@ -52,11 +54,17 @@ export const HospitalsScreen = ({ onProvision, onSelect }) => {
     (filter === 'All' || getStatus(h) === filter.toUpperCase())
   );
 
+  const filterOptions = [
+    { label: t('hospital.status_all'), value: 'All' },
+    { label: t('hospital.status_active'), value: 'Active' },
+    { label: t('hospital.status_inactive'), value: 'Inactive' },
+  ];
+
   return (
     <View style={styles.container}>
       <View style={{ padding: 16, paddingBottom: 0 }}>
         <SearchBar 
-          placeholder="Search hospitals..."
+          placeholder={t('placeholders.search_hospitals')}
           value={query}
           onChangeText={setQuery}
           trailing={
@@ -75,19 +83,19 @@ export const HospitalsScreen = ({ onProvision, onSelect }) => {
       >
         {/* Chips */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
-          {['All', 'Active', 'Inactive'].map((f) => (
+          {filterOptions.map((f) => (
             <Chip 
-              key={f}
-              active={filter === f} 
-              onPress={() => setFilter(f)}
+              key={f.value}
+              active={filter === f.value} 
+              onPress={() => setFilter(f.value)}
             >
-              {f} · {f === 'All' ? hospitals.length : hospitals.filter(h => getStatus(h) === f.toUpperCase()).length}
+              {f.label} · {f.value === 'All' ? hospitals.length : hospitals.filter(h => getStatus(h) === f.value.toUpperCase()).length}
             </Chip>
           ))}
         </ScrollView>
 
         <View style={styles.headerRow}>
-          <SectionHeader title="HOSPITALS" count={filtered.length} />
+          <SectionHeader title={t('hospital.hospitals_title')} count={filtered.length} />
           
           <Btn 
             variant="primary" 
@@ -95,7 +103,7 @@ export const HospitalsScreen = ({ onProvision, onSelect }) => {
             style={styles.newBtn} 
             onPress={onProvision}
           >
-            <IconPlus size={14} color="#fff" /> New Hospital
+            <IconPlus size={14} color="#fff" /> {t('actions.new_hospital')}
           </Btn>
         </View>
 
@@ -108,22 +116,60 @@ export const HospitalsScreen = ({ onProvision, onSelect }) => {
           <View style={styles.center}>
             <Text style={[styles.errorText, { color: T.bad }]}>{error}</Text>
             <Btn variant="surface" size="sm" onPress={() => fetchHospitals()} style={{ marginTop: 12 }}>
-              Retry
+              {t('common.retry')}
             </Btn>
           </View>
         ) : filtered.length === 0 ? (
           <View style={styles.center}>
             <IconHospital size={48} color={T.textFaint} />
             <Text style={[styles.emptyText, { color: T.textDim }]}>
-              {query ? 'No matching hospitals found' : 'No hospitals provisioned yet'}
+              {query ? t('messages.no_matching_hospitals') : t('messages.no_hospitals_provisioned')}
             </Text>
             {!query && (
               <Btn variant="tonal" size="sm" onPress={onProvision} style={{ marginTop: 16 }}>
-                Provision First Hospital
+                {t('actions.provision_first_hospital')}
               </Btn>
             )}
           </View>
         ) : (
+          <View style={styles.list}>
+            {filtered.map((h, idx) => (
+              <Card key={h.id || idx} onPress={() => onSelect?.(h)}>
+                <View style={styles.orgHeader}>
+                  <View style={styles.orgAvatar}>
+                    <IconHospital size={24} color="#fff" />
+                  </View>
+                  <View style={styles.orgInfo}>
+                    <View style={styles.titleRow}>
+                      <Text style={styles.orgTitle}>{h.hospitalName}</Text>
+                      <StatusPill status={h.status || 'ACTIVE'} />
+                    </View>
+                    <Text style={styles.orgName}>{h.hospitalCode} · {h.myAddress?.city || '—'}</Text>
+                    
+                    <View style={styles.statsRow}>
+                      <View style={styles.statItem}>
+                        <IconBed size={14} color={T.textDim} />
+                        <Text style={styles.statValue}>{h.beds || 0}</Text>
+                      </View>
+                      <View style={styles.statItem}>
+                        <IconDoor size={14} color={T.textDim} />
+                        <Text style={styles.statValue}>{h.wards || 0}</Text>
+                      </View>
+                      <View style={styles.statItem}>
+                        <IconPulse size={14} color={T.textDim} />
+                        <Text style={styles.statValue}>{h.devices || 0}</Text>
+                      </View>
+                    </View>
+                  </View>
+                </View>
+              </Card>
+            ))}
+          </View>
+        )}
+      </ScrollView>
+    </View>
+  );
+};
           <View style={styles.list}>
             {filtered.map((h, idx) => (
               <Card key={h.id || idx} onPress={() => onSelect?.(h)}>

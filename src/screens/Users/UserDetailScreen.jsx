@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Avatar, RoleBadge, Btn } from '../../components/Shared';
@@ -8,6 +9,7 @@ import { IconHospital, IconUser, IconEdit, IconKey, IconPause, IconTrash } from 
 import { userApi } from '../../services/api';
 
 export const UserDetailScreen = ({ userId, onBack }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user: authUser, token } = useAuth();
@@ -33,14 +35,14 @@ export const UserDetailScreen = ({ userId, onBack }) => {
   if (!u || Object.keys(u).length <= 2) { // Robust check if it's just a status response
     return (
       <View style={styles.center}>
-        <Text style={{ color: T.textDim }}>User details not available.</Text>
+        <Text style={{ color: T.textDim }}>{t('users.no_users')}</Text>
       </View>
     );
   }
 
   const firstName = u.firstName || '';
   const lastName = u.lastName || '';
-  const fullName = (firstName || lastName) ? `${firstName} ${lastName}`.trim() : (u.userName || 'User');
+  const fullName = (firstName || lastName) ? `${firstName} ${lastName}`.trim() : (u.userName || t('dashboard.users'));
   const initials = u.initials || `${firstName?.[0] ?? ''}${lastName?.[0] ?? ''}`.toUpperCase() || u.userName?.[0]?.toUpperCase() || 'US';
   const role = u.role || u.userRoles?.[0] || '';
 
@@ -52,7 +54,7 @@ export const UserDetailScreen = ({ userId, onBack }) => {
             <Avatar initials={initials} size={64} />
             <View style={styles.profileInfo}>
               <Text style={styles.userName}>{fullName}</Text>
-              <Text style={styles.userEmail}>{u.email || u.userName || 'No email'}</Text>
+              <Text style={styles.userEmail}>{u.email || u.userName || t('users.no_email')}</Text>
               <View style={styles.badgesRow}>
                 <StatusPill status={u.status ?? 'ACTIVE'} />
                 {role ? <RoleBadge role={role} /> : null}
@@ -63,9 +65,9 @@ export const UserDetailScreen = ({ userId, onBack }) => {
 
         <Card style={styles.detailsCard}>
           {[
-            { l: 'Hospital', v: u.hospitalCode ?? '—', i: <IconHospital size={16} color={T.textDim} /> },
-            { l: 'Username', v: u.userName ?? '—', i: <IconUser size={16} color={T.textDim} />, mono: true },
-            { l: 'Organisation', v: u.orgName ?? '—', i: <IconUser size={16} color={T.textDim} />, mono: true },
+            { l: t('dashboard.hospitals'), v: u.hospitalCode ?? '—', i: <IconHospital size={16} color={T.textDim} /> },
+            { l: t('auth.username'), v: u.userName ?? '—', i: <IconUser size={16} color={T.textDim} />, mono: true },
+            { l: t('dashboard.organisations'), v: u.orgName ?? '—', i: <IconUser size={16} color={T.textDim} />, mono: true },
           ].map((row, i) => (
             <View key={i} style={[styles.detailItem, i > 0 && styles.itemBorder]}>
               <View style={styles.detailIcon}>{row.i}</View>
@@ -78,11 +80,11 @@ export const UserDetailScreen = ({ userId, onBack }) => {
         <View style={styles.actionGrid}>
           <Btn variant="surface" style={styles.actionBtn}>
             <IconEdit size={16} color={T.text} />
-            <Text style={styles.btnText}>Edit</Text>
+            <Text style={styles.btnText}>{t('users.edit_profile')}</Text>
           </Btn>
           <Btn variant="surface" style={styles.actionBtn}>
             <IconKey size={16} color={T.text} />
-            <Text style={styles.btnText}>Reset password</Text>
+            <Text style={styles.btnText}>{t('auth.forgot_password')}</Text>
           </Btn>
         </View>
 

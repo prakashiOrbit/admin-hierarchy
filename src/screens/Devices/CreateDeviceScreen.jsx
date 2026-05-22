@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
@@ -11,6 +12,7 @@ const VERIFY_TYPES = ['MACADDR', 'SERIAL', 'CERTIFICATE'];
 const USAGE_TYPES = ['Fixed', 'Mobile'];
 
 export const CreateDeviceScreen = ({ onCancel, onSuccess }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user, token } = useAuth();
@@ -33,11 +35,11 @@ export const CreateDeviceScreen = ({ onCancel, onSuccess }) => {
     setSaving(true);
     try {
       await deviceApi.create(user.orgName, user.hospitalCode, form, token);
-      Alert.alert('Success', `Device ${form.deviceCode} registered.`, [
-        { text: 'OK', onPress: onSuccess || onCancel },
+      Alert.alert(t('common.success'), t('alerts.device_registered', { code: form.deviceCode }), [
+        { text: t('common.done'), onPress: onSuccess || onCancel },
       ]);
     } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to create device.');
+      Alert.alert(t('common.error'), e.message || t('alerts.device_create_failed'));
     } finally {
       setSaving(false);
     }
@@ -49,32 +51,32 @@ export const CreateDeviceScreen = ({ onCancel, onSuccess }) => {
         <View style={styles.banner}>
           <IconCpu size={24} color={T.accent} />
           <Text style={styles.bannerText}>
-            Provisioning a new clinical monitoring device for {user?.hospitalCode}. Once registered, this device can be assigned to a gateway, bed or patient.
+            {t('device.create_banner', { hospital: user?.hospitalCode })}
           </Text>
         </View>
 
         <View style={styles.section}>
-          <SectionHeader title="Device Specifications" />
+          <SectionHeader title={t('device.specifications')} />
 
-          <Field label="Device Serial / Code" required>
+          <Field label={t('device.code')} required>
             <TextInput
               value={form.deviceCode}
               onChangeText={v => updateForm('deviceCode', v.toUpperCase())}
-              placeholder="e.g. MON-ICU-001"
+              placeholder={t('device.code_placeholder')}
               leading={<IconShield size={16} color={T.textFaint} />}
             />
           </Field>
 
-          <Field label="Hardware Profile / Model" required>
+          <Field label={t('device.type')} required>
             <TextInput
               value={form.deviceType}
               onChangeText={v => updateForm('deviceType', v)}
-              placeholder="e.g. Comen-V4, Mindray-T1"
+              placeholder={t('device.type_placeholder')}
               leading={<IconActivity size={16} color={T.textFaint} />}
             />
           </Field>
 
-          <Field label="Communication Protocol" required>
+          <Field label={t('device.protocol')} required>
             <View style={styles.optionGrid}>
               {PROTOCOLS.map(p => (
                 <TouchableOpacity
@@ -88,7 +90,7 @@ export const CreateDeviceScreen = ({ onCancel, onSuccess }) => {
             </View>
           </Field>
 
-          <Field label="Verification Method">
+          <Field label={t('device.verification_method')}>
             <View style={styles.optionGrid}>
               {VERIFY_TYPES.map(v => (
                 <TouchableOpacity
@@ -96,13 +98,15 @@ export const CreateDeviceScreen = ({ onCancel, onSuccess }) => {
                   style={[styles.optionBtn, form.verifyWith === v && styles.optionActive]}
                   onPress={() => updateForm('verifyWith', v)}
                 >
-                  <Text style={[styles.optionText, form.verifyWith === v && styles.optionTextActive]}>{v}</Text>
+                  <Text style={[styles.optionText, form.verifyWith === v && styles.optionTextActive]}>
+                    {t(`device.verify_${v.toLowerCase().replace('macaddr', 'mac').replace('certificate', 'cert')}`)}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
           </Field>
 
-          <Field label="Usage Type">
+          <Field label={t('device.usage_type')}>
             <View style={styles.optionGrid}>
               {USAGE_TYPES.map(u => (
                 <TouchableOpacity
@@ -110,7 +114,9 @@ export const CreateDeviceScreen = ({ onCancel, onSuccess }) => {
                   style={[styles.optionBtn, form.usageType === u && styles.optionActive]}
                   onPress={() => updateForm('usageType', u)}
                 >
-                  <Text style={[styles.optionText, form.usageType === u && styles.optionTextActive]}>{u}</Text>
+                  <Text style={[styles.optionText, form.usageType === u && styles.optionTextActive]}>
+                    {t(`device.usage_${u.toLowerCase()}`)}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -118,14 +124,14 @@ export const CreateDeviceScreen = ({ onCancel, onSuccess }) => {
         </View>
 
         <View style={styles.actionRow}>
-          <Btn variant="surface" style={{ flex: 1 }} onPress={onCancel}>Cancel</Btn>
+          <Btn variant="surface" style={{ flex: 1 }} onPress={onCancel}>{t('common.cancel')}</Btn>
           <Btn
             variant="primary"
             style={{ flex: 2 }}
             disabled={!isFormValid || saving}
             onPress={handleCreate}
           >
-            {saving ? 'Registering...' : 'Register Device'}
+            {saving ? t('actions.registering') : t('actions.register_device')}
           </Btn>
         </View>
       </ScrollView>

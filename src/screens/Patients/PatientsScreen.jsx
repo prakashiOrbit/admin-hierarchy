@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, SearchBar, Btn, Chip, Avatar } from '../../components/Shared';
@@ -8,6 +9,7 @@ import { IconPatient, IconPlus, IconChevron, IconFilter } from '../../icons';
 import { patientApi } from '../../services/api';
 
 export const PatientsScreen = ({ onNewPatient, onSelectPatient }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user, token } = useAuth();
@@ -53,7 +55,7 @@ export const PatientsScreen = ({ onNewPatient, onSelectPatient }) => {
           <SearchBar
             value={query}
             onChangeText={setQuery}
-            placeholder="Search patients by name or MRN..."
+            placeholder={t('placeholders.search_patients')}
             trailing={
               <TouchableOpacity style={styles.filterBtn}>
                 <IconFilter size={20} color={T.textDim} />
@@ -65,21 +67,21 @@ export const PatientsScreen = ({ onNewPatient, onSelectPatient }) => {
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
           {['ALL', 'MONITORING', 'REGISTERED', 'OUTPATIENT'].map(f => (
             <Chip key={f} active={filter === f} onPress={() => setFilter(f)}>
-              {f.charAt(0) + f.slice(1).toLowerCase()} · {f === 'ALL' ? patients.length : countByStatus(f)}
+              {t(`entity.filter_${f.toLowerCase()}`)} · {f === 'ALL' ? patients.length : countByStatus(f)}
             </Chip>
           ))}
         </ScrollView>
 
         <View style={styles.headerRow}>
-          <SectionHeader title="Patients" subtitle={`${filtered.length} found`} />
+          <SectionHeader title={t('entity.patients')} subtitle={t('messages.count_found', { count: filtered.length })} />
           <Btn variant="primary" size="sm" style={styles.newBtn} onPress={onNewPatient}>
-            <IconPlus size={14} color="#FFF" /> New Patient
+            <IconPlus size={14} color="#FFF" /> {t('actions.new_patient')}
           </Btn>
         </View>
 
         <View style={styles.list}>
           {filtered.map(p => {
-            const fullName = `${p.firstName || ''} ${p.lastName || ''}`.trim() || 'Unknown';
+            const fullName = `${p.firstName || ''} ${p.lastName || ''}`.trim() || t('entity.unknown');
             const initials = `${p.firstName?.[0] || ''}${p.lastName?.[0] || ''}`.toUpperCase();
             return (
               <Card key={p.patientCode} onPress={() => onSelectPatient(p.patientCode)}>
@@ -103,8 +105,8 @@ export const PatientsScreen = ({ onNewPatient, onSelectPatient }) => {
           {filtered.length === 0 && (
             <View style={styles.emptyState}>
               <IconPatient size={48} color={T.textFaint} />
-              <Text style={styles.emptyTitle}>No patients found</Text>
-              <Text style={styles.emptyHint}>Try broadening your search or register a new patient.</Text>
+              <Text style={styles.emptyTitle}>{t('messages.no_patients_found')}</Text>
+              <Text style={styles.emptyHint}>{t('messages.no_patients_hint')}</Text>
             </View>
           )}
         </View>

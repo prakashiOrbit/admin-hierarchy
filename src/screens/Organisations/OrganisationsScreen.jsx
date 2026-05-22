@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Platform, ActivityIndicator, RefreshControl } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { organisationApi } from '../../services/api';
@@ -8,6 +9,7 @@ import { StatusPill } from '../../components/StatusPill';
 import { IconSearch, IconFilter, IconHospital, IconUsers, IconPulse } from '../../icons';
 
 export const OrganisationsScreen = ({ onSelectOrg }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { token } = useAuth();
   const styles = createStyles(T);
@@ -31,7 +33,7 @@ export const OrganisationsScreen = ({ onSelectOrg }) => {
       const orgList = Array.isArray(response) ? response : (Array.isArray(response.data) ? response.data : []);
       setOrgs(orgList);
     } catch (err) {
-      setError(err.message || 'Failed to load organisations');
+      setError(err.message || t('messages.load_failed_orgs'));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -68,7 +70,7 @@ export const OrganisationsScreen = ({ onSelectOrg }) => {
           <IconSearch size={18} color={T.textFaint} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search organisations..."
+            placeholder={t('placeholders.search_organisations')}
             placeholderTextColor={T.textFaint}
             value={query}
             onChangeText={setQuery}
@@ -84,14 +86,14 @@ export const OrganisationsScreen = ({ onSelectOrg }) => {
             style={[styles.chip, filter === 'All' && styles.chipActive]}
           >
             <Text style={[styles.chipText, filter === 'All' && styles.chipTextActive]}>
-              All · {orgs.length}
+              {t('common.all')} · {orgs.length}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setFilter('Hospital')}
             style={[styles.chip, filter === 'Hospital' && styles.chipActive]}
           >
             <Text style={[styles.chipText, filter === 'Hospital' && styles.chipTextActive]}>
-              Hospitals · {orgs.filter(o => o.orgType === 'HOSPITAL').length}
+              {t('dashboard.hospitals')} · {orgs.filter(o => o.orgType === 'HOSPITAL').length}
             </Text>
           </TouchableOpacity>
         </ScrollView>
@@ -100,13 +102,13 @@ export const OrganisationsScreen = ({ onSelectOrg }) => {
           <View style={styles.errorCard}>
             <Text style={styles.errorText}>{error}</Text>
             <TouchableOpacity onPress={() => fetchOrgs()} style={styles.retryBtn}>
-              <Text style={styles.retryText}>Retry</Text>
+              <Text style={styles.retryText}>{t('common.retry')}</Text>
             </TouchableOpacity>
           </View>
         )}
 
         <View style={styles.headerRow}>
-          <Text style={styles.sectionTitle}>ORGANISATIONS</Text>
+          <Text style={styles.sectionTitle}>{t('dashboard.organisations').toUpperCase()}</Text>
           <Text style={styles.countText}>{filteredOrgs.length}</Text>
         </View>
 
@@ -130,11 +132,11 @@ export const OrganisationsScreen = ({ onSelectOrg }) => {
                   <View style={styles.statsRow}>
                     <View style={styles.statItem}>
                       <IconHospital size={14} color={T.textDim} />
-                      <Text style={styles.statValue}>{org.orgType || 'N/A'}</Text>
+                      <Text style={styles.statValue}>{org.orgType ? t(`orgs.types.${org.orgType}`) : t('common.na')}</Text>
                     </View>
                     <View style={styles.statItem}>
                       <IconUsers size={14} color={T.textDim} />
-                      <Text style={styles.statValue}>{org.contact?.name || 'No Contact'}</Text>
+                      <Text style={styles.statValue}>{org.contact?.name || t('messages.no_contact')}</Text>
                     </View>
                   </View>
                 </View>
@@ -144,7 +146,7 @@ export const OrganisationsScreen = ({ onSelectOrg }) => {
 
           {!loading && filteredOrgs.length === 0 && (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyText}>No organisations found</Text>
+              <Text style={styles.emptyText}>{t('messages.no_organisations_found')}</Text>
             </View>
           )}
         </View>

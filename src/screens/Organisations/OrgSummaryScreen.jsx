@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { organisationApi, userApi, summaryApi } from '../../services/api';
@@ -7,6 +8,7 @@ import { Card, SectionHeader, Btn } from '../../components/Shared';
 import { IconHospital, IconUsers, IconPulse, IconHeart, IconShield, IconDownload } from '../../icons';
 
 export const OrgSummaryScreen = () => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
   const styles = createStyles(T);
@@ -30,11 +32,11 @@ export const OrgSummaryScreen = () => {
       setHospitals(Array.isArray(hospData) ? hospData : (hospData?.data || []));
       setAdmins(Array.isArray(adminData) ? adminData : (adminData?.data || []));
     } catch (err) {
-      setError(err.message || 'Failed to load summary');
+      setError(err.message || t('orgs.error_load_summary'));
     } finally {
       setLoading(false);
     }
-  }, [user?.orgName, token]);
+  }, [user?.orgName, token, t]);
 
   useEffect(() => {
     fetchSummary();
@@ -44,37 +46,37 @@ export const OrgSummaryScreen = () => {
 
   const stats = [
     {
-      label: 'Hospitals',
+      label: t('orgs.stats.hospitals'),
       value: fmt(summary?.stats?.totalHospitals || summary?.hospitals || hospitals.length),
       sub: '',
       icon: <IconHospital />,
       color: T.accent,
     },
     {
-      label: 'Administrators',
+      label: t('orgs.stats.administrators'),
       value: fmt(summary?.stats?.totalUsers || summary?.users || summary?.userCount || admins.length),
       sub: '',
       icon: <IconUsers />,
       color: '#2DD4BF',
     },
     {
-      label: 'Devices deployed',
+      label: t('orgs.stats.devices_deployed'),
       value: fmt(summary?.devices ?? summary?.deviceCount ?? summary?.totalDevices),
       sub: '',
       icon: <IconPulse />,
       color: '#22D3EE',
     },
     {
-      label: 'Vitals events',
+      label: t('orgs.stats.vitals_events'),
       value: fmt(summary?.vitalsEvents ?? summary?.vitalEvents ?? summary?.totalVitals),
       sub: '',
       icon: <IconHeart />,
       color: '#F472B6',
     },
     {
-      label: 'Audit events',
+      label: t('orgs.stats.audit_events'),
       value: fmt(summary?.auditEvents ?? summary?.totalAuditEvents),
-      sub: summary?.highRiskEvents != null ? `${summary.highRiskEvents} high-risk flagged` : '',
+      sub: summary?.highRiskEvents != null ? t('orgs.stats.high_risk_flagged', { count: summary.highRiskEvents }) : '',
       icon: <IconShield />,
       color: '#A78BFA',
     },
@@ -90,7 +92,7 @@ export const OrgSummaryScreen = () => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Uptime Card */}
         <Card style={styles.uptimeCard}>
-          <SectionHeader title="PLATFORM PERFORMANCE" />
+          <SectionHeader title={t('orgs.performance')} />
           {loading ? (
             <View style={styles.loadingRow}>
               <ActivityIndicator color={T.good} />
@@ -102,7 +104,7 @@ export const OrgSummaryScreen = () => {
                   <Text style={styles.uptimeValue}>{uptimeStr}</Text>
                   <Text style={styles.uptimePercent}>%</Text>
                 </View>
-                <Text style={styles.uptimeLabel}>30-day uptime</Text>
+                <Text style={styles.uptimeLabel}>{t('orgs.uptime_30d')}</Text>
               </View>
               <View style={styles.sparklinePlaceholder}>
                 <View style={styles.trendRow}>
@@ -117,12 +119,12 @@ export const OrgSummaryScreen = () => {
 
         {/* Growth Section */}
         <View style={styles.section}>
-          <SectionHeader title="ORGANISATION GROWTH" />
+          <SectionHeader title={t('orgs.growth')} />
           {error ? (
             <View style={styles.center}>
               <Text style={[styles.errorText, { color: T.bad }]}>{error}</Text>
               <Btn variant="surface" size="sm" onPress={fetchSummary} style={{ marginTop: 12 }}>
-                Retry
+                {t('common.retry')}
               </Btn>
             </View>
           ) : (
@@ -148,7 +150,7 @@ export const OrgSummaryScreen = () => {
         </View>
 
         <Btn type="outline" style={styles.exportBtn}>
-          <IconDownload size={16} color={T.accent} /> Export PDF summary
+          <IconDownload size={16} color={T.accent} /> {t('orgs.export_pdf')}
         </Btn>
       </ScrollView>
     </View>

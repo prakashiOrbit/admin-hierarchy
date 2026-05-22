@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, Platform, BackHandler, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { summaryApi, deviceApi, patientApi, nurseApi } from '../../services/api';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
@@ -43,6 +44,7 @@ const { width } = Dimensions.get('window');
 
 const StatCard = ({ label, value, delta, icon, color, accent }) => {
   const { theme: T } = useTheme();
+  const { t } = useTranslation();
   const styles = createStyles(T);
   return (
     <Card style={styles.statCard}>
@@ -50,7 +52,7 @@ const StatCard = ({ label, value, delta, icon, color, accent }) => {
         <View style={[styles.statIcon, { backgroundColor: accent || 'rgba(59,130,246,.14)' }]}>
           {React.cloneElement(icon, { color: color || T.accent, size: 15 })}
         </View>
-        <Text style={styles.statLabel}>{label}</Text>
+        <Text style={styles.statLabel}>{t(label)}</Text>
       </View>
       <View style={styles.statBody}>
         <Text style={styles.statValue}>{value}</Text>
@@ -74,11 +76,9 @@ const PulseWave = ({ color }) => (
   </View>
 );
 
-const DAY_NAMES = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
-const MON_NAMES = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-
 const HospHomeContent = ({ role, onNavigate }) => {
   const { theme: T } = useTheme();
+  const { t } = useTranslation();
   const { user, token } = useAuth();
   const styles = createStyles(T);
   const [homeStats, setHomeStats] = useState({ wards: null, beds: null, devices: null, staffing: null, patients: null });
@@ -103,113 +103,77 @@ const HospHomeContent = ({ role, onNavigate }) => {
   }, [user?.orgName, user?.hospitalCode, token]);
 
   const fmt = (v) => v == null ? '—' : String(v);
-  const now = new Date();
-  const dateStr = `${DAY_NAMES[now.getDay()]}, ${now.getDate()} ${MON_NAMES[now.getMonth()]}`;
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>
-      {/* Greeting */}
       <View style={styles.greetingHeader}>
-        <Text style={styles.date}>{dateStr} · {user?.hospitalCode || 'HOSPITAL'}</Text>
-        <Text style={styles.greeting}>Good morning, {user?.userName || 'User'}</Text>
+        <Text style={styles.date}>{new Date().toLocaleDateString(t('i18n_locale_tag') || 'en-US', { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()} · {user?.hospitalCode || 'HOSPITAL'}</Text>
+        <Text style={styles.greeting}>{t('dashboard.good_morning', { name: user?.userName || 'User' })}</Text>
         {homeLoading ? (
           <ActivityIndicator size="small" color={T.textDim} style={{ marginTop: 4 }} />
         ) : (
           <Text style={styles.status}>
-            {homeStats.wards != null
-              ? <Text style={{ color: T.good, fontWeight: '600' }}>{homeStats.wards} wards</Text>
-              : null}
+            {homeStats.wards != null ? <Text style={{ color: T.good, fontWeight: '600' }}>{homeStats.wards} {t('dashboard.wards').toLowerCase()}</Text> : null}
             {homeStats.wards != null ? '  ·  ' : null}
-            <Text>{fmt(homeStats.devices)} devices registered</Text>
+            <Text>{t('dashboard.registered_devices', { count: fmt(homeStats.devices) })}</Text>
           </Text>
         )}
       </View>
 
-      {/* Stats Grid */}
       <View style={styles.grid}>
-        <StatCard
-          label="Admissions"
-          value={homeLoading ? '…' : fmt(homeStats.patients)}
-          icon={<IconPatient />} color="#2DD4BF" accent="rgba(45,212,191,.14)"
-        />
-        <StatCard
-          label="Active Beds"
-          value={homeLoading ? '…' : fmt(homeStats.beds)}
-          icon={<IconBed />} color={T.accent}
-        />
-        <StatCard
-          label="Devices"
-          value={homeLoading ? '…' : fmt(homeStats.devices)}
-          icon={<IconPulse />} color="#22D3EE" accent="rgba(34,211,238,.14)"
-        />
-        <StatCard
-          label="Staffing"
-          value={homeLoading ? '…' : fmt(homeStats.staffing)}
-          icon={<IconUsers />} color="#A78BFA" accent="rgba(167,139,250,.14)"
-        />
+        <StatCard label="dashboard.admissions" value={homeLoading ? '…' : fmt(homeStats.patients)} icon={<IconPatient />} color="#2DD4BF" accent="rgba(45,212,191,.14)" />
+        <StatCard label="dashboard.beds" value={homeLoading ? '…' : fmt(homeStats.beds)} icon={<IconBed />} color={T.accent} />
+        <StatCard label="dashboard.devices" value={homeLoading ? '…' : fmt(homeStats.devices)} icon={<IconPulse />} color="#22D3EE" accent="rgba(34,211,238,.14)" />
+        <StatCard label="dashboard.staffing" value={homeLoading ? '…' : fmt(homeStats.staffing)} icon={<IconUsers />} color="#A78BFA" accent="rgba(167,139,250,.14)" />
       </View>
 
-      {/* Live Vitals Card */}
       <Card style={{ marginBottom: 24 }}>
         <View style={styles.sectionHeaderRow}>
-          <SectionHeader title="LIVE VITALS" />
-          {homeStats.beds != null && (
-            <Text style={styles.bedsLabel}>● {homeStats.beds} BEDS</Text>
-          )}
+          <SectionHeader title={t('dashboard.live_vitals')} />
+          {homeStats.beds != null && <Text style={styles.bedsLabel}>● {homeStats.beds} {t('dashboard.beds').toUpperCase()}</Text>}
         </View>
         <View style={styles.vitalsGrid}>
           {[
-            { l: 'AVG HR',   v: '—', u: 'bpm', c: '#F472B6' },
-            { l: 'AVG SpO₂', v: '—', u: '%',   c: '#22D3EE' },
-            { l: 'ALERTS',   v: '—', u: '',    c: T.warn    },
+            { l: t('dashboard.avg_hr'),   v: '—', u: 'bpm', c: '#F472B6' },
+            { l: t('dashboard.avg_spo2'), v: '—', u: '%',   c: '#22D3EE' },
+            { l: t('dashboard.alerts'),   v: '—', u: '',    c: T.warn    },
           ].map((m, i) => (
             <View key={i} style={{ flex: 1 }}>
               <Text style={styles.vitalLabel}>{m.l}</Text>
-              <Text style={[styles.vitalValue, { color: m.c }]}>
-                {m.v}<Text style={styles.vitalUnit}>{m.u}</Text>
-              </Text>
+              <Text style={[styles.vitalValue, { color: m.c }]}>{m.v}<Text style={styles.vitalUnit}>{m.u}</Text></Text>
             </View>
           ))}
         </View>
-        <View style={{ marginTop: 12 }}>
-          <PulseWave color={T.accent} />
-        </View>
+        <View style={{ marginTop: 12 }}><PulseWave color={T.accent} /></View>
       </Card>
 
-      {/* Today's Shifts */}
       <View style={styles.section}>
         <View style={styles.sectionHeaderRow}>
-          <SectionHeader title="NURSING SHIFTS" />
-          <TouchableOpacity onPress={() => onNavigate('shifts')}>
-            <Text style={styles.viewLink}>View →</Text>
-          </TouchableOpacity>
+          <SectionHeader title={t('dashboard.nursing_shifts')} />
+          <TouchableOpacity onPress={() => onNavigate('shifts')}><Text style={styles.viewLink}>{t('common.view')} →</Text></TouchableOpacity>
         </View>
         <Card style={styles.listCard}>
           <View style={styles.shiftRow}>
             {[
-              { l: 'Day',     c: '#22D3EE' },
-              { l: 'Evening', c: '#A78BFA' },
-              { l: 'Night',   c: '#60A5FA' },
+              { l: t('dashboard.day'),     c: '#22D3EE' },
+              { l: t('dashboard.evening'), c: '#A78BFA' },
+              { l: t('dashboard.night'),   c: '#60A5FA' },
             ].map((s, i) => (
               <View key={i} style={[styles.shiftBox, { borderColor: T.borderSoft }]}>
-                <View style={styles.shiftHeader}>
-                  <View style={[styles.shiftDot, { backgroundColor: s.c }]} />
-                  <Text style={[styles.shiftTitle, { color: T.textDim }]}>{s.l.toUpperCase()}</Text>
-                </View>
+                <View style={styles.shiftHeader}><View style={[styles.shiftDot, { backgroundColor: s.c }]} /><Text style={[styles.shiftTitle, { color: T.textDim }]}>{s.l.toUpperCase()}</Text></View>
                 <Text style={styles.shiftCount}>—</Text>
-                <Text style={styles.shiftUnit}>nurses</Text>
+                <Text style={styles.shiftUnit}>{t('dashboard.nurses')}</Text>
               </View>
             ))}
           </View>
         </Card>
       </View>
 
-      {/* Device Alerts */}
       <View style={styles.section}>
-        <SectionHeader title="DEVICE ALERTS" />
+        <SectionHeader title={t('dashboard.device_alerts')} />
         <Card style={styles.listCard}>
           <View style={[styles.alertItem, { justifyContent: 'center', paddingVertical: 20 }]}>
-            <Text style={{ color: T.textFaint, fontSize: 13 }}>No active alerts</Text>
+            <Text style={{ color: T.textFaint, fontSize: 13 }}>{t('dashboard.no_alerts')}</Text>
           </View>
         </Card>
       </View>
@@ -224,6 +188,7 @@ export const HospDashboard = ({ navigation, route }) => {
   const insets = useSafeAreaInsets();
   const { theme: T, isDark, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
   const styles = createStyles(T);
   const [activeTab, setActiveTab] = useState('home');
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -255,40 +220,15 @@ export const HospDashboard = ({ navigation, route }) => {
   useEffect(() => {
     const backAction = () => {
       if (drawerOpen) { toggleDrawer(); return true; }
-      if (isInvitingHospAdmin) { setIsInvitingHospAdmin(false); return true; }
-      if (isProvisioningWard) { setIsProvisioningWard(false); return true; }
-      if (selectedWardForBed) { setSelectedWardForBed(null); return true; }
-      if (isProvisioningGateway) { setIsProvisioningGateway(false); return true; }
-      if (isProvisioningDevice) { setIsProvisioningDevice(false); return true; }
-      if (isRegisteringPatient) { setIsRegisteringPatient(false); return true; }
-      if (isCreatingDoctor) { setIsCreatingDoctor(false); return true; }
-      if (isCreatingNurse) { setIsCreatingNurse(false); return true; }
-      if (isCreatingShift) { setIsCreatingShift(false); return true; }
-      if (assignmentData) { setAssignmentData(null); return true; }
-      if (selectedWardForEdit) { setSelectedWardForEdit(null); return true; }
-      if (selectedPatientForEdit) { setSelectedPatientForEdit(null); return true; }
-      if (selectedDoctorForEdit) { setSelectedDoctorForEdit(null); return true; }
-      if (selectedNurseForEdit) { setSelectedNurseForEdit(null); return true; }
-      if (selectedNurseId) { setSelectedNurseId(null); return true; }
-      if (selectedShiftForEdit) { setSelectedShiftForEdit(null); return true; }
-      if (selectedShiftId) { setSelectedShiftId(null); return true; }
-      if (selectedUserId) { setSelectedUserId(null); return true; }
-      if (selectedPatientId) { setSelectedPatientId(null); return true; }
-      if (selectedDoctorId) { setSelectedDoctorId(null); return true; }
+      if (isDeep) { handleBackPress(); return true; }
       if (activeTab !== 'home') { handleTabChange('home'); return true; }
       return false;
     };
     const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
     return () => backHandler.remove();
-  }, [drawerOpen, activeTab, isInvitingHospAdmin, selectedUserId, isProvisioningWard, selectedWardForBed, isProvisioningGateway, isProvisioningDevice, isRegisteringPatient, selectedPatientId, isCreatingDoctor, selectedDoctorId, isCreatingNurse, isCreatingShift, assignmentData, selectedWardForEdit, selectedPatientForEdit, selectedDoctorForEdit, selectedNurseId, selectedNurseForEdit, selectedShiftId, selectedShiftForEdit]);
+  }, [drawerOpen, activeTab, isDeep]);
 
-  const toggleDrawer = React.useCallback(() => {
-    const toValue = drawerOpen ? -width : 0;
-    Animated.timing(drawerAnim, { toValue, duration: 250, useNativeDriver: true }).start();
-    setDrawerOpen(!drawerOpen);
-  }, [drawerOpen, drawerAnim]);
-
-  const handleTabChange = (tabId) => {
+  const handleBackPress = () => {
     setIsInvitingHospAdmin(false);
     setSelectedUserId(null);
     setSelectedPatientId(null);
@@ -309,269 +249,116 @@ export const HospDashboard = ({ navigation, route }) => {
     setSelectedNurseForEdit(null);
     setSelectedShiftId(null);
     setSelectedShiftForEdit(null);
+  };
+
+  const toggleDrawer = React.useCallback(() => {
+    const toValue = drawerOpen ? -width : 0;
+    Animated.timing(drawerAnim, { toValue, duration: 250, useNativeDriver: true }).start();
+    setDrawerOpen(!drawerOpen);
+  }, [drawerOpen, drawerAnim]);
+
+  const handleTabChange = (tabId) => {
+    handleBackPress();
     setActiveTab(tabId);
   };
 
   const footerItems = [
-    { id: 'home', label: 'Home', icon: <IconDashboard /> },
-    ...(isOwner ? [{ id: 'admins', label: 'Admins', icon: <IconUsers /> }] : []),
-    { id: 'wards', label: 'Wards', icon: <IconDoor /> },
-    { id: 'devices', label: 'Devices', icon: <IconPulse /> },
-    { id: 'patients', label: 'Patients', icon: <IconPatient /> },
-    { id: 'doctors', label: 'Doctors', icon: <IconStethoscope /> },
-    { id: 'shifts', label: 'Shifts', icon: <IconClock /> },
+    { id: 'home', label: t('dashboard.home'), icon: <IconDashboard /> },
+    ...(isOwner ? [{ id: 'admins', label: t('dashboard.admins'), icon: <IconUsers /> }] : []),
+    { id: 'wards', label: t('dashboard.wards'), icon: <IconDoor /> },
+    { id: 'devices', label: t('dashboard.devices'), icon: <IconPulse /> },
+    { id: 'patients', label: t('dashboard.patients'), icon: <IconPatient /> },
+    { id: 'doctors', label: t('dashboard.doctors'), icon: <IconStethoscope /> },
+    { id: 'shifts', label: t('dashboard.shifts'), icon: <IconClock /> },
   ];
 
   const renderContent = () => {
-    if (isInvitingHospAdmin) {
-      return <CreateHospAdminScreen onCancel={() => setIsInvitingHospAdmin(false)} />;
-    }
-    if (isProvisioningWard) {
-      return <CreateWardScreen onCancel={() => setIsProvisioningWard(false)} />;
-    }
-    if (selectedWardForBed) {
-      return <CreateBedScreen onCancel={() => setSelectedWardForBed(null)} wardCode={selectedWardForBed} />;
-    }
-    if (isProvisioningGateway) {
-      return <CreateGatewayScreen onCancel={() => setIsProvisioningGateway(false)} />;
-    }
-    if (isProvisioningDevice) {
-      return <CreateDeviceScreen onCancel={() => setIsProvisioningDevice(false)} />;
-    }
-    if (isRegisteringPatient) {
-      return <CreatePatientScreen onCancel={() => setIsRegisteringPatient(false)} />;
-    }
-    if (isCreatingDoctor) {
-      return <CreateDoctorScreen onCancel={() => setIsCreatingDoctor(false)} hospCode="CLV-MAIN" />;
-    }
-    if (isCreatingNurse) {
-      return <CreateNurseScreen onCancel={() => setIsCreatingNurse(false)} hospCode="CLV-MAIN" />;
-    }
-    if (isCreatingShift) {
-      return <CreateShiftScreen onCancel={() => setIsCreatingShift(false)} />;
-    }
-    if (assignmentData) {
-      return <AssignmentScreen
-        initialPatientId={assignmentData.patientId}
-        initialDoctorId={assignmentData.doctorId}
-        onCancel={() => setAssignmentData(null)}
-      />;
-    }
-    if (selectedWardForEdit) {
-      return <EditWardScreen
-        ward={selectedWardForEdit}
-        onCancel={() => setSelectedWardForEdit(null)}
-        onSave={() => setSelectedWardForEdit(null)}
-        onDelete={() => setSelectedWardForEdit(null)}
-      />;
-    }
-    if (selectedPatientForEdit) {
-      return <EditPatientScreen
-        patientDetail={selectedPatientForEdit}
-        onCancel={() => setSelectedPatientForEdit(null)}
-        onSave={() => setSelectedPatientForEdit(null)}
-      />;
-    }
-    if (selectedDoctorForEdit) {
-      return <EditDoctorScreen
-        doctor={selectedDoctorForEdit}
-        onCancel={() => setSelectedDoctorForEdit(null)}
-        onSave={() => setSelectedDoctorForEdit(null)}
-      />;
-    }
-    if (selectedNurseForEdit) {
-      return <EditNurseScreen
-        nurse={selectedNurseForEdit}
-        onCancel={() => setSelectedNurseForEdit(null)}
-        onSave={() => setSelectedNurseForEdit(null)}
-      />;
-    }
-    if (selectedNurseId) {
-      return <NurseDetailScreen
-        nurseId={selectedNurseId}
-        onBack={() => setSelectedNurseId(null)}
-        onEdit={(n) => setSelectedNurseForEdit(n)}
-      />;
-    }
-    if (selectedShiftForEdit) {
-      return <EditShiftScreen
-        shift={selectedShiftForEdit}
-        onCancel={() => setSelectedShiftForEdit(null)}
-        onSave={() => setSelectedShiftForEdit(null)}
-        onDelete={() => { setSelectedShiftForEdit(null); setSelectedShiftId(null); }}
-      />;
-    }
-    if (selectedShiftId) {
-      return <ShiftDetailScreen
-        shiftId={selectedShiftId}
-        onBack={() => setSelectedShiftId(null)}
-        onEdit={(s) => setSelectedShiftForEdit(s)}
-      />;
-    }
-    if (selectedUserId) {
-      return <UserDetailScreen userId={selectedUserId} onBack={() => setSelectedUserId(null)} />;
-    }
-    if (selectedPatientId) {
-      return <PatientDetailScreen
-        patientId={selectedPatientId}
-        onBack={() => setSelectedPatientId(null)}
-        onAssign={() => setAssignmentData({ patientId: selectedPatientId })}
-        onEdit={(detail) => setSelectedPatientForEdit(detail)}
-      />;
-    }
-    if (selectedDoctorId) {
-      return <DoctorDetailScreen
-        doctorId={selectedDoctorId}
-        onBack={() => setSelectedDoctorId(null)}
-        onAssign={() => setAssignmentData({ doctorId: selectedDoctorId })}
-        onEdit={(d) => setSelectedDoctorForEdit(d)}
-      />;
-    }
-
+    if (isInvitingHospAdmin) return <CreateHospAdminScreen onCancel={() => setIsInvitingHospAdmin(false)} />;
+    if (isProvisioningWard) return <CreateWardScreen onCancel={() => setIsProvisioningWard(false)} />;
+    if (selectedWardForBed) return <CreateBedScreen onCancel={() => setSelectedWardForBed(null)} wardCode={selectedWardForBed} />;
+    if (isProvisioningGateway) return <CreateGatewayScreen onCancel={() => setIsProvisioningGateway(false)} />;
+    if (isProvisioningDevice) return <CreateDeviceScreen onCancel={() => setIsProvisioningDevice(false)} />;
+    if (isRegisteringPatient) return <CreatePatientScreen onCancel={() => setIsRegisteringPatient(false)} />;
+    if (isCreatingDoctor) return <CreateDoctorScreen onCancel={() => setIsCreatingDoctor(false)} hospCode="CLV-MAIN" />;
+    if (isCreatingNurse) return <CreateNurseScreen onCancel={() => setIsCreatingNurse(false)} hospCode="CLV-MAIN" />;
+    if (isCreatingShift) return <CreateShiftScreen onCancel={() => setIsCreatingShift(false)} />;
+    if (assignmentData) return <AssignmentScreen initialPatientId={assignmentData.patientId} initialDoctorId={assignmentData.doctorId} onCancel={() => setAssignmentData(null)} />;
+    if (selectedWardForEdit) return <EditWardScreen ward={selectedWardForEdit} onCancel={() => setSelectedWardForEdit(null)} onSave={() => setSelectedWardForEdit(null)} onDelete={() => setSelectedWardForEdit(null)} />;
+    if (selectedPatientForEdit) return <EditPatientScreen patientDetail={selectedPatientForEdit} onCancel={() => setSelectedPatientForEdit(null)} onSave={() => setSelectedPatientForEdit(null)} />;
+    if (selectedDoctorForEdit) return <EditDoctorScreen doctor={selectedDoctorForEdit} onCancel={() => setSelectedDoctorForEdit(null)} onSave={() => setSelectedDoctorForEdit(null)} />;
+    if (selectedNurseForEdit) return <EditNurseScreen nurse={selectedNurseForEdit} onCancel={() => setSelectedNurseForEdit(null)} onSave={() => setSelectedNurseForEdit(null)} />;
+    if (selectedNurseId) return <NurseDetailScreen nurseId={selectedNurseId} onBack={() => setSelectedNurseId(null)} onEdit={(n) => setSelectedNurseForEdit(n)} />;
+    if (selectedShiftForEdit) return <EditShiftScreen shift={selectedShiftForEdit} onCancel={() => setSelectedShiftForEdit(null)} onSave={() => setSelectedShiftForEdit(null)} onDelete={() => { setSelectedShiftForEdit(null); setSelectedShiftId(null); }} />;
+    if (selectedShiftId) return <ShiftDetailScreen shiftId={selectedShiftId} onBack={() => setSelectedShiftId(null)} onEdit={(s) => setSelectedShiftForEdit(s)} />;
+    if (selectedUserId) return <UserDetailScreen userId={selectedUserId} onBack={() => setSelectedUserId(null)} />;
+    if (selectedPatientId) return <PatientDetailScreen patientId={selectedPatientId} onBack={() => setSelectedPatientId(null)} onAssign={() => setAssignmentData({ patientId: selectedPatientId })} onEdit={(detail) => setSelectedPatientForEdit(detail)} />;
+    if (selectedDoctorId) return <DoctorDetailScreen doctorId={selectedDoctorId} onBack={() => setSelectedDoctorId(null)} onAssign={() => setAssignmentData({ doctorId: selectedDoctorId })} onEdit={(d) => setSelectedDoctorForEdit(d)} />;
     switch (activeTab) {
       case 'home': return <HospHomeContent role={role} onNavigate={handleTabChange} />;
       case 'admins': return <HospAdminsScreen onInvite={() => setIsInvitingHospAdmin(true)} onSelectUser={setSelectedUserId} />;
-      case 'wards': return <WardsScreen
-        onNewWard={() => setIsProvisioningWard(true)}
-        onNewBed={setSelectedWardForBed}
-        onEditWard={setSelectedWardForEdit}
-      />;
-      case 'devices': return <DevicesScreen 
-        onNewGateway={() => setIsProvisioningGateway(true)}
-        onNewDevice={() => setIsProvisioningDevice(true)}
-      />;
-      case 'patients': return <PatientsScreen 
-        onNewPatient={() => setIsRegisteringPatient(true)}
-        onSelectPatient={setSelectedPatientId}
-      />;
-      case 'doctors': return <DoctorsScreen 
-        onNewDoctor={() => setIsCreatingDoctor(true)}
-        onSelectDoctor={setSelectedDoctorId}
-      />;
-      case 'shifts': return <ShiftsScreen
-        onNewNurse={() => setIsCreatingNurse(true)}
-        onNewShift={() => setIsCreatingShift(true)}
-        onSelectNurse={setSelectedNurseId}
-        onSelectShift={setSelectedShiftId}
-      />;
+      case 'wards': return <WardsScreen onNewWard={() => setIsProvisioningWard(true)} onNewBed={setSelectedWardForBed} onEditWard={setSelectedWardForEdit} />;
+      case 'devices': return <DevicesScreen onNewGateway={() => setIsProvisioningGateway(true)} onNewDevice={() => setIsProvisioningDevice(true)} />;
+      case 'patients': return <PatientsScreen onNewPatient={() => setIsRegisteringPatient(true)} onSelectPatient={setSelectedPatientId} />;
+      case 'doctors': return <DoctorsScreen onNewDoctor={() => setIsCreatingDoctor(true)} onSelectDoctor={setSelectedDoctorId} />;
+      case 'shifts': return <ShiftsScreen onNewNurse={() => setIsCreatingNurse(true)} onNewShift={() => setIsCreatingShift(true)} onSelectNurse={setSelectedNurseId} onSelectShift={setSelectedShiftId} />;
       default: return <HospHomeContent role={role} onNavigate={handleTabChange} />;
     }
   };
 
   const getTitle = () => {
-    if (isInvitingHospAdmin) return "Invite Hosp Admin";
-    if (isProvisioningWard) return "Create Ward";
-    if (selectedWardForBed) return "Provision Bed";
-    if (isProvisioningGateway) return "Create Gateway";
-    if (isProvisioningDevice) return "Create Device";
-    if (isRegisteringPatient) return "Register Patient";
-    if (isCreatingDoctor) return "Onboard Doctor";
-    if (isCreatingNurse) return "Onboard Nurse";
-    if (isCreatingShift) return "Assign Shift";
-    if (assignmentData) return "Clinical Assignment";
-    if (selectedWardForEdit) return "Edit Ward";
-    if (selectedPatientForEdit) return "Edit Patient";
-    if (selectedDoctorForEdit) return "Edit Doctor";
-    if (selectedNurseForEdit) return "Edit Nurse";
-    if (selectedNurseId) return "Nurse Details";
-    if (selectedShiftForEdit) return "Edit Shift";
-    if (selectedShiftId) return "Shift Details";
-    if (selectedUserId) return "User Details";
-    if (selectedPatientId) return "Patient Details";
-    if (selectedDoctorId) return "Doctor Details";
-
+    if (isInvitingHospAdmin) return t('dashboard.invite_hosp_admin');
+    if (isProvisioningWard) return t('dashboard.create_ward');
+    if (selectedWardForBed) return t('dashboard.provision_bed');
+    if (isProvisioningGateway) return t('dashboard.create_gateway');
+    if (isProvisioningDevice) return t('dashboard.create_device');
+    if (isRegisteringPatient) return t('dashboard.register_patient');
+    if (isCreatingDoctor) return t('dashboard.onboard_doctor');
+    if (isCreatingNurse) return t('dashboard.onboard_nurse');
+    if (isCreatingShift) return t('dashboard.assign_shift');
+    if (assignmentData) return t('dashboard.clinical_assignment');
+    if (selectedWardForEdit) return t('dashboard.edit_ward');
+    if (selectedPatientForEdit) return t('dashboard.edit_patient');
+    if (selectedDoctorForEdit) return t('dashboard.edit_doctor');
+    if (selectedNurseForEdit) return t('dashboard.edit_nurse');
+    if (selectedNurseId) return t('dashboard.nurse_details');
+    if (selectedShiftForEdit) return t('dashboard.edit_shift');
+    if (selectedShiftId) return t('dashboard.shift_details');
+    if (selectedUserId) return t('dashboard.user_details');
+    if (selectedPatientId) return t('dashboard.patient_details');
+    if (selectedDoctorId) return t('dashboard.doctor_details');
     switch (activeTab) {
-      case 'home': return "Hosp Console";
-      case 'admins': return "Hospital Admins";
-      case 'wards': return "Wards & Beds";
-      case 'devices': return "Gateways & Devices";
-      case 'patients': return "Patient Registry";
-      case 'doctors': return "Medical Staff";
-      case 'shifts': return "Nurses & Shifts";
-      default: return "Hosp Console";
+      case 'home': return t('dashboard.hosp_console');
+      case 'admins': return t('dashboard.hosp_admins');
+      case 'wards': return t('dashboard.wards_beds');
+      case 'devices': return t('dashboard.gateways_devices');
+      case 'patients': return t('dashboard.patient_registry');
+      case 'doctors': return t('dashboard.medical_staff');
+      case 'shifts': return t('dashboard.nurses_shifts');
+      default: return t('dashboard.hosp_console');
     }
   };
 
   return (
     <View style={styles.container}>
-      {/* Drawer */}
       {drawerOpen && <TouchableOpacity style={styles.drawerOverlay} activeOpacity={1} onPress={toggleDrawer} />}
       <Animated.View style={[styles.drawer, { transform: [{ translateX: drawerAnim }] }]}>
         <View style={{ flex: 1, paddingTop: insets.top }}>
           <View style={styles.drawerHeader}>
             <Text style={styles.drawerName}>{user?.userName || 'User'}</Text>
-            <Text style={styles.drawerRole}>{isOwner ? 'Hospital Owner' : 'Hospital Administrator'}</Text>
+            <Text style={styles.drawerRole}>{isOwner ? t('dashboard.hosp_owner') : t('dashboard.hosp_administrator')}</Text>
           </View>
           <ScrollView style={styles.drawerMenu}>
-            <TouchableOpacity 
-              style={styles.drawerItem}
-              onPress={() => { handleTabChange('home'); toggleDrawer(); }}
-            >
-              <IconDashboard size={20} color={T.textDim} />
-              <Text style={styles.drawerItemText}>Dashboard</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.drawerItem} onPress={() => { toggleTheme(); toggleDrawer(); }}>
-              <IconMoon size={20} color={T.textDim} />
-              <Text style={styles.drawerItemText}>Theme: {isDark ? 'Dark' : 'Light'}</Text>
-            </TouchableOpacity>
-
+            <TouchableOpacity style={styles.drawerItem} onPress={() => { handleTabChange('home'); toggleDrawer(); }}><IconDashboard size={20} color={T.textDim} /><Text style={styles.drawerItemText}>{t('dashboard.title')}</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.drawerItem} onPress={() => { toggleTheme(); toggleDrawer(); }}><IconMoon size={20} color={T.textDim} /><Text style={styles.drawerItemText}>{t('common.theme')}: {isDark ? t('settings.theme_dark') : t('settings.theme_light')}</Text></TouchableOpacity>
             <View style={styles.drawerDivider} />
-            
-            <TouchableOpacity 
-              style={[styles.drawerItem, { marginTop: 'auto' }]} 
-              onPress={() => { logout(); navigation.replace('Login'); }}
-            >
-              <IconLogout size={20} color={T.bad} />
-              <Text style={[styles.drawerItemText, { color: T.bad }]}>Log out</Text>
-            </TouchableOpacity>
+            <TouchableOpacity style={[styles.drawerItem, { marginTop: 'auto' }]} onPress={() => { logout(); navigation.replace('Login'); }}><IconLogout size={20} color={T.bad} /><Text style={[styles.drawerItemText, { color: T.bad }]}>{t('common.logout')}</Text></TouchableOpacity>
           </ScrollView>
         </View>
       </Animated.View>
-
-      <TopBar 
-        title={getTitle()} 
-        leading={ isDeep ? <IconBack /> : <IconMenu /> }
-        onLeadingPress={isDeep ? () => {
-          setIsInvitingHospAdmin(false);
-          setSelectedUserId(null);
-          setSelectedPatientId(null);
-          setSelectedDoctorId(null);
-          setIsProvisioningWard(false);
-          setSelectedWardForBed(null);
-          setIsProvisioningGateway(false);
-          setIsProvisioningDevice(false);
-          setIsRegisteringPatient(false);
-          setIsCreatingDoctor(false);
-          setIsCreatingNurse(false);
-          setIsCreatingShift(false);
-          setAssignmentData(null);
-          setSelectedWardForEdit(null);
-          setSelectedPatientForEdit(null);
-          setSelectedDoctorForEdit(null);
-          setSelectedNurseId(null);
-          setSelectedNurseForEdit(null);
-          setSelectedShiftId(null);
-          setSelectedShiftForEdit(null);
-        } : toggleDrawer}
-        onNotificationPress={() => setShowNotifications(true)}
-        onProfilePress={() => { logout(); navigation.replace('Login'); }}
-      />
-
-      <View style={{ flex: 1 }}>
-        {renderContent()}
-      </View>
-
-      <BottomNav
-        items={footerItems}
-        active={activeTab}
-        onChange={handleTabChange}
-      />
-
-      <NotificationSheet
-        visible={showNotifications}
-        onClose={() => setShowNotifications(false)}
-      />
+      <TopBar title={getTitle()} leading={ isDeep ? <IconBack /> : <IconMenu /> } onLeadingPress={isDeep ? handleBackPress : toggleDrawer} onNotificationPress={() => setShowNotifications(true)} onProfilePress={() => { logout(); navigation.replace('Login'); }} />
+      <View style={{ flex: 1 }}>{renderContent()}</View>
+      <BottomNav items={footerItems} active={activeTab} onChange={handleTabChange} />
+      <NotificationSheet visible={showNotifications} onClose={() => setShowNotifications(false)} />
     </View>
   );
 };

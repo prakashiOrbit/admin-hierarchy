@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator, Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { organisationApi } from '../../services/api';
@@ -7,6 +8,7 @@ import { Card, Field, TextInput, Btn } from '../../components/Shared';
 import { IconHospital, IconUser, IconMail, IconLocation, IconPhone, IconBuilding } from '../../icons';
 
 export const EditHospitalScreen = ({ hospital, onCancel, onSave }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
   const styles = createStyles(T);
@@ -39,11 +41,11 @@ export const EditHospitalScreen = ({ hospital, onCancel, onSave }) => {
     setLoading(true);
     try {
       await organisationApi.updateHospital(user.orgName, hospital.hospitalCode, form, token);
-      Alert.alert('Success', 'Hospital updated successfully', [
-        { text: 'OK', onPress: () => onSave({ ...hospital, ...form }) }
+      Alert.alert(t('alerts.success'), t('alerts.hospital_updated'), [
+        { text: t('actions.ok'), onPress: () => onSave({ ...hospital, ...form }) }
       ]);
     } catch (err) {
-      Alert.alert('Error', err.message || 'Failed to update hospital');
+      Alert.alert(t('alerts.error'), err.message || t('alerts.update_failed'));
     } finally {
       setLoading(false);
     }
@@ -56,15 +58,15 @@ export const EditHospitalScreen = ({ hospital, onCancel, onSave }) => {
         <View style={styles.banner}>
           <IconHospital size={20} color={T.accent} />
           <Text style={styles.bannerText}>
-            Editing <Text style={{ fontWeight: '700' }}>{hospital.hospitalCode}</Text>. The hospital code cannot be changed.
+            {t('hospital.edit_banner', { code: hospital.hospitalCode })}
           </Text>
         </View>
 
         {/* Identity Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>HOSPITAL IDENTITY</Text>
+          <Text style={styles.sectionTitle}>{t('hospital.identity_section')}</Text>
 
-          <Field label="Hospital Code">
+          <Field label={t('hospital.code')}>
             <Card style={styles.readOnlyCard}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <IconBuilding size={16} color={T.textFaint} />
@@ -73,50 +75,50 @@ export const EditHospitalScreen = ({ hospital, onCancel, onSave }) => {
             </Card>
           </Field>
 
-          <Field label="Hospital Name" required>
+          <Field label={t('hospital.name')} required>
             <TextInput
               value={form.hospitalName}
               onChangeText={v => updateRoot('hospitalName', v)}
-              placeholder="e.g. City General Hospital"
+              placeholder={t('placeholders.hospital_name')}
             />
           </Field>
 
-          <Field label="Description">
+          <Field label={t('hospital.description')}>
             <TextInput
               value={form.description}
               onChangeText={v => updateRoot('description', v)}
-              placeholder="e.g. Main city branch"
+              placeholder={t('placeholders.hospital_description')}
             />
           </Field>
         </View>
 
         {/* Contact Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>PRIMARY CONTACT</Text>
+          <Text style={styles.sectionTitle}>{t('hospital.contact_section')}</Text>
 
-          <Field label="Full Name">
+          <Field label={t('hospital.contact_name')}>
             <TextInput
               value={form.myContact.name}
               onChangeText={v => updateContact('name', v)}
-              placeholder="Full name"
+              placeholder={t('placeholders.contact_name')}
               leading={<IconUser size={18} color={T.textDim} />}
             />
           </Field>
 
-          <Field label="Email Address" required>
+          <Field label={t('hospital.contact_email')} required>
             <TextInput
               value={form.myContact.email}
               onChangeText={v => updateContact('email', v.toLowerCase())}
-              placeholder="owner@hospital.com"
+              placeholder={t('placeholders.contact_email')}
               leading={<IconMail size={18} color={T.textDim} />}
             />
           </Field>
 
-          <Field label="Phone Number">
+          <Field label={t('hospital.contact_phone')}>
             <TextInput
               value={form.myContact.phone}
               onChangeText={v => updateContact('phone', v)}
-              placeholder="+91 98000 00000"
+              placeholder={t('placeholders.contact_phone')}
               leading={<IconPhone size={18} color={T.textDim} />}
             />
           </Field>
@@ -124,33 +126,33 @@ export const EditHospitalScreen = ({ hospital, onCancel, onSave }) => {
 
         {/* Address Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>PHYSICAL ADDRESS</Text>
+          <Text style={styles.sectionTitle}>{t('hospital.address_section')}</Text>
 
-          <Field label="Street Address">
+          <Field label={t('hospital.address_street')}>
             <TextInput
               value={form.myAddress.street1}
               onChangeText={v => updateAddress('street1', v)}
-              placeholder="123 Health Ave"
+              placeholder={t('placeholders.address_street')}
               leading={<IconLocation size={18} color={T.textDim} />}
             />
           </Field>
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="City">
+              <Field label={t('hospital.address_city')}>
                 <TextInput
                   value={form.myAddress.city}
                   onChangeText={v => updateAddress('city', v)}
-                  placeholder="Metropolis"
+                  placeholder={t('placeholders.address_city')}
                 />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="State">
+              <Field label={t('hospital.address_state')}>
                 <TextInput
                   value={form.myAddress.state}
                   onChangeText={v => updateAddress('state', v)}
-                  placeholder="NY"
+                  placeholder={t('placeholders.address_state')}
                 />
               </Field>
             </View>
@@ -158,20 +160,20 @@ export const EditHospitalScreen = ({ hospital, onCancel, onSave }) => {
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="Country">
+              <Field label={t('hospital.address_country')}>
                 <TextInput
                   value={form.myAddress.country}
                   onChangeText={v => updateAddress('country', v)}
-                  placeholder="India"
+                  placeholder={t('placeholders.address_country')}
                 />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Pincode">
+              <Field label={t('hospital.address_pincode')}>
                 <TextInput
                   value={form.myAddress.pincode}
                   onChangeText={v => updateAddress('pincode', v)}
-                  placeholder="10001"
+                  placeholder={t('placeholders.address_pincode')}
                 />
               </Field>
             </View>
@@ -181,7 +183,7 @@ export const EditHospitalScreen = ({ hospital, onCancel, onSave }) => {
         {/* Actions */}
         <View style={styles.actionRow}>
           <Btn variant="ghost" full style={{ flex: 1 }} onPress={onCancel} disabled={loading}>
-            Cancel
+            {t('actions.cancel')}
           </Btn>
           <Btn
             full
@@ -189,9 +191,13 @@ export const EditHospitalScreen = ({ hospital, onCancel, onSave }) => {
             onPress={handleSave}
             disabled={!isFormValid || loading}
           >
-            {loading ? <ActivityIndicator color="#FFF" size="small" /> : 'Save Changes'}
+            {loading ? <ActivityIndicator color="#FFF" size="small" /> : t('actions.save_changes')}
           </Btn>
         </View>
+      </ScrollView>
+    </View>
+  );
+};
       </ScrollView>
     </View>
   );

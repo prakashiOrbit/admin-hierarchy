@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
@@ -9,6 +10,7 @@ import { doctorApi } from '../../services/api';
 const DOCTOR_TYPES = ['SPECIALIST', 'GENERAL', 'CONSULTANT', 'RESIDENT'];
 
 export const EditDoctorScreen = ({ doctor, onCancel, onSave }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
   const styles = createStyles(T);
@@ -46,9 +48,9 @@ export const EditDoctorScreen = ({ doctor, onCancel, onSave }) => {
     };
     try {
       await doctorApi.update(user.orgName, user.hospitalCode, doctor.doctorCode, payload, token);
-      Alert.alert('Saved', 'Doctor profile updated.', [{ text: 'OK', onPress: () => onSave?.() }]);
+      Alert.alert(t('common.success'), t('users.doctor_updated'), [{ text: t('common.done'), onPress: () => onSave?.() }]);
     } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to update doctor.');
+      Alert.alert(t('common.error'), e.message || t('users.update_failed_doctor'));
     } finally {
       setSaving(false);
     }
@@ -60,14 +62,14 @@ export const EditDoctorScreen = ({ doctor, onCancel, onSave }) => {
         <View style={styles.banner}>
           <IconStethoscope size={24} color={T.accent} />
           <Text style={styles.bannerText}>
-            Editing <Text style={{ fontWeight: '700' }}>{doctor.doctorCode}</Text>. Doctor code cannot be changed.
+            {t('users.editing')} <Text style={{ fontWeight: '700' }}>{doctor.doctorCode}</Text>. {t('users.immutable_code_doctor')}
           </Text>
         </View>
 
         <View style={styles.section}>
-          <SectionHeader title="Professional Identity" />
+          <SectionHeader title={t('users.professional_identity')} />
 
-          <Field label="Doctor Code">
+          <Field label={t('users.doctor_code')}>
             <Card style={styles.readOnlyCard}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <IconBuilding size={16} color={T.textFaint} />
@@ -78,18 +80,18 @@ export const EditDoctorScreen = ({ doctor, onCancel, onSave }) => {
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="First Name" required>
+              <Field label={t('users.first_name')} required>
                 <TextInput value={form.firstName} onChangeText={v => set('firstName', v)} placeholder="Gregory" />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Last Name" required>
+              <Field label={t('users.last_name')} required>
                 <TextInput value={form.lastName} onChangeText={v => set('lastName', v)} placeholder="House" />
               </Field>
             </View>
           </View>
 
-          <Field label="Speciality (comma-separated)">
+          <Field label={t('users.speciality_csv')}>
             <TextInput
               value={form.doctorSpeciality}
               onChangeText={v => set('doctorSpeciality', v)}
@@ -100,7 +102,7 @@ export const EditDoctorScreen = ({ doctor, onCancel, onSave }) => {
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="Experience (Years)">
+              <Field label={t('users.experience')}>
                 <TextInput
                   value={form.doctorExperience}
                   onChangeText={v => set('doctorExperience', v.replace(/[^0-9.]/g, ''))}
@@ -110,7 +112,7 @@ export const EditDoctorScreen = ({ doctor, onCancel, onSave }) => {
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Date of Birth">
+              <Field label={t('users.dob')}>
                 <TextInput
                   value={form.birthDate}
                   onChangeText={v => set('birthDate', v)}
@@ -121,21 +123,21 @@ export const EditDoctorScreen = ({ doctor, onCancel, onSave }) => {
             </View>
           </View>
 
-          <Field label="Doctor Type">
+          <Field label={t('users.type')}>
             <View style={styles.typeGrid}>
-              {DOCTOR_TYPES.map(t => (
+              {DOCTOR_TYPES.map(t_item => (
                 <TouchableOpacity
-                  key={t}
-                  style={[styles.typeBtn, form.doctorType === t && styles.typeBtnActive]}
-                  onPress={() => set('doctorType', t)}
+                  key={t_item}
+                  style={[styles.typeBtn, form.doctorType === t_item && styles.typeBtnActive]}
+                  onPress={() => set('doctorType', t_item)}
                 >
-                  <Text style={[styles.typeText, form.doctorType === t && styles.typeTextActive]}>{t}</Text>
+                  <Text style={[styles.typeText, form.doctorType === t_item && styles.typeTextActive]}>{t_item}</Text>
                 </TouchableOpacity>
               ))}
             </View>
           </Field>
 
-          <Field label="Gender">
+          <Field label={t('users.gender')}>
             <View style={styles.row}>
               {['MALE', 'FEMALE'].map(g => (
                 <TouchableOpacity
@@ -151,8 +153,8 @@ export const EditDoctorScreen = ({ doctor, onCancel, onSave }) => {
         </View>
 
         <View style={styles.section}>
-          <SectionHeader title="Contact & Location" />
-          <Field label="Email" required>
+          <SectionHeader title={t('users.contact_location')} />
+          <Field label={t('users.email')} required>
             <TextInput
               value={form.email}
               onChangeText={v => set('email', v.toLowerCase())}
@@ -161,7 +163,7 @@ export const EditDoctorScreen = ({ doctor, onCancel, onSave }) => {
               leading={<IconMail size={16} color={T.textFaint} />}
             />
           </Field>
-          <Field label="Phone">
+          <Field label={t('users.phone')}>
             <TextInput
               value={form.phone}
               onChangeText={v => set('phone', v)}
@@ -172,12 +174,12 @@ export const EditDoctorScreen = ({ doctor, onCancel, onSave }) => {
           </Field>
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="City">
+              <Field label={t('users.city')}>
                 <TextInput value={form.city} onChangeText={v => set('city', v)} placeholder="Princeton" />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="State">
+              <Field label={t('users.state')}>
                 <TextInput value={form.state} onChangeText={v => set('state', v)} placeholder="NJ" />
               </Field>
             </View>
@@ -185,9 +187,9 @@ export const EditDoctorScreen = ({ doctor, onCancel, onSave }) => {
         </View>
 
         <View style={styles.actionRow}>
-          <Btn variant="ghost" style={{ flex: 1 }} onPress={onCancel} disabled={saving}>Cancel</Btn>
+          <Btn variant="ghost" style={{ flex: 1 }} onPress={onCancel} disabled={saving}>{t('common.cancel')}</Btn>
           <Btn style={{ flex: 1.5 }} onPress={handleSave} disabled={!isValid || saving}>
-            {saving ? <ActivityIndicator color="#FFF" size="small" /> : 'Save Changes'}
+            {saving ? <ActivityIndicator color="#FFF" size="small" /> : t('users.save_changes')}
           </Btn>
         </View>
       </ScrollView>

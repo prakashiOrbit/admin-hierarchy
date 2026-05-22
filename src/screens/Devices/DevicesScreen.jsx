@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, SearchBar, Btn, Chip } from '../../components/Shared';
@@ -8,6 +9,7 @@ import { IconGateway, IconPulse, IconPlus, IconCpu, IconChevron } from '../../ic
 import { gatewayApi, deviceApi } from '../../services/api';
 
 export const DevicesScreen = ({ onNewGateway, onNewDevice }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user, token } = useAuth();
@@ -41,11 +43,11 @@ export const DevicesScreen = ({ onNewGateway, onNewDevice }) => {
       setGateways(gList);
       setDevices(dList);
     } catch (err) {
-      setError(err.message || 'Failed to load devices');
+      setError(err.message || t('messages.error_load_devices'));
     } finally {
       setLoading(false);
     }
-  }, [user?.orgName, user?.hospitalCode, token]);
+  }, [user?.orgName, user?.hospitalCode, token, t]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
@@ -67,7 +69,7 @@ export const DevicesScreen = ({ onNewGateway, onNewDevice }) => {
     return (
       <View style={styles.center}>
         <Text style={{ color: T.bad, fontSize: 13, textAlign: 'center', marginBottom: 12 }}>{error}</Text>
-        <Btn variant="surface" size="sm" onPress={fetchAll}>Retry</Btn>
+        <Btn variant="surface" size="sm" onPress={fetchAll}>{t('actions.retry')}</Btn>
       </View>
     );
   }
@@ -79,21 +81,21 @@ export const DevicesScreen = ({ onNewGateway, onNewDevice }) => {
           <SearchBar
             value={query}
             onChangeText={setQuery}
-            placeholder={mode === 'gateways' ? 'Search gateways...' : 'Search devices...'}
+            placeholder={mode === 'gateways' ? t('placeholders.search_gateways') : t('placeholders.search_devices')}
           />
         </View>
 
         <View style={styles.modeRow}>
           <Chip active={mode === 'gateways'} onPress={() => setMode('gateways')}>
-            Gateways · {gateways.length}
+            {t('entity.gateways')} · {gateways.length}
           </Chip>
           <Chip active={mode === 'devices'} onPress={() => setMode('devices')}>
-            Devices · {devices.length}
+            {t('entity.devices')} · {devices.length}
           </Chip>
         </View>
 
         <View style={styles.headerRow}>
-          <SectionHeader title={mode === 'gateways' ? 'IoT Gateways' : 'Medical Devices'} />
+          <SectionHeader title={mode === 'gateways' ? t('entity.iot_gateways') : t('entity.medical_devices')} />
           <Btn
             variant="primary"
             size="sm"
@@ -101,7 +103,7 @@ export const DevicesScreen = ({ onNewGateway, onNewDevice }) => {
             onPress={mode === 'gateways' ? onNewGateway : onNewDevice}
           >
             <IconPlus size={14} color="#FFF" />
-            {mode === 'gateways' ? ' New Gateway' : ' New Device'}
+             {mode === 'gateways' ? ` ${t('actions.new_gateway')}` : ` ${t('actions.new_device')}`}
           </Btn>
         </View>
 
@@ -128,8 +130,8 @@ export const DevicesScreen = ({ onNewGateway, onNewDevice }) => {
             )) : (
               <View style={styles.emptyState}>
                 <IconGateway size={48} color={T.textFaint} />
-                <Text style={styles.emptyTitle}>No gateways registered</Text>
-                <Text style={styles.emptyHint}>Add an IoT gateway to start streaming telemetry from beds.</Text>
+                <Text style={styles.emptyTitle}>{t('messages.no_gateways')}</Text>
+                <Text style={styles.emptyHint}>{t('messages.no_gateways_hint')}</Text>
               </View>
             )
           ) : (
@@ -154,8 +156,8 @@ export const DevicesScreen = ({ onNewGateway, onNewDevice }) => {
             )) : (
               <View style={styles.emptyState}>
                 <IconCpu size={48} color={T.textFaint} />
-                <Text style={styles.emptyTitle}>No devices registered</Text>
-                <Text style={styles.emptyHint}>Register a medical device to assign it to a bed or patient.</Text>
+                <Text style={styles.emptyTitle}>{t('messages.no_devices')}</Text>
+                <Text style={styles.emptyHint}>{t('messages.no_devices_hint')}</Text>
               </View>
             )
           )}

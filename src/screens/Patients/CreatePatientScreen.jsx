@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
@@ -7,6 +8,7 @@ import { IconUser, IconMail, IconLocation, IconPhone, IconHeart } from '../../ic
 import { patientApi } from '../../services/api';
 
 export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user, token } = useAuth();
@@ -52,11 +54,11 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
     };
     try {
       await patientApi.create(user.orgName, user.hospitalCode, payload, token);
-      Alert.alert('Success', `Patient ${form.patient.patientCode} registered.`, [
-        { text: 'OK', onPress: onSuccess || onCancel },
+      Alert.alert(t('messages.success'), t('messages.patient_registered', { code: form.patient.patientCode }), [
+        { text: t('actions.ok'), onPress: onSuccess || onCancel },
       ]);
     } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to register patient.');
+      Alert.alert(t('messages.error'), e.message || t('messages.failed_register_patient'));
     } finally {
       setSaving(false);
     }
@@ -68,79 +70,79 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
         <View style={styles.banner}>
           <IconUser size={24} color={T.accent} />
           <Text style={styles.bannerText}>
-            Registering a new patient for {user?.hospitalCode}. Please provide accurate identity, contact, and preliminary vital sign information.
+            {t('messages.register_patient_banner', { hospitalCode: user?.hospitalCode })}
           </Text>
         </View>
 
         <View style={styles.section}>
-          <SectionHeader title="Patient Identity" />
-          <Field label="Patient MRN / Code" required>
-            <TextInput value={form.patient.patientCode} onChangeText={v => updatePatient('patientCode', v.toUpperCase())} placeholder="e.g. MRN-2026-001" />
+          <SectionHeader title={t('entity.patient_identity')} />
+          <Field label={t('entity.patient_mrn_code')} required>
+            <TextInput value={form.patient.patientCode} onChangeText={v => updatePatient('patientCode', v.toUpperCase())} placeholder={t('placeholders.mrn_example')} />
           </Field>
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="First Name" required>
-                <TextInput value={form.patient.firstName} onChangeText={v => updatePatient('firstName', v)} placeholder="John" />
+              <Field label={t('entity.first_name')} required>
+                <TextInput value={form.patient.firstName} onChangeText={v => updatePatient('firstName', v)} placeholder={t('placeholders.john')} />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Last Name" required>
-                <TextInput value={form.patient.lastName} onChangeText={v => updatePatient('lastName', v)} placeholder="Doe" />
+              <Field label={t('entity.last_name')} required>
+                <TextInput value={form.patient.lastName} onChangeText={v => updatePatient('lastName', v)} placeholder={t('placeholders.doe')} />
               </Field>
             </View>
           </View>
         </View>
 
         <View style={styles.section}>
-          <SectionHeader title="Contact & Address" />
-          <Field label="Email Address" required>
-            <TextInput value={form.patient.myContact.email} onChangeText={v => updateContact('email', v.toLowerCase())} placeholder="patient@example.com" leading={<IconMail size={16} color={T.textFaint} />} />
+          <SectionHeader title={t('entity.contact_address')} />
+          <Field label={t('entity.email_address')} required>
+            <TextInput value={form.patient.myContact.email} onChangeText={v => updateContact('email', v.toLowerCase())} placeholder={t('placeholders.email_example')} leading={<IconMail size={16} color={T.textFaint} />} />
           </Field>
-          <Field label="Phone Number">
-            <TextInput value={form.patient.myContact.phone} onChangeText={v => updateContact('phone', v)} placeholder="555-0101" leading={<IconPhone size={16} color={T.textFaint} />} />
+          <Field label={t('entity.phone_number')}>
+            <TextInput value={form.patient.myContact.phone} onChangeText={v => updateContact('phone', v)} placeholder={t('placeholders.phone_example')} leading={<IconPhone size={16} color={T.textFaint} />} />
           </Field>
-          <Field label="Street Address">
-            <TextInput value={form.patient.myAddress.street1} onChangeText={v => updateAddress('street1', v)} placeholder="123 Medical Lane" leading={<IconLocation size={16} color={T.textFaint} />} />
+          <Field label={t('entity.street_address')}>
+            <TextInput value={form.patient.myAddress.street1} onChangeText={v => updateAddress('street1', v)} placeholder={t('placeholders.address_example')} leading={<IconLocation size={16} color={T.textFaint} />} />
           </Field>
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="City">
-                <TextInput value={form.patient.myAddress.city} onChangeText={v => updateAddress('city', v)} placeholder="Springfield" />
+              <Field label={t('entity.city')}>
+                <TextInput value={form.patient.myAddress.city} onChangeText={v => updateAddress('city', v)} placeholder={t('placeholders.city_example')} />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Pincode">
-                <TextInput value={form.patient.myAddress.pincode} onChangeText={v => updateAddress('pincode', v)} placeholder="62704" />
+              <Field label={t('entity.pincode')}>
+                <TextInput value={form.patient.myAddress.pincode} onChangeText={v => updateAddress('pincode', v)} placeholder={t('placeholders.pincode_example')} />
               </Field>
             </View>
           </View>
         </View>
 
         <View style={styles.section}>
-          <SectionHeader title="Preliminary Vitals" />
+          <SectionHeader title={t('entity.preliminary_vitals')} />
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="Blood Group">
-                <TextInput value={form.patientinfo[0].infoData.bloodGroup} onChangeText={v => updateInfo('bloodGroup', v)} placeholder="O+" leading={<IconHeart size={16} color={T.textFaint} />} />
+              <Field label={t('entity.blood_group')}>
+                <TextInput value={form.patientinfo[0].infoData.bloodGroup} onChangeText={v => updateInfo('bloodGroup', v)} placeholder={t('placeholders.blood_group_example')} leading={<IconHeart size={16} color={T.textFaint} />} />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Weight">
-                <TextInput value={form.patientinfo[0].infoData.weight} onChangeText={v => updateInfo('weight', v)} placeholder="75kg" />
+              <Field label={t('entity.weight')}>
+                <TextInput value={form.patientinfo[0].infoData.weight} onChangeText={v => updateInfo('weight', v)} placeholder={t('placeholders.weight_example')} />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Height">
-                <TextInput value={form.patientinfo[0].infoData.height} onChangeText={v => updateInfo('height', v)} placeholder="180cm" />
+              <Field label={t('entity.height')}>
+                <TextInput value={form.patientinfo[0].infoData.height} onChangeText={v => updateInfo('height', v)} placeholder={t('placeholders.height_example')} />
               </Field>
             </View>
           </View>
         </View>
 
         <View style={styles.actionRow}>
-          <Btn variant="surface" style={{ flex: 1 }} onPress={onCancel}>Cancel</Btn>
+          <Btn variant="surface" style={{ flex: 1 }} onPress={onCancel}>{t('actions.cancel')}</Btn>
           <Btn variant="primary" style={{ flex: 2 }} disabled={!isFormValid || saving} onPress={handleCreate}>
-            {saving ? 'Registering...' : 'Register Patient'}
+            {saving ? t('actions.registering') : t('actions.register_patient')}
           </Btn>
         </View>
       </ScrollView>

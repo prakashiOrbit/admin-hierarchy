@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator, Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { deviceTypeApi } from '../../services/api';
@@ -7,6 +8,7 @@ import { Card, Field, TextInput, Btn } from '../../components/Shared';
 import { IconCpu, IconActivity, IconShield } from '../../icons';
 
 export const EditDeviceTypeScreen = ({ deviceType, onCancel, onSave }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
   const styles = createStyles(T);
@@ -29,11 +31,11 @@ export const EditDeviceTypeScreen = ({ deviceType, onCancel, onSave }) => {
     setLoading(true);
     try {
       await deviceTypeApi.updateType(user.orgName, deviceType.deviceType, form, token);
-      Alert.alert('Success', 'Device type updated successfully', [
-        { text: 'OK', onPress: () => onSave({ ...deviceType, ...form }) }
+      Alert.alert(t('messages.success'), t('messages.device_type_updated'), [
+        { text: t('actions.ok'), onPress: () => onSave({ ...deviceType, ...form }) }
       ]);
     } catch (err) {
-      Alert.alert('Error', err.message || 'Failed to update device type');
+      Alert.alert(t('messages.error'), err.message || t('messages.error_update_device_type'));
     } finally {
       setLoading(false);
     }
@@ -46,15 +48,15 @@ export const EditDeviceTypeScreen = ({ deviceType, onCancel, onSave }) => {
         <View style={styles.banner}>
           <IconCpu size={24} color={T.accent} />
           <Text style={styles.bannerText}>
-            Editing <Text style={{ fontWeight: '700' }}>{deviceType.deviceType}</Text>. The profile name cannot be changed.
+            {t('messages.editing_device_type_hint', { name: deviceType.deviceType })}
           </Text>
         </View>
 
         {/* Read-only identity */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>DEVICE IDENTITY</Text>
+          <Text style={styles.sectionTitle}>{t('entity.device_identity')}</Text>
 
-          <Field label="Profile Name">
+          <Field label={t('entity.profile_name')}>
             <Card style={styles.readOnlyCard}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <IconActivity size={16} color={T.textFaint} />
@@ -63,44 +65,44 @@ export const EditDeviceTypeScreen = ({ deviceType, onCancel, onSave }) => {
             </Card>
           </Field>
 
-          <Field label="Category" required>
+          <Field label={t('entity.category')} required>
             <TextInput
               value={form.category}
               onChangeText={v => updateForm('category', v.toUpperCase())}
-              placeholder="e.g. PMS"
+              placeholder={t('placeholders.category')}
               leading={<IconShield size={16} color={T.textFaint} />}
             />
           </Field>
 
-          <Field label="Description">
+          <Field label={t('entity.description')}>
             <TextInput
               value={form.description}
               onChangeText={v => updateForm('description', v)}
-              placeholder="e.g. Comen Patient Monitor"
+              placeholder={t('placeholders.description')}
             />
           </Field>
         </View>
 
         {/* Specifications */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>SPECIFICATIONS</Text>
+          <Text style={styles.sectionTitle}>{t('entity.specifications')}</Text>
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="Vendor" required>
+              <Field label={t('entity.vendor')} required>
                 <TextInput
                   value={form.deviceVendor}
                   onChangeText={v => updateForm('deviceVendor', v)}
-                  placeholder="e.g. Comen"
+                  placeholder={t('placeholders.vendor')}
                 />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Profile Code" required>
+              <Field label={t('entity.profile_code')} required>
                 <TextInput
                   value={form.deviceProfile}
                   onChangeText={v => updateForm('deviceProfile', v)}
-                  placeholder="e.g. Comen"
+                  placeholder={t('placeholders.vendor')}
                 />
               </Field>
             </View>
@@ -108,20 +110,20 @@ export const EditDeviceTypeScreen = ({ deviceType, onCancel, onSave }) => {
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="Min Firmware">
+              <Field label={t('entity.min_firmware')}>
                 <TextInput
                   value={form.deviceFirmware}
                   onChangeText={v => updateForm('deviceFirmware', v)}
-                  placeholder="1.0.0"
+                  placeholder={t('placeholders.firmware_version')}
                 />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Max Firmware">
+              <Field label={t('entity.max_firmware')}>
                 <TextInput
                   value={form.maxFirmware}
                   onChangeText={v => updateForm('maxFirmware', v)}
-                  placeholder="2.0.0"
+                  placeholder={t('placeholders.firmware_version')}
                 />
               </Field>
             </View>
@@ -131,7 +133,7 @@ export const EditDeviceTypeScreen = ({ deviceType, onCancel, onSave }) => {
         {/* Actions */}
         <View style={styles.actionRow}>
           <Btn variant="ghost" full style={{ flex: 1 }} onPress={onCancel} disabled={loading}>
-            Cancel
+            {t('actions.cancel')}
           </Btn>
           <Btn
             full
@@ -139,7 +141,7 @@ export const EditDeviceTypeScreen = ({ deviceType, onCancel, onSave }) => {
             onPress={handleSave}
             disabled={!isFormValid || loading}
           >
-            {loading ? <ActivityIndicator color="#FFF" size="small" /> : 'Save Changes'}
+            {loading ? <ActivityIndicator color="#FFF" size="small" /> : t('actions.save_changes')}
           </Btn>
         </View>
       </ScrollView>

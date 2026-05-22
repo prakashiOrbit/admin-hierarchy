@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, Platform, BackHandler, ActivityIndicator } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, Btn } from '../../components/Shared';
@@ -33,6 +34,7 @@ const { width } = Dimensions.get('window');
 
 const StatCard = ({ label, value, delta, icon, color, accent }) => {
   const { theme: T } = useTheme();
+  const { t } = useTranslation();
   const styles = createStyles(T);
   return (
     <Card style={styles.statCard}>
@@ -40,7 +42,7 @@ const StatCard = ({ label, value, delta, icon, color, accent }) => {
         <View style={[styles.statIcon, { backgroundColor: accent || 'rgba(59,130,246,.14)' }]}>
           {React.cloneElement(icon, { color: color || T.accent, size: 15 })}
         </View>
-        <Text style={styles.statLabel}>{label}</Text>
+        <Text style={styles.statLabel}>{t(label)}</Text>
       </View>
       <View style={styles.statBody}>
         <Text style={styles.statValue}>{value}</Text>
@@ -56,6 +58,7 @@ const StatCard = ({ label, value, delta, icon, color, accent }) => {
 
 const OrgHomeContent = ({ role }) => {
   const { theme: T } = useTheme();
+  const { t } = useTranslation();
   const { user, token } = useAuth();
   const styles = createStyles(T);
 
@@ -112,69 +115,45 @@ const OrgHomeContent = ({ role }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>
-      {/* Greeting */}
       <View style={styles.greetingHeader}>
-        <Text style={styles.date}>{new Date().toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()} · {user?.orgName || 'ORGANISATION'}</Text>
-        <Text style={styles.greeting}>Good morning, {user?.userName || 'User'}</Text>
+        <Text style={styles.date}>{new Date().toLocaleDateString(t('i18n_locale_tag') || 'en-US', { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()} · {user?.orgName || 'ORGANISATION'}</Text>
+        <Text style={styles.greeting}>{t('dashboard.good_morning', { name: user?.userName || 'User' })}</Text>
         <Text style={styles.status}>
-          <Text style={{ color: T.good, fontWeight: '600' }}>{hospitals.length} hospitals</Text> provisioned · {activeHospitals} online
+          <Text style={{ color: T.good, fontWeight: '600' }}>{t('dashboard.provisioned', { count: hospitals.length })}</Text> · {t('dashboard.online_count', { count: activeHospitals })}
         </Text>
       </View>
 
-      {/* Stats Grid */}
       <View style={styles.grid}>
-        <StatCard
-          label="Hospitals"
-          value={loading ? '...' : hospitals.length.toString()}
-          icon={<IconHospital />} color={T.accent}
-        />
-        <StatCard
-          label="Admins"
-          value={loading ? '...' : admins.length.toString()}
-          icon={<IconUsers />} color="#2DD4BF" accent="rgba(45,212,191,.14)"
-        />
-        <StatCard
-          label="Devices"
-          value={loading ? '...' : totalDevices.toString()}
-          icon={<IconPulse />} color="#22D3EE" accent="rgba(34,211,238,.14)"
-        />
-        <StatCard
-          label="Gateways"
-          value={loading ? '...' : gateways.length.toString()}
-          icon={<IconGateway />} color="#A78BFA" accent="rgba(167,139,250,.14)"
-        />
+        <StatCard label="dashboard.hospitals" value={loading ? '...' : hospitals.length.toString()} icon={<IconHospital />} color={T.accent} />
+        <StatCard label="dashboard.admins" value={loading ? '...' : admins.length.toString()} icon={<IconUsers />} color="#2DD4BF" accent="rgba(45,212,191,.14)" />
+        <StatCard label="dashboard.devices" value={loading ? '...' : totalDevices.toString()} icon={<IconPulse />} color="#22D3EE" accent="rgba(34,211,238,.14)" />
+        <StatCard label="dashboard.gateways" value={loading ? '...' : gateways.length.toString()} icon={<IconGateway />} color="#A78BFA" accent="rgba(167,139,250,.14)" />
       </View>
 
-      {/* Alert Strip */}
       <Card style={styles.alertCard}>
         <View style={styles.alertContent}>
           <View style={[styles.alertIcon, { backgroundColor: 'rgba(245,158,11,.15)' }]}>
             <IconAlert size={20} color={T.warn} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.alertTitle}>Monitoring system active</Text>
-            <Text style={styles.alertText}>
-              All hospital gateways are communicating correctly. No critical alerts in the last 24h.
-            </Text>
+            <Text style={styles.alertTitle}>{t('dashboard.monitoring_active')}</Text>
+            <Text style={styles.alertText}>{t('dashboard.gateways_ok')}</Text>
           </View>
         </View>
       </Card>
 
-      {/* Top Hospitals */}
       <View style={styles.section}>
-        <SectionHeader title="TOP HOSPITALS" />
+        <SectionHeader title={t('dashboard.top_hospitals')} />
         <View style={styles.list}>
           {loading ? (
             <ActivityIndicator color={T.accent} style={{ padding: 20 }} />
           ) : hospitals.length === 0 ? (
-            <Text style={{ color: T.textDim, fontSize: 13, textAlign: 'center', padding: 20 }}>No hospitals found</Text>
+            <Text style={{ color: T.textDim, fontSize: 13, textAlign: 'center', padding: 20 }}>{t('dashboard.no_hospitals')}</Text>
           ) : (
             hospitals.slice(0, 3).map((h, i) => (
               <Card key={h.id || i} style={{ backgroundColor: T.surface }}>
                 <View style={styles.listItem}>
-                  <View style={styles.hospIcon}>
-                    <IconHospital size={20} color={T.accent} />
-                  </View>
+                  <View style={styles.hospIcon}><IconHospital size={20} color={T.accent} /></View>
                   <View style={styles.listItemContent}>
                     <View style={styles.titleRow}>
                       <Text style={styles.hospName}>{h.hospitalName}</Text>
@@ -182,7 +161,7 @@ const OrgHomeContent = ({ role }) => {
                     </View>
                     <View style={styles.hospMetaRow}>
                       <Text style={styles.hospMetaText}>{h.hospitalCode}</Text>
-                      <Text style={styles.hospMetaText}>{h.beds || 0} beds</Text>
+                      <Text style={styles.hospMetaText}>{h.beds || 0} {t('dashboard.beds').toLowerCase()}</Text>
                     </View>
                   </View>
                   <IconChevron size={16} color={T.textFaint} />
@@ -193,18 +172,17 @@ const OrgHomeContent = ({ role }) => {
         </View>
       </View>
 
-      {/* Device Capacity */}
       <Card style={{ marginBottom: 24 }}>
-        <SectionHeader title="DEVICE CAPACITY" />
+        <SectionHeader title={t('dashboard.device_capacity')} />
         {loading ? (
           <ActivityIndicator color={T.accent} style={{ padding: 12 }} />
         ) : totalDevices === 0 ? (
-          <Text style={{ color: T.textFaint, fontSize: 13, textAlign: 'center', paddingVertical: 12 }}>No devices found</Text>
+          <Text style={{ color: T.textFaint, fontSize: 13, textAlign: 'center', paddingVertical: 12 }}>{t('dashboard.no_devices')}</Text>
         ) : (
           <>
             <View style={styles.capacityHeader}>
               <Text style={styles.capacityValue}>{onlineDevices.toLocaleString()}</Text>
-              <Text style={styles.capacityTotal}>/ {totalDevices.toLocaleString()} devices · {onlinePct} online</Text>
+              <Text style={styles.capacityTotal}>/ {totalDevices.toLocaleString()} {t('dashboard.devices').toLowerCase()} · {onlinePct} {t('dashboard.online').toLowerCase()}</Text>
             </View>
             <View style={styles.progressBar}>
               <View style={[styles.progressSegment, { width: onlinePct, backgroundColor: T.good }]} />
@@ -212,9 +190,9 @@ const OrgHomeContent = ({ role }) => {
               <View style={[styles.progressSegment, { width: offlinePct, backgroundColor: T.surface2 }]} />
             </View>
             <View style={styles.progressLegend}>
-              <Text style={styles.legendItem}><Text style={{ color: T.good }}>●</Text> Online {onlineDevices}</Text>
-              <Text style={styles.legendItem}><Text style={{ color: T.warn }}>●</Text> Warn {warnDevices}</Text>
-              <Text style={styles.legendItem}><Text style={{ color: T.textFaint }}>●</Text> Offline {offlineDevices}</Text>
+              <Text style={styles.legendItem}><Text style={{ color: T.good }}>●</Text> {t('dashboard.online')} {onlineDevices}</Text>
+              <Text style={styles.legendItem}><Text style={{ color: T.warn }}>●</Text> {t('dashboard.warn')} {warnDevices}</Text>
+              <Text style={styles.legendItem}><Text style={{ color: T.textFaint }}>●</Text> {t('dashboard.offline')} {offlineDevices}</Text>
             </View>
           </>
         )}
@@ -230,6 +208,7 @@ export const OrgDashboard = ({ navigation, route }) => {
   const insets = useSafeAreaInsets();
   const { theme: T, isDark, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
   const styles = createStyles(T);
   const [activeTab, setActiveTab] = useState('home');
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -296,71 +275,26 @@ export const OrgDashboard = ({ navigation, route }) => {
   };
 
   const footerItems = [
-    { id: 'home', label: 'Home', icon: <IconDashboard /> },
-    ...(isOwner ? [{ id: 'admins', label: 'Admins', icon: <IconUsers /> }] : []),
-    { id: 'hospitals', label: 'Hospitals', icon: <IconHospital /> },
-    { id: 'types', label: 'DeviceType', icon: <IconCpu /> },
-    { id: 'users', label: 'Users', icon: <IconUser /> },
-    { id: 'roles', label: 'Roles', icon: <IconShield /> },
-    { id: 'summary', label: 'Summary', icon: <IconChart /> },
+    { id: 'home', label: t('dashboard.home'), icon: <IconDashboard /> },
+    ...(isOwner ? [{ id: 'admins', label: t('dashboard.admins'), icon: <IconUsers /> }] : []),
+    { id: 'hospitals', label: t('dashboard.hospitals'), icon: <IconHospital /> },
+    { id: 'types', label: t('dashboard.device_type'), icon: <IconCpu /> },
+    { id: 'users', label: t('dashboard.users'), icon: <IconUser /> },
+    { id: 'roles', label: t('dashboard.roles_perms'), icon: <IconShield /> },
+    { id: 'summary', label: t('dashboard.summary'), icon: <IconChart /> },
   ];
 
   const renderContent = () => {
-    if (isInvitingAdmin) {
-      return <InviteOrgAdminScreen onCancel={() => setIsInvitingAdmin(false)} />;
-    }
-    if (isProvisioningHospital) {
-      return <CreateHospitalScreen onCancel={() => setIsProvisioningHospital(false)} />;
-    }
-    if (isCreatingDeviceType) {
-      return <CreateDeviceTypeScreen onCancel={() => setIsCreatingDeviceType(false)} />;
-    }
-    if (isEditingDeviceType && selectedDeviceType) {
-      return (
-        <EditDeviceTypeScreen
-          deviceType={selectedDeviceType}
-          onCancel={() => setIsEditingDeviceType(false)}
-          onSave={(updated) => { setSelectedDeviceType(updated); setIsEditingDeviceType(false); }}
-        />
-      );
-    }
-    if (selectedDeviceType) {
-      return (
-        <DeviceTypeDetailScreen
-          deviceType={selectedDeviceType}
-          onBack={() => setSelectedDeviceType(null)}
-          onEdit={() => setIsEditingDeviceType(true)}
-        />
-      );
-    }
-    if (isEditingHospital && selectedHospital) {
-      return (
-        <EditHospitalScreen
-          hospital={selectedHospital}
-          onCancel={() => setIsEditingHospital(false)}
-          onSave={(updated) => { setSelectedHospital(updated); setIsEditingHospital(false); }}
-        />
-      );
-    }
-    if (selectedHospital) {
-      return (
-        <HospitalDetailScreen
-          hospital={selectedHospital}
-          onBack={() => setSelectedHospital(null)}
-          onEdit={() => setIsEditingHospital(true)}
-        />
-      );
-    }
-    if (isCreatingRole) {
-      return <CreateRoleScreen onCancel={() => setIsCreatingRole(false)} />;
-    }
-    if (selectedUserId) {
-      return <UserDetailScreen userId={selectedUserId} onBack={() => setSelectedUserId(null)} />;
-    }
-    if (selectedRoleId) {
-      return <RoleDetailScreen roleId={selectedRoleId} onBack={() => setSelectedRoleId(null)} />;
-    }
-
+    if (isInvitingAdmin) return <InviteOrgAdminScreen onCancel={() => setIsInvitingAdmin(false)} />;
+    if (isProvisioningHospital) return <CreateHospitalScreen onCancel={() => setIsProvisioningHospital(false)} />;
+    if (isCreatingDeviceType) return <CreateDeviceTypeScreen onCancel={() => setIsCreatingDeviceType(false)} />;
+    if (isEditingDeviceType && selectedDeviceType) return <EditDeviceTypeScreen deviceType={selectedDeviceType} onCancel={() => setIsEditingDeviceType(false)} onSave={(updated) => { setSelectedDeviceType(updated); setIsEditingDeviceType(false); }} />;
+    if (selectedDeviceType) return <DeviceTypeDetailScreen deviceType={selectedDeviceType} onBack={() => setSelectedDeviceType(null)} onEdit={() => setIsEditingDeviceType(true)} />;
+    if (isEditingHospital && selectedHospital) return <EditHospitalScreen hospital={selectedHospital} onCancel={() => setIsEditingHospital(false)} onSave={(updated) => { setSelectedHospital(updated); setIsEditingHospital(false); }} />;
+    if (selectedHospital) return <HospitalDetailScreen hospital={selectedHospital} onBack={() => setSelectedHospital(null)} onEdit={() => setIsEditingHospital(true)} />;
+    if (isCreatingRole) return <CreateRoleScreen onCancel={() => setIsCreatingRole(false)} />;
+    if (selectedUserId) return <UserDetailScreen userId={selectedUserId} onBack={() => setSelectedUserId(null)} />;
+    if (selectedRoleId) return <RoleDetailScreen roleId={selectedRoleId} onBack={() => setSelectedRoleId(null)} />;
     switch (activeTab) {
       case 'home': return <OrgHomeContent role={role} />;
       case 'admins': return <OrgAdminsScreen onInvite={() => setIsInvitingAdmin(true)} onSelectUser={setSelectedUserId} />;
@@ -374,89 +308,58 @@ export const OrgDashboard = ({ navigation, route }) => {
   };
 
   const getTitle = () => {
-    if (isInvitingAdmin) return "Invite Org Admin";
-    if (isProvisioningHospital) return "Create Hospital";
-    if (isCreatingDeviceType) return "Create Device Type";
-    if (isEditingDeviceType) return "Edit Device Type";
-    if (selectedDeviceType) return "Device Type Details";
-    if (isEditingHospital) return "Edit Hospital";
-    if (selectedHospital) return "Hospital Details";
-    if (isCreatingRole) return "Create New Role";
-    if (selectedUserId) return "User Details";
-    if (selectedRoleId) return "Role Details";
-
+    if (isInvitingAdmin) return t('dashboard.invite_org_admin');
+    if (isProvisioningHospital) return t('dashboard.create_hospital');
+    if (isCreatingDeviceType) return t('dashboard.create_device_type');
+    if (isEditingDeviceType) return t('dashboard.edit_device_type');
+    if (selectedDeviceType) return t('dashboard.device_type_details');
+    if (isEditingHospital) return t('dashboard.edit_hospital');
+    if (selectedHospital) return t('dashboard.hospital_details');
+    if (isCreatingRole) return t('dashboard.create_role');
+    if (selectedUserId) return t('dashboard.user_details');
+    if (selectedRoleId) return t('dashboard.role_details');
     switch (activeTab) {
-      case 'home': return "Org Console";
-      case 'admins': return "Organisation Admins";
-      case 'hospitals': return "Hospitals";
-      case 'types': return "Device Types";
-      case 'users': return "Users";
-      case 'roles': return "Roles & Permissions";
-      case 'summary': return "Org Summary";
-      default: return "Org Console";
+      case 'home': return t('dashboard.org_console');
+      case 'admins': return t('dashboard.org_admins');
+      case 'hospitals': return t('dashboard.hospitals');
+      case 'types': return t('dashboard.device_types');
+      case 'users': return t('dashboard.users');
+      case 'roles': return t('dashboard.roles_perms');
+      case 'summary': return t('dashboard.summary');
+      default: return t('dashboard.org_console');
     }
   };
 
   return (
     <View style={styles.container}>
-      {/* Drawer */}
       {drawerOpen && <TouchableOpacity style={styles.drawerOverlay} activeOpacity={1} onPress={toggleDrawer} />}
       <Animated.View style={[styles.drawer, { transform: [{ translateX: drawerAnim }] }]}>
         <View style={{ flex: 1, paddingTop: insets.top }}>
           <View style={styles.drawerHeader}>
             <Text style={styles.drawerName}>{user?.userName || 'User'}</Text>
-            <Text style={styles.drawerRole}>{isOwner ? 'Organisation Owner' : 'Organisation Administrator'}</Text>
+            <Text style={styles.drawerRole}>{isOwner ? t('dashboard.org_owner') : t('dashboard.org_administrator')}</Text>
           </View>
           <ScrollView style={styles.drawerMenu}>
-            <TouchableOpacity 
-              style={styles.drawerItem}
-              onPress={() => { handleTabChange('home'); toggleDrawer(); }}
-            >
+            <TouchableOpacity style={styles.drawerItem} onPress={() => { handleTabChange('home'); toggleDrawer(); }}>
               <IconDashboard size={20} color={T.textDim} />
-              <Text style={styles.drawerItemText}>Dashboard</Text>
+              <Text style={styles.drawerItemText}>{t('dashboard.title')}</Text>
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.drawerItem} onPress={() => { toggleTheme(); toggleDrawer(); }}>
               <IconMoon size={20} color={T.textDim} />
-              <Text style={styles.drawerItemText}>Theme: {isDark ? 'Dark' : 'Light'}</Text>
+              <Text style={styles.drawerItemText}>{t('common.theme')}: {isDark ? t('settings.theme_dark') : t('settings.theme_light')}</Text>
             </TouchableOpacity>
-
             <View style={styles.drawerDivider} />
-            
-            <TouchableOpacity 
-              style={[styles.drawerItem, { marginTop: 'auto' }]} 
-              onPress={() => { logout(); navigation.replace('Login'); }}
-            >
+            <TouchableOpacity style={[styles.drawerItem, { marginTop: 'auto' }]} onPress={() => { logout(); navigation.replace('Login'); }}>
               <IconLogout size={20} color={T.bad} />
-              <Text style={[styles.drawerItemText, { color: T.bad }]}>Log out</Text>
+              <Text style={[styles.drawerItemText, { color: T.bad }]}>{t('common.logout')}</Text>
             </TouchableOpacity>
           </ScrollView>
         </View>
       </Animated.View>
-
-      <TopBar
-        title={getTitle()}
-        leading={isSubScreen ? <IconBack /> : <IconMenu />}
-        onLeadingPress={isSubScreen ? handleBack : toggleDrawer}
-        onNotificationPress={() => setShowNotifications(true)}
-        onProfilePress={() => { logout(); navigation.replace('Login'); }}
-      />
-
-
-      <View style={{ flex: 1 }}>
-        {renderContent()}
-      </View>
-
-      <BottomNav
-        items={footerItems}
-        active={activeTab}
-        onChange={handleTabChange}
-      />
-
-      <NotificationSheet
-        visible={showNotifications}
-        onClose={() => setShowNotifications(false)}
-      />
+      <TopBar title={getTitle()} leading={isSubScreen ? <IconBack /> : <IconMenu />} onLeadingPress={isSubScreen ? handleBack : toggleDrawer} onNotificationPress={() => setShowNotifications(true)} onProfilePress={() => { logout(); navigation.replace('Login'); }} />
+      <View style={{ flex: 1 }}>{renderContent()}</View>
+      <BottomNav items={footerItems} active={activeTab} onChange={handleTabChange} />
+      <NotificationSheet visible={showNotifications} onClose={() => setShowNotifications(false)} />
     </View>
   );
 };
@@ -481,7 +384,6 @@ const createStyles = (T) => StyleSheet.create({
   alertIcon: { width: 32, height: 32, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   alertTitle: { fontSize: 13, fontWeight: '600', color: T.text },
   alertText: { fontSize: 11.5, color: T.textDim, marginTop: 3, lineHeight: 18 },
-  reviewLink: { color: T.warn, fontSize: 12, fontWeight: '600' },
   section: { marginBottom: 24 },
   list: { gap: 8 },
   listItem: { flexDirection: 'row', gap: 10, alignItems: 'center' },

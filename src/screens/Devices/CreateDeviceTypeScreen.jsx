@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator, Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { deviceTypeApi } from '../../services/api';
@@ -7,6 +8,7 @@ import { Card, Field, TextInput, Btn } from '../../components/Shared';
 import { IconCpu, IconActivity, IconShield, IconBuilding } from '../../icons';
 
 export const CreateDeviceTypeScreen = ({ onCancel }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
   const styles = createStyles(T);
@@ -30,18 +32,18 @@ export const CreateDeviceTypeScreen = ({ onCancel }) => {
 
   const handleCreate = async () => {
     if (!user?.orgName) {
-      Alert.alert('Error', 'Organisation name not found');
+      Alert.alert(t('messages.error'), t('messages.error_org_not_found'));
       return;
     }
 
     setLoading(true);
     try {
       await deviceTypeApi.createType(user.orgName, form, token);
-      Alert.alert('Success', 'Device Type created successfully', [
-        { text: 'OK', onPress: onCancel }
+      Alert.alert(t('messages.success'), t('messages.device_type_created'), [
+        { text: t('actions.done'), onPress: onCancel }
       ]);
     } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to create device type');
+      Alert.alert(t('messages.error'), error.message || t('messages.error_create_device_type'));
     } finally {
       setLoading(false);
     }
@@ -54,61 +56,61 @@ export const CreateDeviceTypeScreen = ({ onCancel }) => {
         <View style={styles.banner}>
           <IconCpu size={24} color={T.accent} />
           <Text style={styles.bannerText}>
-            Defining a new IoMT hardware profile. This template will be used to validate and provision physical devices across the organization.
+            {t('messages.device_type_create_banner')}
           </Text>
         </View>
 
         {/* Device Identity Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>DEVICE IDENTITY</Text>
+          <Text style={styles.sectionTitle}>{t('entity.device_identity')}</Text>
           
-          <Field label="Profile Name" required>
+          <Field label={t('entity.profile_name')} required>
             <TextInput
               value={form.deviceType}
               onChangeText={v => updateForm('deviceType', v)}
-              placeholder="e.g. Comen-V4"
+              placeholder={t('placeholders.profile_name')}
               leading={<IconActivity size={16} color={T.textFaint} />}
             />
           </Field>
 
-          <Field label="Category" required>
+          <Field label={t('entity.category')} required>
             <TextInput
               value={form.category}
               onChangeText={v => updateForm('category', v.toUpperCase())}
-              placeholder="e.g. PMS"
+              placeholder={t('placeholders.category')}
               leading={<IconShield size={16} color={T.textFaint} />}
             />
           </Field>
 
-          <Field label="Description">
+          <Field label={t('entity.description')}>
             <TextInput
               value={form.description}
               onChangeText={v => updateForm('description', v)}
-              placeholder="e.g. Comen Patient Monitor"
+              placeholder={t('placeholders.description')}
             />
           </Field>
         </View>
 
         {/* Vendor Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>SPECIFICATIONS</Text>
+          <Text style={styles.sectionTitle}>{t('entity.specifications')}</Text>
           
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="Vendor" required>
+              <Field label={t('entity.vendor')} required>
                 <TextInput
                   value={form.deviceVendor}
                   onChangeText={v => updateForm('deviceVendor', v)}
-                  placeholder="e.g. Comen"
+                  placeholder={t('placeholders.vendor')}
                 />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Profile Code" required>
+              <Field label={t('entity.profile_code')} required>
                 <TextInput
                   value={form.deviceProfile}
                   onChangeText={v => updateForm('deviceProfile', v)}
-                  placeholder="e.g. Comen"
+                  placeholder={t('placeholders.vendor')}
                 />
               </Field>
             </View>
@@ -116,20 +118,20 @@ export const CreateDeviceTypeScreen = ({ onCancel }) => {
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="Min Firmware">
+              <Field label={t('entity.min_firmware')}>
                 <TextInput
                   value={form.deviceFirmware}
                   onChangeText={v => updateForm('deviceFirmware', v)}
-                  placeholder="1.0.0"
+                  placeholder={t('placeholders.firmware_version')}
                 />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Max Firmware">
+              <Field label={t('entity.max_firmware')}>
                 <TextInput
                   value={form.maxFirmware}
                   onChangeText={v => updateForm('maxFirmware', v)}
-                  placeholder="2.0.0"
+                  placeholder={t('placeholders.firmware_version')}
                 />
               </Field>
             </View>
@@ -138,14 +140,14 @@ export const CreateDeviceTypeScreen = ({ onCancel }) => {
 
         {/* Actions */}
         <View style={styles.actionRow}>
-          <Btn variant="surface" style={{ flex: 1 }} onPress={onCancel} disabled={loading}>Cancel</Btn>
+          <Btn variant="surface" style={{ flex: 1 }} onPress={onCancel} disabled={loading}>{t('actions.cancel')}</Btn>
           <Btn 
             variant="primary" 
             style={{ flex: 2 }} 
             disabled={!isFormValid || loading}
             onPress={handleCreate}
           >
-            {loading ? <ActivityIndicator color="#FFF" size="small" /> : 'Create Type'}
+            {loading ? <ActivityIndicator color="#FFF" size="small" /> : t('actions.create_type')}
           </Btn>
         </View>
       </ScrollView>

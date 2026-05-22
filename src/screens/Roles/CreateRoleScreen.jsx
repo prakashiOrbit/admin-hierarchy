@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, TouchableOpacity, Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Field, TextInput, Btn } from '../../components/Shared';
@@ -8,6 +9,7 @@ import { rolesApi } from '../../services/api';
 import { PERMISSION_GROUPS } from '../../data/mock';
 
 export const CreateRoleScreen = ({ onCancel, onSuccess }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user, token } = useAuth();
@@ -39,11 +41,11 @@ export const CreateRoleScreen = ({ onCancel, onSuccess }) => {
     };
     try {
       await rolesApi.create(user.orgName, payload, token);
-      Alert.alert('Success', `Role "${form.roleName}" created.`, [
-        { text: 'OK', onPress: onSuccess || onCancel },
+      Alert.alert(t('common.success'), t('roles_screen.role_created'), [
+        { text: t('common.done'), onPress: onSuccess || onCancel },
       ]);
     } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to create role.');
+      Alert.alert(t('common.error'), e.message || t('common.error'));
     } finally {
       setSaving(false);
     }
@@ -53,20 +55,20 @@ export const CreateRoleScreen = ({ onCancel, onSuccess }) => {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>ROLE IDENTITY</Text>
+          <Text style={styles.sectionTitle}>{t('roles_screen.role_name').toUpperCase()}</Text>
 
-          <Field label="Role Name" required>
+          <Field label={t('roles_screen.role_name')} required>
             <TextInput
               value={form.roleName}
               onChangeText={(v) => setForm(prev => ({ ...prev, roleName: v }))}
-              placeholder="e.g. Ward Supervisor"
+              placeholder={t('roles_screen.role_name')}
               leading={<IconShield size={18} color={T.textDim} />}
             />
           </Field>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>SELECT PERMISSIONS ({form.permissions.size})</Text>
+          <Text style={styles.sectionTitle}>{t('roles_screen.permissions').toUpperCase()} ({form.permissions.size})</Text>
 
           <View style={styles.permsContainer}>
             {PERMISSION_GROUPS.map((group) => (
@@ -99,13 +101,13 @@ export const CreateRoleScreen = ({ onCancel, onSuccess }) => {
         </View>
 
         <View style={styles.actionRow}>
-          <Btn variant="ghost" style={{ flex: 1 }} onPress={onCancel}>Cancel</Btn>
+          <Btn variant="ghost" style={{ flex: 1 }} onPress={onCancel}>{t('common.cancel')}</Btn>
           <Btn
             style={{ flex: 1.5 }}
             onPress={handleCreate}
             disabled={!isFormValid || saving}
           >
-            {saving ? 'Creating...' : 'Create Role'}
+            {saving ? t('common.loading') : t('roles_screen.create_role')}
           </Btn>
         </View>
       </ScrollView>

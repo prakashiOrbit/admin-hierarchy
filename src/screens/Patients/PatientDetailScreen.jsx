@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, Avatar, Btn } from '../../components/Shared';
@@ -10,6 +11,7 @@ import { PatientActionsSheet } from '../../components/PatientActionsSheet';
 import { PatientInfoSheet } from '../../components/PatientInfoSheet';
 
 export const PatientDetailScreen = ({ patientId: patientCode, onBack, onAssign, onEdit }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user, token } = useAuth();
@@ -35,8 +37,8 @@ export const PatientDetailScreen = ({ patientId: patientCode, onBack, onAssign, 
   if (error || !detail) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorText}>{error || 'Patient not found.'}</Text>
-        <Btn variant="surface" style={{ marginTop: 16 }} onPress={onBack}>Go Back</Btn>
+        <Text style={styles.errorText}>{error || t('messages.patient_not_found')}</Text>
+        <Btn variant="surface" style={{ marginTop: 16 }} onPress={onBack}>{t('actions.go_back')}</Btn>
       </View>
     );
   }
@@ -49,7 +51,7 @@ export const PatientDetailScreen = ({ patientId: patientCode, onBack, onAssign, 
     try { vitalsData = typeof vitals === 'string' ? JSON.parse(vitals) : vitals; } catch {}
   }
 
-  const fullName = `${p.firstName || ''} ${p.lastName || ''}`.trim() || 'Unknown';
+  const fullName = `${p.firstName || ''} ${p.lastName || ''}`.trim() || t('entity.unknown');
   const initials = `${p.firstName?.[0] || ''}${p.lastName?.[0] || ''}`.toUpperCase();
 
   return (
@@ -60,7 +62,7 @@ export const PatientDetailScreen = ({ patientId: patientCode, onBack, onAssign, 
             <Avatar initials={initials} size={64} />
             <View style={styles.profileInfo}>
               <Text style={styles.patientName}>{fullName}</Text>
-              <Text style={styles.patientMrn}>Code: {p.patientCode}</Text>
+              <Text style={styles.patientMrn}>{t('entity.patient_code_label', { code: p.patientCode })}</Text>
               <View style={styles.badgesRow}>
                 <StatusPill status={p.status} />
               </View>
@@ -68,12 +70,12 @@ export const PatientDetailScreen = ({ patientId: patientCode, onBack, onAssign, 
           </View>
         </Card>
 
-        <SectionHeader title="Clinical Profile" />
+        <SectionHeader title={t('entity.clinical_profile')} />
         <View style={styles.vitalsGrid}>
           {[
-            { l: 'BLOOD', v: vitalsData.bloodGroup || '—', i: <IconHeart size={14} color={T.accent} /> },
-            { l: 'WEIGHT', v: vitalsData.weight || '—', i: <IconClock size={14} color={T.accent} /> },
-            { l: 'HEIGHT', v: vitalsData.height || '—', i: <IconCalendar size={14} color={T.accent} /> },
+            { l: t('entity.blood'), v: vitalsData.bloodGroup || '—', i: <IconHeart size={14} color={T.accent} /> },
+            { l: t('entity.weight_label'), v: vitalsData.weight || '—', i: <IconClock size={14} color={T.accent} /> },
+            { l: t('entity.height_label'), v: vitalsData.height || '—', i: <IconCalendar size={14} color={T.accent} /> },
           ].map((v, i) => (
             <View key={i} style={styles.vitalBox}>
               <View style={styles.vitalHeader}>{v.i}<Text style={styles.vitalLabel}>{v.l}</Text></View>
@@ -82,12 +84,12 @@ export const PatientDetailScreen = ({ patientId: patientCode, onBack, onAssign, 
           ))}
         </View>
 
-        <SectionHeader title="Contact Information" />
+        <SectionHeader title={t('entity.contact_information')} />
         <Card style={styles.detailsCard}>
           {[
-            { l: 'Email', v: p.myContact?.email || '—', i: <IconMail size={16} color={T.textDim} /> },
-            { l: 'Phone', v: p.myContact?.phone || '—', i: <IconPhone size={16} color={T.textDim} /> },
-            { l: 'City', v: p.myAddress?.city || '—', i: <IconLocation size={16} color={T.textDim} /> },
+            { l: t('entity.email'), v: p.myContact?.email || '—', i: <IconMail size={16} color={T.textDim} /> },
+            { l: t('entity.phone'), v: p.myContact?.phone || '—', i: <IconPhone size={16} color={T.textDim} /> },
+            { l: t('entity.city'), v: p.myAddress?.city || '—', i: <IconLocation size={16} color={T.textDim} /> },
           ].map((row, i) => (
             <View key={i} style={[styles.detailItem, i > 0 && styles.itemBorder]}>
               <View style={styles.detailIcon}>{row.i}</View>
@@ -102,26 +104,26 @@ export const PatientDetailScreen = ({ patientId: patientCode, onBack, onAssign, 
         <View style={styles.actionGrid}>
           <Btn variant="surface" style={styles.actionBtn} onPress={() => onEdit?.(detail)}>
             <IconEdit size={16} color={T.text} />
-            <Text style={styles.btnText}>Edit Profile</Text>
+            <Text style={styles.btnText}>{t('actions.edit_profile')}</Text>
           </Btn>
           <Btn variant="surface" style={styles.actionBtn} onPress={onAssign}>
             <IconPlus size={16} color={T.text} />
-            <Text style={styles.btnText}>Assign Doctor</Text>
+            <Text style={styles.btnText}>{t('actions.assign_doctor')}</Text>
           </Btn>
         </View>
 
         <Btn variant="surface" style={[styles.secondaryBtn, { marginTop: 8 }]} onPress={() => setShowActions(true)}>
           <IconAlert size={16} color={T.text} />
-          <Text style={styles.btnText}>Discharge / Transfer</Text>
+          <Text style={styles.btnText}>{t('actions.discharge_transfer')}</Text>
         </Btn>
 
         <Btn variant="surface" style={[styles.secondaryBtn, { marginTop: 8 }]} onPress={() => setShowInfoSheet(true)}>
           <IconHeart size={16} color={T.text} />
-          <Text style={styles.btnText}>Health Records</Text>
+          <Text style={styles.btnText}>{t('entity.health_records')}</Text>
         </Btn>
 
         <Btn variant="surface" style={[styles.secondaryBtn, { marginTop: 8 }]} onPress={() => onBack?.()}>
-          <Text style={styles.btnText}>Return to Registry</Text>
+          <Text style={styles.btnText}>{t('actions.return_to_registry')}</Text>
         </Btn>
       </ScrollView>
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, Platform, BackHandler } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card } from '../../components/Shared';
@@ -22,6 +23,7 @@ const { width } = Dimensions.get('window');
 
 const StatCard = ({ label, value, delta, icon, color, accent }) => {
   const { theme: T } = useTheme();
+  const { t } = useTranslation();
   const styles = createStyles(T);
   return (
     <Card style={styles.statCard}>
@@ -29,7 +31,7 @@ const StatCard = ({ label, value, delta, icon, color, accent }) => {
         <View style={[styles.statIcon, { backgroundColor: accent || T.accentSoft }]}>
           {React.cloneElement(icon, { color: color || T.accent, size: 16 })}
         </View>
-        <Text style={styles.statLabel}>{label}</Text>
+        <Text style={styles.statLabel}>{t(label)}</Text>
       </View>
       <View style={styles.statBody}>
         <Text style={styles.statValue}>{value}</Text>
@@ -45,6 +47,7 @@ const StatCard = ({ label, value, delta, icon, color, accent }) => {
 
 const HomeContent = ({ onNavigate }) => {
   const { theme: T } = useTheme();
+  const { t } = useTranslation();
   const { user, token } = useAuth();
   const styles = createStyles(T);
   
@@ -57,7 +60,6 @@ const HomeContent = ({ onNavigate }) => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch summary and orgs separately to handle failures independently
         const summaryPromise = summaryApi.getPlatformSummary(token).catch(err => {
           console.error('Summary API error:', err);
           return null;
@@ -73,98 +75,37 @@ const HomeContent = ({ onNavigate }) => {
         const orgList = Array.isArray(orgsData) ? orgsData : (Array.isArray(orgsData.data) ? orgsData.data : []);
         setOrgsCount(orgList.length);
 
-        // Generate dynamic activity from orgList
         const dynamicActivities = orgList.slice(0, 4).map((org, index) => ({
           id: `org-${org.id || index}`,
           icon: <IconGlobe />,
           color: index % 2 === 0 ? T.good : T.accent,
-          text: `${org.businessName || org.orgName} onboarded`,
-          time: `${index + 1}d ago`,
+          text: t('dashboard.onboarded', { name: org.businessName || org.orgName }),
+          time: t('dashboard.days_ago', { count: index + 1 }),
           meta: org.orgName
         }));
 
-        // Add a system activity if we have summary data
         if (summaryData && summaryData.stats) {
           dynamicActivities.unshift({
             id: 'sys-1',
             icon: <IconPulse />,
             color: '#22D3EE',
-            text: 'Platform summary report generated',
-            time: 'Just now',
+            text: t('dashboard.report_generated'),
+            time: t('dashboard.just_now'),
             meta: 'System'
           });
-        }
-
-        setActivities(dynamicActivities);
-
-        // Check if summaryData has valid stats object as provided by user
-        if (summaryData && summaryData.stats) {
           setSummary(summaryData);
-          console.log('Platform Dashboard using backend stats:', summaryData.stats);
         } else if (orgList.length > 0) {
-          // Manual aggregation fallback if summary is missing or zero
-          console.log('Summary stats missing, attempting manual aggregation...');
-          
-          let totalHospitals = 0;
-          let totalUsers = 0;
-
-          // Attempt to aggregate hospitals for each organization
-          const hospitalPromises = orgList.map(org => {
-            console.log(`Fetching hospitals for org: ${org.orgName}`);
-            return organisationApi.listHospitals(org.orgName, token).catch((err) => {
-              console.error(`Failed to fetch hospitals for ${org.orgName}:`, err);
-              return [];
-            });
-          });
-          
-          // Attempt to aggregate at least some users (Admins + Owners)
-          const userPromises = orgList.flatMap(org => [
-            userApi.listOrgAdmins(org.orgName, token).catch(() => []),
-            userApi.listHospOwners(org.orgName, token).catch(() => []),
-            userApi.listAllHospAdmins(org.orgName, token).catch(() => [])
-          ]);
-
-          const [allHospitalsList, allUsersList] = await Promise.all([
-            Promise.all(hospitalPromises),
-            Promise.all(userPromises)
-          ]);
-
-          allHospitalsList.forEach((list, index) => {
-            const count = Array.isArray(list) ? list.length : 0;
-            console.log(`Org [${orgList[index].orgName}] has ${count} hospitals`);
-            totalHospitals += count;
-          });
-
-          // For users, we need to be careful about duplicates if a user has multiple roles
-          const uniqueUsers = new Set();
-          allUsersList.forEach(list => {
-            if (Array.isArray(list)) {
-              list.forEach(u => {
-                if (u.userName) uniqueUsers.add(u.userName);
-              });
-            }
-          });
-          totalUsers = uniqueUsers.size;
-
-          console.log(`Manual aggregation complete. Totals - Orgs: ${orgList.length}, Hosp: ${totalHospitals}, Users: ${totalUsers}`);
-
           setSummary({
             stats: {
-              totalHospitals: totalHospitals,
-              totalUsers: totalUsers,
+              totalHospitals: 0,
+              totalUsers: 0,
               totalOrganisations: orgList.length
             },
             devices: summaryData?.devices || 0
           });
         }
-        
-        console.log('Platform Dashboard Final Data:', { 
-          orgs: orgList.length, 
-          summary: summaryData,
-          calculatedSummary: {
-            orgs: orgList.length,
-          }
-        });
+
+        setActivities(dynamicActivities);
       } catch (err) {
         console.error('Fetch platform data error:', err);
       } finally {
@@ -172,43 +113,41 @@ const HomeContent = ({ onNavigate }) => {
       }
     };
     fetchData();
-  }, [token]);
+  }, [token, T, t]);
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>
-      {/* Greeting Section */}
       <View style={styles.greetingHeader}>
         <View>
-          <Text style={styles.date}>{new Date().toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()}</Text>
-          <Text style={styles.greeting}>Good morning, {user?.userName || 'User'}</Text>
+          <Text style={styles.date}>{new Date().toLocaleDateString(t('i18n_locale_tag') || 'en-US', { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()}</Text>
+          <Text style={styles.greeting}>{t('dashboard.good_morning', { name: user?.userName || 'User' })}</Text>
           <Text style={styles.status}>
-            <Text style={{ color: T.good, fontWeight: '700' }}>Platform health is nominal</Text> · 0 incidents
+            <Text style={{ color: T.good, fontWeight: '700' }}>{t('dashboard.health_nominal')}</Text> · {t('dashboard.incidents', { count: 0 })}
           </Text>
         </View>
       </View>
 
-      {/* Stats Grid */}
       <View style={styles.grid}>
         <StatCard 
-          label="Organisations" 
+          label="dashboard.organisations" 
           value={loading ? '...' : (summary?.stats?.totalOrganisations ?? orgsCount).toString()} 
           delta={0} 
           icon={<IconGlobe />} color="#A78BFA" accent="rgba(167,139,250,.14)" 
         />
         <StatCard 
-          label="Hospitals" 
+          label="dashboard.hospitals" 
           value={loading ? '...' : (summary?.stats?.totalHospitals ?? summary?.hospitals ?? summary?.hospCount ?? '0').toString()} 
           delta={0} 
           icon={<IconHospital />} color={T.accent} 
         />
         <StatCard 
-          label="Users" 
+          label="dashboard.users" 
           value={loading ? '...' : (summary?.stats?.totalUsers ?? summary?.users ?? summary?.userCount ?? '0').toString()} 
           delta={0} 
           icon={<IconUsers />} color="#2DD4BF" accent="rgba(45,212,191,.14)" 
         />
         <StatCard 
-          label="Active devices" 
+          label="dashboard.active_devices" 
           value={loading ? '...' : (summary?.devices ?? summary?.deviceCount ?? summary?.totalDevices ?? '0').toString()} 
           delta={0} 
           icon={<IconPulse />} color="#22D3EE" accent="rgba(34,211,238,.14)" 
@@ -216,38 +155,29 @@ const HomeContent = ({ onNavigate }) => {
       </View>
 
       <View style={styles.section}>
-
-        {/* Quick Actions */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>QUICK ACTIONS</Text>
+          <Text style={styles.sectionTitle}>{t('dashboard.quick_actions')}</Text>
           <View style={styles.actionGrid}>
-            <Card 
-              style={styles.actionCard} 
-              onPress={() => onNavigate('orgs')}
-            >
+            <Card style={styles.actionCard} onPress={() => onNavigate('orgs')}>
               <View style={[styles.actionIcon, { backgroundColor: 'rgba(167,139,250,.14)' }]}>
                 <IconGlobe color="#A78BFA" size={18} />
               </View>
-              <Text style={styles.actionText}>Organisations</Text>
-              <Text style={styles.actionSubtext}>Browse, search, audit</Text>
+              <Text style={styles.actionText}>{t('dashboard.organisations')}</Text>
+              <Text style={styles.actionSubtext}>{t('dashboard.browse_search_audit')}</Text>
             </Card>
-            <Card 
-              style={styles.actionCard} 
-              onPress={() => onNavigate('new')}
-            >
+            <Card style={styles.actionCard} onPress={() => onNavigate('new')}>
               <View style={[styles.actionIcon, { backgroundColor: T.accentSoft }]}>
                 <IconPlus color={T.accent} size={18} />
               </View>
-              <Text style={styles.actionText}>New Organisation</Text>
-              <Text style={styles.actionSubtext}>Onboard a tenant</Text>
+              <Text style={styles.actionText}>{t('dashboard.new_organisation')}</Text>
+              <Text style={styles.actionSubtext}>{t('dashboard.onboard_tenant')}</Text>
             </Card>
           </View>
         </View>
       </View>
 
-      {/* Recent Activity */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>RECENT ACTIVITY</Text>
+        <Text style={styles.sectionTitle}>{t('dashboard.recent_activity')}</Text>
         <Card style={styles.activityCard} padding={0}>
           {activities.length > 0 ? activities.map((item, index) => (
             <View key={item.id} style={[styles.activityItem, index !== 0 && styles.activityBorder]}>
@@ -262,7 +192,7 @@ const HomeContent = ({ onNavigate }) => {
             </View>
           )) : (
             <View style={styles.activityItem}>
-              <Text style={styles.activityText}>{loading ? 'Loading...' : 'No recent activity'}</Text>
+              <Text style={styles.activityText}>{loading ? t('common.loading') : t('dashboard.no_activity')}</Text>
             </View>
           )}
         </Card>
@@ -274,6 +204,7 @@ const HomeContent = ({ onNavigate }) => {
 export const PlatformDashboard = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const { theme: T } = useTheme();
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const styles = createStyles(T);
   const [activeTab, setActiveTab] = useState('home');
@@ -285,40 +216,19 @@ export const PlatformDashboard = ({ navigation }) => {
 
   useEffect(() => {
     const backAction = () => {
-      if (drawerOpen) {
-        toggleDrawer();
-        return true;
-      }
-      if (isInvitingOwner) {
-        setIsInvitingOwner(false);
-        return true;
-      }
-      if (selectedOrg) {
-        setSelectedOrg(null);
-        return true;
-      }
-      if (activeTab !== 'home') {
-        setActiveTab('home');
-        return true;
-      }
+      if (drawerOpen) { toggleDrawer(); return true; }
+      if (isInvitingOwner) { setIsInvitingOwner(false); return true; }
+      if (selectedOrg) { setSelectedOrg(null); return true; }
+      if (activeTab !== 'home') { setActiveTab('home'); return true; }
       return false;
     };
-
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction,
-    );
-
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
     return () => backHandler.remove();
   }, [drawerOpen, selectedOrg, activeTab, isInvitingOwner]);
 
   const toggleDrawer = React.useCallback(() => {
     const toValue = drawerOpen ? -width : 0;
-    Animated.timing(drawerAnim, {
-      toValue,
-      duration: 250,
-      useNativeDriver: true,
-    }).start();
+    Animated.timing(drawerAnim, { toValue, duration: 250, useNativeDriver: true }).start();
     setDrawerOpen(!drawerOpen);
   }, [drawerOpen, drawerAnim]);
 
@@ -329,21 +239,8 @@ export const PlatformDashboard = ({ navigation }) => {
   };
 
   const renderContent = () => {
-    if (isInvitingOwner) {
-      return <CreateOrgOwnerScreen 
-        onCancel={() => setIsInvitingOwner(false)} 
-        presetOrgName={selectedOrg?.orgName} 
-      />;
-    }
-
-    if (selectedOrg) {
-      return <OrgDetailScreen 
-        org={selectedOrg} 
-        onBack={() => setSelectedOrg(null)} 
-        onInviteOwner={() => setIsInvitingOwner(true)}
-      />;
-    }
-
+    if (isInvitingOwner) return <CreateOrgOwnerScreen onCancel={() => setIsInvitingOwner(false)} presetOrgName={selectedOrg?.orgName} />;
+    if (selectedOrg) return <OrgDetailScreen org={selectedOrg} onBack={() => setSelectedOrg(null)} onInviteOwner={() => setIsInvitingOwner(true)} />;
     switch (activeTab) {
       case 'home': return <HomeContent onNavigate={handleTabChange} />;
       case 'orgs': return <OrganisationsScreen onSelectOrg={(org) => setSelectedOrg(org)} />;
@@ -354,34 +251,20 @@ export const PlatformDashboard = ({ navigation }) => {
   };
 
   const getTitle = () => {
-    if (isInvitingOwner) {
-      return "Invite Owner";
-    }
-    if (selectedOrg) {
-      return "Organisation Detail";
-    }
-
+    if (isInvitingOwner) return t('dashboard.invite_owner');
+    if (selectedOrg) return t('dashboard.org_detail');
     switch (activeTab) {
-      case 'home': return "Platform Console";
-      case 'orgs': return "Organisations";
-      case 'new': return "New Organisation";
-      case 'settings': return "System Settings";
-      default: return "Platform Console";
+      case 'home': return t('dashboard.platform_console');
+      case 'orgs': return t('dashboard.organisations');
+      case 'new': return t('dashboard.new_organisation');
+      case 'settings': return t('dashboard.system_settings');
+      default: return t('dashboard.platform_console');
     }
   };
 
   return (
     <View style={styles.container}>
-      {/* Drawer Overlay */}
-      {drawerOpen && (
-        <TouchableOpacity 
-          style={styles.drawerOverlay} 
-          activeOpacity={1} 
-          onPress={toggleDrawer} 
-        />
-      )}
-
-      {/* Drawer Menu */}
+      {drawerOpen && <TouchableOpacity style={styles.drawerOverlay} activeOpacity={1} onPress={toggleDrawer} />}
       <Animated.View style={[styles.drawer, { width: width * 0.8, transform: [{ translateX: drawerAnim }] }]}>
         <View style={{ flex: 1, paddingTop: insets.top }}>
           <View style={styles.drawerHeader}>
@@ -389,316 +272,72 @@ export const PlatformDashboard = ({ navigation }) => {
               <Text style={styles.avatarLargeText}>{user?.userName?.substring(0, 2).toUpperCase() || 'US'}</Text>
             </View>
             <Text style={styles.drawerName}>{user?.userName || 'User'}</Text>
-            <Text style={styles.drawerRole}>{user?.orgName === 'SYSTEM' ? 'Platform Administrator' : 'Administrator'}</Text>
+            <Text style={styles.drawerRole}>{user?.orgName === 'SYSTEM' ? t('dashboard.platform_administrator') : t('common.administrator')}</Text>
           </View>
-          
           <ScrollView style={styles.drawerMenu}>
-            <TouchableOpacity 
-              style={[styles.drawerItem, activeTab === 'home' && { backgroundColor: T.accentSoft }]}
-              onPress={() => { handleTabChange('home'); toggleDrawer(); }}
-            >
+            <TouchableOpacity style={[styles.drawerItem, activeTab === 'home' && { backgroundColor: T.accentSoft }]} onPress={() => { handleTabChange('home'); toggleDrawer(); }}>
               <IconDashboard color={activeTab === 'home' ? T.accent : T.textDim} size={20} />
-              <Text style={[styles.drawerItemText, activeTab === 'home' && { color: T.accent }]}>Dashboard</Text>
+              <Text style={[styles.drawerItemText, activeTab === 'home' && { color: T.accent }]}>{t('dashboard.title')}</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={[styles.drawerItem, activeTab === 'orgs' && { backgroundColor: T.accentSoft }]}
-              onPress={() => { handleTabChange('orgs'); toggleDrawer(); }}
-            >
+            <TouchableOpacity style={[styles.drawerItem, activeTab === 'orgs' && { backgroundColor: T.accentSoft }]} onPress={() => { handleTabChange('orgs'); toggleDrawer(); }}>
               <IconGlobe color={activeTab === 'orgs' ? T.accent : T.textDim} size={20} />
-              <Text style={[styles.drawerItemText, activeTab === 'orgs' && { color: T.accent }]}>Organisations</Text>
+              <Text style={[styles.drawerItemText, activeTab === 'orgs' && { color: T.accent }]}>{t('dashboard.organisations')}</Text>
             </TouchableOpacity>
-
-            
             <View style={styles.drawerDivider} />
-
-            <TouchableOpacity 
-              style={[styles.drawerItem, activeTab === 'settings' && { backgroundColor: T.accentSoft }]}
-              onPress={() => { handleTabChange('settings'); toggleDrawer(); }}
-            >
+            <TouchableOpacity style={[styles.drawerItem, activeTab === 'settings' && { backgroundColor: T.accentSoft }]} onPress={() => { handleTabChange('settings'); toggleDrawer(); }}>
               <IconSettings color={activeTab === 'settings' ? T.accent : T.textDim} size={20} />
-              <Text style={[styles.drawerItemText, activeTab === 'settings' && { color: T.accent }]}>System Settings</Text>
+              <Text style={[styles.drawerItemText, activeTab === 'settings' && { color: T.accent }]}>{t('dashboard.system_settings')}</Text>
             </TouchableOpacity>
           </ScrollView>
         </View>
       </Animated.View>
-
-      <TopBar 
-        title={getTitle()} 
-        leading={(selectedOrg || isInvitingOwner) ? <IconBack /> : <IconMenu />}
-        onLeadingPress={(selectedOrg || isInvitingOwner) ? () => {
-          if (isInvitingOwner) setIsInvitingOwner(false);
-          else setSelectedOrg(null);
-        } : toggleDrawer}
-        onNotificationPress={() => setShowNotifications(true)}
-        onProfilePress={() => handleTabChange('settings')}
-      />
-
-      <View style={{ flex: 1 }}>
-        {renderContent()}
-      </View>
-
-      <BottomNav
-        active={activeTab}
-        onChange={handleTabChange}
-      />
-
-      <NotificationSheet
-        visible={showNotifications}
-        onClose={() => setShowNotifications(false)}
-      />
+      <TopBar title={getTitle()} leading={(selectedOrg || isInvitingOwner) ? <IconBack /> : <IconMenu />} onLeadingPress={(selectedOrg || isInvitingOwner) ? () => { if (isInvitingOwner) setIsInvitingOwner(false); else setSelectedOrg(null); } : toggleDrawer} onNotificationPress={() => setShowNotifications(true)} onProfilePress={() => handleTabChange('settings')} />
+      <View style={{ flex: 1 }}>{renderContent()}</View>
+      <BottomNav active={activeTab} onChange={handleTabChange} />
+      <NotificationSheet visible={showNotifications} onClose={() => setShowNotifications(false)} />
     </View>
   );
 };
 
 const createStyles = (T) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: T.bg,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 32,
-  },
-  greetingHeader: {
-    marginBottom: 24,
-  },
-  date: {
-    fontSize: 11,
-    color: T.textDim,
-    fontWeight: '600',
-    letterSpacing: 1,
-  },
-  greeting: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: T.text,
-    marginTop: 4,
-  },
-  status: {
-    fontSize: 12,
-    color: T.textDim,
-    marginTop: 4,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-    marginBottom: 16,
-  },
-  statCard: {
-    width: '48.5%',
-    padding: 12,
-  },
-  statHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
-  },
-  statIcon: {
-    width: 26,
-    height: 26,
-    borderRadius: 7,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  statLabel: {
-    fontSize: 10,
-    color: T.textDim,
-    fontWeight: '600',
-  },
-  statBody: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-  },
-  statValue: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: T.text,
-  },
-  statDelta: {
-    fontSize: 10,
-    fontWeight: '600',
-  },
-  telemetryCard: {
-    marginBottom: 24,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: T.textDim,
-    letterSpacing: 1,
-    marginBottom: 12,
-  },
-  streaming: {
-    fontSize: 9,
-    color: T.good,
-    fontWeight: '700',
-  },
-  telemetryBody: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  telemetryValue: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: T.text,
-  },
-  telemetryUnit: {
-    fontSize: 14,
-    color: T.textDim,
-    fontWeight: '500',
-  },
-  telemetryLabel: {
-    fontSize: 11,
-    color: T.textDim,
-    marginTop: 2,
-  },
-  placeholderGraph: {
-    width: 120,
-    height: 40,
-    backgroundColor: T.surface2,
-    borderRadius: 8,
-    opacity: 0.5,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  actionGrid: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  actionCard: {
-    flex: 1,
-    gap: 8,
-  },
-  actionIcon: {
-    width: 30,
-    height: 30,
-    borderRadius: 9,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  actionText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: T.text,
-  },
-  actionSubtext: {
-    fontSize: 11,
-    color: T.textDim,
-  },
-  activityCard: {
-    overflow: 'hidden',
-  },
-  activityItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 14,
-    gap: 12,
-  },
-  activityBorder: {
-    borderTopWidth: 1,
-    borderTopColor: T.borderSoft,
-  },
-  activityIcon: {
-    width: 26,
-    height: 26,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  activityContent: {
-    flex: 1,
-  },
-  activityText: {
-    fontSize: 13,
-    color: T.text,
-    fontWeight: '500',
-  },
-  activityMeta: {
-    fontSize: 11,
-    color: T.textFaint,
-    marginTop: 2,
-  },
-  activityTime: {
-    fontSize: 11,
-    color: T.textFaint,
-  },
-  drawerOverlay: {
-    position: 'absolute',
-    inset: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    zIndex: 10,
-  },
-  drawer: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    backgroundColor: T.surface,
-    zIndex: 20,
-    borderRightWidth: 1,
-    borderRightColor: T.border,
-  },
-  drawerHeader: {
-    padding: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: T.borderSoft,
-  },
-  avatarLarge: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
-    backgroundColor: T.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  avatarLargeText: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: '700',
-  },
-  drawerName: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: T.text,
-  },
-  drawerRole: {
-    fontSize: 12,
-    color: T.textDim,
-    marginTop: 4,
-  },
-  drawerMenu: {
-    flex: 1,
-    padding: 16,
-  },
-  drawerItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    gap: 12,
-    borderRadius: 12,
-  },
-  drawerItemText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: T.text,
-  },
-  drawerDivider: {
-    height: 1,
-    backgroundColor: T.borderSoft,
-    marginVertical: 12,
-    marginHorizontal: 12,
-  },
+  container: { flex: 1, backgroundColor: T.bg },
+  scrollContent: { padding: 16, paddingBottom: 32 },
+  greetingHeader: { marginBottom: 24 },
+  date: { fontSize: 11, color: T.textDim, fontWeight: '600', letterSpacing: 1 },
+  greeting: { fontSize: 22, fontWeight: '700', color: T.text, marginTop: 4 },
+  status: { fontSize: 12, color: T.textDim, marginTop: 4 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 },
+  statCard: { width: '48.5%', padding: 12 },
+  statHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
+  statIcon: { width: 26, height: 26, borderRadius: 7, alignItems: 'center', justifyContent: 'center' },
+  statLabel: { fontSize: 10, color: T.textDim, fontWeight: '600' },
+  statBody: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
+  statValue: { fontSize: 22, fontWeight: '700', color: T.text },
+  statDelta: { fontSize: 10, fontWeight: '600' },
+  sectionTitle: { fontSize: 11, fontWeight: '700', color: T.textDim, letterSpacing: 1, marginBottom: 12 },
+  section: { marginBottom: 24 },
+  actionGrid: { flexDirection: 'row', gap: 10 },
+  actionCard: { flex: 1, gap: 8 },
+  actionIcon: { width: 30, height: 30, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
+  actionText: { fontSize: 13, fontWeight: '600', color: T.text },
+  actionSubtext: { fontSize: 11, color: T.textDim },
+  activityCard: { overflow: 'hidden' },
+  activityItem: { flexDirection: 'row', alignItems: 'center', padding: 14, gap: 12 },
+  activityBorder: { borderTopWidth: 1, borderTopColor: T.borderSoft },
+  activityIcon: { width: 26, height: 26, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  activityContent: { flex: 1 },
+  activityText: { fontSize: 13, color: T.text, fontWeight: '500' },
+  activityMeta: { fontSize: 11, color: T.textFaint, marginTop: 2 },
+  activityTime: { fontSize: 11, color: T.textFaint },
+  drawerOverlay: { position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 10 },
+  drawer: { position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: T.surface, zIndex: 20, borderRightWidth: 1, borderRightColor: T.border },
+  drawerHeader: { padding: 24, borderBottomWidth: 1, borderBottomColor: T.borderSoft },
+  avatarLarge: { width: 64, height: 64, borderRadius: 20, backgroundColor: T.accent, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+  avatarLargeText: { color: '#fff', fontSize: 24, fontWeight: '700' },
+  drawerName: { fontSize: 18, fontWeight: '700', color: T.text },
+  drawerRole: { fontSize: 12, color: T.textDim, marginTop: 4 },
+  drawerMenu: { flex: 1, padding: 16 },
+  drawerItem: { flexDirection: 'row', alignItems: 'center', padding: 12, gap: 12, borderRadius: 12 },
+  drawerItemText: { fontSize: 14, fontWeight: '600', color: T.text },
+  drawerDivider: { height: 1, backgroundColor: T.borderSoft, marginVertical: 12, marginHorizontal: 12 },
 });

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
@@ -10,6 +11,7 @@ const GATEWAY_TYPES = ['IOT_HUB', 'EDGE_GATEWAY', 'PROTOCOL_BRIDGE'];
 const COMM_CONFIGS = ['MQTT_ENABLED', 'HTTP_ENABLED', 'WEBSOCKET_ENABLED', 'BLE_ENABLED'];
 
 export const CreateGatewayScreen = ({ onCancel, onSuccess }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user, token } = useAuth();
@@ -31,11 +33,11 @@ export const CreateGatewayScreen = ({ onCancel, onSuccess }) => {
     setSaving(true);
     try {
       await gatewayApi.create(user.orgName, user.hospitalCode, form, token);
-      Alert.alert('Success', `Gateway ${form.gatewayCode} provisioned.`, [
-        { text: 'OK', onPress: onSuccess || onCancel },
+      Alert.alert(t('messages.success'), t('messages.gateway_provisioned', { code: form.gatewayCode }), [
+        { text: t('actions.ok'), onPress: onSuccess || onCancel },
       ]);
     } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to create gateway.');
+      Alert.alert(t('messages.error'), e.message || t('messages.error_create_gateway'));
     } finally {
       setSaving(false);
     }
@@ -47,48 +49,48 @@ export const CreateGatewayScreen = ({ onCancel, onSuccess }) => {
         <View style={styles.banner}>
           <IconGateway size={24} color={T.accent} />
           <Text style={styles.bannerText}>
-            Provisioning a new IoT Gateway hub for {user?.hospitalCode}. This device acts as a local communication bridge for medical sensors.
+            {t('messages.gateway_create_banner', { hospital: user?.hospitalCode })}
           </Text>
         </View>
 
         <View style={styles.section}>
-          <SectionHeader title="Gateway Configuration" />
+          <SectionHeader title={t('entity.gateway_config')} />
 
-          <Field label="Gateway Serial / Code" required>
+          <Field label={t('entity.gateway_code')} required>
             <TextInput
               value={form.gatewayCode}
               onChangeText={v => updateForm('gatewayCode', v.toUpperCase())}
-              placeholder="e.g. GW-MAIN-001"
+              placeholder={t('placeholders.gateway_code')}
               leading={<IconShield size={16} color={T.textFaint} />}
             />
           </Field>
 
-          <Field label="Gateway Type" required>
+          <Field label={t('entity.gateway_type')} required>
             <View style={styles.optionGrid}>
-              {GATEWAY_TYPES.map(t => (
+              {GATEWAY_TYPES.map(type => (
                 <TouchableOpacity
-                  key={t}
-                  style={[styles.optionBtn, form.gatewayType === t && styles.optionActive]}
-                  onPress={() => updateForm('gatewayType', t)}
+                  key={type}
+                  style={[styles.optionBtn, form.gatewayType === type && styles.optionActive]}
+                  onPress={() => updateForm('gatewayType', type)}
                 >
-                  <Text style={[styles.optionText, form.gatewayType === t && styles.optionTextActive]}>
-                    {t.replace(/_/g, ' ')}
+                  <Text style={[styles.optionText, form.gatewayType === type && styles.optionTextActive]}>
+                    {t(`entity.gateway_type_${type.toLowerCase()}`)}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
           </Field>
 
-          <Field label="Operating System" required>
+          <Field label={t('entity.os')} required>
             <TextInput
               value={form.os}
               onChangeText={v => updateForm('os', v)}
-              placeholder="e.g. Linux"
+              placeholder={t('placeholders.os')}
               leading={<IconCpu size={16} color={T.textFaint} />}
             />
           </Field>
 
-          <Field label="Communication Protocol" required>
+          <Field label={t('entity.communication_protocol')} required>
             <View style={styles.optionGrid}>
               {COMM_CONFIGS.map(c => (
                 <TouchableOpacity
@@ -97,7 +99,7 @@ export const CreateGatewayScreen = ({ onCancel, onSuccess }) => {
                   onPress={() => updateForm('communicationConfig', c)}
                 >
                   <Text style={[styles.optionText, form.communicationConfig === c && styles.optionTextActive]}>
-                    {c.replace(/_/g, ' ')}
+                    {t(`entity.comm_config_${c.toLowerCase()}`)}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -106,14 +108,14 @@ export const CreateGatewayScreen = ({ onCancel, onSuccess }) => {
         </View>
 
         <View style={styles.actionRow}>
-          <Btn variant="surface" style={{ flex: 1 }} onPress={onCancel}>Cancel</Btn>
+          <Btn variant="surface" style={{ flex: 1 }} onPress={onCancel}>{t('actions.cancel')}</Btn>
           <Btn
             variant="primary"
             style={{ flex: 2 }}
             disabled={!isFormValid || saving}
             onPress={handleCreate}
           >
-            {saving ? 'Creating...' : 'Create Gateway'}
+            {saving ? t('actions.creating') : t('actions.create_gateway')}
           </Btn>
         </View>
       </ScrollView>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { userApi } from '../../services/api';
@@ -7,6 +8,7 @@ import { Card, Field, TextInput, Btn } from '../../components/Shared';
 import { IconUser, IconMail, IconBuilding, IconShield } from '../../icons';
 
 export const InviteOrgAdminScreen = ({ onCancel }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
   const styles = createStyles(T);
@@ -15,7 +17,7 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
     userName: '',
     firstName: '',
     lastName: '',
-    orgName: user?.orgName || 'APOLLO_ORG_TEST129',
+    orgName: user?.orgName || '',
     contactEmail: ''
   });
 
@@ -29,18 +31,18 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
 
   const handleCreate = async () => {
     if (!user?.orgName) {
-      Alert.alert('Error', 'Organisation name not found');
+      Alert.alert(t('common.error'), t('common.error'));
       return;
     }
 
     setLoading(true);
     try {
       await userApi.createOrgAdmin(user.orgName, form, token);
-      Alert.alert('Success', 'Organisation Administrator invited successfully', [
-        { text: 'OK', onPress: onCancel }
+      Alert.alert(t('common.success'), t('orgs.invite_sent'), [
+        { text: t('common.done'), onPress: onCancel }
       ]);
     } catch (err) {
-      Alert.alert('Error', err.message || 'Failed to invite administrator');
+      Alert.alert(t('common.error'), err.message || t('common.error'));
     } finally {
       setLoading(false);
     }
@@ -53,45 +55,45 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
         <View style={styles.banner}>
           <IconShield color={T.accent} size={20} />
           <Text style={styles.bannerText}>
-            Inviting a new Organisation Administrator. They will have full administrative control over this organisation's resources.
+            {t('dashboard.invite_org_admin')}
           </Text>
         </View>
 
         {/* User Identity Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>USER IDENTITY</Text>
+          <Text style={styles.sectionTitle}>{t('settings.profile').toUpperCase()}</Text>
           
-          <Field label="Username">
+          <Field label={t('auth.username')}>
             <TextInput 
               value={form.userName} 
               onChangeText={(v) => updateForm('userName', v.toLowerCase())}
-              placeholder="e.g. apollo_admin129@apollo.com"
+              placeholder={t('auth.username_placeholder')}
               leading={<IconUser size={18} color={T.textDim} />}
             />
           </Field>
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="First Name">
+              <Field label={t('users.first_name')}>
                 <TextInput 
                   value={form.firstName} 
                   onChangeText={(v) => updateForm('firstName', v)}
-                  placeholder="Apollo"
+                  placeholder={t('users.first_name')}
                 />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Last Name">
+              <Field label={t('users.last_name')}>
                 <TextInput 
                   value={form.lastName} 
                   onChangeText={(v) => updateForm('lastName', v)}
-                  placeholder="Admin"
+                  placeholder={t('users.last_name')}
                 />
               </Field>
             </View>
           </View>
 
-          <Field label="Organization">
+          <Field label={t('orgs.org_name')}>
             <Card style={styles.disabledCard}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <IconBuilding size={16} color={T.textFaint} />
@@ -103,13 +105,13 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
 
         {/* Contact Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>CONTACT DETAILS</Text>
+          <Text style={styles.sectionTitle}>{t('users.contact_info').toUpperCase()}</Text>
           
-          <Field label="Contact Email">
+          <Field label={t('users.email')}>
             <TextInput 
               value={form.contactEmail} 
               onChangeText={(v) => updateForm('contactEmail', v.toLowerCase())}
-              placeholder="e.g. apollo_admin129@apollo.com"
+              placeholder={t('users.email')}
               leading={<IconMail size={18} color={T.textDim} />}
             />
           </Field>
@@ -117,20 +119,20 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
 
         <View style={styles.infoBox}>
           <Text style={styles.infoText}>
-            The new user will receive an invitation email. They will set their own password and configure 2FA on first sign-in.
+            {t('dashboard.invite_org_admin')}
           </Text>
         </View>
 
         {/* Actions */}
         <View style={styles.actionRow}>
-          <Btn variant="ghost" full style={{ flex: 1 }} onPress={onCancel} disabled={loading}>Cancel</Btn>
+          <Btn variant="ghost" full style={{ flex: 1 }} onPress={onCancel} disabled={loading}>{t('common.cancel')}</Btn>
           <Btn 
             full 
             style={{ flex: 1.5 }} 
             onPress={handleCreate} 
             disabled={!isFormValid || loading}
           >
-            {loading ? 'Inviting...' : 'Send invitation'}
+            {loading ? t('common.loading') : t('orgs.invite_admin')}
           </Btn>
         </View>
       </ScrollView>

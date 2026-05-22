@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, Avatar, RoleBadge, Btn } from '../../components/Shared';
@@ -8,6 +9,7 @@ import { IconHospital, IconUsers, IconPulse, IconLock, IconUserPlus } from '../.
 import { organisationApi, userApi, summaryApi } from '../../services/api';
 
 export const OrgDetailScreen = ({ org, onInviteOwner }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { token } = useAuth();
   const styles = createStyles(T);
@@ -30,14 +32,14 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
         const list = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
         setHospitals(list);
       })
-      .catch(err => setHospError(err.message || 'Failed to load hospitals'));
+      .catch(err => setHospError(err.message || t('orgs.error_load_hospitals')));
 
     const fetchOwners = userApi.listOrgOwners(org.orgName, token)
       .then(data => {
         const list = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
         setOwners(list);
       })
-      .catch(err => setOwnersError(err.message || 'Failed to load owners'));
+      .catch(err => setOwnersError(err.message || t('orgs.error_load_owners')));
 
     const fetchSummary = summaryApi.getOrgSummary(org.orgName, token)
       .then(setSummary)
@@ -63,7 +65,7 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
                 <StatusPill status={org.deleted ? 'INACTIVE' : 'ACTIVE'} />
               </View>
               <Text style={styles.orgName}>{org.orgName}</Text>
-              <Text style={styles.orgMeta}>{org.orgType || 'ORGANISATION'} · {org.locale || 'en-IN'}</Text>
+              <Text style={styles.orgMeta}>{org.orgType || t('orgs.type_org')} · {org.locale || 'en-IN'}</Text>
             </View>
           </View>
         </Card>
@@ -71,9 +73,9 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
         {/* Stats Grid */}
         <View style={styles.statsGrid}>
           {[
-            { label: 'Hospitals', value: summary?.stats?.totalHospitals ?? hospitals.length, color: T.accent },
-            { label: 'Users', value: summary?.stats?.totalUsers ?? owners.length, color: '#2DD4BF' },
-            { label: 'Devices', value: summary?.devices ?? summary?.totalDevices ?? '—', color: '#22D3EE' },
+            { label: t('orgs.stats.hospitals'), value: summary?.stats?.totalHospitals ?? hospitals.length, color: T.accent },
+            { label: t('orgs.stats.users'), value: summary?.stats?.totalUsers ?? owners.length, color: '#2DD4BF' },
+            { label: t('orgs.stats.devices'), value: summary?.devices ?? summary?.totalDevices ?? '—', color: '#22D3EE' },
           ].map((stat, i) => (
             <View key={stat.label} style={styles.statBox}>
               <Text style={styles.statLabel}>{stat.label.toUpperCase()}</Text>
@@ -84,7 +86,7 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
 
         {/* Org Owners */}
         <View style={styles.section}>
-          <SectionHeader title="ORGANISATION OWNERS" count={owners.length} />
+          <SectionHeader title={t('orgs.owners_title')} count={owners.length} />
           <Card style={styles.listCard}>
             {loading ? (
               <ActivityIndicator color={T.accent} style={{ padding: 20 }} />
@@ -99,14 +101,14 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
                   <Avatar name={user.userName} size={36} />
                   <View style={styles.listItemContent}>
                     <Text style={styles.userName}>{user.userName}</Text>
-                    <Text style={styles.userEmail}>{user.email || 'No email'}</Text>
+                    <Text style={styles.userEmail}>{user.email || t('admins.no_email')}</Text>
                   </View>
                   <RoleBadge role={user.role || 'ORG_OWNER'} />
                 </View>
               ))
             ) : (
               <View style={styles.emptyItem}>
-                <Text style={styles.emptyText}>No owners assigned yet</Text>
+                <Text style={styles.emptyText}>{t('orgs.no_owners')}</Text>
               </View>
             )}
           </Card>

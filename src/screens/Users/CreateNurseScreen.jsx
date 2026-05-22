@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
@@ -7,6 +8,7 @@ import { IconUser, IconMail, IconPhone } from '../../icons';
 import { nurseApi } from '../../services/api';
 
 export const CreateNurseScreen = ({ onCancel, onSuccess }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user, token } = useAuth();
@@ -39,11 +41,11 @@ export const CreateNurseScreen = ({ onCancel, onSuccess }) => {
     };
     try {
       await nurseApi.create(user.orgName, user.hospitalCode, payload, token);
-      Alert.alert('Success', `Nurse ${form.firstName} ${form.lastName} onboarded.`, [
-        { text: 'OK', onPress: onSuccess || onCancel },
+      Alert.alert(t('messages.success'), t('messages.nurse_onboarded', { firstName: form.firstName, lastName: form.lastName }), [
+        { text: t('actions.ok'), onPress: onSuccess || onCancel },
       ]);
     } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to create nurse.');
+      Alert.alert(t('messages.error'), e.message || t('messages.failed_create_nurse'));
     } finally {
       setSaving(false);
     }
@@ -55,57 +57,57 @@ export const CreateNurseScreen = ({ onCancel, onSuccess }) => {
         <View style={styles.banner}>
           <IconUser size={24} color={T.accent} />
           <Text style={styles.bannerText}>
-            Onboarding new nursing staff for {user?.hospitalCode}. Registered nurses can be assigned to ward shifts and monitored telemetry hubs.
+            {t('messages.onboard_nurse_banner', { hospitalCode: user?.hospitalCode })}
           </Text>
         </View>
 
         <View style={styles.section}>
-          <SectionHeader title="Nurse Identity" />
+          <SectionHeader title={t('entity.nurse_identity')} />
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="Staff Code" required>
-                <TextInput value={form.nurseCode} onChangeText={v => updateRoot('nurseCode', v.toUpperCase())} placeholder="NR-001" />
+              <Field label={t('entity.staff_code')} required>
+                <TextInput value={form.nurseCode} onChangeText={v => updateRoot('nurseCode', v.toUpperCase())} placeholder={t('placeholders.nurse_code_example')} />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Experience (Years)">
-                <TextInput value={form.nurseExperience} onChangeText={v => updateRoot('nurseExperience', v.replace(/[^0-9]/g, ''))} placeholder="5" keyboardType="numeric" />
+              <Field label={t('entity.experience_years')}>
+                <TextInput value={form.nurseExperience} onChangeText={v => updateRoot('nurseExperience', v.replace(/[^0-9]/g, ''))} placeholder={t('placeholders.experience_nurse_example')} keyboardType="numeric" />
               </Field>
             </View>
           </View>
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="First Name" required>
-                <TextInput value={form.firstName} onChangeText={v => updateRoot('firstName', v)} placeholder="Lena" />
+              <Field label={t('entity.first_name')} required>
+                <TextInput value={form.firstName} onChangeText={v => updateRoot('firstName', v)} placeholder={t('placeholders.lena')} />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Last Name" required>
-                <TextInput value={form.lastName} onChangeText={v => updateRoot('lastName', v)} placeholder="Kowalski" />
+              <Field label={t('entity.last_name')} required>
+                <TextInput value={form.lastName} onChangeText={v => updateRoot('lastName', v)} placeholder={t('placeholders.kowalski')} />
               </Field>
             </View>
           </View>
 
-          <Field label="Speciality (comma separated)">
-            <TextInput value={form.nurseSpeciality} onChangeText={v => updateRoot('nurseSpeciality', v)} placeholder="ICU, Paediatrics" />
+          <Field label={t('entity.speciality_csv')}>
+            <TextInput value={form.nurseSpeciality} onChangeText={v => updateRoot('nurseSpeciality', v)} placeholder={t('placeholders.speciality_nurse_example')} />
           </Field>
         </View>
 
         <View style={styles.section}>
-          <SectionHeader title="Contact Information" />
-          <Field label="Email Address" required>
-            <TextInput value={form.myContact.email} onChangeText={v => updateContact('email', v.toLowerCase())} placeholder="nurse@hospital.org" leading={<IconMail size={16} color={T.textFaint} />} />
+          <SectionHeader title={t('entity.contact_information')} />
+          <Field label={t('entity.email_address')} required>
+            <TextInput value={form.myContact.email} onChangeText={v => updateContact('email', v.toLowerCase())} placeholder={t('placeholders.nurse_email_example')} leading={<IconMail size={16} color={T.textFaint} />} />
           </Field>
-          <Field label="Phone Number">
-            <TextInput value={form.myContact.phone} onChangeText={v => updateContact('phone', v)} placeholder="+91 00000 00000" leading={<IconPhone size={16} color={T.textFaint} />} />
+          <Field label={t('entity.phone_number')}>
+            <TextInput value={form.myContact.phone} onChangeText={v => updateContact('phone', v)} placeholder={t('placeholders.phone_intl_example')} leading={<IconPhone size={16} color={T.textFaint} />} />
           </Field>
         </View>
 
         <View style={styles.actionRow}>
-          <Btn variant="surface" style={{ flex: 1 }} onPress={onCancel}>Cancel</Btn>
+          <Btn variant="surface" style={{ flex: 1 }} onPress={onCancel}>{t('actions.cancel')}</Btn>
           <Btn variant="primary" style={{ flex: 2 }} disabled={!isFormValid || saving} onPress={handleCreate}>
-            {saving ? 'Creating...' : 'Create Nurse'}
+            {saving ? t('actions.creating') : t('actions.create_nurse')}
           </Btn>
         </View>
       </ScrollView>

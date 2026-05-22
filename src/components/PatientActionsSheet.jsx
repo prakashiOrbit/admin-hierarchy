@@ -3,6 +3,7 @@ import {
   View, Text, Modal, TouchableOpacity, TouchableWithoutFeedback,
   StyleSheet, ScrollView, ActivityIndicator, Alert, TextInput as RNTextInput,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -10,6 +11,7 @@ import { patientApi, wardApi } from '../services/api';
 import { IconPatient, IconDoor, IconCheck, IconChevron } from '../icons';
 
 export const PatientActionsSheet = ({ patient, visible, onClose }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const insets = useSafeAreaInsets();
   const { user, token } = useAuth();
@@ -32,18 +34,18 @@ export const PatientActionsSheet = ({ patient, visible, onClose }) => {
 
   const handleDischarge = () => {
     Alert.alert(
-      'Discharge Patient',
-      `Discharge ${patient?.firstName} ${patient?.lastName} (${patient?.patientCode})?`,
+      t('actions.discharge_patient'),
+      t('actions.confirm_discharge', { code: `${patient?.firstName} ${patient?.lastName} (${patient?.patientCode})` }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Discharge', style: 'destructive',
+          text: t('actions.discharge'), style: 'destructive',
           onPress: async () => {
             setSaving(true);
             try {
               await patientApi.discharge(user.orgName, user.hospitalCode, patient.patientCode, token);
-              Alert.alert('Done', 'Patient discharged.', [{ text: 'OK', onPress: handleClose }]);
-            } catch (e) { Alert.alert('Error', e.message || 'Failed.'); }
+              Alert.alert(t('common.done'), t('actions.patient_discharged'), [{ text: t('common.ok'), onPress: handleClose }]);
+            } catch (e) { Alert.alert(t('common.error'), e.message || t('common.failed')); }
             finally { setSaving(false); }
           },
         },
@@ -65,10 +67,10 @@ export const PatientActionsSheet = ({ patient, visible, onClose }) => {
     setSaving(true);
     try {
       await patientApi.transfer(user.orgName, user.hospitalCode, patient.patientCode, { targetWardCode: ward.wardCode }, token);
-      Alert.alert('Done', `${patient.firstName} ${patient.lastName} transferred to ${ward.wardName}.`, [
-        { text: 'OK', onPress: handleClose },
+      Alert.alert(t('common.done'), t('actions.patient_transferred_msg', { name: `${patient.firstName} ${patient.lastName}`, ward: ward.wardName }), [
+        { text: t('common.ok'), onPress: handleClose },
       ]);
-    } catch (e) { Alert.alert('Error', e.message || 'Failed.'); }
+    } catch (e) { Alert.alert(t('common.error'), e.message || t('common.failed')); }
     finally { setSaving(false); }
   };
 
@@ -99,7 +101,7 @@ export const PatientActionsSheet = ({ patient, visible, onClose }) => {
             <View style={[styles.actionIcon, { backgroundColor: '#10B98118' }]}>
               <IconCheck size={18} color="#10B981" />
             </View>
-            <Text style={styles.actionLabel}>Discharge Patient</Text>
+            <Text style={styles.actionLabel}>{t('actions.discharge_patient')}</Text>
             <IconChevron size={16} color={T.textFaint} />
           </TouchableOpacity>
 
@@ -111,7 +113,7 @@ export const PatientActionsSheet = ({ patient, visible, onClose }) => {
             <View style={[styles.actionIcon, { backgroundColor: '#8B5CF618' }]}>
               <IconDoor size={18} color="#8B5CF6" />
             </View>
-            <Text style={styles.actionLabel}>Transfer to Ward</Text>
+            <Text style={styles.actionLabel}>{t('actions.transfer_ward')}</Text>
             <IconChevron size={16} color={T.textFaint} />
           </TouchableOpacity>
         </>
@@ -123,13 +125,13 @@ export const PatientActionsSheet = ({ patient, visible, onClose }) => {
         <>
           <View style={styles.subHeader}>
             <TouchableOpacity onPress={() => { setMode('main'); setQuery(''); }}>
-              <Text style={styles.backLink}>← Back</Text>
+              <Text style={styles.backLink}>← {t('common.back')}</Text>
             </TouchableOpacity>
-            <Text style={styles.subTitle}>Select Ward</Text>
+            <Text style={styles.subTitle}>{t('actions.select_ward')}</Text>
           </View>
           <RNTextInput
             style={[styles.searchInput, { color: T.text, borderColor: T.borderSoft, backgroundColor: T.surface }]}
-            placeholder="Search wards..."
+            placeholder={t('actions.search_wards')}
             placeholderTextColor={T.textFaint}
             value={query}
             onChangeText={setQuery}
@@ -156,7 +158,7 @@ export const PatientActionsSheet = ({ patient, visible, onClose }) => {
                 </TouchableOpacity>
               ))}
               {filteredWards.length === 0 && !loading && (
-                <Text style={styles.emptyText}>No wards found.</Text>
+                <Text style={styles.emptyText}>{t('actions.no_wards')}</Text>
               )}
             </ScrollView>
           )}
@@ -176,9 +178,9 @@ export const PatientActionsSheet = ({ patient, visible, onClose }) => {
       <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 24) }]}>
         <View style={styles.handle} />
         <View style={styles.sheetHeader}>
-          <Text style={styles.sheetTitle}>Patient Actions</Text>
+          <Text style={styles.sheetTitle}>{t('actions.patient_actions')}</Text>
           <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
-            <Text style={styles.closeBtnText}>Done</Text>
+            <Text style={styles.closeBtnText}>{t('common.done')}</Text>
           </TouchableOpacity>
         </View>
         {renderContent()}

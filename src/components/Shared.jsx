@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, TextInput as RNTextInput, StyleSheet, Image, Platform } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeContext';
 import { IconSearch } from '../icons';
 
@@ -125,6 +126,7 @@ export const Field = ({ label, children, hint, error }) => {
 // --- Logo ---
 export const Logo = ({ size = 24 }) => {
   const { theme: T } = useTheme();
+  const { t } = useTranslation();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
       <Image 
@@ -133,7 +135,7 @@ export const Logo = ({ size = 24 }) => {
         resizeMode="contain"
       />
       <Text style={{ fontSize: size * 0.7, fontWeight: '700', color: T.text, marginLeft: 10 }}>
-        iOrbit <Text style={{ color: T.textDim, fontWeight: '500' }}>Admin</Text>
+        iOrbit <Text style={{ color: T.textDim, fontWeight: '500' }}>{t('common.admin')}</Text>
       </Text>
     </View>
   );
@@ -178,12 +180,13 @@ export const SectionHeader = ({ title, count, subtitle }) => {
 // --- Role Badge ---
 export const RoleBadge = ({ role }) => {
   const { theme: T } = useTheme();
+  const { t } = useTranslation();
   const roleMap = {
-    PLATFORM_ADMIN: { label: 'PLATFORM', color: '#A78BFA', bg: 'rgba(167,139,250,.14)' },
-    ORG_OWNER:      { label: 'ORG OWNER', color: '#818CF8', bg: 'rgba(129,140,248,.14)' },
-    ORG_ADMIN:      { label: 'ORG ADMIN', color: '#60A5FA', bg: 'rgba(96,165,250,.14)' },
-    HOSP_OWNER:     { label: 'HOSP OWNER', color: '#2DD4BF', bg: 'rgba(45,212,191,.14)' },
-    HOSP_ADMIN:     { label: 'HOSP ADMIN', color: '#22D3EE', bg: 'rgba(34,211,238,.14)' },
+    PLATFORM_ADMIN: { label: t('roles.PLATFORM_ADMIN'), color: '#A78BFA', bg: 'rgba(167,139,250,.14)' },
+    ORG_OWNER:      { label: t('roles.ORG_OWNER'), color: '#818CF8', bg: 'rgba(129,140,248,.14)' },
+    ORG_ADMIN:      { label: t('roles.ORG_ADMIN'), color: '#60A5FA', bg: 'rgba(96,165,250,.14)' },
+    HOSP_OWNER:     { label: t('roles.HOSP_OWNER'), color: '#2DD4BF', bg: 'rgba(45,212,191,.14)' },
+    HOSP_ADMIN:     { label: t('roles.HOSP_ADMIN'), color: '#22D3EE', bg: 'rgba(34,211,238,.14)' },
   };
   const r = roleMap[role] || { label: role, color: T.textDim, bg: T.surface2 };
 

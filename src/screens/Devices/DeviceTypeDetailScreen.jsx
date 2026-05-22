@@ -1,22 +1,24 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { Card, SectionHeader, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
 import { IconCpu, IconActivity, IconShield, IconBuilding, IconChevron, IconBack } from '../../icons';
 
 export const DeviceTypeDetailScreen = ({ deviceType, onBack, onEdit }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   
   if (!deviceType) return null;
 
   const details = [
-    { label: 'Category', value: deviceType.category },
-    { label: 'Vendor', value: deviceType.deviceVendor },
-    { label: 'Profile Code', value: deviceType.deviceProfile },
-    { label: 'Min Firmware', value: deviceType.deviceFirmware, mono: true },
-    { label: 'Max Firmware', value: deviceType.maxFirmware, mono: true },
+    { label: t('entity.category'), value: deviceType.category },
+    { label: t('entity.vendor'), value: deviceType.deviceVendor },
+    { label: t('entity.profile_code'), value: deviceType.deviceProfile },
+    { label: t('entity.min_firmware'), value: deviceType.deviceFirmware, mono: true },
+    { label: t('entity.max_firmware'), value: deviceType.maxFirmware, mono: true },
   ];
 
   return (
@@ -42,7 +44,7 @@ export const DeviceTypeDetailScreen = ({ deviceType, onBack, onEdit }) => {
 
         {/* Specifications */}
         <View style={styles.section}>
-          <SectionHeader title="Specifications" />
+          <SectionHeader title={t('entity.specifications')} />
           <Card style={{ padding: 0, overflow: 'hidden' }}>
             {details.map((item, i) => (
               <View 
@@ -68,9 +70,9 @@ export const DeviceTypeDetailScreen = ({ deviceType, onBack, onEdit }) => {
         <Card style={styles.banner}>
           <IconShield size={20} color={T.good} />
           <View style={{ flex: 1 }}>
-            <Text style={styles.bannerTitle}>Deployment Ready</Text>
+            <Text style={styles.bannerTitle}>{t('messages.deployment_ready')}</Text>
             <Text style={styles.bannerText}>
-              This profile is validated for production use. Devices matching these specifications can be provisioned to hospitals.
+              {t('messages.deployment_ready_desc')}
             </Text>
           </View>
         </Card>
@@ -78,10 +80,10 @@ export const DeviceTypeDetailScreen = ({ deviceType, onBack, onEdit }) => {
         {/* Actions */}
         <View style={styles.actionRow}>
           <Btn variant="surface" style={{ flex: 1 }} onPress={onBack}>
-            Back to List
+            {t('actions.back_to_list')}
           </Btn>
           <Btn variant="primary" style={{ flex: 1 }} onPress={onEdit}>
-            Edit Profile
+            {t('actions.edit_profile')}
           </Btn>
         </View>
       </ScrollView>

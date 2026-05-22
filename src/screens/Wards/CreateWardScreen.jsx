@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
@@ -7,6 +8,7 @@ import { IconDoor, IconBuilding } from '../../icons';
 import { wardApi } from '../../services/api';
 
 export const CreateWardScreen = ({ onCancel, onSuccess }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user, token } = useAuth();
@@ -28,11 +30,11 @@ export const CreateWardScreen = ({ onCancel, onSuccess }) => {
     setSaving(true);
     try {
       await wardApi.create(user.orgName, user.hospitalCode, form, token);
-      Alert.alert('Success', `Ward ${form.wardCode} created.`, [
-        { text: 'OK', onPress: onSuccess || onCancel },
+      Alert.alert(t('alerts.success'), t('messages.ward_created', { wardCode: form.wardCode }), [
+        { text: t('actions.ok'), onPress: onSuccess || onCancel },
       ]);
     } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to create ward.');
+      Alert.alert(t('alerts.error'), e.message || t('alerts.create_ward_failed'));
     } finally {
       setSaving(false);
     }
@@ -44,50 +46,50 @@ export const CreateWardScreen = ({ onCancel, onSuccess }) => {
         <View style={styles.banner}>
           <IconDoor size={24} color={T.accent} />
           <Text style={styles.bannerText}>
-            Provisioning a new physical ward for {user?.hospitalCode}. Once created, you can assign individual beds and gateways to this unit.
+            {t('ward.provision_ward_banner', { hospitalCode: user?.hospitalCode })}
           </Text>
         </View>
 
         <View style={styles.section}>
-          <SectionHeader title="Ward Configuration" />
+          <SectionHeader title={t('ward.ward_configuration')} />
 
-          <Field label="Ward Code" required>
+          <Field label={t('ward.ward_code')} required>
             <TextInput
               value={form.wardCode}
               onChangeText={v => updateForm('wardCode', v.toUpperCase())}
-              placeholder="e.g. WARD-ICU-01"
+              placeholder={t('placeholders.ward_code')}
             />
           </Field>
 
-          <Field label="Ward Name" required>
+          <Field label={t('ward.ward_name')} required>
             <TextInput
               value={form.wardName}
               onChangeText={v => updateForm('wardName', v)}
-              placeholder="e.g. Emergency Ward"
+              placeholder={t('placeholders.ward_name')}
             />
           </Field>
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="Type" required>
+              <Field label={t('ward.ward_type')} required>
                 <Card style={styles.selectCard} padding={12}>
                   <Text style={styles.selectText}>{form.wardType}</Text>
                 </Card>
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Est. Beds" required>
+              <Field label={t('ward.estimated_beds')} required>
                 <TextInput
                   value={form.numberOfBeds}
                   onChangeText={v => updateForm('numberOfBeds', v.replace(/[^0-9]/g, ''))}
-                  placeholder="15"
+                  placeholder={t('placeholders.beds_count')}
                   keyboardType="numeric"
                 />
               </Field>
             </View>
           </View>
 
-          <Field label="Assigned Hospital">
+          <Field label={t('ward.assigned_hospital')}>
             <Card style={styles.disabledCard} padding={12}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <IconBuilding size={16} color={T.textFaint} />
@@ -98,14 +100,14 @@ export const CreateWardScreen = ({ onCancel, onSuccess }) => {
         </View>
 
         <View style={styles.actionRow}>
-          <Btn variant="surface" style={{ flex: 1 }} onPress={onCancel}>Cancel</Btn>
+          <Btn variant="surface" style={{ flex: 1 }} onPress={onCancel}>{t('actions.cancel')}</Btn>
           <Btn
             variant="primary"
             style={{ flex: 2 }}
             disabled={!isFormValid || saving}
             onPress={handleCreate}
           >
-            {saving ? 'Creating...' : 'Create Ward'}
+            {saving ? t('actions.creating') : t('actions.create_ward')}
           </Btn>
         </View>
       </ScrollView>

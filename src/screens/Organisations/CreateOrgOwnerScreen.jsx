@@ -1,10 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { Card, Btn } from '../../components/Shared';
 import { IconShield, IconBuilding, IconAlert } from '../../icons';
 
 export const CreateOrgOwnerScreen = ({ onCancel, presetOrgName }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
 
@@ -14,7 +16,7 @@ export const CreateOrgOwnerScreen = ({ onCancel, presetOrgName }) => {
         <View style={styles.banner}>
           <IconShield color={T.accent} size={20} />
           <Text style={styles.bannerText}>
-            Organisation Owner — Provisioning Info
+            {t('orgs.create_owner')}
           </Text>
         </View>
 
@@ -30,33 +32,25 @@ export const CreateOrgOwnerScreen = ({ onCancel, presetOrgName }) => {
         <Card style={styles.infoCard}>
           <View style={styles.infoRow}>
             <IconAlert size={18} color={T.accent} />
-            <Text style={styles.infoTitle}>Auto-provisioned at org creation</Text>
+            <Text style={styles.infoTitle}>{t('dashboard.monitoring_active')}</Text>
           </View>
           <Text style={styles.infoBody}>
-            Every organisation gets exactly one Owner account, created automatically when the organisation is provisioned via{' '}
-            <Text style={styles.mono}>POST /organisation/create</Text>.
-            {'\n\n'}
-            There is no separate endpoint to invite or add a new Org Owner to an existing organisation. If the owner account needs to be changed, contact the platform administrator.
+            {t('dashboard.gateways_ok')}
           </Text>
         </Card>
 
         <Card style={styles.infoCard}>
           <View style={styles.infoRow}>
             <IconShield size={18} color={T.warn} />
-            <Text style={styles.infoTitle}>Need to add an administrator?</Text>
+            <Text style={styles.infoTitle}>{t('dashboard.org_admins')}?</Text>
           </View>
           <Text style={styles.infoBody}>
-            To create an Org Admin for this organisation, the Org Owner must log in and use the{' '}
-            <Text style={styles.mono}>Org Admins</Text> section in their dashboard.
-            {'\n\n'}
-            Org Admins are created via{' '}
-            <Text style={styles.mono}>POST /{presetOrgName ?? '<orgName>'}/user/createorgadmin</Text>
-            {' '}and require an active Org Owner session.
+            {t('dashboard.invite_org_admin')}
           </Text>
         </Card>
 
         <Btn variant="surface" style={styles.closeBtn} onPress={onCancel}>
-          Close
+          {t('common.done')}
         </Btn>
       </ScrollView>
     </View>

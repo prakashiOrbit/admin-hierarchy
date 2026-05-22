@@ -4,22 +4,16 @@ import {
   StyleSheet, ScrollView, Platform, ActivityIndicator, Alert, TextInput as RNTextInput,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { bedApi, patientApi, wardApi } from '../services/api';
 import { Avatar } from './Shared';
 import { IconBed, IconPatient, IconDoor, IconAlert, IconCheck, IconChevron } from '../icons';
 
-const ACTION_LIST = [
-  { key: 'assign',    label: 'Assign Patient',    icon: IconPatient, color: '#22D3EE' },
-  { key: 'unassign',  label: 'Unassign Patient',  icon: IconPatient, color: '#F59E0B' },
-  { key: 'discharge', label: 'Discharge Patient', icon: IconCheck,   color: '#10B981' },
-  { key: 'transfer',  label: 'Transfer to Ward',  icon: IconDoor,    color: '#8B5CF6' },
-  { key: 'alarm',     label: 'Alarm Config',      icon: IconAlert,   color: '#EF4444' },
-];
-
 export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
   const { theme: T } = useTheme();
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { user, token } = useAuth();
   const styles = createStyles(T);
@@ -37,6 +31,14 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
     tempMin: '36.0', tempMax: '38.5',
   });
 
+  const ACTION_LIST = [
+    { key: 'assign',    label: t('actions.assign_patient'),    icon: IconPatient, color: '#22D3EE' },
+    { key: 'unassign',  label: t('actions.unassign_patient'),  icon: IconPatient, color: '#F59E0B' },
+    { key: 'discharge', label: t('actions.discharge_patient'), icon: IconCheck,   color: '#10B981' },
+    { key: 'transfer',  label: t('actions.transfer_ward'),  icon: IconDoor,    color: '#8B5CF6' },
+    { key: 'alarm',     label: t('actions.alarm_config'),      icon: IconAlert,   color: '#EF4444' },
+  ];
+
   const reset = useCallback(() => {
     setMode('main');
     setItems([]);
@@ -48,16 +50,16 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
 
   const enterMode = async (key) => {
     if (key === 'unassign') {
-      Alert.alert('Unassign Patient', `Remove patient from ${bed.bedCode}?`, [
-        { text: 'Cancel', style: 'cancel' },
+      Alert.alert(t('actions.unassign_patient'), t('actions.confirm_unassign', { code: bed.bedCode }), [
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Unassign', style: 'destructive',
+          text: t('actions.unassign_patient'), style: 'destructive',
           onPress: async () => {
             setSaving(true);
             try {
               await bedApi.unassignPatient(user.orgName, user.hospitalCode, bed.bedCode, token);
-              Alert.alert('Done', 'Patient unassigned.', [{ text: 'OK', onPress: handleClose }]);
-            } catch (e) { Alert.alert('Error', e.message || 'Failed.'); }
+              Alert.alert(t('common.done'), t('actions.patient_unassigned'), [{ text: 'OK', onPress: handleClose }]);
+            } catch (e) { Alert.alert(t('common.error'), e.message || 'Failed.'); }
             finally { setSaving(false); }
           },
         },
@@ -65,16 +67,16 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
       return;
     }
     if (key === 'discharge') {
-      Alert.alert('Discharge Patient', `Discharge patient from ${bed.bedCode}?`, [
-        { text: 'Cancel', style: 'cancel' },
+      Alert.alert(t('actions.discharge_patient'), t('actions.confirm_discharge', { code: bed.bedCode }), [
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Discharge', style: 'destructive',
+          text: t('actions.discharge_patient'), style: 'destructive',
           onPress: async () => {
             setSaving(true);
             try {
               await bedApi.discharge(user.orgName, user.hospitalCode, bed.bedCode, token);
-              Alert.alert('Done', 'Patient discharged.', [{ text: 'OK', onPress: handleClose }]);
-            } catch (e) { Alert.alert('Error', e.message || 'Failed.'); }
+              Alert.alert(t('common.done'), t('actions.patient_discharged'), [{ text: 'OK', onPress: handleClose }]);
+            } catch (e) { Alert.alert(t('common.error'), e.message || 'Failed.'); }
             finally { setSaving(false); }
           },
         },
@@ -110,10 +112,10 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
     setSaving(true);
     try {
       await bedApi.assignPatient(user.orgName, user.hospitalCode, bed.bedCode, { patientCode: patient.patientCode }, token);
-      Alert.alert('Done', `${patient.firstName} ${patient.lastName} assigned to ${bed.bedCode}.`, [
+      Alert.alert(t('common.done'), t('actions.patient_assigned', { name: `${patient.firstName} ${patient.lastName}`, code: bed.bedCode }), [
         { text: 'OK', onPress: handleClose },
       ]);
-    } catch (e) { Alert.alert('Error', e.message || 'Failed.'); }
+    } catch (e) { Alert.alert(t('common.error'), e.message || 'Failed.'); }
     finally { setSaving(false); }
   };
 
@@ -121,10 +123,10 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
     setSaving(true);
     try {
       await bedApi.transferWard(user.orgName, user.hospitalCode, bed.bedCode, { targetWardCode: ward.wardCode }, token);
-      Alert.alert('Done', `${bed.bedCode} transferred to ${ward.wardName}.`, [
+      Alert.alert(t('common.done'), t('actions.bed_transferred', { code: bed.bedCode, ward: ward.wardName }), [
         { text: 'OK', onPress: handleClose },
       ]);
-    } catch (e) { Alert.alert('Error', e.message || 'Failed.'); }
+    } catch (e) { Alert.alert(t('common.error'), e.message || 'Failed.'); }
     finally { setSaving(false); }
   };
 
@@ -139,8 +141,8 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
     setSaving(true);
     try {
       await bedApi.updateAlarmConfig(user.orgName, user.hospitalCode, bed.bedCode, payload, token);
-      Alert.alert('Done', 'Alarm thresholds saved.', [{ text: 'OK', onPress: handleClose }]);
-    } catch (e) { Alert.alert('Error', e.message || 'Failed.'); }
+      Alert.alert(t('common.done'), t('actions.alarm_thresholds_saved'), [{ text: 'OK', onPress: handleClose }]);
+    } catch (e) { Alert.alert(t('common.error'), e.message || 'Failed.'); }
     finally { setSaving(false); }
   };
 
@@ -194,13 +196,13 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
         <>
           <View style={styles.subHeader}>
             <TouchableOpacity onPress={() => { setMode('main'); setQuery(''); }}>
-              <Text style={styles.backLink}>← Back</Text>
+              <Text style={styles.backLink}>← {t('common.back')}</Text>
             </TouchableOpacity>
-            <Text style={styles.subTitle}>{isAssign ? 'Select Patient' : 'Select Ward'}</Text>
+            <Text style={styles.subTitle}>{t(isAssign ? 'actions.select_patient' : 'actions.select_ward')}</Text>
           </View>
           <RNTextInput
             style={[styles.searchInput, { color: T.text, borderColor: T.borderSoft, backgroundColor: T.surface }]}
-            placeholder={isAssign ? 'Search patients...' : 'Search wards...'}
+            placeholder={t(isAssign ? 'actions.search_patients' : 'actions.search_wards')}
             placeholderTextColor={T.textFaint}
             value={query}
             onChangeText={setQuery}
@@ -239,7 +241,7 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
                 </TouchableOpacity>
               ))}
               {filteredItems.length === 0 && !loading && (
-                <Text style={styles.emptyText}>No results found.</Text>
+                <Text style={styles.emptyText}>{t('actions.no_results')}</Text>
               )}
             </ScrollView>
           )}
@@ -249,19 +251,19 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
 
     if (mode === 'alarm') {
       const pairs = [
-        { label: 'Heart Rate (bpm)', fields: [['hrMin', 'Min'], ['hrMax', 'Max']] },
-        { label: 'SpO₂ (%)', fields: [['spo2Min', 'Min']] },
-        { label: 'Systolic BP (mmHg)', fields: [['sysBpMin', 'Min'], ['sysBpMax', 'Max']] },
-        { label: 'Diastolic BP (mmHg)', fields: [['diasBpMin', 'Min'], ['diasBpMax', 'Max']] },
-        { label: 'Temperature (°C)', fields: [['tempMin', 'Min'], ['tempMax', 'Max']] },
+        { label: t('actions.heart_rate'), fields: [['hrMin', t('actions.min')], ['hrMax', t('actions.max')]] },
+        { label: t('actions.spo2'), fields: [['spo2Min', t('actions.min')]] },
+        { label: t('actions.systolic_bp'), fields: [['sysBpMin', t('actions.min')], ['sysBpMax', t('actions.max')]] },
+        { label: t('actions.diastolic_bp'), fields: [['diasBpMin', t('actions.min')], ['diasBpMax', t('actions.max')]] },
+        { label: t('actions.temperature'), fields: [['tempMin', t('actions.min')], ['tempMax', t('actions.max')]] },
       ];
       return (
         <>
           <View style={styles.subHeader}>
             <TouchableOpacity onPress={() => setMode('main')}>
-              <Text style={styles.backLink}>← Back</Text>
+              <Text style={styles.backLink}>← {t('common.back')}</Text>
             </TouchableOpacity>
-            <Text style={styles.subTitle}>Alarm Thresholds</Text>
+            <Text style={styles.subTitle}>{t('actions.alarm_thresholds')}</Text>
           </View>
           <ScrollView style={{ maxHeight: 300 }}>
             {pairs.map(({ label, fields }) => (
@@ -290,7 +292,7 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
           >
             {saving
               ? <ActivityIndicator color="#fff" size="small" />
-              : <Text style={styles.saveAlarmText}>Save Thresholds</Text>
+              : <Text style={styles.saveAlarmText}>{t('actions.save_thresholds')}</Text>
             }
           </TouchableOpacity>
         </>
@@ -309,9 +311,9 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
       <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 24) }]}>
         <View style={styles.handle} />
         <View style={styles.sheetHeader}>
-          <Text style={styles.sheetTitle}>Bed Actions</Text>
+          <Text style={styles.sheetTitle}>{t('actions.bed_actions')}</Text>
           <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
-            <Text style={styles.closeBtnText}>Done</Text>
+            <Text style={styles.closeBtnText}>{t('common.done')}</Text>
           </TouchableOpacity>
         </View>
         {renderContent()}
@@ -321,41 +323,4 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
 };
 
 const createStyles = (T) => StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)' },
-  sheet: {
-    backgroundColor: T.bg, borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    paddingTop: 12, paddingHorizontal: 20,
-    borderTopWidth: 1, borderColor: T.borderSoft,
-  },
-  handle: { width: 36, height: 4, borderRadius: 2, backgroundColor: T.border, alignSelf: 'center', marginBottom: 16 },
-  sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
-  sheetTitle: { fontSize: 17, fontWeight: '700', color: T.text },
-  closeBtn: { paddingHorizontal: 4 },
-  closeBtnText: { fontSize: 15, color: T.accent, fontWeight: '600' },
-  bedInfo: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: T.borderSoft },
-  bedIconBox: { width: 40, height: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  bedCode: { fontSize: 15, fontWeight: '700', color: T.text, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
-  bedMeta: { fontSize: 11, color: T.textDim, marginTop: 2 },
-  actionItem: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: T.borderSoft },
-  actionIcon: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  actionLabel: { flex: 1, fontSize: 15, color: T.text, fontWeight: '500' },
-  subHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
-  backLink: { fontSize: 14, color: T.accent, fontWeight: '600' },
-  subTitle: { fontSize: 15, fontWeight: '700', color: T.text },
-  searchInput: {
-    height: 40, borderRadius: 10, borderWidth: 1, paddingHorizontal: 12,
-    fontSize: 14, marginBottom: 10,
-  },
-  listItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: T.borderSoft },
-  listName: { fontSize: 14, fontWeight: '600', color: T.text },
-  listMeta: { fontSize: 11, color: T.textDim, marginTop: 2, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
-  emptyText: { color: T.textFaint, fontSize: 13, textAlign: 'center', paddingVertical: 24 },
-  alarmRow: { marginBottom: 14 },
-  alarmLabel: { fontSize: 12, fontWeight: '600', color: T.textDim, marginBottom: 6, letterSpacing: 0.3 },
-  alarmInputs: { flexDirection: 'row', gap: 12 },
-  alarmInputWrap: { flex: 1 },
-  alarmInputLabel: { fontSize: 10, color: T.textFaint, marginBottom: 4 },
-  alarmInput: { height: 40, borderRadius: 8, borderWidth: 1, paddingHorizontal: 10, fontSize: 14, textAlign: 'center' },
-  saveAlarmBtn: { marginTop: 16, height: 46, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  saveAlarmText: { color: '#fff', fontSize: 15, fontWeight: '700' },
-});
+...

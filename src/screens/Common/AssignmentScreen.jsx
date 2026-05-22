@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, ActivityIndicator, Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, SearchBar, Btn, Avatar } from '../../components/Shared';
@@ -12,6 +13,7 @@ export const AssignmentScreen = ({
   onCancel,
   onSuccess,
 }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user, token } = useAuth();
@@ -47,7 +49,7 @@ export const AssignmentScreen = ({
           if (found) setSelectedDoctor(found);
         }
       })
-      .catch(err => setError(err.message || 'Failed to load data'))
+      .catch(err => setError(err.message || t('common.load_failed')))
       .finally(() => setLoading(false));
   }, [user?.orgName, user?.hospitalCode, token]);
 
@@ -78,12 +80,12 @@ export const AssignmentScreen = ({
     try {
       await assignmentApi.assign(user.orgName, user.hospitalCode, payload, token);
       Alert.alert(
-        'Success',
-        `Dr. ${selectedDoctor.lastName} assigned to ${selectedPatients.length} patient(s).`,
-        [{ text: 'OK', onPress: onSuccess || onCancel }]
+        t('common.success'),
+        t('assignments.assigned_success_msg', { name: selectedDoctor.lastName, count: selectedPatients.length }),
+        [{ text: t('common.ok'), onPress: onSuccess || onCancel }]
       );
     } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to save assignment.');
+      Alert.alert(t('common.error'), e.message || t('assignments.failed_msg'));
     } finally {
       setSaving(false);
     }
@@ -101,7 +103,7 @@ export const AssignmentScreen = ({
     return (
       <View style={styles.center}>
         <Text style={{ color: T.bad, fontSize: 13, textAlign: 'center', marginBottom: 12 }}>{error}</Text>
-        <Btn variant="surface" size="sm" onPress={onCancel}>Go Back</Btn>
+        <Btn variant="surface" size="sm" onPress={onCancel}>{t('common.go_back')}</Btn>
       </View>
     );
   }
@@ -111,13 +113,13 @@ export const AssignmentScreen = ({
       <View style={styles.stepperHeader}>
         <View style={styles.stepInfo}>
           <Text style={styles.stepTitle}>
-            {step === 'doctor' ? 'Step 1: Select Physician' : 'Step 2: Select Patients'}
+            {step === 'doctor' ? t('assignments.step1_title') : t('assignments.step2_title')}
           </Text>
           <Text style={styles.stepSubtitle}>
             {selectedDoctor
-              ? `Assigned to Dr. ${selectedDoctor.lastName}`
-              : 'Choose an attending doctor'}
-            {selectedPatients.length > 0 && ` · ${selectedPatients.length} patient(s) selected`}
+              ? t('assignments.assigned_to_dr', { name: selectedDoctor.lastName })
+              : t('assignments.choose_doctor')}
+            {selectedPatients.length > 0 && ` · ${t('assignments.patients_selected', { count: selectedPatients.length })}`}
           </Text>
         </View>
         <View style={styles.progressContainer}>
@@ -128,7 +130,7 @@ export const AssignmentScreen = ({
 
       <View style={styles.searchWrap}>
         <SearchBar
-          placeholder={step === 'doctor' ? 'Search doctors...' : 'Search patients...'}
+          placeholder={step === 'doctor' ? t('shifts.search_doctors') : t('actions.search_patients')}
           value={query}
           onChangeText={setQuery}
         />
@@ -149,7 +151,7 @@ export const AssignmentScreen = ({
                   <View style={styles.row}>
                     <Avatar initials={initials} color={T.accent} />
                     <View style={styles.info}>
-                      <Text style={styles.name}>Dr. {d.firstName} {d.lastName}</Text>
+                      <Text style={styles.name}>{t('common.dr_prefix')}{d.firstName} {d.lastName}</Text>
                       <Text style={styles.meta}>
                         {d.doctorCode} · {d.doctorSpeciality?.[0] ?? d.doctorType}
                       </Text>
@@ -160,7 +162,7 @@ export const AssignmentScreen = ({
               );
             })}
             {filteredDoctors.length === 0 && (
-              <Text style={styles.emptyText}>No doctors found.</Text>
+              <Text style={styles.emptyText}>{t('shifts.no_doctors')}</Text>
             )}
           </View>
         ) : (
@@ -188,7 +190,7 @@ export const AssignmentScreen = ({
               );
             })}
             {filteredPatients.length === 0 && (
-              <Text style={styles.emptyText}>No patients found.</Text>
+              <Text style={styles.emptyText}>{t('actions.no_patients')}</Text>
             )}
           </View>
         )}
@@ -201,14 +203,14 @@ export const AssignmentScreen = ({
             variant="ghost"
             onPress={step === 'patient' && !initialDoctorId ? () => { setStep('doctor'); setQuery(''); } : onCancel}
           >
-            {step === 'patient' && !initialDoctorId ? 'Back to Doctors' : 'Cancel'}
+            {step === 'patient' && !initialDoctorId ? t('assignments.back_to_doctors') : t('common.cancel')}
           </Btn>
           <Btn
             style={{ flex: 2 }}
             onPress={handleFinish}
             disabled={!selectedDoctor || selectedPatients.length === 0 || saving}
           >
-            {saving ? 'Saving...' : `Assign ${selectedPatients.length || ''} ${selectedPatients.length === 1 ? 'Patient' : 'Patients'}`}
+            {saving ? t('common.saving') : t('assignments.assign_btn', { count: selectedPatients.length || '' })}
           </Btn>
         </View>
       </View>

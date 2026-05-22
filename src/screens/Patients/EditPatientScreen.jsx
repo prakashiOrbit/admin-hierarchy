@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
@@ -7,6 +8,7 @@ import { IconUser, IconMail, IconPhone, IconLocation, IconHeart, IconBuilding } 
 import { patientApi } from '../../services/api';
 
 export const EditPatientScreen = ({ patientDetail, onCancel, onSave }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
   const styles = createStyles(T);
@@ -55,9 +57,9 @@ export const EditPatientScreen = ({ patientDetail, onCancel, onSave }) => {
     };
     try {
       await patientApi.update(user.orgName, user.hospitalCode, p.patientCode, payload, token);
-      Alert.alert('Saved', 'Patient profile updated.', [{ text: 'OK', onPress: () => onSave?.() }]);
+      Alert.alert(t('messages.saved'), t('messages.patient_updated'), [{ text: t('actions.ok'), onPress: () => onSave?.() }]);
     } catch (e) {
-      Alert.alert('Error', e.message || 'Failed to update patient.');
+      Alert.alert(t('messages.error'), e.message || t('messages.failed_update_patient'));
     } finally {
       setSaving(false);
     }
@@ -69,14 +71,14 @@ export const EditPatientScreen = ({ patientDetail, onCancel, onSave }) => {
         <View style={styles.banner}>
           <IconUser size={24} color={T.accent} />
           <Text style={styles.bannerText}>
-            Editing <Text style={{ fontWeight: '700' }}>{p.patientCode}</Text>. Patient code cannot be changed.
+            {t('messages.editing_patient_banner', { code: p.patientCode })}
           </Text>
         </View>
 
         <View style={styles.section}>
-          <SectionHeader title="Patient Identity" />
+          <SectionHeader title={t('entity.patient_identity')} />
 
-          <Field label="Patient Code">
+          <Field label={t('entity.patient_code')}>
             <Card style={styles.readOnlyCard}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <IconBuilding size={16} color={T.textFaint} />
@@ -87,85 +89,85 @@ export const EditPatientScreen = ({ patientDetail, onCancel, onSave }) => {
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="First Name" required>
-                <TextInput value={form.firstName} onChangeText={v => set('firstName', v)} placeholder="John" />
+              <Field label={t('entity.first_name')} required>
+                <TextInput value={form.firstName} onChangeText={v => set('firstName', v)} placeholder={t('placeholders.john')} />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Last Name" required>
-                <TextInput value={form.lastName} onChangeText={v => set('lastName', v)} placeholder="Doe" />
+              <Field label={t('entity.last_name')} required>
+                <TextInput value={form.lastName} onChangeText={v => set('lastName', v)} placeholder={t('placeholders.doe')} />
               </Field>
             </View>
           </View>
         </View>
 
         <View style={styles.section}>
-          <SectionHeader title="Contact & Address" />
-          <Field label="Email" required>
+          <SectionHeader title={t('entity.contact_address')} />
+          <Field label={t('entity.email')} required>
             <TextInput
               value={form.email}
               onChangeText={v => set('email', v.toLowerCase())}
-              placeholder="patient@example.com"
+              placeholder={t('placeholders.email_example')}
               keyboardType="email-address"
               leading={<IconMail size={16} color={T.textFaint} />}
             />
           </Field>
-          <Field label="Phone">
+          <Field label={t('entity.phone')}>
             <TextInput
               value={form.phone}
               onChangeText={v => set('phone', v)}
-              placeholder="555-0101"
+              placeholder={t('placeholders.phone_example')}
               keyboardType="phone-pad"
               leading={<IconPhone size={16} color={T.textFaint} />}
             />
           </Field>
-          <Field label="Street Address">
+          <Field label={t('entity.street_address')}>
             <TextInput
               value={form.street1}
               onChangeText={v => set('street1', v)}
-              placeholder="123 Medical Lane"
+              placeholder={t('placeholders.address_example')}
               leading={<IconLocation size={16} color={T.textFaint} />}
             />
           </Field>
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="City">
-                <TextInput value={form.city} onChangeText={v => set('city', v)} placeholder="Springfield" />
+              <Field label={t('entity.city')}>
+                <TextInput value={form.city} onChangeText={v => set('city', v)} placeholder={t('placeholders.city_example')} />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Pincode">
-                <TextInput value={form.pincode} onChangeText={v => set('pincode', v)} placeholder="62704" keyboardType="numeric" />
-              </Field>
+              <Field label={t('entity.pincode')}>
+                <TextInput value={form.pincode} onChangeText={v => set('pincode', v)} placeholder={t('placeholders.pincode_example')} keyboardType="numeric" />
+              </View>
             </View>
           </View>
         </View>
 
         <View style={styles.section}>
-          <SectionHeader title="Vital Signs" />
+          <SectionHeader title={t('entity.vital_signs')} />
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="Blood Group">
-                <TextInput value={form.bloodGroup} onChangeText={v => set('bloodGroup', v)} placeholder="O+" leading={<IconHeart size={16} color={T.textFaint} />} />
+              <Field label={t('entity.blood_group')}>
+                <TextInput value={form.bloodGroup} onChangeText={v => set('bloodGroup', v)} placeholder={t('placeholders.blood_group_example')} leading={<IconHeart size={16} color={T.textFaint} />} />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Weight">
-                <TextInput value={form.weight} onChangeText={v => set('weight', v)} placeholder="75kg" />
+              <Field label={t('entity.weight')}>
+                <TextInput value={form.weight} onChangeText={v => set('weight', v)} placeholder={t('placeholders.weight_example')} />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Height">
-                <TextInput value={form.height} onChangeText={v => set('height', v)} placeholder="180cm" />
+              <Field label={t('entity.height')}>
+                <TextInput value={form.height} onChangeText={v => set('height', v)} placeholder={t('placeholders.height_example')} />
               </Field>
             </View>
           </View>
         </View>
 
         <View style={styles.actionRow}>
-          <Btn variant="ghost" style={{ flex: 1 }} onPress={onCancel} disabled={saving}>Cancel</Btn>
+          <Btn variant="ghost" style={{ flex: 1 }} onPress={onCancel} disabled={saving}>{t('actions.cancel')}</Btn>
           <Btn style={{ flex: 1.5 }} onPress={handleSave} disabled={!isValid || saving}>
-            {saving ? <ActivityIndicator color="#FFF" size="small" /> : 'Save Changes'}
+            {saving ? <ActivityIndicator color="#FFF" size="small" /> : t('actions.save_changes')}
           </Btn>
         </View>
       </ScrollView>

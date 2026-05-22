@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, SearchBar, Btn } from '../../components/Shared';
@@ -9,6 +10,7 @@ import { wardApi, bedApi } from '../../services/api';
 import { BedActionsSheet } from '../../components/BedActionsSheet';
 
 export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user, token } = useAuth();
@@ -73,8 +75,8 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
   if (error) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorText}>Failed to load wards: {error}</Text>
-        <Btn variant="surface" size="sm" onPress={() => { setLoading(true); /* trigger useEffect */ }}>Retry</Btn>
+        <Text style={styles.errorText}>{t('messages.failed_load_wards')}: {error}</Text>
+        <Btn variant="surface" size="sm" onPress={() => { setLoading(true); }}>{t('common.retry')}</Btn>
       </View>
     );
   }
@@ -83,13 +85,13 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={{ marginBottom: 20 }}>
-          <SearchBar value={query} onChangeText={setQuery} placeholder="Search wards..." />
+          <SearchBar value={query} onChangeText={setQuery} placeholder={t('placeholders.search_wards')} />
         </View>
 
         <View style={styles.headerRow}>
-          <SectionHeader title="Hospital Wards" subtitle={`${filtered.length} units`} />
+          <SectionHeader title={t('ward.wards_title')} subtitle={t('ward.units_count', { count: filtered.length })} />
           <Btn variant="primary" size="sm" style={styles.newBtn} onPress={onNewWard}>
-            <IconPlus size={14} color="#FFF" /> New Ward
+            <IconPlus size={14} color="#FFF" /> {t('actions.new_ward')}
           </Btn>
         </View>
 
@@ -118,7 +120,7 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
                             <Text style={styles.typeText}>{w.wardType}</Text>
                           </View>
                         </View>
-                        <Text style={styles.wardMeta}>{w.wardCode} · {w.numberOfBeds || 0} beds</Text>
+                        <Text style={styles.wardMeta}>{w.wardCode} · {w.numberOfBeds || 0} {t('ward.beds')}</Text>
                       </View>
                       <View style={{ transform: [{ rotate: isExpanded ? '90deg' : '0deg' }] }}>
                         <IconChevron size={18} color={T.textFaint} />
@@ -135,9 +137,9 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
                 {isExpanded && (
                   <View style={styles.bedsContainer}>
                     <View style={styles.bedsHeader}>
-                      <Text style={styles.bedsTitle}>MONITORED BEDS</Text>
+                      <Text style={styles.bedsTitle}>{t('ward.monitored_beds')}</Text>
                       <TouchableOpacity onPress={() => onNewBed(w.wardCode)}>
-                        <Text style={styles.addBedText}>+ Add Bed</Text>
+                        <Text style={styles.addBedText}>+ {t('actions.add_bed')}</Text>
                       </TouchableOpacity>
                     </View>
 
@@ -159,7 +161,7 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
                         <StatusPill status={b.bedStatus} />
                       </TouchableOpacity>
                     )) : (
-                      <Text style={styles.noBeds}>No beds provisioned in this ward.</Text>
+                      <Text style={styles.noBeds}>{t('messages.no_beds_in_ward')}</Text>
                     )}
                   </View>
                 )}
@@ -170,13 +172,13 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
           {filtered.length === 0 && (
             <View style={styles.emptyState}>
               <IconDoor size={48} color={T.textFaint} />
-              <Text style={styles.emptyTitle}>No wards found</Text>
+              <Text style={styles.emptyTitle}>{t('messages.no_wards_found')}</Text>
               <Text style={styles.emptyHint}>
-                We couldn't find any wards for hospital <Text style={{ fontWeight: '600', color: T.text }}>{user?.hospitalCode}</Text>. 
-                Create a ward to start assigning beds and monitoring patients.
+                {t('messages.no_wards_hospital_hint', { hospitalCode: user?.hospitalCode })} 
+                {t('messages.create_ward_hint')}
               </Text>
               <Btn variant="primary" size="md" style={{ marginTop: 24, paddingHorizontal: 32 }} onPress={onNewWard}>
-                <IconPlus size={16} color="#FFF" /> Create New Ward
+                <IconPlus size={16} color="#FFF" /> {t('actions.create_new_ward')}
               </Btn>
             </View>
           )}

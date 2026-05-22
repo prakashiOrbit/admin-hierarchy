@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, Alert, TouchableOpacity, Modal } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { organisationApi } from '../../services/api';
@@ -7,6 +8,7 @@ import { Card, Field, TextInput, Btn } from '../../components/Shared';
 import { IconBuilding, IconUser, IconMail, IconLocation, IconPhone, IconShield, IconChevron } from '../../icons';
 
 export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const [showTypePicker, setShowTypePicker] = useState(false);
@@ -57,11 +59,11 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
     setLoading(true);
     try {
       await organisationApi.create(form, token);
-      Alert.alert('Success', 'Organisation created successfully', [
-        { text: 'OK', onPress: () => onSuccess ? onSuccess() : onCancel() }
+      Alert.alert(t('alerts.success'), t('alerts.org_created'), [
+        { text: t('actions.ok'), onPress: () => onSuccess ? onSuccess() : onCancel() }
       ]);
     } catch (err) {
-      Alert.alert('Error', err.message || 'Failed to create organisation');
+      Alert.alert(t('alerts.error'), err.message || t('alerts.create_org_failed'));
     } finally {
       setLoading(false);
     }
@@ -74,33 +76,33 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
         <View style={styles.banner}>
           <IconShield color={T.accent} size={20} />
           <Text style={styles.bannerText}>
-            Onboarding a new tenant. Configure the primary identity and contact details for the new organisation.
+            {t('orgs.onboarding_banner')}
           </Text>
         </View>
 
         {/* Identity Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>IDENTITY</Text>
+          <Text style={styles.sectionTitle}>{t('orgs.identity_section')}</Text>
           
-          <Field label="Org Unique ID">
+          <Field label={t('orgs.id')}>
             <TextInput 
               value={form.orgName} 
               onChangeText={(v) => updateRoot('orgName', v.toUpperCase())}
-              placeholder="e.g. APOLLO_ORG_TEST129"
+              placeholder={t('placeholders.org_id_eg')}
             />
           </Field>
 
-          <Field label="Business Name">
+          <Field label={t('orgs.business_name')}>
             <TextInput 
               value={form.businessName} 
               onChangeText={(v) => updateRoot('businessName', v)}
-              placeholder="e.g. Apollo Hospitals"
+              placeholder={t('placeholders.business_name_eg')}
             />
           </Field>
 
-          <Field label="Org Type">
+          <Field label={t('orgs.type')}>
             <Card style={styles.selectCard} onPress={() => setShowTypePicker(true)}>
-              <Text style={styles.selectText}>{form.orgType}</Text>
+              <Text style={styles.selectText}>{t(`orgs.types.${form.orgType}`)}</Text>
               <IconChevron size={18} color={T.textDim} />
             </Card>
           </Field>
@@ -108,31 +110,31 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
 
         {/* Contact Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>CONTACT PERSON</Text>
+          <Text style={styles.sectionTitle}>{t('orgs.contact_section')}</Text>
           
-          <Field label="Contact Name">
+          <Field label={t('orgs.contact_name')}>
             <TextInput 
               value={form.myContact.name} 
               onChangeText={(v) => updateContact('name', v)}
-              placeholder="Full name"
+              placeholder={t('orgs.contact_name')}
               leading={<IconUser size={18} color={T.textDim} />}
             />
           </Field>
 
-          <Field label="Email Address">
+          <Field label={t('orgs.contact_email')}>
             <TextInput 
               value={form.myContact.email} 
               onChangeText={(v) => updateContact('email', v)}
-              placeholder="admin@organisation.com"
+              placeholder={t('placeholders.email_eg')}
               leading={<IconMail size={18} color={T.textDim} />}
             />
           </Field>
 
-          <Field label="Phone Number">
+          <Field label={t('orgs.contact_phone')}>
             <TextInput 
               value={form.myContact.phone} 
               onChangeText={(v) => updateContact('phone', v)}
-              placeholder="+91 98000 00000"
+              placeholder={t('placeholders.phone_eg')}
               leading={<IconPhone size={18} color={T.textDim} />}
             />
           </Field>
@@ -140,33 +142,33 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
 
         {/* Address Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>OFFICE ADDRESS</Text>
+          <Text style={styles.sectionTitle}>{t('orgs.address_section')}</Text>
           
-          <Field label="Street Address">
+          <Field label={t('orgs.address_street')}>
             <TextInput 
               value={form.myAddress.street1} 
               onChangeText={(v) => updateAddress('street1', v)}
-              placeholder="123 Main St"
+              placeholder={t('placeholders.street_eg')}
               leading={<IconLocation size={18} color={T.textDim} />}
             />
           </Field>
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="City">
+              <Field label={t('orgs.address_city')}>
                 <TextInput 
                   value={form.myAddress.city} 
                   onChangeText={(v) => updateAddress('city', v)}
-                  placeholder="Bangalore"
+                  placeholder={t('placeholders.city_eg')}
                 />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="State">
+              <Field label={t('orgs.address_state')}>
                 <TextInput 
                   value={form.myAddress.state} 
                   onChangeText={(v) => updateAddress('state', v)}
-                  placeholder="Karnataka"
+                  placeholder={t('placeholders.state_eg')}
                 />
               </Field>
             </View>
@@ -174,20 +176,20 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="Country">
+              <Field label={t('orgs.address_country')}>
                 <TextInput 
                   value={form.myAddress.country} 
                   onChangeText={(v) => updateAddress('country', v)}
-                  placeholder="India"
+                  placeholder={t('placeholders.country_eg')}
                 />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Pincode">
+              <Field label={t('orgs.address_pincode')}>
                 <TextInput 
                   value={form.myAddress.pincode} 
                   onChangeText={(v) => updateAddress('pincode', v)}
-                  placeholder="560001"
+                  placeholder={t('placeholders.pincode_eg')}
                 />
               </Field>
             </View>
@@ -196,14 +198,14 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
 
         {/* Actions */}
         <View style={styles.actionRow}>
-          <Btn variant="ghost" full style={{ flex: 1 }} onPress={onCancel}>Cancel</Btn>
+          <Btn variant="ghost" full style={{ flex: 1 }} onPress={onCancel}>{t('common.cancel')}</Btn>
           <Btn 
             full 
             style={{ flex: 1.5 }} 
             onPress={handleCreate} 
             disabled={!isFormValid || loading}
           >
-            {loading ? 'Creating...' : 'Create organisation'}
+            {loading ? t('actions.creating') : t('actions.create')}
           </Btn>
         </View>
       </ScrollView>
@@ -216,7 +218,7 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
           onPress={() => setShowTypePicker(false)}
         >
           <Card style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Select Organisation Type</Text>
+            <Text style={styles.modalTitle}>{t('orgs.select_type_title')}</Text>
             {orgTypes.map((type) => (
               <TouchableOpacity 
                 key={type} 
@@ -233,7 +235,7 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
                   styles.typeOptionText,
                   form.orgType === type && { color: T.accent, fontWeight: '700' }
                 ]}>
-                  {type}
+                  {t(`orgs.types.${type}`)}
                 </Text>
               </TouchableOpacity>
             ))}
