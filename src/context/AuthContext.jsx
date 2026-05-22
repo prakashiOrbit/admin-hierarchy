@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { I18nManager } from 'react-native';
 import i18n from '../i18n';
 import { userApi } from '../services/api';
 
@@ -33,20 +32,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const changeLanguage = async (newLocale) => {
-    const isRTL = newLocale === 'ar';
-    
-    // Update i18n instance
     i18n.changeLanguage(newLocale);
     setLocale(newLocale);
-
-    // Handle RTL Flip - only allow and force for Arabic
-    if (I18nManager.isRTL !== isRTL) {
-      I18nManager.allowRTL(isRTL);
-      I18nManager.forceRTL(isRTL);
-      // Note: In a real device, you usually need to call RNRestart.Restart()
-      // to apply RTL changes globally.
-      console.log(`RTL state changed to: ${isRTL}. App restart recommended.`);
-    }
 
     if (token && user?.orgName) {
       try {
