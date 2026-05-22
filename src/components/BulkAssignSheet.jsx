@@ -153,4 +153,27 @@ export const BulkAssignSheet = ({ doctorCode, doctorName, visible, onClose }) =>
 };
 
 const createStyles = (T) => StyleSheet.create({
-...
+  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)' },
+  sheet: {
+    backgroundColor: T.bg, borderTopLeftRadius: 20, borderTopRightRadius: 20,
+    paddingTop: 12, paddingHorizontal: 20,
+    borderTopWidth: 1, borderColor: T.borderSoft,
+  },
+  handle: { width: 36, height: 4, borderRadius: 2, backgroundColor: T.border, alignSelf: 'center', marginBottom: 16 },
+  sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
+  sheetTitle: { fontSize: 17, fontWeight: '700', color: T.text },
+  closeBtn: { paddingHorizontal: 4 },
+  closeBtnText: { fontSize: 15, color: T.accent, fontWeight: '600' },
+  subtitle: { fontSize: 14, color: T.textDim, marginBottom: 20 },
+  searchInput: { height: 42, borderRadius: 10, borderWidth: 1, paddingHorizontal: 12, fontSize: 14, marginBottom: 16 },
+  personItem: { flexDirection: 'row', alignItems: 'center', padding: 12, borderRadius: 12, marginBottom: 4 },
+  personName: { fontSize: 14, fontWeight: '600', color: T.text },
+  personMeta: { fontSize: 11, color: T.textDim, marginTop: 2 },
+  checkbox: { width: 20, height: 20, borderRadius: 6, borderWidth: 2, borderColor: T.border, alignItems: 'center', justifyContent: 'center' },
+  checkboxActive: { backgroundColor: T.accent, borderColor: T.accent },
+  checkmark: { color: '#fff', fontSize: 12, fontWeight: 'bold' },
+  emptyText: { color: T.textFaint, fontSize: 13, textAlign: 'center', paddingVertical: 24 },
+  assignBtn: { height: 50, borderRadius: 12, backgroundColor: T.accent, alignItems: 'center', justifyContent: 'center', marginTop: 16 },
+  assignBtnDisabled: { opacity: 0.5 },
+  assignBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+});

@@ -170,44 +170,6 @@ export const HospitalsScreen = ({ onProvision, onSelect }) => {
     </View>
   );
 };
-          <View style={styles.list}>
-            {filtered.map((h, idx) => (
-              <Card key={h.id || idx} onPress={() => onSelect?.(h)}>
-                <View style={styles.orgHeader}>
-                  <View style={styles.orgAvatar}>
-                    <IconHospital size={24} color="#fff" />
-                  </View>
-                  <View style={styles.orgInfo}>
-                    <View style={styles.titleRow}>
-                      <Text style={styles.orgTitle}>{h.hospitalName}</Text>
-                      <StatusPill status={h.status || 'ACTIVE'} />
-                    </View>
-                    <Text style={styles.orgName}>{h.hospitalCode} · {h.myAddress?.city || '—'}</Text>
-                    
-                    <View style={styles.statsRow}>
-                      <View style={styles.statItem}>
-                        <IconBed size={14} color={T.textDim} />
-                        <Text style={styles.statValue}>{h.beds || 0}</Text>
-                      </View>
-                      <View style={styles.statItem}>
-                        <IconDoor size={14} color={T.textDim} />
-                        <Text style={styles.statValue}>{h.wards || 0}</Text>
-                      </View>
-                      <View style={styles.statItem}>
-                        <IconPulse size={14} color={T.textDim} />
-                        <Text style={styles.statValue}>{h.devices || 0}</Text>
-                      </View>
-                    </View>
-                  </View>
-                </View>
-              </Card>
-            ))}
-          </View>
-        )}
-      </ScrollView>
-    </View>
-  );
-};
 
 const createStyles = (T) => StyleSheet.create({
   container: {

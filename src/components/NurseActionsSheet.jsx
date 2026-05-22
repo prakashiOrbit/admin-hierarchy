@@ -294,4 +294,27 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
 };
 
 const createStyles = (T) => StyleSheet.create({
-...
+  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)' },
+  sheet: {
+    backgroundColor: T.bg, borderTopLeftRadius: 20, borderTopRightRadius: 20,
+    paddingTop: 12, paddingHorizontal: 20,
+    borderTopWidth: 1, borderColor: T.borderSoft,
+  },
+  handle: { width: 36, height: 4, borderRadius: 2, backgroundColor: T.border, alignSelf: 'center', marginBottom: 16 },
+  sheetHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
+  sheetTitle: { fontSize: 17, fontWeight: '700', color: T.text },
+  closeBtn: { paddingHorizontal: 4 },
+  closeBtnText: { fontSize: 15, color: T.accent, fontWeight: '600' },
+  subtitle: { fontSize: 14, color: T.textDim, marginBottom: 20 },
+  actionItem: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: T.borderSoft },
+  actionIcon: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  actionTitle: { fontSize: 15, fontWeight: '600', color: T.text },
+  actionSubtitle: { fontSize: 12, color: T.textDim, marginTop: 2 },
+  backText: { fontSize: 15, color: T.accent, fontWeight: '600' },
+  searchInput: { height: 42, borderRadius: 10, borderWidth: 1, paddingHorizontal: 12, fontSize: 14, marginBottom: 16 },
+  listItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: T.borderSoft },
+  listIcon: { width: 32, height: 32, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  listName: { fontSize: 14, fontWeight: '600', color: T.text },
+  listMeta: { fontSize: 11, color: T.textDim, marginTop: 2 },
+  emptyText: { color: T.textFaint, fontSize: 13, textAlign: 'center', paddingVertical: 24 },
+});

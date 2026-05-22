@@ -114,10 +114,6 @@ export const HospitalDetailScreen = ({ hospital, onBack, onEdit }) => {
     </View>
   );
 };
-      </ScrollView>
-    </View>
-  );
-};
 
 const createStyles = (T) => StyleSheet.create({
   container: { flex: 1 },

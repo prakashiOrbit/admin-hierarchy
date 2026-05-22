@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
     i18n.changeLanguage(newLocale);
     setLocale(newLocale);
 
-    // Handle RTL Flip
+    // Handle RTL Flip - only allow and force for Arabic
     if (I18nManager.isRTL !== isRTL) {
       I18nManager.allowRTL(isRTL);
       I18nManager.forceRTL(isRTL);

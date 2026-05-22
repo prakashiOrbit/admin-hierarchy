@@ -198,10 +198,6 @@ export const EditHospitalScreen = ({ hospital, onCancel, onSave }) => {
     </View>
   );
 };
-      </ScrollView>
-    </View>
-  );
-};
 
 const createStyles = (T) => StyleSheet.create({
   container: { flex: 1 },

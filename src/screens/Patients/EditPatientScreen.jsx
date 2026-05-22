@@ -138,7 +138,7 @@ export const EditPatientScreen = ({ patientDetail, onCancel, onSave }) => {
             <View style={{ flex: 1 }}>
               <Field label={t('entity.pincode')}>
                 <TextInput value={form.pincode} onChangeText={v => set('pincode', v)} placeholder={t('placeholders.pincode_example')} keyboardType="numeric" />
-              </View>
+              </Field>
             </View>
           </View>
         </View>

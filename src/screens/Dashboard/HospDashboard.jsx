@@ -18,6 +18,7 @@ import { UserDetailScreen } from '../Users/UserDetailScreen';
 import { WardsScreen } from '../Wards/WardsScreen';
 import { CreateWardScreen } from '../Wards/CreateWardScreen';
 import { CreateBedScreen } from '../Wards/CreateBedScreen';
+import { SettingsScreen } from '../Settings/SettingsScreen';
 import { DevicesScreen } from '../Devices/DevicesScreen';
 import { CreateGatewayScreen } from '../Devices/CreateGatewayScreen';
 import { CreateDeviceScreen } from '../Devices/CreateDeviceScreen';
@@ -107,7 +108,7 @@ const HospHomeContent = ({ role, onNavigate }) => {
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>
       <View style={styles.greetingHeader}>
-        <Text style={styles.date}>{new Date().toLocaleDateString(t('i18n_locale_tag') || 'en-US', { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()} · {user?.hospitalCode || 'HOSPITAL'}</Text>
+        <Text style={styles.date}>{new Date().toLocaleDateString(t('i18n_locale_tag', 'en-US'), { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()} · {user?.hospitalCode || 'HOSPITAL'}</Text>
         <Text style={styles.greeting}>{t('dashboard.good_morning', { name: user?.userName || 'User' })}</Text>
         {homeLoading ? (
           <ActivityIndicator size="small" color={T.textDim} style={{ marginTop: 4 }} />
@@ -301,6 +302,7 @@ export const HospDashboard = ({ navigation, route }) => {
       case 'patients': return <PatientsScreen onNewPatient={() => setIsRegisteringPatient(true)} onSelectPatient={setSelectedPatientId} />;
       case 'doctors': return <DoctorsScreen onNewDoctor={() => setIsCreatingDoctor(true)} onSelectDoctor={setSelectedDoctorId} />;
       case 'shifts': return <ShiftsScreen onNewNurse={() => setIsCreatingNurse(true)} onNewShift={() => setIsCreatingShift(true)} onSelectNurse={setSelectedNurseId} onSelectShift={setSelectedShiftId} />;
+      case 'settings': return <SettingsScreen onLogout={() => { logout(); navigation.replace('Login'); }} />;
       default: return <HospHomeContent role={role} onNavigate={handleTabChange} />;
     }
   };
@@ -334,6 +336,7 @@ export const HospDashboard = ({ navigation, route }) => {
       case 'patients': return t('dashboard.patient_registry');
       case 'doctors': return t('dashboard.medical_staff');
       case 'shifts': return t('dashboard.nurses_shifts');
+      case 'settings': return t('dashboard.system_settings');
       default: return t('dashboard.hosp_console');
     }
   };
@@ -349,13 +352,14 @@ export const HospDashboard = ({ navigation, route }) => {
           </View>
           <ScrollView style={styles.drawerMenu}>
             <TouchableOpacity style={styles.drawerItem} onPress={() => { handleTabChange('home'); toggleDrawer(); }}><IconDashboard size={20} color={T.textDim} /><Text style={styles.drawerItemText}>{t('dashboard.title')}</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.drawerItem} onPress={() => { handleTabChange('settings'); toggleDrawer(); }}><IconSettings size={20} color={T.textDim} /><Text style={styles.drawerItemText}>{t('dashboard.system_settings')}</Text></TouchableOpacity>
             <TouchableOpacity style={styles.drawerItem} onPress={() => { toggleTheme(); toggleDrawer(); }}><IconMoon size={20} color={T.textDim} /><Text style={styles.drawerItemText}>{t('common.theme')}: {isDark ? t('settings.theme_dark') : t('settings.theme_light')}</Text></TouchableOpacity>
             <View style={styles.drawerDivider} />
             <TouchableOpacity style={[styles.drawerItem, { marginTop: 'auto' }]} onPress={() => { logout(); navigation.replace('Login'); }}><IconLogout size={20} color={T.bad} /><Text style={[styles.drawerItemText, { color: T.bad }]}>{t('common.logout')}</Text></TouchableOpacity>
           </ScrollView>
         </View>
       </Animated.View>
-      <TopBar title={getTitle()} leading={ isDeep ? <IconBack /> : <IconMenu /> } onLeadingPress={isDeep ? handleBackPress : toggleDrawer} onNotificationPress={() => setShowNotifications(true)} onProfilePress={() => { logout(); navigation.replace('Login'); }} />
+      <TopBar title={getTitle()} leading={ isDeep ? <IconBack /> : <IconMenu /> } onLeadingPress={isDeep ? handleBackPress : toggleDrawer} onNotificationPress={() => setShowNotifications(true)} onProfilePress={() => handleTabChange('settings')} />
       <View style={{ flex: 1 }}>{renderContent()}</View>
       <BottomNav items={footerItems} active={activeTab} onChange={handleTabChange} />
       <NotificationSheet visible={showNotifications} onClose={() => setShowNotifications(false)} />

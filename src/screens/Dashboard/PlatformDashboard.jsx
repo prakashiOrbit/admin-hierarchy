@@ -119,7 +119,7 @@ const HomeContent = ({ onNavigate }) => {
     <ScrollView contentContainerStyle={styles.scrollContent}>
       <View style={styles.greetingHeader}>
         <View>
-          <Text style={styles.date}>{new Date().toLocaleDateString(t('i18n_locale_tag') || 'en-US', { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()}</Text>
+          <Text style={styles.date}>{new Date().toLocaleDateString(t('i18n_locale_tag', 'en-US'), { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()}</Text>
           <Text style={styles.greeting}>{t('dashboard.good_morning', { name: user?.userName || 'User' })}</Text>
           <Text style={styles.status}>
             <Text style={{ color: T.good, fontWeight: '700' }}>{t('dashboard.health_nominal')}</Text> · {t('dashboard.incidents', { count: 0 })}
@@ -283,11 +283,11 @@ export const PlatformDashboard = ({ navigation }) => {
               <IconGlobe color={activeTab === 'orgs' ? T.accent : T.textDim} size={20} />
               <Text style={[styles.drawerItemText, activeTab === 'orgs' && { color: T.accent }]}>{t('dashboard.organisations')}</Text>
             </TouchableOpacity>
-            <View style={styles.drawerDivider} />
             <TouchableOpacity style={[styles.drawerItem, activeTab === 'settings' && { backgroundColor: T.accentSoft }]} onPress={() => { handleTabChange('settings'); toggleDrawer(); }}>
               <IconSettings color={activeTab === 'settings' ? T.accent : T.textDim} size={20} />
               <Text style={[styles.drawerItemText, activeTab === 'settings' && { color: T.accent }]}>{t('dashboard.system_settings')}</Text>
             </TouchableOpacity>
+            <View style={styles.drawerDivider} />
           </ScrollView>
         </View>
       </Animated.View>

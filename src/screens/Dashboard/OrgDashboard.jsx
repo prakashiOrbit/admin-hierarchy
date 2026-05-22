@@ -23,6 +23,7 @@ import { OrgAdminsScreen } from '../Organisations/OrgAdminsScreen';
 import { RoleDetailScreen } from '../Roles/RoleDetailScreen';
 import { CreateRoleScreen } from '../Roles/CreateRoleScreen';
 import { CreateHospitalScreen } from '../Hospitals/CreateHospitalScreen';
+import { SettingsScreen } from '../Settings/SettingsScreen';
 import { DeviceTypesScreen } from '../Devices/DeviceTypesScreen';
 import { CreateDeviceTypeScreen } from '../Devices/CreateDeviceTypeScreen';
 import { DeviceTypeDetailScreen } from '../Devices/DeviceTypeDetailScreen';
@@ -116,7 +117,7 @@ const OrgHomeContent = ({ role }) => {
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>
       <View style={styles.greetingHeader}>
-        <Text style={styles.date}>{new Date().toLocaleDateString(t('i18n_locale_tag') || 'en-US', { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()} · {user?.orgName || 'ORGANISATION'}</Text>
+        <Text style={styles.date}>{new Date().toLocaleDateString(t('i18n_locale_tag', 'en-US'), { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()} · {user?.orgName || 'ORGANISATION'}</Text>
         <Text style={styles.greeting}>{t('dashboard.good_morning', { name: user?.userName || 'User' })}</Text>
         <Text style={styles.status}>
           <Text style={{ color: T.good, fontWeight: '600' }}>{t('dashboard.provisioned', { count: hospitals.length })}</Text> · {t('dashboard.online_count', { count: activeHospitals })}
@@ -303,6 +304,7 @@ export const OrgDashboard = ({ navigation, route }) => {
       case 'users': return <UsersScreen onSelectUser={setSelectedUserId} />;
       case 'roles': return <RolesScreen onSelectRole={setSelectedRoleId} onCreate={() => setIsCreatingRole(true)} />;
       case 'summary': return <OrgSummaryScreen />;
+      case 'settings': return <SettingsScreen onLogout={() => { logout(); navigation.replace('Login'); }} />;
       default: return <OrgHomeContent role={role} />;
     }
   };
@@ -326,6 +328,7 @@ export const OrgDashboard = ({ navigation, route }) => {
       case 'users': return t('dashboard.users');
       case 'roles': return t('dashboard.roles_perms');
       case 'summary': return t('dashboard.summary');
+      case 'settings': return t('dashboard.system_settings');
       default: return t('dashboard.org_console');
     }
   };
@@ -344,6 +347,10 @@ export const OrgDashboard = ({ navigation, route }) => {
               <IconDashboard size={20} color={T.textDim} />
               <Text style={styles.drawerItemText}>{t('dashboard.title')}</Text>
             </TouchableOpacity>
+            <TouchableOpacity style={styles.drawerItem} onPress={() => { handleTabChange('settings'); toggleDrawer(); }}>
+              <IconSettings size={20} color={T.textDim} />
+              <Text style={styles.drawerItemText}>{t('dashboard.system_settings')}</Text>
+            </TouchableOpacity>
             <TouchableOpacity style={styles.drawerItem} onPress={() => { toggleTheme(); toggleDrawer(); }}>
               <IconMoon size={20} color={T.textDim} />
               <Text style={styles.drawerItemText}>{t('common.theme')}: {isDark ? t('settings.theme_dark') : t('settings.theme_light')}</Text>
@@ -356,7 +363,7 @@ export const OrgDashboard = ({ navigation, route }) => {
           </ScrollView>
         </View>
       </Animated.View>
-      <TopBar title={getTitle()} leading={isSubScreen ? <IconBack /> : <IconMenu />} onLeadingPress={isSubScreen ? handleBack : toggleDrawer} onNotificationPress={() => setShowNotifications(true)} onProfilePress={() => { logout(); navigation.replace('Login'); }} />
+      <TopBar title={getTitle()} leading={isSubScreen ? <IconBack /> : <IconMenu />} onLeadingPress={isSubScreen ? handleBack : toggleDrawer} onNotificationPress={() => setShowNotifications(true)} onProfilePress={() => handleTabChange('settings')} />
       <View style={{ flex: 1 }}>{renderContent()}</View>
       <BottomNav items={footerItems} active={activeTab} onChange={handleTabChange} />
       <NotificationSheet visible={showNotifications} onClose={() => setShowNotifications(false)} />
