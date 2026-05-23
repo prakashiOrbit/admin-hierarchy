@@ -203,7 +203,9 @@
     "edit_profile": "Edit Profile",
     "assign_shift": "Assign Shift",
     "nurse_actions": "Nurse Actions",
-    "go_back": "Go Back"
+    "go_back": "Go Back",
+    "preferred_locale": "Preferred Language",
+    "select_locale": "Select Language"
   },
   "roles_screen": {
     "role_name": "Role Name",

@@ -7,15 +7,28 @@ import { organisationApi } from '../../services/api';
 import { Card, Field, TextInput, Btn } from '../../components/Shared';
 import { IconBuilding, IconUser, IconMail, IconLocation, IconPhone, IconShield, IconChevron } from '../../icons';
 
+const LOCALES = [
+  { code: 'en', label: 'English' },
+  { code: 'ar', label: 'العربية' },
+  { code: 'fr', label: 'Français' },
+  { code: 'de', label: 'Deutsch' },
+  { code: 'it', label: 'Italiano' },
+  { code: 'nl', label: 'Nederlands' },
+  { code: 'cs', label: 'Čeština' },
+  { code: 'rm', label: 'Rumantsch' },
+];
+
 export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
   const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const [showTypePicker, setShowTypePicker] = useState(false);
+  const [showLocalePicker, setShowLocalePicker] = useState(false);
   const [form, setForm] = useState({
     orgName: '',
     orgType: 'HOSPITAL',
     businessName: '',
+    preferredLocale: 'en',
     myContact: {
       name: '',
       email: '',
@@ -131,12 +144,21 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
           </Field>
 
           <Field label={t('orgs.contact_phone')}>
-            <TextInput 
-              value={form.myContact.phone} 
+            <TextInput
+              value={form.myContact.phone}
               onChangeText={(v) => updateContact('phone', v)}
               placeholder={t('placeholders.phone_eg')}
               leading={<IconPhone size={18} color={T.textDim} />}
             />
+          </Field>
+
+          <Field label={t('users.preferred_locale')}>
+            <Card style={styles.selectCard} onPress={() => setShowLocalePicker(true)}>
+              <Text style={styles.selectText}>
+                {LOCALES.find(l => l.code === form.preferredLocale)?.label || 'English'}
+              </Text>
+              <IconChevron size={18} color={T.textDim} />
+            </Card>
           </Field>
         </View>
 
@@ -209,6 +231,26 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
           </Btn>
         </View>
       </ScrollView>
+
+      {/* Locale Picker Modal */}
+      <Modal visible={showLocalePicker} transparent animationType="fade">
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowLocalePicker(false)}>
+          <Card style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{t('users.select_locale')}</Text>
+            {LOCALES.map((loc) => (
+              <TouchableOpacity
+                key={loc.code}
+                style={[styles.typeOption, form.preferredLocale === loc.code && { backgroundColor: T.accentSoft }]}
+                onPress={() => { updateRoot('preferredLocale', loc.code); setShowLocalePicker(false); }}
+              >
+                <Text style={[styles.typeOptionText, form.preferredLocale === loc.code && { color: T.accent, fontWeight: '700' }]}>
+                  {loc.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </Card>
+        </TouchableOpacity>
+      </Modal>
 
       {/* Org Type Modal */}
       <Modal visible={showTypePicker} transparent animationType="fade">

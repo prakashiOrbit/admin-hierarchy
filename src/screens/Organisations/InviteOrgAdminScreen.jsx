@@ -1,24 +1,37 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform, Alert, Modal, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { userApi } from '../../services/api';
 import { Card, Field, TextInput, Btn } from '../../components/Shared';
-import { IconUser, IconMail, IconBuilding, IconShield } from '../../icons';
+import { IconUser, IconMail, IconBuilding, IconShield, IconChevron } from '../../icons';
+
+const LOCALES = [
+  { code: 'en', label: 'English' },
+  { code: 'ar', label: 'العربية' },
+  { code: 'fr', label: 'Français' },
+  { code: 'de', label: 'Deutsch' },
+  { code: 'it', label: 'Italiano' },
+  { code: 'nl', label: 'Nederlands' },
+  { code: 'cs', label: 'Čeština' },
+  { code: 'rm', label: 'Rumantsch' },
+];
 
 export const InviteOrgAdminScreen = ({ onCancel }) => {
   const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
   const styles = createStyles(T);
-  
+
+  const [showLocalePicker, setShowLocalePicker] = useState(false);
   const [form, setForm] = useState({
     userName: '',
     firstName: '',
     lastName: '',
     orgName: user?.orgName || '',
-    contactEmail: ''
+    contactEmail: '',
+    preferredLocale: 'en',
   });
 
   const [loading, setLoading] = useState(false);
@@ -62,10 +75,10 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
         {/* User Identity Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('settings.profile').toUpperCase()}</Text>
-          
+
           <Field label={t('auth.username')}>
-            <TextInput 
-              value={form.userName} 
+            <TextInput
+              value={form.userName}
               onChangeText={(v) => updateForm('userName', v.toLowerCase())}
               placeholder={t('auth.username_placeholder')}
               leading={<IconUser size={18} color={T.textDim} />}
@@ -75,8 +88,8 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
               <Field label={t('users.first_name')}>
-                <TextInput 
-                  value={form.firstName} 
+                <TextInput
+                  value={form.firstName}
                   onChangeText={(v) => updateForm('firstName', v)}
                   placeholder={t('users.first_name')}
                 />
@@ -84,8 +97,8 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
             </View>
             <View style={{ flex: 1 }}>
               <Field label={t('users.last_name')}>
-                <TextInput 
-                  value={form.lastName} 
+                <TextInput
+                  value={form.lastName}
                   onChangeText={(v) => updateForm('lastName', v)}
                   placeholder={t('users.last_name')}
                 />
@@ -106,14 +119,23 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
         {/* Contact Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('users.contact_info').toUpperCase()}</Text>
-          
+
           <Field label={t('users.email')}>
-            <TextInput 
-              value={form.contactEmail} 
+            <TextInput
+              value={form.contactEmail}
               onChangeText={(v) => updateForm('contactEmail', v.toLowerCase())}
               placeholder={t('users.email')}
               leading={<IconMail size={18} color={T.textDim} />}
             />
+          </Field>
+
+          <Field label={t('users.preferred_locale')}>
+            <Card style={styles.selectCard} onPress={() => setShowLocalePicker(true)}>
+              <Text style={styles.selectText}>
+                {LOCALES.find(l => l.code === form.preferredLocale)?.label || 'English'}
+              </Text>
+              <IconChevron size={18} color={T.textDim} />
+            </Card>
           </Field>
         </View>
 
@@ -126,16 +148,36 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
         {/* Actions */}
         <View style={styles.actionRow}>
           <Btn variant="ghost" full style={{ flex: 1 }} onPress={onCancel} disabled={loading}>{t('common.cancel')}</Btn>
-          <Btn 
-            full 
-            style={{ flex: 1.5 }} 
-            onPress={handleCreate} 
+          <Btn
+            full
+            style={{ flex: 1.5 }}
+            onPress={handleCreate}
             disabled={!isFormValid || loading}
           >
             {loading ? t('common.loading') : t('orgs.invite_admin')}
           </Btn>
         </View>
       </ScrollView>
+
+      {/* Locale Picker Modal */}
+      <Modal visible={showLocalePicker} transparent animationType="fade">
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowLocalePicker(false)}>
+          <Card style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{t('users.select_locale')}</Text>
+            {LOCALES.map((loc) => (
+              <TouchableOpacity
+                key={loc.code}
+                style={[styles.localeOption, form.preferredLocale === loc.code && { backgroundColor: T.accentSoft }]}
+                onPress={() => { updateForm('preferredLocale', loc.code); setShowLocalePicker(false); }}
+              >
+                <Text style={[styles.localeOptionText, form.preferredLocale === loc.code && { color: T.accent, fontWeight: '700' }]}>
+                  {loc.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </Card>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };
@@ -188,6 +230,19 @@ const createStyles = (T) => StyleSheet.create({
     fontSize: 14,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
+  selectCard: {
+    height: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: T.surface,
+    paddingHorizontal: 12,
+  },
+  selectText: {
+    color: T.text,
+    fontSize: 14,
+    fontWeight: '500',
+  },
   infoBox: {
     padding: 12,
     backgroundColor: T.surface,
@@ -206,5 +261,30 @@ const createStyles = (T) => StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
     marginTop: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  modalContent: {
+    padding: 16,
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: T.text,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  localeOption: {
+    padding: 14,
+    borderRadius: 8,
+    marginBottom: 4,
+  },
+  localeOptionText: {
+    fontSize: 14,
+    color: T.text,
   },
 });

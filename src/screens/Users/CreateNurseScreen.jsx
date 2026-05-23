@@ -1,11 +1,22 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, Modal, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
-import { IconUser, IconMail, IconPhone } from '../../icons';
+import { Card, Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
+import { IconUser, IconMail, IconPhone, IconChevron } from '../../icons';
 import { nurseApi } from '../../services/api';
+
+const LOCALES = [
+  { code: 'en', label: 'English' },
+  { code: 'ar', label: 'العربية' },
+  { code: 'fr', label: 'Français' },
+  { code: 'de', label: 'Deutsch' },
+  { code: 'it', label: 'Italiano' },
+  { code: 'nl', label: 'Nederlands' },
+  { code: 'cs', label: 'Čeština' },
+  { code: 'rm', label: 'Rumantsch' },
+];
 
 export const CreateNurseScreen = ({ onCancel, onSuccess }) => {
   const { t } = useTranslation();
@@ -13,6 +24,7 @@ export const CreateNurseScreen = ({ onCancel, onSuccess }) => {
   const styles = createStyles(T);
   const { user, token } = useAuth();
 
+  const [showLocalePicker, setShowLocalePicker] = useState(false);
   const [form, setForm] = useState({
     nurseCode: '',
     firstName: '',
@@ -21,6 +33,7 @@ export const CreateNurseScreen = ({ onCancel, onSuccess }) => {
     nurseExperience: '',
     nurseType: 'REGISTERED',
     gender: 'FEMALE',
+    preferredLocale: 'en',
     myContact: { email: '', phone: '' },
     myAddress: { city: '', state: '' },
   });
@@ -102,6 +115,15 @@ export const CreateNurseScreen = ({ onCancel, onSuccess }) => {
           <Field label={t('entity.phone_number')}>
             <TextInput value={form.myContact.phone} onChangeText={v => updateContact('phone', v)} placeholder={t('placeholders.phone_intl_example')} leading={<IconPhone size={16} color={T.textFaint} />} />
           </Field>
+
+          <Field label={t('users.preferred_locale')}>
+            <Card style={styles.selectCard} onPress={() => setShowLocalePicker(true)}>
+              <Text style={styles.selectText}>
+                {LOCALES.find(l => l.code === form.preferredLocale)?.label || 'English'}
+              </Text>
+              <IconChevron size={18} color={T.textDim} />
+            </Card>
+          </Field>
         </View>
 
         <View style={styles.actionRow}>
@@ -111,6 +133,26 @@ export const CreateNurseScreen = ({ onCancel, onSuccess }) => {
           </Btn>
         </View>
       </ScrollView>
+
+      {/* Locale Picker Modal */}
+      <Modal visible={showLocalePicker} transparent animationType="fade">
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowLocalePicker(false)}>
+          <Card style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{t('users.select_locale')}</Text>
+            {LOCALES.map((loc) => (
+              <TouchableOpacity
+                key={loc.code}
+                style={[styles.localeOption, form.preferredLocale === loc.code && { backgroundColor: T.accentSoft }]}
+                onPress={() => { updateRoot('preferredLocale', loc.code); setShowLocalePicker(false); }}
+              >
+                <Text style={[styles.localeOptionText, form.preferredLocale === loc.code && { color: T.accent, fontWeight: '700' }]}>
+                  {loc.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </Card>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };
@@ -123,4 +165,18 @@ const createStyles = (T) => StyleSheet.create({
   section: { marginBottom: 24 },
   row: { flexDirection: 'row', gap: 12 },
   actionRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
+  selectCard: {
+    height: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: T.surface,
+    paddingHorizontal: 12,
+  },
+  selectText: { color: T.text, fontSize: 14, fontWeight: '500' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 24 },
+  modalContent: { padding: 16 },
+  modalTitle: { fontSize: 16, fontWeight: '700', color: T.text, marginBottom: 16, textAlign: 'center' },
+  localeOption: { padding: 14, borderRadius: 8, marginBottom: 4 },
+  localeOptionText: { fontSize: 14, color: T.text },
 });
