@@ -166,7 +166,7 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
               <View style={[styles.listIcon, { backgroundColor: T.surface2 }]}>
                 <IconDoor size={16} color={T.textDim} />
               </View>
-              <View style={{ flex: 1, marginLeft: 12 }}>
+              <View style={{ flex: 1, marginStart: 12 }}>
                 <Text style={styles.listName}>{w.wardName || w.wardCode}</Text>
                 <Text style={styles.listMeta}>{w.wardCode}</Text>
               </View>
@@ -212,7 +212,7 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
                     <IconBed size={16} color={T.textDim} />
                   </View>
               }
-              <View style={{ flex: 1, marginLeft: 12 }}>
+              <View style={{ flex: 1, marginStart: 12 }}>
                 <Text style={styles.listName}>{b.bedCode}</Text>
                 <Text style={styles.listMeta}>{b.status || '—'}</Text>
               </View>
@@ -258,7 +258,7 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
                     <IconUser size={16} color="#10b981" />
                   </View>
               }
-              <View style={{ flex: 1, marginLeft: 12 }}>
+              <View style={{ flex: 1, marginStart: 12 }}>
                 <Text style={styles.listName}>{p.firstName} {p.lastName}</Text>
                 <Text style={styles.listMeta}>{p.patientCode}</Text>
               </View>

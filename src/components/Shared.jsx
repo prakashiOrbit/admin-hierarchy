@@ -91,7 +91,7 @@ export const TextInput = ({ value, onChangeText, placeholder, secureTextEntry, l
       { borderColor: error ? T.bad : T.borderSoft },
       containerStyle
     ]}>
-      {leading && <View style={{ marginRight: 8 }}>{leading}</View>}
+      {leading && <View style={{ marginEnd: 8 }}>{leading}</View>}
       <RNTextInput
         value={value}
         onChangeText={onChangeText}
@@ -101,7 +101,7 @@ export const TextInput = ({ value, onChangeText, placeholder, secureTextEntry, l
         style={[styles.input, style]}
         {...props}
       />
-      {trailing && <View style={{ marginLeft: 8 }}>{trailing}</View>}
+      {trailing && <View style={{ marginStart: 8 }}>{trailing}</View>}
     </View>
   );
 };
@@ -134,7 +134,7 @@ export const Logo = ({ size = 24 }) => {
         style={{ width: size, height: size, borderRadius: size * 0.2 }}
         resizeMode="contain"
       />
-      <Text style={{ fontSize: size * 0.7, fontWeight: '700', color: T.text, marginLeft: 10 }}>
+      <Text style={{ fontSize: size * 0.7, fontWeight: '700', color: T.text, marginStart: 10 }}>
         iOrbit <Text style={{ color: T.textDim, fontWeight: '500' }}>{t('common.admin')}</Text>
       </Text>
     </View>
@@ -233,7 +233,7 @@ export const SearchBar = ({ placeholder, value, onChange, onChangeText, trailing
         onChangeText={handleChange}
         placeholder={placeholder}
         placeholderTextColor={T.textFaint}
-        style={{ flex: 1, color: T.text, fontSize: 14, marginLeft: 8, padding: 0 }}
+        style={{ flex: 1, color: T.text, fontSize: 14, marginStart: 8, padding: 0 }}
       />
       {trailing}
     </View>
@@ -260,7 +260,7 @@ export const Chip = ({ children, active, on, color, onPress, onClick }) => {
         backgroundColor: bg,
         borderWidth: 1,
         borderColor: border,
-        marginRight: 8,
+        marginEnd: 8,
       }}
     >
       <Text style={{ fontSize: 12, fontWeight: '600', color: textColor }}>{children}</Text>

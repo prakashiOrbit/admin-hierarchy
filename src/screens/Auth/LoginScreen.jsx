@@ -30,39 +30,43 @@ export const LoginScreen = ({ navigation }) => {
     setState('loading');
 
     const processLoginResponse = (res) => {
-      const resCode = String(res.code);
+      if (!res) return false;
+      const resCode = res.code ? String(res.code) : null;
+      const msg = (res.message || '').toLowerCase();
+      const hasToken = !!res.token;
 
-      // 200: Success
-      if (resCode === "200" && res.token) {
+      // 1. SECURITY CHALLENGE (HIGHEST PRIORITY)
+      // If the server says 601/600 or keywords match, we MUST verify.
+      // CRITICAL: We do NOT call login(res) here to avoid setting the session token.
+      if (resCode === "601" || msg.includes('2-factor') || msg.includes('2fa') || msg.includes('due fattori') || msg.includes('عاملين')) {
+        setPendingOrg(res.orgName || 'UNKNOWN');
+        setState('twofa');
+        return true;
+      }
+
+      if (resCode === "600" || msg.includes('verify') || msg.includes('email') || msg.includes('البريد')) {
+        setPendingOrg(res.orgName || 'UNKNOWN');
+        setState('emailVerify');
+        return true;
+      }
+
+      // 2. FINAL SUCCESS (ONLY IF CODE IS 200)
+      if (resCode === "200" && hasToken) {
         login(res);
-        
         const roles = res.roles || res.userData?.roles || [];
         const isOrgOwner = roles.includes('ORG_OWNER');
         const isHospOwner = roles.includes('HOSP_OWNER');
         
         if (res.orgName === 'SYSTEM' || username === 'iorbit') {
           navigation.replace('PlatformDashboard', { role: 'PLATFORM_ADMIN' });
-          return true;
         } else if (res.hospitalCode) {
           navigation.replace('HospDashboard', { role: isHospOwner ? 'HOSP_OWNER' : 'HOSP_ADMIN' });
-          return true;
         } else {
           navigation.replace('OrgDashboard', { role: isOrgOwner ? 'ORG_OWNER' : 'ORG_ADMIN' });
-          return true;
         }
+        return true;
       }
 
-      // 600: Email Verification Required
-      // 601: 2FA Required
-      if (resCode === "600") {
-        setPendingOrg(res.orgName);
-        setState('emailVerify');
-        return true;
-      } else if (resCode === "601") {
-        setPendingOrg(res.orgName);
-        setState('twofa');
-        return true;
-      }
       return false;
     };
 
@@ -72,6 +76,9 @@ export const LoginScreen = ({ navigation }) => {
         throw new Error(response.message || 'Login failed');
       }
     } catch (err) {
+      if (err.data && processLoginResponse(err.data)) return;
+      if (processLoginResponse({ message: err.message })) return;
+
       setError(err.message || 'Invalid username or password');
       setState('idle');
     }

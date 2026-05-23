@@ -15,7 +15,7 @@ export const TopBar = ({ title, subtitle, onLeadingPress, leading, onNotificatio
       <TouchableOpacity onPress={onLeadingPress} style={styles.iconBtn}>
         {leading && React.cloneElement(leading, { color: T.text })}
       </TouchableOpacity>
-      <View style={{ flex: 1, marginLeft: 4 }}>
+      <View style={{ flex: 1, marginStart: 4 }}>
         <Text style={styles.topTitle}>{title}</Text>
         {subtitle && <Text style={styles.topSubtitle}>{subtitle}</Text>}
       </View>
@@ -111,7 +111,7 @@ const createStyles = (T) => StyleSheet.create({
   notifDot: {
     position: 'absolute',
     top: 8,
-    right: 8,
+    end: 8,
     width: 6,
     height: 6,
     borderRadius: 3,

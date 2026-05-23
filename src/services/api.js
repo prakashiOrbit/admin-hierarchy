@@ -12,7 +12,7 @@ export const apiRequest = async (endpoint, options = {}) => {
   
   const headers = {
     'Content-Type': 'application/json',
-    'X-Locale': i18n.language || 'en',
+    'X-Locale': (i18n.language || 'en').split('-')[0],
     ...options.headers,
   };
 
@@ -54,18 +54,21 @@ export const authApi = {
   login: (userName, password) => {
     return apiRequest('/login', {
       method: 'POST',
+      headers: { 'X-Locale': 'en' },
       body: JSON.stringify({ userName, password }),
     });
   },
   verifyEmail: (orgName, userName, otpCode) => {
     return apiRequest(`/${orgName}/user/${userName}/verification`, {
       method: 'POST',
+      headers: { 'X-Locale': 'en' },
       body: JSON.stringify({ otpCode }),
     });
   },
   verify2fa: (orgName, userName, otpCode) => {
     return apiRequest(`/${orgName}/user/${userName}/verify2fa`, {
       method: 'POST',
+      headers: { 'X-Locale': 'en' },
       body: JSON.stringify({ otpCode }),
     });
   },
