@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, Modal, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
+import { Card, Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
 import { IconCpu, IconActivity, IconShield } from '../../icons';
-import { deviceApi } from '../../services/api';
+import { deviceApi, deviceTypeApi } from '../../services/api';
 
 const PROTOCOLS = ['BLE', 'WIFI', 'MQTT', 'HL7', 'MODBUS'];
 const VERIFY_TYPES = ['MACADDR', 'SERIAL', 'CERTIFICATE'];
@@ -25,6 +25,18 @@ export const CreateDeviceScreen = ({ onCancel, onSuccess }) => {
     usageType: 'Fixed',
   });
   const [saving, setSaving] = useState(false);
+  const [deviceTypes, setDeviceTypes] = useState([]);
+  const [loadingTypes, setLoadingTypes] = useState(false);
+  const [showTypePicker, setShowTypePicker] = useState(false);
+
+  useEffect(() => {
+    if (!user?.orgName) return;
+    setLoadingTypes(true);
+    deviceTypeApi.listTypes(user.orgName, token)
+      .then(data => setDeviceTypes(Array.isArray(data) ? data : []))
+      .catch(() => setDeviceTypes([]))
+      .finally(() => setLoadingTypes(false));
+  }, []);
 
   const updateForm = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
@@ -68,12 +80,23 @@ export const CreateDeviceScreen = ({ onCancel, onSuccess }) => {
           </Field>
 
           <Field label={t('device.type')} required>
-            <TextInput
-              value={form.deviceType}
-              onChangeText={v => updateForm('deviceType', v)}
-              placeholder={t('device.type_placeholder')}
-              leading={<IconActivity size={16} color={T.textFaint} />}
-            />
+            <Card
+              style={styles.selectCard}
+              padding={12}
+              onPress={() => setShowTypePicker(true)}
+            >
+              {loadingTypes ? (
+                <ActivityIndicator size="small" color={T.accent} />
+              ) : (
+                <>
+                  <IconActivity size={16} color={T.textFaint} />
+                  <Text style={[styles.selectText, !form.deviceType && { color: T.textFaint }]}>
+                    {form.deviceType || t('device.type_placeholder')}
+                  </Text>
+                  <Text style={styles.chevron}>▾</Text>
+                </>
+              )}
+            </Card>
           </Field>
 
           <Field label={t('device.protocol')} required>
@@ -135,6 +158,33 @@ export const CreateDeviceScreen = ({ onCancel, onSuccess }) => {
           </Btn>
         </View>
       </ScrollView>
+
+      <Modal visible={showTypePicker} transparent animationType="fade">
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowTypePicker(false)}>
+          <Card style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{t('device.type')}</Text>
+            <ScrollView style={{ maxHeight: 320 }}>
+              {deviceTypes.map(dt => (
+                <TouchableOpacity
+                  key={dt.deviceType}
+                  style={[styles.pickerOption, form.deviceType === dt.deviceType && { backgroundColor: T.accentSoft }]}
+                  onPress={() => { updateForm('deviceType', dt.deviceType); setShowTypePicker(false); }}
+                >
+                  <Text style={[styles.pickerOptionText, form.deviceType === dt.deviceType && { color: T.accent, fontWeight: '700' }]}>
+                    {dt.deviceType}
+                  </Text>
+                  {dt.description ? (
+                    <Text style={styles.pickerOptionSub}>{dt.description}</Text>
+                  ) : null}
+                </TouchableOpacity>
+              ))}
+              {!deviceTypes.length && (
+                <Text style={[styles.pickerOptionText, { color: T.textFaint, padding: 12 }]}>{t('common.no_data')}</Text>
+              )}
+            </ScrollView>
+          </Card>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };
@@ -151,4 +201,13 @@ const createStyles = (T) => StyleSheet.create({
   optionText: { fontSize: 12, color: T.text, fontWeight: '600' },
   optionTextActive: { color: '#fff' },
   actionRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
+  selectCard: { height: 48, flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: T.surface },
+  selectText: { flex: 1, color: T.text, fontSize: 14 },
+  chevron: { fontSize: 16, color: T.textDim },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 24 },
+  modalContent: { padding: 16 },
+  modalTitle: { fontSize: 16, fontWeight: '700', color: T.text, marginBottom: 12, textAlign: 'center' },
+  pickerOption: { padding: 14, borderRadius: 8, marginBottom: 4 },
+  pickerOptionText: { fontSize: 14, color: T.text },
+  pickerOptionSub: { fontSize: 11, color: T.textFaint, marginTop: 2 },
 });

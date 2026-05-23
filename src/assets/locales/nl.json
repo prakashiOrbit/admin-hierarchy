@@ -18,7 +18,9 @@
     "theme": "Thema",
     "na": "N.v.t.",
     "all": "Alle",
-    "retry": "Opnieuw proberen"
+    "retry": "Opnieuw proberen",
+    "none": "Geen",
+    "no_data": "Geen items gevonden"
   },
   "auth": {
     "login": "Inloggen",

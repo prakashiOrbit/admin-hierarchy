@@ -18,7 +18,9 @@
     "theme": "Design",
     "na": "n.a.",
     "all": "Tut",
-    "retry": "Repetir"
+    "retry": "Repetir",
+    "none": "Nagin",
+    "no_data": "Nagins elements chattads"
   },
   "auth": {
     "login": "Login",

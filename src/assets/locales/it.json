@@ -18,7 +18,9 @@
     "theme": "Tema",
     "na": "N/D",
     "all": "Tutti",
-    "retry": "Riprova"
+    "retry": "Riprova",
+    "none": "Nessuno",
+    "no_data": "Nessun elemento trovato"
   },
   "auth": {
     "login": "Login",

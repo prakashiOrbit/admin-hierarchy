@@ -18,7 +18,9 @@
     "theme": "Design",
     "na": "N/V",
     "all": "Alle",
-    "retry": "Wiederholen"
+    "retry": "Wiederholen",
+    "none": "Keiner",
+    "no_data": "Keine Einträge gefunden"
   },
   "auth": {
     "login": "Anmelden",

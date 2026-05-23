@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
+import { DatePickerModal } from '../../components/DatePickerModal';
 import { IconStethoscope, IconMail, IconPhone, IconCalendar, IconActivity, IconBuilding } from '../../icons';
 import { doctorApi } from '../../services/api';
 
@@ -29,6 +30,7 @@ export const EditDoctorScreen = ({ doctor, onCancel, onSave }) => {
     state: doctor.myAddress?.state || '',
   });
   const [saving, setSaving] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const set = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
   const isValid = form.firstName && form.lastName && form.email;
@@ -113,12 +115,16 @@ export const EditDoctorScreen = ({ doctor, onCancel, onSave }) => {
             </View>
             <View style={{ flex: 1 }}>
               <Field label={t('users.dob')}>
-                <TextInput
-                  value={form.birthDate}
-                  onChangeText={v => set('birthDate', v)}
-                  placeholder="YYYY-MM-DD"
-                  leading={<IconCalendar size={16} color={T.textFaint} />}
-                />
+                <Card
+                  style={styles.dateCard}
+                  padding={12}
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <IconCalendar size={16} color={T.textFaint} />
+                  <Text style={[styles.dateText, !form.birthDate && { color: T.textFaint }]}>
+                    {form.birthDate || 'YYYY-MM-DD'}
+                  </Text>
+                </Card>
               </Field>
             </View>
           </View>
@@ -193,6 +199,13 @@ export const EditDoctorScreen = ({ doctor, onCancel, onSave }) => {
           </Btn>
         </View>
       </ScrollView>
+
+      <DatePickerModal
+        visible={showDatePicker}
+        value={form.birthDate}
+        onConfirm={date => { set('birthDate', date); setShowDatePicker(false); }}
+        onCancel={() => setShowDatePicker(false)}
+      />
     </View>
   );
 };
@@ -225,4 +238,6 @@ const createStyles = (T) => StyleSheet.create({
   radioText: { fontSize: 13, fontWeight: '600', color: T.textDim },
   radioTextActive: { color: '#fff' },
   actionRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
+  dateCard: { height: 44, flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: T.surface },
+  dateText: { flex: 1, fontSize: 14, color: T.text },
 });

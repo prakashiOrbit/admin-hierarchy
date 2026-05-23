@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
+import { DatePickerModal } from '../../components/DatePickerModal';
 import { IconMail, IconPhone, IconStethoscope, IconCalendar, IconActivity, IconChevron } from '../../icons';
 import { doctorApi } from '../../services/api';
 
@@ -25,6 +26,7 @@ export const CreateDoctorScreen = ({ onCancel, onSuccess }) => {
   const { user, token } = useAuth();
 
   const [showLocalePicker, setShowLocalePicker] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [form, setForm] = useState({
     doctorCode: '',
     firstName: '',
@@ -114,7 +116,16 @@ export const CreateDoctorScreen = ({ onCancel, onSuccess }) => {
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
               <Field label={t('entity.dob')}>
-                <TextInput value={form.birthDate} onChangeText={v => updateRoot('birthDate', v)} placeholder={t('placeholders.dob_format')} leading={<IconCalendar size={16} color={T.textFaint} />} />
+                <Card
+                  style={styles.selectCard}
+                  padding={12}
+                  onPress={() => setShowDatePicker(true)}
+                >
+                  <IconCalendar size={16} color={T.textFaint} />
+                  <Text style={[styles.selectText, !form.birthDate && { color: T.textFaint }]}>
+                    {form.birthDate || t('placeholders.dob_format')}
+                  </Text>
+                </Card>
               </Field>
             </View>
             <View style={{ flex: 1 }}>
@@ -170,6 +181,13 @@ export const CreateDoctorScreen = ({ onCancel, onSuccess }) => {
         </View>
       </ScrollView>
 
+      <DatePickerModal
+        visible={showDatePicker}
+        value={form.birthDate}
+        onConfirm={date => { updateRoot('birthDate', date); setShowDatePicker(false); }}
+        onCancel={() => setShowDatePicker(false)}
+      />
+
       {/* Locale Picker Modal */}
       <Modal visible={showLocalePicker} transparent animationType="fade">
         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowLocalePicker(false)}>
@@ -210,11 +228,11 @@ const createStyles = (T) => StyleSheet.create({
     height: 48,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 8,
     backgroundColor: T.surface,
     paddingHorizontal: 12,
   },
-  selectText: { color: T.text, fontSize: 14, fontWeight: '500' },
+  selectText: { flex: 1, color: T.text, fontSize: 14, fontWeight: '500' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 24 },
   modalContent: { padding: 16 },
   modalTitle: { fontSize: 16, fontWeight: '700', color: T.text, marginBottom: 16, textAlign: 'center' },

@@ -18,7 +18,9 @@
     "theme": "Motiv",
     "na": "N/A",
     "all": "Vše",
-    "retry": "Opakovat"
+    "retry": "Opakovat",
+    "none": "Žádný",
+    "no_data": "Žádné položky nenalezeny"
   },
   "auth": {
     "login": "Přihlášení",

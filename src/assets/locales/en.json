@@ -25,7 +25,9 @@
     "failed": "Failed",
     "go_back": "Go Back",
     "load_failed": "Failed to load data.",
-    "dr_prefix": "Dr."
+    "dr_prefix": "Dr.",
+    "none": "None",
+    "no_data": "No items found"
   },
   "auth": {
     "login": "Login",
