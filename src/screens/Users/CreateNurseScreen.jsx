@@ -19,7 +19,7 @@ const LOCALES = [
 ];
 
 export const CreateNurseScreen = ({ onCancel, onSuccess }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user, token } = useAuth();
@@ -33,7 +33,7 @@ export const CreateNurseScreen = ({ onCancel, onSuccess }) => {
     nurseExperience: '',
     nurseType: 'REGISTERED',
     gender: 'FEMALE',
-    preferredLocale: 'en',
+    preferredLocale: (i18n.language || 'en').split('-')[0],
     myContact: { email: '', phone: '' },
     myAddress: { city: '', state: '' },
   });

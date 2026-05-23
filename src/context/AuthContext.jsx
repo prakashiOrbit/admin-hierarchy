@@ -7,7 +7,14 @@ const AuthContext = createContext(undefined);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
-  const [locale, setLocale] = useState(i18n.language);
+  const [locale, setLocale] = useState(() => (i18n.language || 'en').split('-')[0]);
+
+  // Keep locale in sync with i18n regardless of who calls i18n.changeLanguage()
+  useEffect(() => {
+    const sync = (lng) => setLocale((lng || 'en').split('-')[0]);
+    i18n.on('languageChanged', sync);
+    return () => i18n.off('languageChanged', sync);
+  }, []);
 
   const login = (userData) => {
     const userProfile = {
@@ -21,8 +28,13 @@ export const AuthProvider = ({ children }) => {
     setUser(userProfile);
     setToken(userData.token);
 
-    if (userProfile.preferredLocale && userProfile.preferredLocale !== i18n.language) {
-      changeLanguage(userProfile.preferredLocale);
+    const backendLocale = (userProfile.preferredLocale || '').split('-')[0];
+    const currentLocale = (i18n.language || '').split('-')[0];
+    // Only override the current language if the backend has an explicit non-default preference.
+    // If backend says 'en' (never changed from default), preserve whatever the user
+    // selected before logging in (e.g. from the login screen language picker).
+    if (backendLocale && backendLocale !== 'en' && backendLocale !== currentLocale) {
+      changeLanguage(backendLocale);
     }
   };
 

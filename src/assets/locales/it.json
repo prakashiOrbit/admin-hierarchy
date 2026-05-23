@@ -453,5 +453,10 @@
     "more_fields": "Altri campi",
     "record_added": "Cartella clinica aggiunta.",
     "save_failed": "Salvataggio cartella fallito."
+  },
+  "messages": {
+    "doctor_onboarded": "Il Dott. {{firstName}} {{lastName}} è stato inserito.",
+    "nurse_onboarded": "{{firstName}} {{lastName}} è stato/a inserito/a.",
+    "patient_registered": "Paziente {{code}} registrato."
   }
 }

@@ -19,7 +19,7 @@ const LOCALES = [
 ];
 
 export const CreateDoctorScreen = ({ onCancel, onSuccess }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user, token } = useAuth();
@@ -34,7 +34,7 @@ export const CreateDoctorScreen = ({ onCancel, onSuccess }) => {
     birthDate: '',
     gender: 'MALE',
     doctorType: 'SPECIALIST',
-    preferredLocale: 'en',
+    preferredLocale: (i18n.language || 'en').split('-')[0],
     myContact: { email: '', phone: '' },
     myAddress: { city: '', state: '' },
   });

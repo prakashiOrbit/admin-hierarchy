@@ -19,7 +19,7 @@ const LOCALES = [
 ];
 
 export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const [showTypePicker, setShowTypePicker] = useState(false);
@@ -28,7 +28,7 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
     orgName: '',
     orgType: 'HOSPITAL',
     businessName: '',
-    preferredLocale: 'en',
+    preferredLocale: (i18n.language || 'en').split('-')[0],
     myContact: {
       name: '',
       email: '',

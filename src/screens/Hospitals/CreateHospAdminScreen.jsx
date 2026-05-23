@@ -19,7 +19,7 @@ const LOCALES = [
 ];
 
 export const CreateHospAdminScreen = ({ onCancel }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
   const styles = createStyles(T);
@@ -32,7 +32,7 @@ export const CreateHospAdminScreen = ({ onCancel }) => {
     lastName: '',
     orgName: user?.orgName || '',
     contactEmail: '',
-    preferredLocale: 'en',
+    preferredLocale: (i18n.language || 'en').split('-')[0],
   });
 
   const updateForm = (key, value) => {

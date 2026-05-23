@@ -453,5 +453,10 @@
     "more_fields": "Weitere Felder",
     "record_added": "Gesundheitsakte hinzugefügt.",
     "save_failed": "Speichern der Akte fehlgeschlagen."
+  },
+  "messages": {
+    "doctor_onboarded": "Dr. {{firstName}} {{lastName}} wurde aufgenommen.",
+    "nurse_onboarded": "{{firstName}} {{lastName}} wurde aufgenommen.",
+    "patient_registered": "Patient {{code}} registriert."
   }
 }

@@ -453,5 +453,10 @@
     "more_fields": "حقول إضافية",
     "record_added": "تمت إضافة السجل الصحي.",
     "save_failed": "فشل حفظ السجل."
+  },
+  "messages": {
+    "doctor_onboarded": "تم إلحاق الدكتور {{firstName}} {{lastName}}.",
+    "nurse_onboarded": "تم إلحاق {{firstName}} {{lastName}}.",
+    "patient_registered": "تم تسجيل المريض {{code}}."
   }
 }

@@ -453,5 +453,10 @@
     "more_fields": "Ulteriurs champs",
     "record_added": "Record da sanadad agiuntà.",
     "save_failed": "Betg pussaivel da memorisar il record."
+  },
+  "messages": {
+    "doctor_onboarded": "Dr. {{firstName}} {{lastName}} è vegnì integrar.",
+    "nurse_onboarded": "{{firstName}} {{lastName}} è vegnì/a integrar.",
+    "patient_registered": "Pazient {{code}} registrà."
   }
 }
