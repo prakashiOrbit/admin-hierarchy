@@ -148,7 +148,9 @@
     "home": "Home",
     "device_type": "TipoDispositivo",
     "roles_perms": "Ruoli e Permessi",
-    "device_types": "Tipi Dispositivo"
+    "device_types": "Tipi Dispositivo",
+    "hours_ago": "{{count}}h fa",
+    "minutes_ago": "{{count}}min fa"
   },
   "users": {
     "first_name": "Nome",
@@ -461,5 +463,10 @@
     "doctor_onboarded": "Il Dott. {{firstName}} {{lastName}} è stato inserito.",
     "nurse_onboarded": "{{firstName}} {{lastName}} è stato/a inserito/a.",
     "patient_registered": "Paziente {{code}} registrato."
+  },
+  "notifications": {
+    "title": "Notifiche",
+    "all_caught_up": "Sei aggiornato",
+    "empty_hint": "Nessuna nuova notifica al momento."
   }
 }

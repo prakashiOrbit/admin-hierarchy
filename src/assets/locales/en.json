@@ -159,7 +159,9 @@
     "device_types": "Device Types",
     "patients": "Patients",
     "doctors": "Doctors",
-    "shifts": "Shifts"
+    "shifts": "Shifts",
+    "hours_ago": "{{count}}h ago",
+    "minutes_ago": "{{count}}m ago"
   },
   "users": {
     "first_name": "First Name",
@@ -820,5 +822,10 @@
     "staff_assigned": "Staff Assigned",
     "staff_assigned_msg": "{{name}} assigned to shift {{shift}}.",
     "assignment_failed": "Assignment failed."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "all_caught_up": "You're all caught up",
+    "empty_hint": "No new notifications right now."
   }
 }

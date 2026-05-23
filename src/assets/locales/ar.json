@@ -148,7 +148,9 @@
     "home": "الرئيسية",
     "device_type": "نوع الجهاز",
     "roles_perms": "الأدوار والأذونات",
-    "device_types": "أنواع الأجهزة"
+    "device_types": "أنواع الأجهزة",
+    "hours_ago": "منذ {{count}} ساعة",
+    "minutes_ago": "منذ {{count}} دقيقة"
   },
   "users": {
     "first_name": "الاسم الأول",
@@ -461,5 +463,10 @@
     "doctor_onboarded": "تم إلحاق الدكتور {{firstName}} {{lastName}}.",
     "nurse_onboarded": "تم إلحاق {{firstName}} {{lastName}}.",
     "patient_registered": "تم تسجيل المريض {{code}}."
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "all_caught_up": "أنت على اطلاع كامل",
+    "empty_hint": "لا إشعارات جديدة الآن."
   }
 }

@@ -75,12 +75,29 @@ const HomeContent = ({ onNavigate }) => {
         const orgList = Array.isArray(orgsData) ? orgsData : (Array.isArray(orgsData.data) ? orgsData.data : []);
         setOrgsCount(orgList.length);
 
-        const dynamicActivities = orgList.slice(0, 4).map((org, index) => ({
+        const relativeTime = (dateStr) => {
+          if (!dateStr) return t('dashboard.just_now');
+          const diff = Date.now() - new Date(dateStr).getTime();
+          const mins = Math.floor(diff / 60000);
+          if (mins < 2) return t('dashboard.just_now');
+          if (mins < 60) return t('dashboard.minutes_ago', { count: mins });
+          const hours = Math.floor(mins / 60);
+          if (hours < 24) return t('dashboard.hours_ago', { count: hours });
+          return t('dashboard.days_ago', { count: Math.floor(hours / 24) });
+        };
+
+        const sortedOrgs = [...orgList].sort((a, b) => {
+          const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return tb - ta;
+        });
+
+        const dynamicActivities = sortedOrgs.slice(0, 4).map((org, index) => ({
           id: `org-${org.id || index}`,
           icon: <IconGlobe />,
           color: index % 2 === 0 ? T.good : T.accent,
           text: t('dashboard.onboarded', { name: org.businessName || org.orgName }),
-          time: t('dashboard.days_ago', { count: index + 1 }),
+          time: relativeTime(org.createdAt),
           meta: org.orgName
         }));
 
@@ -99,9 +116,9 @@ const HomeContent = ({ onNavigate }) => {
             stats: {
               totalHospitals: 0,
               totalUsers: 0,
-              totalOrganisations: orgList.length
-            },
-            devices: summaryData?.devices || 0
+              totalOrganisations: orgList.length,
+              totalDevices: 0
+            }
           });
         }
 
@@ -148,7 +165,7 @@ const HomeContent = ({ onNavigate }) => {
         />
         <StatCard 
           label="dashboard.active_devices" 
-          value={loading ? '...' : (summary?.devices ?? summary?.deviceCount ?? summary?.totalDevices ?? '0').toString()} 
+          value={loading ? '...' : (summary?.stats?.totalDevices ?? '0').toString()}
           delta={0} 
           icon={<IconPulse />} color="#22D3EE" accent="rgba(34,211,238,.14)" 
         />

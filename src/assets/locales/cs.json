@@ -148,7 +148,9 @@
     "home": "Domů",
     "device_type": "TypZařízení",
     "roles_perms": "Role a oprávnění",
-    "device_types": "Typy zařízení"
+    "device_types": "Typy zařízení",
+    "hours_ago": "před {{count}}h",
+    "minutes_ago": "před {{count}}min"
   },
   "users": {
     "first_name": "Křestní jméno",
@@ -461,5 +463,10 @@
     "doctor_onboarded": "Dr. {{firstName}} {{lastName}} byl zaregistrován.",
     "nurse_onboarded": "{{firstName}} {{lastName}} byl/a zaregistrován/a.",
     "patient_registered": "Pacient {{code}} zaregistrován."
+  },
+  "notifications": {
+    "title": "Oznámení",
+    "all_caught_up": "Jste aktuální",
+    "empty_hint": "Žádná nová oznámení právě teď."
   }
 }

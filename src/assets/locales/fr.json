@@ -148,7 +148,9 @@
     "home": "Accueil",
     "device_type": "TypeAppareil",
     "roles_perms": "Rôles et Perms",
-    "device_types": "Types Appareils"
+    "device_types": "Types Appareils",
+    "hours_ago": "il y a {{count}}h",
+    "minutes_ago": "il y a {{count}}m"
   },
   "users": {
     "first_name": "Prénom",
@@ -461,5 +463,10 @@
     "doctor_onboarded": "Dr. {{firstName}} {{lastName}} a été intégré.",
     "nurse_onboarded": "{{firstName}} {{lastName}} a été intégré(e).",
     "patient_registered": "Patient {{code}} enregistré."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "all_caught_up": "Vous êtes à jour",
+    "empty_hint": "Aucune nouvelle notification pour le moment."
   }
 }

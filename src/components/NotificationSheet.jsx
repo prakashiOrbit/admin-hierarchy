@@ -1,11 +1,13 @@
 import React from 'react';
 import { View, Text, Modal, TouchableOpacity, TouchableWithoutFeedback, StyleSheet, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeContext';
 import { IconBell } from '../icons';
 
 export const NotificationSheet = ({ visible, onClose }) => {
   const { theme: T } = useTheme();
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const styles = createStyles(T);
 
@@ -27,9 +29,9 @@ export const NotificationSheet = ({ visible, onClose }) => {
 
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Notifications</Text>
+          <Text style={styles.title}>{t('notifications.title')}</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-            <Text style={styles.closeText}>Done</Text>
+            <Text style={styles.closeText}>{t('common.done')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -38,8 +40,8 @@ export const NotificationSheet = ({ visible, onClose }) => {
           <View style={[styles.iconCircle, { backgroundColor: T.accentSoft }]}>
             <IconBell size={28} color={T.accent} />
           </View>
-          <Text style={styles.emptyTitle}>You're all caught up</Text>
-          <Text style={styles.emptyHint}>No new notifications right now.</Text>
+          <Text style={styles.emptyTitle}>{t('notifications.all_caught_up')}</Text>
+          <Text style={styles.emptyHint}>{t('notifications.empty_hint')}</Text>
         </View>
       </View>
     </Modal>

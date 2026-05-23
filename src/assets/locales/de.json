@@ -148,7 +148,9 @@
     "home": "Home",
     "device_type": "Gerätetyp",
     "roles_perms": "Rollen & Rechte",
-    "device_types": "Gerätetypen"
+    "device_types": "Gerätetypen",
+    "hours_ago": "vor {{count}}h",
+    "minutes_ago": "vor {{count}}min"
   },
   "users": {
     "first_name": "Vorname",
@@ -461,5 +463,10 @@
     "doctor_onboarded": "Dr. {{firstName}} {{lastName}} wurde aufgenommen.",
     "nurse_onboarded": "{{firstName}} {{lastName}} wurde aufgenommen.",
     "patient_registered": "Patient {{code}} registriert."
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "all_caught_up": "Sie sind auf dem Laufenden",
+    "empty_hint": "Keine neuen Benachrichtigungen gerade."
   }
 }
