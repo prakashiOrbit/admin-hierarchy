@@ -586,7 +586,12 @@
     "protocol": "Protocol",
     "verification_method": "Verification Method",
     "usage_type": "Usage Type",
-    "create_banner": "Register a new IoMT device to this hospital's fleet."
+    "create_banner": "Register a new IoMT device to this hospital's fleet.",
+    "verify_mac": "MAC Address",
+    "verify_serial": "Serial Number",
+    "verify_cert": "Certificate",
+    "usage_fixed": "Fixed",
+    "usage_mobile": "Mobile"
   },
   "entity": {
     "first_name": "First Name",
@@ -642,6 +647,13 @@
     "gateway_code": "Gateway Code",
     "gateway_type": "Gateway Type",
     "gateway_config": "GATEWAY CONFIG",
+    "gateway_type_iot_hub": "IoMT Hub",
+    "gateway_type_edge_gateway": "Edge Gateway",
+    "gateway_type_protocol_bridge": "Protocol Bridge",
+    "comm_config_mqtt_enabled": "MQTT Enabled",
+    "comm_config_http_enabled": "HTTP Enabled",
+    "comm_config_websocket_enabled": "WebSocket Enabled",
+    "comm_config_ble_enabled": "BLE Enabled",
     "device_identity": "DEVICE IDENTITY",
     "specifications": "SPECIFICATIONS",
     "communication_protocol": "Communication Protocol",
@@ -654,6 +666,10 @@
     "max_firmware": "Max Firmware",
     "category": "Category",
     "description": "Description",
+    "filter_all": "All",
+    "filter_monitoring": "Monitoring",
+    "filter_registered": "Registered",
+    "filter_outpatient": "Outpatient",
     "unknown": "Unknown"
   },
   "messages": {
@@ -725,6 +741,36 @@
     "more_fields": "More Fields",
     "record_added": "Health record added.",
     "save_failed": "Failed to save record."
+  },
+  "records": {
+    "VITAL_SIGNS": "Vital Signs",
+    "ALLERGIES": "Allergies",
+    "MEDICATIONS": "Medications",
+    "LAB_RESULTS": "Lab Results",
+    "CHRONIC_CONDITIONS": "Chronic Conditions",
+    "fields": {
+      "bloodGroup": "Blood Group",
+      "weight": "Weight",
+      "height": "Height",
+      "bloodPressure": "Blood Pressure",
+      "heartRate": "Heart Rate",
+      "temperature": "Temperature",
+      "allergen": "Allergen",
+      "reaction": "Reaction",
+      "severity": "Severity",
+      "medicationName": "Medication Name",
+      "dosage": "Dosage",
+      "frequency": "Frequency",
+      "startDate": "Start Date",
+      "testName": "Test Name",
+      "result": "Result",
+      "unit": "Unit",
+      "referenceRange": "Reference Range",
+      "date": "Date",
+      "condition": "Condition",
+      "diagnosedDate": "Diagnosed Date",
+      "managedBy": "Managed By"
+    }
   },
   "assignments": {
     "step1_title": "Select Doctor",

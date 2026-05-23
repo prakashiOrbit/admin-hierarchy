@@ -29,41 +29,53 @@ export const LoginScreen = ({ navigation }) => {
     setError(null);
     setState('loading');
 
-    try {
-      const response = await authApi.login(username, password);
-      console.log('Login Response:', JSON.stringify(response));
-      
-      // Platform User (iorbit) logs in directly if successful
-      if (response.code === "200" && response.token) {
-        login(response);
+    const processLoginResponse = (res) => {
+      const resCode = String(res.code);
+
+      // 200: Success
+      if (resCode === "200" && res.token) {
+        login(res);
         
-        const roles = response.roles || response.userData?.roles || [];
+        const roles = res.roles || res.userData?.roles || [];
         const isOrgOwner = roles.includes('ORG_OWNER');
         const isHospOwner = roles.includes('HOSP_OWNER');
         
-        if (response.orgName === 'SYSTEM' || username === 'iorbit') {
+        if (res.orgName === 'SYSTEM' || username === 'iorbit') {
           navigation.replace('PlatformDashboard', { role: 'PLATFORM_ADMIN' });
-          return;
-        } else if (response.hospitalCode) {
+          return true;
+        } else if (res.hospitalCode) {
           navigation.replace('HospDashboard', { role: isHospOwner ? 'HOSP_OWNER' : 'HOSP_ADMIN' });
-          return;
+          return true;
         } else {
           navigation.replace('OrgDashboard', { role: isOrgOwner ? 'ORG_OWNER' : 'ORG_ADMIN' });
-          return;
+          return true;
         }
       }
 
-      // Only for non-platform users, check for verification codes
-      if (response.code === "600" || response.message?.toLowerCase().includes('email')) {
-        setPendingOrg(response.orgName);
+      // 600: Email Verification Required
+      // 601: 2FA Required
+      if (resCode === "600") {
+        setPendingOrg(res.orgName);
         setState('emailVerify');
-      } else if (response.code === "601" || response.message?.toLowerCase().includes('2-factor') || response.message?.toLowerCase().includes('2fa')) {
-        setPendingOrg(response.orgName);
+        return true;
+      } else if (resCode === "601") {
+        setPendingOrg(res.orgName);
         setState('twofa');
-      } else {
+        return true;
+      }
+      return false;
+    };
+
+    try {
+      const response = await authApi.login(username, password);
+      if (!processLoginResponse(response)) {
         throw new Error(response.message || 'Login failed');
       }
     } catch (err) {
+      // Check if the error contains a verification code (600/601)
+      if (err.data && processLoginResponse(err.data)) {
+        return; // Handled by processLoginResponse (transitioned to 2FA/Email screen)
+      }
       setError(err.message || 'Invalid username or password');
       setState('idle');
     } finally {
