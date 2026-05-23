@@ -1,23 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, Alert, Modal } from 'react-native';
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { authApi } from '../../services/api';
 import { Logo, Field, TextInput, Btn } from '../../components/Shared';
+import { LanguageSheet } from '../../components/LanguageSheet';
 import { IconUser, IconLock, IconEye, IconEyeOff, IconShield, IconBack, IconMail, IconGlobe, IconChevron } from '../../icons';
 
-const LOCALES = [
-  { code: 'en', label: 'English' },
-  { code: 'ar', label: 'العربية' },
-  { code: 'fr', label: 'Français' },
-  { code: 'de', label: 'Deutsch' },
-  { code: 'it', label: 'Italiano' },
-  { code: 'nl', label: 'Nederlands' },
-  { code: 'cs', label: 'Čeština' },
-  { code: 'rm', label: 'Rumantsch' },
-];
 
 export const LoginScreen = ({ navigation }) => {
   const insets = useSafeAreaInsets();
@@ -133,31 +124,8 @@ export const LoginScreen = ({ navigation }) => {
     }
   };
 
-  const currentLocaleLabel = LOCALES.find(l => l.code === (i18n.language || 'en').split('-')[0])?.label || 'English';
-
-  const renderLocalePicker = () => (
-    <Modal visible={showLocalePicker} transparent animationType="fade">
-      <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowLocalePicker(false)}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>{t('users.select_locale')}</Text>
-          {LOCALES.map((loc) => {
-            const active = (i18n.language || 'en').split('-')[0] === loc.code;
-            return (
-              <TouchableOpacity
-                key={loc.code}
-                style={[styles.localeOption, active && { backgroundColor: T.accentSoft }]}
-                onPress={() => { i18n.changeLanguage(loc.code); setShowLocalePicker(false); }}
-              >
-                <Text style={[styles.localeOptionText, active && { color: T.accent, fontWeight: '700' }]}>
-                  {loc.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </TouchableOpacity>
-    </Modal>
-  );
+  const currentLangCode = (i18n.language || 'en').split('-')[0];
+  const currentLangLabel = t(`languages.${currentLangCode}`)?.split(' ')[0] || 'English';
 
   if (state === 'twofa' || state === 'emailVerify') {
     const isEmail = state === 'emailVerify';
@@ -171,7 +139,7 @@ export const LoginScreen = ({ navigation }) => {
             </TouchableOpacity>
             <TouchableOpacity style={styles.langBtn} onPress={() => setShowLocalePicker(true)}>
               <IconGlobe size={14} color={T.textDim} />
-              <Text style={styles.langBtnText}>{(i18n.language || 'en').toUpperCase()}</Text>
+              <Text style={styles.langBtnText}>{currentLangLabel}</Text>
               <IconChevron size={12} color={T.textDim} />
             </TouchableOpacity>
           </View>
@@ -223,7 +191,12 @@ export const LoginScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {renderLocalePicker()}
+        <LanguageSheet
+          visible={showLocalePicker}
+          onClose={() => setShowLocalePicker(false)}
+          currentLanguage={currentLangCode}
+          onSelect={(code) => { i18n.changeLanguage(code); setShowLocalePicker(false); }}
+        />
       </View>
     );
   }
@@ -235,7 +208,7 @@ export const LoginScreen = ({ navigation }) => {
           <View style={styles.langRow}>
             <TouchableOpacity style={styles.langBtn} onPress={() => setShowLocalePicker(true)}>
               <IconGlobe size={14} color={T.textDim} />
-              <Text style={styles.langBtnText}>{currentLocaleLabel}</Text>
+              <Text style={styles.langBtnText}>{currentLangLabel}</Text>
               <IconChevron size={12} color={T.textDim} />
             </TouchableOpacity>
           </View>
@@ -301,7 +274,12 @@ export const LoginScreen = ({ navigation }) => {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {renderLocalePicker()}
+      <LanguageSheet
+        visible={showLocalePicker}
+        onClose={() => setShowLocalePicker(false)}
+        currentLanguage={currentLangCode}
+        onSelect={(code) => { i18n.changeLanguage(code); setShowLocalePicker(false); }}
+      />
     </View>
   );
 };
@@ -389,33 +367,6 @@ const createStyles = (T) => StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     color: T.textDim,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  modalContent: {
-    backgroundColor: T.card,
-    borderRadius: 16,
-    padding: 16,
-  },
-  modalTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: T.text,
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  localeOption: {
-    padding: 14,
-    borderRadius: 8,
-    marginBottom: 4,
-  },
-  localeOptionText: {
-    fontSize: 14,
-    color: T.text,
   },
   twofaContent: {
     flex: 1,
