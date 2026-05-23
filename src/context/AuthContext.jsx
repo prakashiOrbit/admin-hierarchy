@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { I18nManager, Alert } from 'react-native';
 import i18n from '../i18n';
 import { userApi } from '../services/api';
 
@@ -33,29 +32,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   const changeLanguage = async (newLocale) => {
-    const isRTL = newLocale === 'ar';
-    const currentRTL = I18nManager.isRTL;
-    
-    // 1. Update i18n instance immediately for text
     i18n.changeLanguage(newLocale);
     setLocale(newLocale);
 
-    // 2. Handle Native RTL Layout
-    // CRITICAL: RTL changes are NATIVE properties. They require an app restart.
-    if (currentRTL !== isRTL) {
-      I18nManager.allowRTL(isRTL);
-      I18nManager.forceRTL(isRTL);
-      
-      Alert.alert(
-        isRTL ? "تغيير تخطيط اللغة" : "Language Layout Change",
-        isRTL 
-          ? "يجب إعادة تشغيل التطبيق لتطبيق التنسيق من اليمين إلى اليسار بشكل صحيح."
-          : "The app must be restarted to apply the standard layout direction correctly.",
-        [{ text: "OK" }]
-      );
-    }
-
-    // 3. Persist to Back-end
     if (token && user?.orgName) {
       try {
         await userApi.updatePreferredLocale(user.orgName, newLocale, token);
