@@ -72,14 +72,8 @@ export const LoginScreen = ({ navigation }) => {
         throw new Error(response.message || 'Login failed');
       }
     } catch (err) {
-      // Check if the error contains a verification code (600/601)
-      if (err.data && processLoginResponse(err.data)) {
-        return; // Handled by processLoginResponse (transitioned to 2FA/Email screen)
-      }
       setError(err.message || 'Invalid username or password');
       setState('idle');
-    } finally {
-      if (state === 'loading') setState('idle');
     }
   };
 
@@ -117,8 +111,6 @@ export const LoginScreen = ({ navigation }) => {
     } catch (err) {
       Alert.alert(t('common.error'), err.message);
       setState('twofa');
-    } finally {
-      if (state === 'loading') setState('twofa');
     }
   };
 
