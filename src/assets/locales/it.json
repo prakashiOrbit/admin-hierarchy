@@ -415,7 +415,8 @@
     "verify_serial": "Numero di serie",
     "verify_cert": "Certificato",
     "usage_fixed": "Fisso",
-    "usage_mobile": "Mobile"
+    "usage_mobile": "Mobile",
+    "code_already_exists": "Il codice dispositivo \"{{code}}\" è già registrato. Utilizzare un codice diverso."
   },
   "records": {
     "VITAL_SIGNS": "Segni vitali",

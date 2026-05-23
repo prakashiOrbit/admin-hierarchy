@@ -415,7 +415,8 @@
     "verify_serial": "Sériové číslo",
     "verify_cert": "Certifikát",
     "usage_fixed": "Pevné",
-    "usage_mobile": "Mobilní"
+    "usage_mobile": "Mobilní",
+    "code_already_exists": "Kód zařízení \"{{code}}\" je již registrován. Použijte prosím jiný kód."
   },
   "records": {
     "VITAL_SIGNS": "Vitální funkce",

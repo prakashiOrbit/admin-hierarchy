@@ -415,7 +415,8 @@
     "verify_serial": "Serienummer",
     "verify_cert": "Certificaat",
     "usage_fixed": "Vast",
-    "usage_mobile": "Mobiel"
+    "usage_mobile": "Mobiel",
+    "code_already_exists": "Apparaatcode \"{{code}}\" is al geregistreerd. Gebruik een andere code."
   },
   "records": {
     "VITAL_SIGNS": "Vitale functies",

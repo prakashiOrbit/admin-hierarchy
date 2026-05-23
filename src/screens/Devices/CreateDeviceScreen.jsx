@@ -51,7 +51,10 @@ export const CreateDeviceScreen = ({ onCancel, onSuccess }) => {
         { text: t('common.done'), onPress: onSuccess || onCancel },
       ]);
     } catch (e) {
-      Alert.alert(t('common.error'), e.message || t('alerts.device_create_failed'));
+      const msg = e.status === 409
+        ? t('device.code_already_exists', { code: form.deviceCode })
+        : (e.message || t('alerts.device_create_failed'));
+      Alert.alert(t('common.error'), msg);
     } finally {
       setSaving(false);
     }

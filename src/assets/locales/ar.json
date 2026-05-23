@@ -415,7 +415,8 @@
     "verify_serial": "الرقم التسلسلي",
     "verify_cert": "شهادة",
     "usage_fixed": "ثابت",
-    "usage_mobile": "متنقل"
+    "usage_mobile": "متنقل",
+    "code_already_exists": "كود الجهاز \"{{code}}\" مسجّل بالفعل. يرجى استخدام كود مختلف."
   },
   "records": {
     "VITAL_SIGNS": "العلامات الحيوية",

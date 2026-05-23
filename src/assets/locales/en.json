@@ -595,7 +595,8 @@
     "verify_serial": "Serial Number",
     "verify_cert": "Certificate",
     "usage_fixed": "Fixed",
-    "usage_mobile": "Mobile"
+    "usage_mobile": "Mobile",
+    "code_already_exists": "Device code \"{{code}}\" is already registered. Please use a different code."
   },
   "entity": {
     "first_name": "First Name",

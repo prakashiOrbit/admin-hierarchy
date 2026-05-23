@@ -415,7 +415,8 @@
     "verify_serial": "Numer da seria",
     "verify_cert": "Certificat",
     "usage_fixed": "Fix",
-    "usage_mobile": "Mobil"
+    "usage_mobile": "Mobil",
+    "code_already_exists": "Il code d'apparatura \"{{code}}\" è gia registrà. Utilisai p.f. in auter code."
   },
   "records": {
     "VITAL_SIGNS": "Signals vitals",
