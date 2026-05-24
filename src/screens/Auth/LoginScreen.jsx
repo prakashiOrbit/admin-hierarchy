@@ -25,6 +25,7 @@ export const LoginScreen = ({ navigation }) => {
   const [state, setState] = useState('idle'); // idle, loading, twofa, emailVerify
   const [otpValue, setOtpValue] = useState('');
   const [pendingOrg, setPendingOrg] = useState(null);
+  const [pendingUserName, setPendingUserName] = useState(null);
 
   const { login } = useAuth();
 
@@ -43,12 +44,14 @@ export const LoginScreen = ({ navigation }) => {
       // CRITICAL: We do NOT call login(res) here to avoid setting the session token.
       if (resCode === "601" || msg.includes('2-factor') || msg.includes('2fa') || msg.includes('due fattori') || msg.includes('عاملين')) {
         setPendingOrg(res.orgName || 'UNKNOWN');
+        setPendingUserName(res.userName || username);
         setState('twofa');
         return true;
       }
 
       if (resCode === "600" || msg.includes('verify') || msg.includes('email') || msg.includes('البريد')) {
         setPendingOrg(res.orgName || 'UNKNOWN');
+        setPendingUserName(res.userName || username);
         setState('emailVerify');
         return true;
       }
@@ -94,7 +97,7 @@ export const LoginScreen = ({ navigation }) => {
   const handleVerifyEmail = async () => {
     setState('loading');
     try {
-      await authApi.verifyEmail(pendingOrg || 'UNKNOWN', username, otpValue);
+      await authApi.verifyEmail(pendingOrg || 'UNKNOWN', pendingUserName || username, otpValue);
       Alert.alert(t('common.success'), 'Email verified successfully. Please login again.', [
         { text: 'OK', onPress: () => { setState('idle'); setOtpValue(''); } }
       ]);
@@ -108,7 +111,7 @@ export const LoginScreen = ({ navigation }) => {
   const handleVerify2fa = async () => {
     setState('loading');
     try {
-      const response = await authApi.verify2fa(pendingOrg || 'UNKNOWN', username, otpValue);
+      const response = await authApi.verify2fa(pendingOrg || 'UNKNOWN', pendingUserName || username, otpValue);
       login(response);
       
       const roles = response.roles || response.userData?.roles || [];
