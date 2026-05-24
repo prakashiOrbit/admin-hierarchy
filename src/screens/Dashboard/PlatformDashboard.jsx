@@ -75,9 +75,11 @@ const HomeContent = ({ onNavigate }) => {
         const orgList = Array.isArray(orgsData) ? orgsData : (Array.isArray(orgsData.data) ? orgsData.data : []);
         setOrgsCount(orgList.length);
 
-        const relativeTime = (dateStr) => {
-          if (!dateStr) return t('dashboard.just_now');
-          const diff = Date.now() - new Date(dateStr).getTime();
+        const relativeTime = (raw) => {
+          if (!raw) return t('dashboard.just_now');
+          // API returns Instant as float seconds (e.g. 1779601553.919); JS Date needs ms
+          const ms = typeof raw === 'number' && raw < 1e12 ? raw * 1000 : Number(raw);
+          const diff = Date.now() - ms;
           const mins = Math.floor(diff / 60000);
           if (mins < 2) return t('dashboard.just_now');
           if (mins < 60) return t('dashboard.minutes_ago', { count: mins });
