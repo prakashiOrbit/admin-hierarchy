@@ -84,7 +84,7 @@ const HospHomeContent = ({ role, onNavigate }) => {
   const { t } = useTranslation();
   const { user, token } = useAuth();
   const styles = createStyles(T);
-  const [homeStats, setHomeStats] = useState({ wards: null, beds: null, devices: null, staffing: null, patients: null });
+  const [homeStats, setHomeStats] = useState({ wards: null, beds: null, devices: null, staffing: null, patients: null, dayShiftNurses: null, eveningShiftNurses: null, nightShiftNurses: null });
   const [homeLoading, setHomeLoading] = useState(true);
 
   useEffect(() => {
@@ -92,11 +92,14 @@ const HospHomeContent = ({ role, onNavigate }) => {
     summaryApi.getHospitalSummary(user.orgName, user.hospitalCode, token)
       .then(summary => {
         setHomeStats({
-          wards:    summary?.stats?.wards         ?? null,
-          beds:     summary?.stats?.beds          ?? null,
-          devices:  summary?.stats?.totalDevices  ?? null,
-          staffing: summary?.stats?.totalNurses   ?? null,
-          patients: summary?.stats?.totalPatients ?? null,
+          wards:              summary?.stats?.wards              ?? null,
+          beds:               summary?.stats?.beds               ?? null,
+          devices:            summary?.stats?.totalDevices       ?? null,
+          staffing:           summary?.stats?.totalNurses        ?? null,
+          patients:           summary?.stats?.totalPatients      ?? null,
+          dayShiftNurses:     summary?.stats?.dayShiftNurses     ?? null,
+          eveningShiftNurses: summary?.stats?.eveningShiftNurses ?? null,
+          nightShiftNurses:   summary?.stats?.nightShiftNurses   ?? null,
         });
       })
       .catch(() => {})
@@ -156,13 +159,13 @@ const HospHomeContent = ({ role, onNavigate }) => {
         <Card style={styles.listCard}>
           <View style={styles.shiftRow}>
             {[
-              { l: t('dashboard.day'),     c: '#22D3EE' },
-              { l: t('dashboard.evening'), c: '#A78BFA' },
-              { l: t('dashboard.night'),   c: '#60A5FA' },
+              { l: t('dashboard.day'),     c: '#22D3EE', v: homeStats.dayShiftNurses },
+              { l: t('dashboard.evening'), c: '#A78BFA', v: homeStats.eveningShiftNurses },
+              { l: t('dashboard.night'),   c: '#60A5FA', v: homeStats.nightShiftNurses },
             ].map((s, i) => (
               <View key={i} style={[styles.shiftBox, { borderColor: T.borderSoft }]}>
                 <View style={styles.shiftHeader}><View style={[styles.shiftDot, { backgroundColor: s.c }]} /><Text style={[styles.shiftTitle, { color: T.textDim }]}>{s.l.toUpperCase()}</Text></View>
-                <Text style={styles.shiftCount}>—</Text>
+                <Text style={styles.shiftCount}>{homeLoading ? '…' : fmt(s.v)}</Text>
                 <Text style={styles.shiftUnit}>{t('dashboard.nurses')}</Text>
               </View>
             ))}
