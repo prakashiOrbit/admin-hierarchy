@@ -47,7 +47,7 @@ export const BulkAssignSheet = ({ doctorCode, doctorName, visible, onClose }) =>
     let ok = 0, fail = 0;
     for (const patientCode of selected) {
       try {
-        await assignmentApi.assign(user.orgName, user.hospitalCode, { doctorCode, patientCode }, token);
+        await assignmentApi.assign(user.orgName, user.hospitalCode, [{ doctorCode, patientCode }], token);
         ok++;
       } catch { fail++; }
     }

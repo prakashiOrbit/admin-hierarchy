@@ -29,7 +29,7 @@
     "welcome_back": "Vítejte zpět",
     "subtitle": "Přihlaste se pro správu svého IoMT majetku.",
     "username": "Uživatelské jméno",
-    "username_placeholder": "Zadejte uživatelské jméno",
+    "username_placeholder": "Uživatelské jméno nebo e-mail",
     "password": "Heslo",
     "password_placeholder": "••••••••",
     "forgot_password": "Zapomenuté heslo?",
@@ -150,7 +150,10 @@
     "roles_perms": "Role a oprávnění",
     "device_types": "Typy zařízení",
     "hours_ago": "před {{count}}h",
-    "minutes_ago": "před {{count}}min"
+    "minutes_ago": "před {{count}}min",
+    "nurse": "Zdravotní sestra",
+    "doctor": "Lékař",
+    "patient": "Pacient"
   },
   "users": {
     "first_name": "Křestní jméno",
@@ -299,7 +302,8 @@
     "city_eg": "Praha",
     "state_eg": "Praha",
     "country_eg": "Česká republika",
-    "pincode_eg": "11000"
+    "pincode_eg": "11000",
+    "select_profile": "Vyberte profil"
   },
   "actions": {
     "bed_actions": "Akce lůžka",
@@ -350,7 +354,10 @@
     "no_wards": "Nenalezena žádná oddělení.",
     "no_beds": "Nenalezena žádná lůžka.",
     "assigned": "Přiřazeno",
-    "admitted": "Přijato"
+    "admitted": "Přijato",
+    "select_shift": "Vybrat směnu",
+    "pick_shift_ward_bed": "Vyberte směnu, oddělení a postel",
+    "pick_patient_ward_bed": "Vyberte pacienta, oddělení a postel"
   },
   "settings": {
     "account": "Účet",
@@ -418,7 +425,22 @@
     "verify_cert": "Certifikát",
     "usage_fixed": "Pevné",
     "usage_mobile": "Mobilní",
-    "code_already_exists": "Kód zařízení \"{{code}}\" je již registrován. Použijte prosím jiný kód."
+    "code_already_exists": "Kód zařízení \"{{code}}\" je již registrován. Použijte prosím jiný kód.",
+    "config_title": "Přidat konfiguraci",
+    "config_comm_mode": "KOMUNIKAČNÍ REŽIM",
+    "config_push_hint": "WIFI_PUSH: zařízení odesílá data na server. Vyžaduje port a IP adresu.",
+    "config_pull_hint": "WIFI_PULL: server dotazuje zařízení. Vyžaduje pouze port.",
+    "config_parameters": "PARAMETRY KONFIGURACE",
+    "config_device_type": "Typ zařízení (konfigurace)",
+    "config_device_type_placeholder": "např. NK, ComenV7",
+    "config_port": "Port",
+    "config_port_placeholder": "např. 4001",
+    "config_ip": "IP adresa",
+    "config_ip_placeholder": "např. 192.168.1.100",
+    "config_preview": "NÁHLED PAYLOADU",
+    "config_submit": "Uložit konfiguraci",
+    "config_saved": "Konfigurace uložena pro {{code}}.",
+    "config_failed": "Nepodařilo se uložit konfiguraci."
   },
   "records": {
     "VITAL_SIGNS": "Vitální funkce",
@@ -468,5 +490,57 @@
     "title": "Oznámení",
     "all_caught_up": "Jste aktuální",
     "empty_hint": "Žádná nová oznámení právě teď."
+  },
+  "gateway": {
+    "detail_title": "Detaily brány",
+    "details_section": "Podrobnosti",
+    "code": "Kód brány",
+    "type": "Typ brány",
+    "os": "Operační systém",
+    "comm": "Komunikace",
+    "hospital": "Kód nemocnice",
+    "org": "Organizace"
+  },
+  "consent": {
+    "title": "Správa souhlasů",
+    "no_consents": "Zatím nebyly zaznamenány žádné souhlasy.",
+    "record_new": "Zaznamenat nový souhlas",
+    "record_title": "Zaznamenat souhlas",
+    "type": "Typ souhlasu",
+    "consented_by_type": "Souhlas udělen",
+    "consented_by_name": "Jméno osoby udělující souhlas",
+    "consented_by_name_placeholder": "např. MUDr. Novák",
+    "emergency_justification": "Nouzové odůvodnění",
+    "emergency_justification_placeholder": "Důvod, proč lékař uděluje souhlas za pacienta…",
+    "relationship": "Vztah k pacientovi",
+    "relationship_placeholder": "např. Matka, zákonný zástupce",
+    "poa_ref": "Reference plné moci",
+    "poa_ref_placeholder": "Referenční číslo dokumentu (volitelné)",
+    "notes": "Poznámky",
+    "notes_placeholder": "Jakékoli další poznámky…",
+    "submit": "Zaznamenat souhlas",
+    "recorded_success": "Souhlas byl úspěšně zaznamenán.",
+    "record_failed": "Nepodařilo se zaznamenat souhlas."
+  },
+  "bootstrap_user": {
+    "screen_title": "Vytvořit bootstrap uživatele",
+    "create_btn": "Bootstrap uživatel",
+    "info_title": "Bootstrap uživatel",
+    "info_body": "Vytvoří systémového uživatele s rolí brány nebo bootstrap rolí. Heslo je automaticky generováno serverem.",
+    "section_identity": "Identita",
+    "section_roles": "Role",
+    "username": "Uživatelské jméno",
+    "username_placeholder": "např. GATEWAY_01",
+    "first_name": "Křestní jméno",
+    "first_name_placeholder": "Volitelné",
+    "last_name": "Příjmení",
+    "last_name_placeholder": "Volitelné",
+    "description": "Popis",
+    "description_placeholder": "Volitelný popis",
+    "roles_hint": "Vyberte alespoň jednu roli pro tohoto uživatele.",
+    "password_auto": "Bezpečné heslo bude automaticky vygenerováno serverem a vráceno v odpovědi.",
+    "submit": "Vytvořit uživatele",
+    "created_success": "Bootstrap uživatel byl úspěšně vytvořen.",
+    "create_failed": "Vytvoření bootstrap uživatele se nezdařilo."
   }
 }

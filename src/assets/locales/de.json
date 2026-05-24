@@ -29,7 +29,7 @@
     "welcome_back": "Willkommen zurück",
     "subtitle": "Melden Sie sich an, um Ihr IoMT-Anwesen zu verwalten.",
     "username": "Benutzername",
-    "username_placeholder": "Geben Sie Ihren Benutzernamen ein",
+    "username_placeholder": "Benutzername oder E-Mail",
     "password": "Passwort",
     "password_placeholder": "••••••••",
     "forgot_password": "Passwort vergessen?",
@@ -150,7 +150,10 @@
     "roles_perms": "Rollen & Rechte",
     "device_types": "Gerätetypen",
     "hours_ago": "vor {{count}}h",
-    "minutes_ago": "vor {{count}}min"
+    "minutes_ago": "vor {{count}}min",
+    "nurse": "Pflegekraft",
+    "doctor": "Arzt",
+    "patient": "Patient"
   },
   "users": {
     "first_name": "Vorname",
@@ -299,7 +302,8 @@
     "city_eg": "Berlin",
     "state_eg": "Berlin",
     "country_eg": "Deutschland",
-    "pincode_eg": "10115"
+    "pincode_eg": "10115",
+    "select_profile": "Profil auswählen"
   },
   "actions": {
     "bed_actions": "Bett-Aktionen",
@@ -350,7 +354,10 @@
     "no_wards": "Keine Stationen.",
     "no_beds": "Keine Betten.",
     "assigned": "Zugewiesen",
-    "admitted": "Aufgenommen"
+    "admitted": "Aufgenommen",
+    "select_shift": "Schicht auswählen",
+    "pick_shift_ward_bed": "Schicht, Station und Bett auswählen",
+    "pick_patient_ward_bed": "Patient, Station und Bett auswählen"
   },
   "settings": {
     "account": "Konto",
@@ -418,7 +425,22 @@
     "verify_cert": "Zertifikat",
     "usage_fixed": "Fest",
     "usage_mobile": "Mobil",
-    "code_already_exists": "Gerätecode \"{{code}}\" ist bereits registriert. Bitte einen anderen Code verwenden."
+    "code_already_exists": "Gerätecode \"{{code}}\" ist bereits registriert. Bitte einen anderen Code verwenden.",
+    "config_title": "Konfiguration hinzufügen",
+    "config_comm_mode": "KOMMUNIKATIONSMODUS",
+    "config_push_hint": "WIFI_PUSH: Gerät sendet Daten an Server. Port und IP-Adresse erforderlich.",
+    "config_pull_hint": "WIFI_PULL: Server fragt Gerät ab. Nur Port erforderlich.",
+    "config_parameters": "KONFIGURATIONSPARAMETER",
+    "config_device_type": "Gerätetyp (Konfiguration)",
+    "config_device_type_placeholder": "z.B. NK, ComenV7",
+    "config_port": "Port",
+    "config_port_placeholder": "z.B. 4001",
+    "config_ip": "IP-Adresse",
+    "config_ip_placeholder": "z.B. 192.168.1.100",
+    "config_preview": "PAYLOAD-VORSCHAU",
+    "config_submit": "Konfiguration speichern",
+    "config_saved": "Konfiguration für {{code}} gespeichert.",
+    "config_failed": "Konfiguration konnte nicht gespeichert werden."
   },
   "records": {
     "VITAL_SIGNS": "Vitalzeichen",
@@ -468,5 +490,57 @@
     "title": "Benachrichtigungen",
     "all_caught_up": "Sie sind auf dem Laufenden",
     "empty_hint": "Keine neuen Benachrichtigungen gerade."
+  },
+  "gateway": {
+    "detail_title": "Gateway-Details",
+    "details_section": "Details",
+    "code": "Gateway-Code",
+    "type": "Gateway-Typ",
+    "os": "Betriebssystem",
+    "comm": "Kommunikation",
+    "hospital": "Krankenhauscode",
+    "org": "Organisation"
+  },
+  "consent": {
+    "title": "Einwilligungsverwaltung",
+    "no_consents": "Noch keine Einwilligungen aufgezeichnet.",
+    "record_new": "Neue Einwilligung aufzeichnen",
+    "record_title": "Einwilligung aufzeichnen",
+    "type": "Einwilligungstyp",
+    "consented_by_type": "Einwilligung durch",
+    "consented_by_name": "Name der einwilligenden Person",
+    "consented_by_name_placeholder": "z.B. Dr. Müller",
+    "emergency_justification": "Notfallbegründung",
+    "emergency_justification_placeholder": "Grund, warum der Arzt im Namen des Patienten einwilligt…",
+    "relationship": "Beziehung zum Patienten",
+    "relationship_placeholder": "z.B. Mutter, gesetzlicher Vormund",
+    "poa_ref": "Vollmachtreferenz",
+    "poa_ref_placeholder": "Dokumentreferenznummer (optional)",
+    "notes": "Anmerkungen",
+    "notes_placeholder": "Weitere Anmerkungen…",
+    "submit": "Einwilligung aufzeichnen",
+    "recorded_success": "Einwilligung erfolgreich aufgezeichnet.",
+    "record_failed": "Einwilligung konnte nicht aufgezeichnet werden."
+  },
+  "bootstrap_user": {
+    "screen_title": "Bootstrap-Benutzer erstellen",
+    "create_btn": "Bootstrap-Benutzer",
+    "info_title": "Bootstrap-Benutzer",
+    "info_body": "Erstellt einen Systembenutzer mit einer Gateway- oder Bootstrap-Rolle. Das Passwort wird automatisch vom Server generiert.",
+    "section_identity": "Identität",
+    "section_roles": "Rollen",
+    "username": "Benutzername",
+    "username_placeholder": "z.B. GATEWAY_01",
+    "first_name": "Vorname",
+    "first_name_placeholder": "Optional",
+    "last_name": "Nachname",
+    "last_name_placeholder": "Optional",
+    "description": "Beschreibung",
+    "description_placeholder": "Optionale Beschreibung",
+    "roles_hint": "Wählen Sie mindestens eine Rolle für diesen Benutzer aus.",
+    "password_auto": "Ein sicheres Passwort wird automatisch vom Server generiert und in der Antwort zurückgegeben.",
+    "submit": "Benutzer erstellen",
+    "created_success": "Bootstrap-Benutzer erfolgreich erstellt.",
+    "create_failed": "Bootstrap-Benutzer konnte nicht erstellt werden."
   }
 }

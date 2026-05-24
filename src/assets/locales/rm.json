@@ -29,7 +29,7 @@
     "welcome_back": "Binvignì enavos",
     "subtitle": "S'annunziar per administrar voss IoMT estate.",
     "username": "Num d'utilisader",
-    "username_placeholder": "Endatar num d'utilisader",
+    "username_placeholder": "Num d'utilisader u e-mail",
     "password": "Parola d'ordine",
     "password_placeholder": "••••••••",
     "forgot_password": "Oublià la parola d'ordine?",
@@ -150,7 +150,10 @@
     "roles_perms": "Rollas & Permissiuns",
     "device_types": "Tips d'apparats",
     "hours_ago": "{{count}}h avant",
-    "minutes_ago": "{{count}}min avant"
+    "minutes_ago": "{{count}}min avant",
+    "nurse": "Sursetta",
+    "doctor": "Medi",
+    "patient": "Pazient"
   },
   "users": {
     "first_name": "Prenum",
@@ -299,7 +302,8 @@
     "city_eg": "Cuira",
     "state_eg": "Grischun",
     "country_eg": "Svizra",
-    "pincode_eg": "7000"
+    "pincode_eg": "7000",
+    "select_profile": "Tscherner in profil"
   },
   "actions": {
     "bed_actions": "Acziuns letg",
@@ -350,7 +354,10 @@
     "no_wards": "Naginas secziuns chattadas.",
     "no_beds": "Nagins letgs chattads.",
     "assigned": "Assegnà",
-    "admitted": "Admess"
+    "admitted": "Admess",
+    "select_shift": "Tscherner selecziunar",
+    "pick_shift_ward_bed": "Tscherner, staziunament e letg tscherner",
+    "pick_patient_ward_bed": "Patient, staziunament e letg tscherner"
   },
   "settings": {
     "account": "Conto",
@@ -418,7 +425,22 @@
     "verify_cert": "Certificat",
     "usage_fixed": "Fix",
     "usage_mobile": "Mobil",
-    "code_already_exists": "Il code d'apparatura \"{{code}}\" è gia registrà. Utilisai p.f. in auter code."
+    "code_already_exists": "Il code d'apparatura \"{{code}}\" è gia registrà. Utilisai p.f. in auter code.",
+    "config_title": "Agiuntar configurazion",
+    "config_comm_mode": "MODA DA COMMUNICAZIUN",
+    "config_push_hint": "WIFI_PUSH: l'apparat trametta datas al server. Dovra port ed adressa IP.",
+    "config_pull_hint": "WIFI_PULL: il server dumonda l'apparat. Dovra mo il port.",
+    "config_parameters": "PARAMETERS DA CONFIGURAZION",
+    "config_device_type": "Tip d'apparat (config)",
+    "config_device_type_placeholder": "ex. NK, ComenV7",
+    "config_port": "Port",
+    "config_port_placeholder": "ex. 4001",
+    "config_ip": "Adressa IP",
+    "config_ip_placeholder": "ex. 192.168.1.100",
+    "config_preview": "PREVISTA DAL PAYLOAD",
+    "config_submit": "Memorisar configurazion",
+    "config_saved": "Configurazion memorisada per {{code}}.",
+    "config_failed": "Memorisaziun da configurazion fallida."
   },
   "records": {
     "VITAL_SIGNS": "Signals vitals",
@@ -468,5 +490,57 @@
     "title": "Communicaziuns",
     "all_caught_up": "Vus essas actualisads",
     "empty_hint": "Naginas communicaziuns novas en quest mument."
+  },
+  "gateway": {
+    "detail_title": "Detagls da gateway",
+    "details_section": "Detagls",
+    "code": "Code gateway",
+    "type": "Tip gateway",
+    "os": "Sistema operativ",
+    "comm": "Communicaziun",
+    "hospital": "Code ospital",
+    "org": "Organisaziun"
+  },
+  "consent": {
+    "title": "Gestiun da consentiment",
+    "no_consents": "Nagin consentiment registrà fin uss.",
+    "record_new": "Registrar nov consentiment",
+    "record_title": "Registrar consentiment",
+    "type": "Tip da consentiment",
+    "consented_by_type": "Consentì da",
+    "consented_by_name": "Num da la persuna che consenta",
+    "consented_by_name_placeholder": "ex. Dr. Caduff",
+    "emergency_justification": "Giustificaziun d'urgenza",
+    "emergency_justification_placeholder": "Motivs perché il medi consenta per il pazient…",
+    "relationship": "Relaziun cul pazient",
+    "relationship_placeholder": "ex. Mamma, tutour legal",
+    "poa_ref": "Referenza da la procura",
+    "poa_ref_placeholder": "Numer da referenza dal document (facultativ)",
+    "notes": "Annotaziuns",
+    "notes_placeholder": "Ulteriuras annotaziuns…",
+    "submit": "Registrar consentiment",
+    "recorded_success": "Consentiment registrà cun success.",
+    "record_failed": "Registraziun dal consentiment fallida."
+  },
+  "bootstrap_user": {
+    "screen_title": "Crear utilisader bootstrap",
+    "create_btn": "Utilisader bootstrap",
+    "info_title": "Utilisader bootstrap",
+    "info_body": "Crea in utilisader da sistem cun in rolla gateway u bootstrap. La pled-clav vegn generada automaticamain dal server.",
+    "section_identity": "Identitad",
+    "section_roles": "Rollas",
+    "username": "Num d'utilisader",
+    "username_placeholder": "p.ex. GATEWAY_01",
+    "first_name": "Prenum",
+    "first_name_placeholder": "Opziunal",
+    "last_name": "Num da famiglia",
+    "last_name_placeholder": "Opziunal",
+    "description": "Descripziun",
+    "description_placeholder": "Descripziun opziunala",
+    "roles_hint": "Tscherna almain ina rolla per quest utilisader.",
+    "password_auto": "Ina pled-clav segira vegn generada automaticamain dal server e returna en la resposta.",
+    "submit": "Crear utilisader",
+    "created_success": "Utilisader bootstrap creà cun success.",
+    "create_failed": "Creaziun da l'utilisader bootstrap fallida."
   }
 }

@@ -7,8 +7,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
-import { wardApi, bedApi, patientApi, nurseApi } from '../services/api';
-import { IconDoor, IconBed, IconUser, IconChevron } from '../icons';
+import { wardApi, bedApi, patientApi, nurseApi, shiftApi } from '../services/api';
+import { IconDoor, IconBed, IconUser, IconChevron, IconClock } from '../icons';
 
 export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
   const { theme: T } = useTheme();
@@ -17,14 +17,29 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
   const { user, token } = useAuth();
   const styles = createStyles(T);
 
+  // mode drives which step is shown
+  // bed assignment:   main → shift → ward → bed
+  // admit patient:    main → admitPatient → admitWard → admitBed
   const [mode, setMode] = useState('main');
+  const [shifts, setShifts] = useState([]);
   const [wards, setWards] = useState([]);
   const [beds, setBeds] = useState([]);
   const [patients, setPatients] = useState([]);
+  const [selectedShift, setSelectedShift] = useState(null);
   const [selectedWard, setSelectedWard] = useState(null);
+  const [selectedPatient, setSelectedPatient] = useState(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(null);
   const [query, setQuery] = useState('');
+
+  const loadShifts = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await shiftApi.listAll(user.orgName, user.hospitalCode, token);
+      setShifts(Array.isArray(data) ? data : []);
+    } catch { setShifts([]); }
+    finally { setLoading(false); }
+  }, [user?.orgName, user?.hospitalCode, token]);
 
   const loadWards = useCallback(async () => {
     setLoading(true);
@@ -56,55 +71,87 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
   const handleClose = () => {
     setMode('main');
     setQuery('');
+    setSelectedShift(null);
     setSelectedWard(null);
+    setSelectedPatient(null);
     onClose();
   };
 
-  const goToWard = () => { setQuery(''); setMode('ward'); loadWards(); };
-
-  const goToBed = (ward) => {
-    setSelectedWard(ward);
-    setQuery('');
-    setMode('bed');
-    loadBeds(ward.wardCode);
-  };
-
-  const goToAdmitPatient = () => { setQuery(''); setMode('admitPatient'); loadPatients(); };
+  // ── Bed Assignment flow: main → shift → ward → bed ────────────────────────
+  const goToShift = () => { setQuery(''); setMode('shift'); loadShifts(); };
+  const goToWard = (shift) => { setSelectedShift(shift); setQuery(''); setMode('ward'); loadWards(); };
+  const goToBed = (ward) => { setSelectedWard(ward); setQuery(''); setMode('bed'); loadBeds(ward.wardCode); };
 
   const handleAssignBed = async (bed) => {
     setSaving(bed.bedCode);
     try {
-      await nurseApi.assignBed(user.orgName, user.hospitalCode, nurse.nurseCode, { bedCode: bed.bedCode }, token);
-      Alert.alert(t('actions.assigned'), t('actions.nurse_bed_assigned', { bed: bed.bedCode, name: `${nurse.firstName} ${nurse.lastName}` }));
+      await nurseApi.assignBed(user.orgName, user.hospitalCode, {
+        nurseCode: nurse.nurseCode,
+        shiftCode: selectedShift.shiftCode,
+        wardCode: selectedWard.wardCode,
+        bedCode: bed.bedCode,
+      }, token);
+      Alert.alert(
+        t('actions.assigned'),
+        t('actions.nurse_bed_assigned', { bed: bed.bedCode, name: `${nurse.firstName} ${nurse.lastName}` }),
+      );
       handleClose();
     } catch (e) {
       Alert.alert(t('common.error'), e.message || 'Failed to assign bed.');
     } finally { setSaving(null); }
   };
 
-  const handleAdmitPatient = async (patient) => {
-    setSaving(patient.patientCode);
+  // ── Admit Patient flow: main → admitPatient → admitWard → admitBed ────────
+  const goToAdmitPatient = () => { setQuery(''); setMode('admitPatient'); loadPatients(); };
+  const goToAdmitWard = (patient) => { setSelectedPatient(patient); setQuery(''); setMode('admitWard'); loadWards(); };
+  const goToAdmitBed = (ward) => { setSelectedWard(ward); setQuery(''); setMode('admitBed'); loadBeds(ward.wardCode); };
+
+  const handleAdmitPatient = async (bed) => {
+    setSaving(bed.bedCode);
     try {
-      await nurseApi.admitPatient(user.orgName, user.hospitalCode, nurse.nurseCode, { patientCode: patient.patientCode }, token);
-      Alert.alert(t('actions.admitted'), t('actions.nurse_patient_admitted', { patient: `${patient.firstName} ${patient.lastName}`, nurse: `${nurse.firstName} ${nurse.lastName}` }));
+      await nurseApi.admitPatient(user.orgName, user.hospitalCode, {
+        nurseCode: nurse.nurseCode,
+        patientCode: selectedPatient.patientCode,
+        wardCode: selectedWard.wardCode,
+        bedCode: bed.bedCode,
+      }, token);
+      Alert.alert(
+        t('actions.admitted'),
+        t('actions.nurse_patient_admitted', {
+          patient: `${selectedPatient.firstName} ${selectedPatient.lastName}`,
+          nurse: `${nurse.firstName} ${nurse.lastName}`,
+        }),
+      );
       handleClose();
     } catch (e) {
       Alert.alert(t('common.error'), e.message || 'Failed to admit patient.');
     } finally { setSaving(null); }
   };
 
+  // ── Filtered lists ────────────────────────────────────────────────────────
+  const filteredShifts = shifts.filter(s =>
+    s.shiftCode?.toLowerCase().includes(query.toLowerCase()) ||
+    s.shiftName?.toLowerCase().includes(query.toLowerCase()),
+  );
   const filteredWards = wards.filter(w =>
     w.wardCode?.toLowerCase().includes(query.toLowerCase()) ||
-    w.wardName?.toLowerCase().includes(query.toLowerCase())
+    w.wardName?.toLowerCase().includes(query.toLowerCase()),
   );
-
-  const filteredBeds = beds.filter(b =>
-    b.bedCode?.toLowerCase().includes(query.toLowerCase())
-  );
-
+  const filteredBeds = beds.filter(b => b.bedCode?.toLowerCase().includes(query.toLowerCase()));
   const filteredPatients = patients.filter(p =>
     `${p.firstName} ${p.lastName}`.toLowerCase().includes(query.toLowerCase()) ||
-    p.patientCode?.toLowerCase().includes(query.toLowerCase())
+    p.patientCode?.toLowerCase().includes(query.toLowerCase()),
+  );
+
+  // ── Render helpers ────────────────────────────────────────────────────────
+  const renderSearchInput = (placeholder) => (
+    <RNTextInput
+      style={[styles.searchInput, { color: T.text, borderColor: T.borderSoft, backgroundColor: T.surface }]}
+      placeholder={placeholder}
+      placeholderTextColor={T.textFaint}
+      value={query}
+      onChangeText={setQuery}
+    />
   );
 
   const renderMain = () => (
@@ -117,13 +164,13 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
       </View>
       <Text style={styles.subtitle}>{nurse?.firstName} {nurse?.lastName}</Text>
 
-      <TouchableOpacity style={styles.actionItem} onPress={goToWard}>
+      <TouchableOpacity style={styles.actionItem} onPress={goToShift}>
         <View style={[styles.actionIcon, { backgroundColor: T.accentSoft }]}>
           <IconBed size={18} color={T.accent} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.actionTitle}>{t('actions.assign_to_bed')}</Text>
-          <Text style={styles.actionSubtitle}>{t('actions.pick_ward_bed')}</Text>
+          <Text style={styles.actionSubtitle}>{t('actions.pick_shift_ward_bed')}</Text>
         </View>
         <IconChevron size={16} color={T.textFaint} />
       </TouchableOpacity>
@@ -134,29 +181,55 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.actionTitle}>{t('actions.admit_patient')}</Text>
-          <Text style={styles.actionSubtitle}>{t('actions.register_caregiver')}</Text>
+          <Text style={styles.actionSubtitle}>{t('actions.pick_patient_ward_bed')}</Text>
         </View>
         <IconChevron size={16} color={T.textFaint} />
       </TouchableOpacity>
     </>
   );
 
-  const renderWard = () => (
+  const renderShift = () => (
     <>
       <View style={styles.sheetHeader}>
         <TouchableOpacity onPress={() => { setMode('main'); setQuery(''); }}>
           <Text style={styles.backText}>‹ {t('common.back')}</Text>
         </TouchableOpacity>
+        <Text style={styles.sheetTitle}>{t('actions.select_shift')}</Text>
+        <View style={{ width: 50 }} />
+      </View>
+      {renderSearchInput(t('actions.search_shifts'))}
+      {loading ? (
+        <ActivityIndicator color={T.accent} style={{ marginVertical: 24 }} />
+      ) : (
+        <ScrollView style={{ maxHeight: 320 }}>
+          {filteredShifts.map(s => (
+            <TouchableOpacity key={s.shiftCode} style={styles.listItem} onPress={() => goToWard(s)}>
+              <View style={[styles.listIcon, { backgroundColor: T.accentSoft }]}>
+                <IconClock size={16} color={T.accent} />
+              </View>
+              <View style={{ flex: 1, marginStart: 12 }}>
+                <Text style={styles.listName}>{s.shiftName || s.shiftCode}</Text>
+                <Text style={styles.listMeta}>{s.shiftCode}</Text>
+              </View>
+              <IconChevron size={14} color={T.textFaint} />
+            </TouchableOpacity>
+          ))}
+          {filteredShifts.length === 0 && <Text style={styles.emptyText}>{t('actions.no_shifts')}</Text>}
+        </ScrollView>
+      )}
+    </>
+  );
+
+  const renderWard = () => (
+    <>
+      <View style={styles.sheetHeader}>
+        <TouchableOpacity onPress={() => { setMode('shift'); setQuery(''); }}>
+          <Text style={styles.backText}>‹ {t('common.back')}</Text>
+        </TouchableOpacity>
         <Text style={styles.sheetTitle}>{t('actions.select_ward')}</Text>
         <View style={{ width: 50 }} />
       </View>
-      <RNTextInput
-        style={[styles.searchInput, { color: T.text, borderColor: T.borderSoft, backgroundColor: T.surface }]}
-        placeholder={t('actions.search_wards')}
-        placeholderTextColor={T.textFaint}
-        value={query}
-        onChangeText={setQuery}
-      />
+      {renderSearchInput(t('actions.search_wards'))}
       {loading ? (
         <ActivityIndicator color={T.accent} style={{ marginVertical: 24 }} />
       ) : (
@@ -188,13 +261,7 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
         <Text style={styles.sheetTitle}>{t('actions.ward_beds', { code: selectedWard?.wardCode })}</Text>
         <View style={{ width: 50 }} />
       </View>
-      <RNTextInput
-        style={[styles.searchInput, { color: T.text, borderColor: T.borderSoft, backgroundColor: T.surface }]}
-        placeholder={t('actions.search_beds')}
-        placeholderTextColor={T.textFaint}
-        value={query}
-        onChangeText={setQuery}
-      />
+      {renderSearchInput(t('actions.search_beds'))}
       {loading ? (
         <ActivityIndicator color={T.accent} style={{ marginVertical: 24 }} />
       ) : (
@@ -234,30 +301,16 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
         <Text style={styles.sheetTitle}>{t('actions.admit_patient')}</Text>
         <View style={{ width: 50 }} />
       </View>
-      <RNTextInput
-        style={[styles.searchInput, { color: T.text, borderColor: T.borderSoft, backgroundColor: T.surface }]}
-        placeholder={t('actions.search_patients')}
-        placeholderTextColor={T.textFaint}
-        value={query}
-        onChangeText={setQuery}
-      />
+      {renderSearchInput(t('actions.search_patients'))}
       {loading ? (
         <ActivityIndicator color={T.accent} style={{ marginVertical: 24 }} />
       ) : (
         <ScrollView style={{ maxHeight: 320 }}>
           {filteredPatients.map(p => (
-            <TouchableOpacity
-              key={p.patientCode}
-              style={styles.listItem}
-              onPress={() => handleAdmitPatient(p)}
-              disabled={!!saving}
-            >
-              {saving === p.patientCode
-                ? <ActivityIndicator size="small" color={T.accent} style={{ width: 40, height: 40 }} />
-                : <View style={[styles.listIcon, { backgroundColor: 'rgba(16,185,129,0.1)' }]}>
-                    <IconUser size={16} color="#10b981" />
-                  </View>
-              }
+            <TouchableOpacity key={p.patientCode} style={styles.listItem} onPress={() => goToAdmitWard(p)}>
+              <View style={[styles.listIcon, { backgroundColor: 'rgba(16,185,129,0.1)' }]}>
+                <IconUser size={16} color="#10b981" />
+              </View>
               <View style={{ flex: 1, marginStart: 12 }}>
                 <Text style={styles.listName}>{p.firstName} {p.lastName}</Text>
                 <Text style={styles.listMeta}>{p.patientCode}</Text>
@@ -266,6 +319,78 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
             </TouchableOpacity>
           ))}
           {filteredPatients.length === 0 && <Text style={styles.emptyText}>{t('actions.no_patients')}</Text>}
+        </ScrollView>
+      )}
+    </>
+  );
+
+  const renderAdmitWard = () => (
+    <>
+      <View style={styles.sheetHeader}>
+        <TouchableOpacity onPress={() => { setMode('admitPatient'); setQuery(''); }}>
+          <Text style={styles.backText}>‹ {t('common.back')}</Text>
+        </TouchableOpacity>
+        <Text style={styles.sheetTitle}>{t('actions.select_ward')}</Text>
+        <View style={{ width: 50 }} />
+      </View>
+      {renderSearchInput(t('actions.search_wards'))}
+      {loading ? (
+        <ActivityIndicator color={T.accent} style={{ marginVertical: 24 }} />
+      ) : (
+        <ScrollView style={{ maxHeight: 320 }}>
+          {filteredWards.map(w => (
+            <TouchableOpacity key={w.wardCode} style={styles.listItem} onPress={() => goToAdmitBed(w)}>
+              <View style={[styles.listIcon, { backgroundColor: T.surface2 }]}>
+                <IconDoor size={16} color={T.textDim} />
+              </View>
+              <View style={{ flex: 1, marginStart: 12 }}>
+                <Text style={styles.listName}>{w.wardName || w.wardCode}</Text>
+                <Text style={styles.listMeta}>{w.wardCode}</Text>
+              </View>
+              <IconChevron size={14} color={T.textFaint} />
+            </TouchableOpacity>
+          ))}
+          {filteredWards.length === 0 && <Text style={styles.emptyText}>{t('actions.no_wards')}</Text>}
+        </ScrollView>
+      )}
+    </>
+  );
+
+  const renderAdmitBed = () => (
+    <>
+      <View style={styles.sheetHeader}>
+        <TouchableOpacity onPress={() => { setMode('admitWard'); setQuery(''); }}>
+          <Text style={styles.backText}>‹ {t('common.back')}</Text>
+        </TouchableOpacity>
+        <Text style={styles.sheetTitle}>{t('actions.ward_beds', { code: selectedWard?.wardCode })}</Text>
+        <View style={{ width: 50 }} />
+      </View>
+      {renderSearchInput(t('actions.search_beds'))}
+      {loading ? (
+        <ActivityIndicator color={T.accent} style={{ marginVertical: 24 }} />
+      ) : (
+        <ScrollView style={{ maxHeight: 320 }}>
+          {filteredBeds.map(b => (
+            <TouchableOpacity
+              key={b.bedCode}
+              style={styles.listItem}
+              onPress={() => handleAdmitPatient(b)}
+              disabled={!!saving}
+            >
+              {saving === b.bedCode
+                ? <ActivityIndicator size="small" color={T.accent} style={{ width: 40, height: 40 }} />
+                : <View style={[styles.listIcon, { backgroundColor: 'rgba(16,185,129,0.1)' }]}>
+                    <IconBed size={16} color="#10b981" />
+                  </View>
+              }
+              <View style={{ flex: 1, marginStart: 12 }}>
+                <Text style={styles.listName}>{b.bedCode}</Text>
+                <Text style={styles.listMeta}>{b.status || '—'}</Text>
+              </View>
+              <IconChevron size={14} color={T.textFaint} />
+            </TouchableOpacity>
+          ))}
+          {filteredBeds.length === 0 && <Text style={styles.emptyText}>{t('actions.no_beds')}</Text>}
         </ScrollView>
       )}
     </>
@@ -285,9 +410,12 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
       <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 24) }]}>
         <View style={styles.handle} />
         {mode === 'main' && renderMain()}
+        {mode === 'shift' && renderShift()}
         {mode === 'ward' && renderWard()}
         {mode === 'bed' && renderBed()}
         {mode === 'admitPatient' && renderAdmitPatient()}
+        {mode === 'admitWard' && renderAdmitWard()}
+        {mode === 'admitBed' && renderAdmitBed()}
       </View>
     </Modal>
   );

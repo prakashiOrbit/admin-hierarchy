@@ -66,7 +66,7 @@ export const PatientActionsSheet = ({ patient, visible, onClose }) => {
   const handleTransfer = async (ward) => {
     setSaving(true);
     try {
-      await patientApi.transfer(user.orgName, user.hospitalCode, patient.patientCode, { targetWardCode: ward.wardCode }, token);
+      await patientApi.transfer(user.orgName, user.hospitalCode, patient.patientCode, { wardCode: ward.wardCode }, token);
       Alert.alert(t('common.done'), t('actions.patient_transferred_msg', { name: `${patient.firstName} ${patient.lastName}`, ward: ward.wardName }), [
         { text: t('common.ok'), onPress: handleClose },
       ]);

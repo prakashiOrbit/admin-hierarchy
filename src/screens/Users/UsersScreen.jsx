@@ -6,9 +6,9 @@ import { useAuth } from '../../context/AuthContext';
 import { userApi } from '../../services/api';
 import { Card, SectionHeader, SearchBar, Chip, Avatar, RoleBadge, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
-import { IconFilter, IconPlus, IconUsers } from '../../icons';
+import { IconFilter, IconPlus, IconUsers, IconShield } from '../../icons';
 
-export const UsersScreen = ({ onSelectUser }) => {
+export const UsersScreen = ({ onSelectUser, onCreateBootstrapUser }) => {
   const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
@@ -117,7 +117,15 @@ export const UsersScreen = ({ onSelectUser }) => {
           ))}
         </ScrollView>
 
-        <SectionHeader title={t('dashboard.users', 'System Users')} subtitle={`${filtered.length} ${t('dashboard.registered_users', 'members').replace(/\d+ /, '')}`} />
+        <View style={styles.sectionRow}>
+          <SectionHeader title={t('dashboard.users', 'System Users')} subtitle={`${filtered.length} ${t('dashboard.registered_users', 'members').replace(/\d+ /, '')}`} />
+          {onCreateBootstrapUser && (
+            <Btn variant="surface" size="sm" onPress={onCreateBootstrapUser} style={styles.bootstrapBtn}>
+              <IconShield size={14} color={T.accent} />
+              <Text style={{ fontSize: 12, fontWeight: '600', color: T.accent }}>{t('bootstrap_user.create_btn')}</Text>
+            </Btn>
+          )}
+        </View>
 
         {/* List */}
         {loading && !refreshing ? (
@@ -185,6 +193,8 @@ const createStyles = (T) => StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 20,
   },
+  sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  bootstrapBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, height: 32 },
   list: {
     gap: 10,
   },

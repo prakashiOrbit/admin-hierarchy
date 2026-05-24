@@ -5,10 +5,11 @@ import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, Avatar, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
-import { IconUser, IconClock, IconCalendar, IconEdit, IconHeart, IconLocation, IconPhone, IconMail, IconPlus, IconAlert } from '../../icons';
+import { IconUser, IconClock, IconCalendar, IconEdit, IconHeart, IconLocation, IconPhone, IconMail, IconPlus, IconAlert, IconShield } from '../../icons';
 import { patientApi } from '../../services/api';
 import { PatientActionsSheet } from '../../components/PatientActionsSheet';
 import { PatientInfoSheet } from '../../components/PatientInfoSheet';
+import { ConsentSheet } from '../../components/ConsentSheet';
 
 export const PatientDetailScreen = ({ patientId: patientCode, onBack, onAssign, onEdit }) => {
   const { t } = useTranslation();
@@ -21,6 +22,7 @@ export const PatientDetailScreen = ({ patientId: patientCode, onBack, onAssign, 
   const [error, setError] = useState(null);
   const [showActions, setShowActions] = useState(false);
   const [showInfoSheet, setShowInfoSheet] = useState(false);
+  const [showConsent, setShowConsent] = useState(false);
 
   useEffect(() => {
     if (!patientCode || !user?.orgName || !user?.hospitalCode) return;
@@ -117,6 +119,11 @@ export const PatientDetailScreen = ({ patientId: patientCode, onBack, onAssign, 
           <Text style={styles.btnText}>{t('actions.discharge_transfer')}</Text>
         </Btn>
 
+        <Btn variant="surface" style={[styles.secondaryBtn, { marginTop: 8 }]} onPress={() => setShowConsent(true)}>
+          <IconShield size={16} color={T.text} />
+          <Text style={styles.btnText}>{t('consent.title')}</Text>
+        </Btn>
+
         <Btn variant="surface" style={[styles.secondaryBtn, { marginTop: 8 }]} onPress={() => setShowInfoSheet(true)}>
           <IconHeart size={16} color={T.text} />
           <Text style={styles.btnText}>{t('entity.health_records')}</Text>
@@ -127,6 +134,11 @@ export const PatientDetailScreen = ({ patientId: patientCode, onBack, onAssign, 
         </Btn>
       </ScrollView>
 
+      <ConsentSheet
+        patient={p}
+        visible={showConsent}
+        onClose={() => setShowConsent(false)}
+      />
       <PatientActionsSheet
         patient={p}
         visible={showActions}

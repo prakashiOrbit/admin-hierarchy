@@ -314,3 +314,9 @@ export const IconBack = (p) => (
     <Path d="M19 12H5M12 19l-7-7 7-7" />
   </I>
 );
+
+export const IconWifi = (p) => (
+  <I {...p}>
+    <Path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01" />
+  </I>
+);

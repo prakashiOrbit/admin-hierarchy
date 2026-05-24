@@ -29,7 +29,7 @@
     "welcome_back": "مرحباً بعودتك",
     "subtitle": "سجل الدخول لإدارة عقارات IoMT الخاصة بك.",
     "username": "اسم المستخدم",
-    "username_placeholder": "أدخل اسم المستخدم",
+    "username_placeholder": "اسم المستخدم أو البريد الإلكتروني",
     "password": "كلمة المرور",
     "password_placeholder": "••••••••",
     "forgot_password": "نسيت كلمة المرور؟",
@@ -150,7 +150,10 @@
     "roles_perms": "الأدوار والأذونات",
     "device_types": "أنواع الأجهزة",
     "hours_ago": "منذ {{count}} ساعة",
-    "minutes_ago": "منذ {{count}} دقيقة"
+    "minutes_ago": "منذ {{count}} دقيقة",
+    "nurse": "ممرضة",
+    "doctor": "طبيب",
+    "patient": "مريض"
   },
   "users": {
     "first_name": "الاسم الأول",
@@ -299,7 +302,8 @@
     "city_eg": "الرياض",
     "state_eg": "منطقة الرياض",
     "country_eg": "السعودية",
-    "pincode_eg": "12345"
+    "pincode_eg": "12345",
+    "select_profile": "اختر ملف تعريف"
   },
   "actions": {
     "bed_actions": "إجراءات السرير",
@@ -350,7 +354,10 @@
     "no_wards": "لم يتم العثور على أجنحة.",
     "no_beds": "لم يتم العثور على أسرة.",
     "assigned": "تم التعيين",
-    "admitted": "تم القبول"
+    "admitted": "تم القبول",
+    "select_shift": "اختر الوردية",
+    "pick_shift_ward_bed": "اختر الوردية، الجناح، ثم السرير",
+    "pick_patient_ward_bed": "اختر المريض، الجناح، ثم السرير"
   },
   "settings": {
     "account": "الحساب",
@@ -418,7 +425,22 @@
     "verify_cert": "شهادة",
     "usage_fixed": "ثابت",
     "usage_mobile": "متنقل",
-    "code_already_exists": "كود الجهاز \"{{code}}\" مسجّل بالفعل. يرجى استخدام كود مختلف."
+    "code_already_exists": "كود الجهاز \"{{code}}\" مسجّل بالفعل. يرجى استخدام كود مختلف.",
+    "config_title": "إضافة تكوين",
+    "config_comm_mode": "وضع الاتصال",
+    "config_push_hint": "WIFI_PUSH: يرسل الجهاز البيانات إلى الخادم. يتطلب منفذاً وعنوان IP.",
+    "config_pull_hint": "WIFI_PULL: يستطلع الخادم الجهاز. يتطلب منفذاً فقط.",
+    "config_parameters": "معاملات التكوين",
+    "config_device_type": "نوع الجهاز (التكوين)",
+    "config_device_type_placeholder": "مثال: NK, ComenV7",
+    "config_port": "المنفذ",
+    "config_port_placeholder": "مثال: 4001",
+    "config_ip": "عنوان IP",
+    "config_ip_placeholder": "مثال: 192.168.1.100",
+    "config_preview": "معاينة الحمولة",
+    "config_submit": "حفظ التكوين",
+    "config_saved": "تم حفظ التكوين لـ {{code}}.",
+    "config_failed": "فشل حفظ التكوين."
   },
   "records": {
     "VITAL_SIGNS": "العلامات الحيوية",
@@ -468,5 +490,57 @@
     "title": "الإشعارات",
     "all_caught_up": "أنت على اطلاع كامل",
     "empty_hint": "لا إشعارات جديدة الآن."
+  },
+  "gateway": {
+    "detail_title": "تفاصيل البوابة",
+    "details_section": "التفاصيل",
+    "code": "رمز البوابة",
+    "type": "نوع البوابة",
+    "os": "نظام التشغيل",
+    "comm": "الاتصال",
+    "hospital": "رمز المستشفى",
+    "org": "المنظمة"
+  },
+  "consent": {
+    "title": "إدارة الموافقة",
+    "no_consents": "لم يتم تسجيل أي موافقة بعد.",
+    "record_new": "تسجيل موافقة جديدة",
+    "record_title": "تسجيل الموافقة",
+    "type": "نوع الموافقة",
+    "consented_by_type": "الموافقة بواسطة",
+    "consented_by_name": "اسم الشخص الموافق",
+    "consented_by_name_placeholder": "مثال: د. أحمد",
+    "emergency_justification": "مبرر الطوارئ",
+    "emergency_justification_placeholder": "سبب موافقة الطبيب نيابةً عن المريض…",
+    "relationship": "العلاقة بالمريض",
+    "relationship_placeholder": "مثال: الأم، الوصي القانوني",
+    "poa_ref": "مرجع وكالة",
+    "poa_ref_placeholder": "رقم مرجع المستند (اختياري)",
+    "notes": "ملاحظات",
+    "notes_placeholder": "أي ملاحظات إضافية…",
+    "submit": "تسجيل الموافقة",
+    "recorded_success": "تم تسجيل الموافقة بنجاح.",
+    "record_failed": "فشل تسجيل الموافقة."
+  },
+  "bootstrap_user": {
+    "screen_title": "إنشاء مستخدم أساسي",
+    "create_btn": "مستخدم أساسي",
+    "info_title": "مستخدم أساسي",
+    "info_body": "ينشئ مستخدمًا على مستوى النظام بدور بوابة أو دور أساسي. يتم إنشاء كلمة المرور تلقائيًا بواسطة الخادم.",
+    "section_identity": "الهوية",
+    "section_roles": "الأدوار",
+    "username": "اسم المستخدم",
+    "username_placeholder": "مثال: GATEWAY_01",
+    "first_name": "الاسم الأول",
+    "first_name_placeholder": "اختياري",
+    "last_name": "اسم العائلة",
+    "last_name_placeholder": "اختياري",
+    "description": "الوصف",
+    "description_placeholder": "وصف اختياري",
+    "roles_hint": "حدد دورًا واحدًا على الأقل لهذا المستخدم.",
+    "password_auto": "سيتم إنشاء كلمة مرور آمنة تلقائيًا بواسطة الخادم وإرجاعها في الاستجابة.",
+    "submit": "إنشاء مستخدم",
+    "created_success": "تم إنشاء المستخدم الأساسي بنجاح.",
+    "create_failed": "فشل إنشاء المستخدم الأساسي."
   }
 }

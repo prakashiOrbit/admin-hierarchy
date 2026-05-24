@@ -189,6 +189,15 @@ export const userApi = {
       params: { locale }, // Note: Back-end expects this as a @RequestParam
     });
   },
+
+  // --- Bootstrap User ---
+  createBootstrapUser: (orgName, userData, token) => {
+    return apiRequest(`/${orgName}/user/create`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify(userData),
+    });
+  },
 };
 
 export const summaryApi = {
@@ -221,6 +230,11 @@ export const deviceTypeApi = {
     }),
   listTypes: (orgName, token) =>
     apiRequest(`/${orgName}/devicetype/all`, {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${token}` },
+    }),
+  listProfiles: (orgName, token) =>
+    apiRequest(`/${orgName}/devicetype/profiles`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
@@ -280,26 +294,28 @@ export const bedApi = {
       headers: { 'Authorization': `Bearer ${token}` },
     }),
   assignPatient: (orgName, hospCode, bedCode, payload, token) =>
-    apiRequest(`/${orgName}/bed/${hospCode}/${bedCode}/assignpatient`, {
+    apiRequest(`/${orgName}/bed/${hospCode}/assign/patient`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ bedCode, ...payload }),
     }),
   unassignPatient: (orgName, hospCode, bedCode, token) =>
-    apiRequest(`/${orgName}/bed/${hospCode}/${bedCode}/unassignpatient`, {
+    apiRequest(`/${orgName}/bed/${hospCode}/patient/unassign`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ bedCode }),
     }),
   discharge: (orgName, hospCode, bedCode, token) =>
-    apiRequest(`/${orgName}/bed/${hospCode}/${bedCode}/discharge`, {
+    apiRequest(`/${orgName}/bed/${hospCode}/patient/discharge`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ bedCode }),
     }),
   transferWard: (orgName, hospCode, bedCode, payload, token) =>
-    apiRequest(`/${orgName}/bed/${hospCode}/${bedCode}/transfer`, {
+    apiRequest(`/${orgName}/bed/${hospCode}/patient/wardTransfer`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ bedCode, ...payload }),
     }),
   updateAlarmConfig: (orgName, hospCode, bedCode, alarmConfig, token) =>
     apiRequest(`/${orgName}/bed/${hospCode}/${bedCode}/alarmconfig`, {
@@ -357,14 +373,14 @@ export const nurseApi = {
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(nurseData),
     }),
-  assignBed: (orgName, hospCode, nurseCode, payload, token) =>
-    apiRequest(`/${orgName}/nurse/${hospCode}/${nurseCode}/assignbed`, {
+  assignBed: (orgName, hospCode, payload, token) =>
+    apiRequest(`/${orgName}/nurse/${hospCode}/assigntobed`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(payload),
     }),
-  admitPatient: (orgName, hospCode, nurseCode, payload, token) =>
-    apiRequest(`/${orgName}/nurse/${hospCode}/${nurseCode}/admitpatient`, {
+  admitPatient: (orgName, hospCode, payload, token) =>
+    apiRequest(`/${orgName}/nurse/${hospCode}/admit`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(payload),
@@ -395,15 +411,16 @@ export const patientApi = {
       body: JSON.stringify(patientData),
     }),
   discharge: (orgName, hospCode, patientCode, token) =>
-    apiRequest(`/${orgName}/patient/${hospCode}/${patientCode}/discharge`, {
+    apiRequest(`/${orgName}/patient/${hospCode}/initiateDischarge`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify({ patientCode }),
     }),
   transfer: (orgName, hospCode, patientCode, payload, token) =>
-    apiRequest(`/${orgName}/patient/${hospCode}/${patientCode}/transfer`, {
+    apiRequest(`/${orgName}/patient/${hospCode}/initiateTransfer`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ patientCode, ...payload }),
     }),
   addInfo: (orgName, hospCode, patientCode, infoData, token) =>
     apiRequest(`/${orgName}/patient/${hospCode}/${patientCode}/addinfo`, {
@@ -479,8 +496,8 @@ export const gatewayApi = {
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(gatewayData),
     }),
-  getDetail: (orgName, gatewayCode, token) =>
-    apiRequest(`/${orgName}/gateway/${gatewayCode}`, {
+  getDetail: (orgName, hospCode, gatewayCode, token) =>
+    apiRequest(`/${orgName}/gateway/${hospCode}/${gatewayCode}`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
@@ -508,6 +525,12 @@ export const deviceApi = {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
+  addConfig: (orgName, hospCode, deviceCode, configs, token) =>
+    apiRequest(`/${orgName}/device/${hospCode}/${deviceCode}/config`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify(configs),
+    }),
 };
 
 export const assignmentApi = {
@@ -532,6 +555,26 @@ export const assignmentApi = {
     apiRequest(`/${orgName}/assignment/${hospCode}/doctor/${doctorCode}`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
+    }),
+};
+
+export const consentApi = {
+  getTypes: (orgName, token) =>
+    apiRequest(`/${orgName}/consent/types`, {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${token}` },
+    }),
+  getPatientConsents: (orgName, patientCode, orgId, patientId, token) =>
+    apiRequest(`/${orgName}/patients/${patientCode}/consents`, {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${token}` },
+      params: { orgId, patientId },
+    }),
+  record: (orgName, patientCode, payload, token) =>
+    apiRequest(`/${orgName}/patients/${patientCode}/consents`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify(payload),
     }),
 };
 

@@ -116,7 +116,7 @@ export const OrgAdminsScreen = ({ onSelectUser, onInvite }) => {
                     </View>
                     <Text style={styles.userEmail}>{u.email || t('admins.no_email')}</Text>
                     <View style={styles.badgesRow}>
-                      <StatusPill status={u.status || 'ACTIVE'} />
+                      <StatusPill status={u.status || 'INACTIVE'} />
                     </View>
                   </View>
                   <IconChevron size={16} color={T.textFaint} />

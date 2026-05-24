@@ -29,7 +29,7 @@
     "welcome_back": "Welkom terug",
     "subtitle": "Log in om uw IoMT-beheer te beheren.",
     "username": "Gebruikersnaam",
-    "username_placeholder": "Voer uw gebruikersnaam in",
+    "username_placeholder": "Gebruikersnaam of e-mail",
     "password": "Wachtwoord",
     "password_placeholder": "••••••••",
     "forgot_password": "Wachtwoord vergeten?",
@@ -150,7 +150,10 @@
     "roles_perms": "Rollen & Rechten",
     "device_types": "Apparaattypen",
     "hours_ago": "{{count}}u geleden",
-    "minutes_ago": "{{count}}m geleden"
+    "minutes_ago": "{{count}}m geleden",
+    "nurse": "Verpleegkundige",
+    "doctor": "Arts",
+    "patient": "Patiënt"
   },
   "users": {
     "first_name": "Voornaam",
@@ -299,7 +302,8 @@
     "city_eg": "Amsterdam",
     "state_eg": "Noord-Holland",
     "country_eg": "Nederland",
-    "pincode_eg": "1000 AA"
+    "pincode_eg": "1000 AA",
+    "select_profile": "Selecteer een profiel"
   },
   "actions": {
     "bed_actions": "Bed Acties",
@@ -350,7 +354,10 @@
     "no_wards": "Geen afdelingen gevonden.",
     "no_beds": "Geen bedden gevonden.",
     "assigned": "Toegewezen",
-    "admitted": "Opgenomen"
+    "admitted": "Opgenomen",
+    "select_shift": "Dienst selecteren",
+    "pick_shift_ward_bed": "Kies een dienst, afdeling en bed",
+    "pick_patient_ward_bed": "Kies een patient, afdeling en bed"
   },
   "settings": {
     "account": "Account",
@@ -418,7 +425,22 @@
     "verify_cert": "Certificaat",
     "usage_fixed": "Vast",
     "usage_mobile": "Mobiel",
-    "code_already_exists": "Apparaatcode \"{{code}}\" is al geregistreerd. Gebruik een andere code."
+    "code_already_exists": "Apparaatcode \"{{code}}\" is al geregistreerd. Gebruik een andere code.",
+    "config_title": "Configuratie toevoegen",
+    "config_comm_mode": "COMMUNICATIEMODUS",
+    "config_push_hint": "WIFI_PUSH: apparaat stuurt data naar server. Vereist poort en IP-adres.",
+    "config_pull_hint": "WIFI_PULL: server pollt het apparaat. Vereist alleen een poort.",
+    "config_parameters": "CONFIGURATIEPARAMETERS",
+    "config_device_type": "Apparaattype (config)",
+    "config_device_type_placeholder": "bijv. NK, ComenV7",
+    "config_port": "Poort",
+    "config_port_placeholder": "bijv. 4001",
+    "config_ip": "IP-adres",
+    "config_ip_placeholder": "bijv. 192.168.1.100",
+    "config_preview": "PAYLOAD VOORBEELD",
+    "config_submit": "Configuratie opslaan",
+    "config_saved": "Configuratie opgeslagen voor {{code}}.",
+    "config_failed": "Opslaan van configuratie mislukt."
   },
   "records": {
     "VITAL_SIGNS": "Vitale functies",
@@ -468,5 +490,57 @@
     "title": "Meldingen",
     "all_caught_up": "Je bent up-to-date",
     "empty_hint": "Geen nieuwe meldingen op dit moment."
+  },
+  "gateway": {
+    "detail_title": "Gatewaydetails",
+    "details_section": "Details",
+    "code": "Gatewaycode",
+    "type": "Gatewaytype",
+    "os": "Besturingssysteem",
+    "comm": "Communicatie",
+    "hospital": "Ziekenhuiscode",
+    "org": "Organisatie"
+  },
+  "consent": {
+    "title": "Toestemmingsbeheer",
+    "no_consents": "Nog geen toestemmingen vastgelegd.",
+    "record_new": "Nieuwe toestemming vastleggen",
+    "record_title": "Toestemming vastleggen",
+    "type": "Toestemmingstype",
+    "consented_by_type": "Toestemming door",
+    "consented_by_name": "Naam van de toestemmende persoon",
+    "consented_by_name_placeholder": "bijv. Dr. Jansen",
+    "emergency_justification": "Noodrechtvaarding",
+    "emergency_justification_placeholder": "Reden waarom de arts namens de patiënt toestemt…",
+    "relationship": "Relatie met de patiënt",
+    "relationship_placeholder": "bijv. Moeder, wettelijke voogd",
+    "poa_ref": "Volmachtreferentie",
+    "poa_ref_placeholder": "Documentreferentienummer (optioneel)",
+    "notes": "Notities",
+    "notes_placeholder": "Aanvullende notities…",
+    "submit": "Toestemming vastleggen",
+    "recorded_success": "Toestemming succesvol vastgelegd.",
+    "record_failed": "Vastleggen van toestemming mislukt."
+  },
+  "bootstrap_user": {
+    "screen_title": "Bootstrap-gebruiker aanmaken",
+    "create_btn": "Bootstrap-gebruiker",
+    "info_title": "Bootstrap-gebruiker",
+    "info_body": "Maakt een systeemgebruiker aan met een gateway- of bootstraprol. Het wachtwoord wordt automatisch door de server gegenereerd.",
+    "section_identity": "Identiteit",
+    "section_roles": "Rollen",
+    "username": "Gebruikersnaam",
+    "username_placeholder": "bijv. GATEWAY_01",
+    "first_name": "Voornaam",
+    "first_name_placeholder": "Optioneel",
+    "last_name": "Achternaam",
+    "last_name_placeholder": "Optioneel",
+    "description": "Beschrijving",
+    "description_placeholder": "Optionele beschrijving",
+    "roles_hint": "Selecteer minimaal één rol voor deze gebruiker.",
+    "password_auto": "Een veilig wachtwoord wordt automatisch door de server gegenereerd en in het antwoord teruggegeven.",
+    "submit": "Gebruiker aanmaken",
+    "created_success": "Bootstrap-gebruiker succesvol aangemaakt.",
+    "create_failed": "Aanmaken van bootstrap-gebruiker mislukt."
   }
 }

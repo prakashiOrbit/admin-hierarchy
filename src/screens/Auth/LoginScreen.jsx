@@ -59,11 +59,15 @@ export const LoginScreen = ({ navigation }) => {
         const roles = res.roles || res.userData?.roles || [];
         const isOrgOwner = roles.includes('ORG_OWNER');
         const isHospOwner = roles.includes('HOSP_OWNER');
-        
+        const isNurse = roles.includes('NURSE');
+        const isDoctor = roles.includes('DOCTOR');
+        const isPatient = roles.includes('PATIENT');
+
         if (res.orgName === 'SYSTEM' || username === 'iorbit') {
           navigation.replace('PlatformDashboard', { role: 'PLATFORM_ADMIN' });
         } else if (res.hospitalCode) {
-          navigation.replace('HospDashboard', { role: isHospOwner ? 'HOSP_OWNER' : 'HOSP_ADMIN' });
+          const hospRole = isHospOwner ? 'HOSP_OWNER' : isNurse ? 'NURSE' : isDoctor ? 'DOCTOR' : isPatient ? 'PATIENT' : 'HOSP_ADMIN';
+          navigation.replace('HospDashboard', { role: hospRole });
         } else {
           navigation.replace('OrgDashboard', { role: isOrgOwner ? 'ORG_OWNER' : 'ORG_ADMIN' });
         }
@@ -110,11 +114,15 @@ export const LoginScreen = ({ navigation }) => {
       const roles = response.roles || response.userData?.roles || [];
       const isOrgOwner = roles.includes('ORG_OWNER');
       const isHospOwner = roles.includes('HOSP_OWNER');
+      const isNurse = roles.includes('NURSE');
+      const isDoctor = roles.includes('DOCTOR');
+      const isPatient = roles.includes('PATIENT');
 
       if (response.orgName === 'SYSTEM') {
         navigation.replace('PlatformDashboard', { role: 'PLATFORM_ADMIN' });
       } else if (response.hospitalCode) {
-        navigation.replace('HospDashboard', { role: isHospOwner ? 'HOSP_OWNER' : 'HOSP_ADMIN' });
+        const hospRole = isHospOwner ? 'HOSP_OWNER' : isNurse ? 'NURSE' : isDoctor ? 'DOCTOR' : isPatient ? 'PATIENT' : 'HOSP_ADMIN';
+        navigation.replace('HospDashboard', { role: hospRole });
       } else {
         navigation.replace('OrgDashboard', { role: isOrgOwner ? 'ORG_OWNER' : 'ORG_ADMIN' });
       }

@@ -122,7 +122,7 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
   const handleTransfer = async (ward) => {
     setSaving(true);
     try {
-      await bedApi.transferWard(user.orgName, user.hospitalCode, bed.bedCode, { targetWardCode: ward.wardCode }, token);
+      await bedApi.transferWard(user.orgName, user.hospitalCode, bed.bedCode, { wardCode: ward.wardCode }, token);
       Alert.alert(t('common.done'), t('actions.bed_transferred', { code: bed.bedCode, ward: ward.wardName }), [
         { text: 'OK', onPress: handleClose },
       ]);

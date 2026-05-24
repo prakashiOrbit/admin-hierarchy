@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, Platform, BackHandler, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { summaryApi, deviceApi, patientApi, nurseApi } from '../../services/api';
+import { summaryApi } from '../../services/api';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -20,6 +20,8 @@ import { CreateWardScreen } from '../Wards/CreateWardScreen';
 import { CreateBedScreen } from '../Wards/CreateBedScreen';
 import { SettingsScreen } from '../Settings/SettingsScreen';
 import { DevicesScreen } from '../Devices/DevicesScreen';
+import { GatewayDetailScreen } from '../Devices/GatewayDetailScreen';
+import { AddDeviceConfigScreen } from '../Devices/AddDeviceConfigScreen';
 import { CreateGatewayScreen } from '../Devices/CreateGatewayScreen';
 import { CreateDeviceScreen } from '../Devices/CreateDeviceScreen';
 import { PatientsScreen } from '../Patients/PatientsScreen';
@@ -87,20 +89,18 @@ const HospHomeContent = ({ role, onNavigate }) => {
 
   useEffect(() => {
     if (!user?.orgName || !user?.hospitalCode) { setHomeLoading(false); return; }
-    Promise.all([
-      summaryApi.getHospitalSummary(user.orgName, user.hospitalCode, token).catch(() => null),
-      deviceApi.listAll(user.orgName, user.hospitalCode, token).catch(() => []),
-      patientApi.listAll(user.orgName, user.hospitalCode, token).catch(() => []),
-      nurseApi.listAll(user.orgName, user.hospitalCode, token).catch(() => []),
-    ]).then(([summary, devices, patients, nurses]) => {
-      setHomeStats({
-        wards: summary?.stats?.wards ?? null,
-        beds: summary?.stats?.beds ?? null,
-        devices: Array.isArray(devices) ? devices.length : null,
-        staffing: Array.isArray(nurses) ? nurses.length : null,
-        patients: Array.isArray(patients) ? patients.length : null,
-      });
-    }).finally(() => setHomeLoading(false));
+    summaryApi.getHospitalSummary(user.orgName, user.hospitalCode, token)
+      .then(summary => {
+        setHomeStats({
+          wards:    summary?.stats?.wards         ?? null,
+          beds:     summary?.stats?.beds          ?? null,
+          devices:  summary?.stats?.totalDevices  ?? null,
+          staffing: summary?.stats?.totalNurses   ?? null,
+          patients: summary?.stats?.totalPatients ?? null,
+        });
+      })
+      .catch(() => {})
+      .finally(() => setHomeLoading(false));
   }, [user?.orgName, user?.hospitalCode, token]);
 
   const fmt = (v) => v == null ? '—' : String(v);
@@ -185,6 +185,9 @@ const HospHomeContent = ({ role, onNavigate }) => {
 export const HospDashboard = ({ navigation, route }) => {
   const role = route.params?.role || 'HOSP_OWNER';
   const isOwner = role === 'HOSP_OWNER';
+  const isNurse = role === 'NURSE';
+  const isDoctor = role === 'DOCTOR';
+  const isPatient = role === 'PATIENT';
   
   const insets = useSafeAreaInsets();
   const { theme: T, isDark, toggleTheme } = useTheme();
@@ -200,6 +203,8 @@ export const HospDashboard = ({ navigation, route }) => {
   const [selectedWardForBed, setSelectedWardForBed] = useState(null);
   const [isProvisioningGateway, setIsProvisioningGateway] = useState(false);
   const [isProvisioningDevice, setIsProvisioningDevice] = useState(false);
+  const [selectedGatewayCode, setSelectedGatewayCode] = useState(null);
+  const [selectedDeviceForConfig, setSelectedDeviceForConfig] = useState(null);
   const [isRegisteringPatient, setIsRegisteringPatient] = useState(false);
   const [isCreatingDoctor, setIsCreatingDoctor] = useState(false);
   const [isCreatingNurse, setIsCreatingNurse] = useState(false);
@@ -216,7 +221,7 @@ export const HospDashboard = ({ navigation, route }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const drawerAnim = React.useRef(new Animated.Value(-width)).current;
 
-  const isDeep = isInvitingHospAdmin || selectedUserId || isProvisioningWard || selectedWardForBed || isProvisioningGateway || isProvisioningDevice || isRegisteringPatient || selectedPatientId || isCreatingDoctor || selectedDoctorId || isCreatingNurse || isCreatingShift || !!assignmentData || !!selectedWardForEdit || !!selectedPatientForEdit || !!selectedDoctorForEdit || selectedNurseId || !!selectedNurseForEdit || selectedShiftId || !!selectedShiftForEdit;
+  const isDeep = isInvitingHospAdmin || selectedUserId || isProvisioningWard || selectedWardForBed || isProvisioningGateway || isProvisioningDevice || !!selectedGatewayCode || !!selectedDeviceForConfig || isRegisteringPatient || selectedPatientId || isCreatingDoctor || selectedDoctorId || isCreatingNurse || isCreatingShift || !!assignmentData || !!selectedWardForEdit || !!selectedPatientForEdit || !!selectedDoctorForEdit || selectedNurseId || !!selectedNurseForEdit || selectedShiftId || !!selectedShiftForEdit;
 
   useEffect(() => {
     const backAction = () => {
@@ -238,6 +243,8 @@ export const HospDashboard = ({ navigation, route }) => {
     setSelectedWardForBed(null);
     setIsProvisioningGateway(false);
     setIsProvisioningDevice(false);
+    setSelectedGatewayCode(null);
+    setSelectedDeviceForConfig(null);
     setIsRegisteringPatient(false);
     setIsCreatingDoctor(false);
     setIsCreatingNurse(false);
@@ -263,7 +270,19 @@ export const HospDashboard = ({ navigation, route }) => {
     setActiveTab(tabId);
   };
 
-  const footerItems = [
+  const footerItems = isNurse ? [
+    { id: 'home',     label: t('dashboard.home'),     icon: <IconDashboard /> },
+    { id: 'devices',  label: t('dashboard.devices'),  icon: <IconPulse /> },
+    { id: 'patients', label: t('dashboard.patients'), icon: <IconPatient /> },
+    { id: 'shifts',   label: t('dashboard.shifts'),   icon: <IconClock /> },
+  ] : isDoctor ? [
+    { id: 'home',     label: t('dashboard.home'),     icon: <IconDashboard /> },
+    { id: 'devices',  label: t('dashboard.devices'),  icon: <IconPulse /> },
+    { id: 'patients', label: t('dashboard.patients'), icon: <IconPatient /> },
+  ] : isPatient ? [
+    { id: 'home',    label: t('dashboard.home'),    icon: <IconDashboard /> },
+    { id: 'devices', label: t('dashboard.devices'), icon: <IconPulse /> },
+  ] : [
     { id: 'home', label: t('dashboard.home'), icon: <IconDashboard /> },
     ...(isOwner ? [{ id: 'admins', label: t('dashboard.admins'), icon: <IconUsers /> }] : []),
     { id: 'wards', label: t('dashboard.wards'), icon: <IconDoor /> },
@@ -279,6 +298,8 @@ export const HospDashboard = ({ navigation, route }) => {
     if (selectedWardForBed) return <CreateBedScreen onCancel={() => setSelectedWardForBed(null)} wardCode={selectedWardForBed} />;
     if (isProvisioningGateway) return <CreateGatewayScreen onCancel={() => setIsProvisioningGateway(false)} />;
     if (isProvisioningDevice) return <CreateDeviceScreen onCancel={() => setIsProvisioningDevice(false)} />;
+    if (selectedGatewayCode) return <GatewayDetailScreen gatewayCode={selectedGatewayCode} onBack={() => setSelectedGatewayCode(null)} />;
+    if (selectedDeviceForConfig) return <AddDeviceConfigScreen device={selectedDeviceForConfig} onCancel={() => setSelectedDeviceForConfig(null)} onSuccess={() => setSelectedDeviceForConfig(null)} />;
     if (isRegisteringPatient) return <CreatePatientScreen onCancel={() => setIsRegisteringPatient(false)} />;
     if (isCreatingDoctor) return <CreateDoctorScreen onCancel={() => setIsCreatingDoctor(false)} hospCode="CLV-MAIN" />;
     if (isCreatingNurse) return <CreateNurseScreen onCancel={() => setIsCreatingNurse(false)} hospCode="CLV-MAIN" />;
@@ -298,7 +319,7 @@ export const HospDashboard = ({ navigation, route }) => {
       case 'home': return <HospHomeContent role={role} onNavigate={handleTabChange} />;
       case 'admins': return <HospAdminsScreen onInvite={() => setIsInvitingHospAdmin(true)} onSelectUser={setSelectedUserId} />;
       case 'wards': return <WardsScreen onNewWard={() => setIsProvisioningWard(true)} onNewBed={setSelectedWardForBed} onEditWard={setSelectedWardForEdit} />;
-      case 'devices': return <DevicesScreen onNewGateway={() => setIsProvisioningGateway(true)} onNewDevice={() => setIsProvisioningDevice(true)} />;
+      case 'devices': return <DevicesScreen onNewGateway={(isNurse || isDoctor || isPatient) ? undefined : () => setIsProvisioningGateway(true)} onNewDevice={(isNurse || isDoctor || isPatient) ? undefined : () => setIsProvisioningDevice(true)} onGatewayPress={setSelectedGatewayCode} onDevicePress={setSelectedDeviceForConfig} />;
       case 'patients': return <PatientsScreen onNewPatient={() => setIsRegisteringPatient(true)} onSelectPatient={setSelectedPatientId} />;
       case 'doctors': return <DoctorsScreen onNewDoctor={() => setIsCreatingDoctor(true)} onSelectDoctor={setSelectedDoctorId} />;
       case 'shifts': return <ShiftsScreen onNewNurse={() => setIsCreatingNurse(true)} onNewShift={() => setIsCreatingShift(true)} onSelectNurse={setSelectedNurseId} onSelectShift={setSelectedShiftId} />;
@@ -313,6 +334,8 @@ export const HospDashboard = ({ navigation, route }) => {
     if (selectedWardForBed) return t('dashboard.provision_bed');
     if (isProvisioningGateway) return t('dashboard.create_gateway');
     if (isProvisioningDevice) return t('dashboard.create_device');
+    if (selectedGatewayCode) return t('gateway.detail_title');
+    if (selectedDeviceForConfig) return t('device.config_title');
     if (isRegisteringPatient) return t('dashboard.register_patient');
     if (isCreatingDoctor) return t('dashboard.onboard_doctor');
     if (isCreatingNurse) return t('dashboard.onboard_nurse');
@@ -348,7 +371,7 @@ export const HospDashboard = ({ navigation, route }) => {
         <View style={{ flex: 1, paddingTop: insets.top }}>
           <View style={styles.drawerHeader}>
             <Text style={styles.drawerName}>{user?.userName || 'User'}</Text>
-            <Text style={styles.drawerRole}>{isOwner ? t('dashboard.hosp_owner') : t('dashboard.hosp_administrator')}</Text>
+            <Text style={styles.drawerRole}>{isOwner ? t('dashboard.hosp_owner') : isNurse ? t('dashboard.nurse') : isDoctor ? t('dashboard.doctor') : isPatient ? t('dashboard.patient') : t('dashboard.hosp_administrator')}</Text>
           </View>
           <ScrollView style={styles.drawerMenu}>
             <TouchableOpacity style={styles.drawerItem} onPress={() => { handleTabChange('home'); toggleDrawer(); }}><IconDashboard size={20} color={T.textDim} /><Text style={styles.drawerItemText}>{t('dashboard.title')}</Text></TouchableOpacity>

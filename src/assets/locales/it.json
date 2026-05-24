@@ -29,7 +29,7 @@
     "welcome_back": "Bentornato",
     "subtitle": "Accedi per gestire la tua proprietà IoMT.",
     "username": "Nome utente",
-    "username_placeholder": "Inserisci il tuo nome utente",
+    "username_placeholder": "Nome utente o e-mail",
     "password": "Password",
     "password_placeholder": "••••••••",
     "forgot_password": "Password dimenticata?",
@@ -150,7 +150,10 @@
     "roles_perms": "Ruoli e Permessi",
     "device_types": "Tipi Dispositivo",
     "hours_ago": "{{count}}h fa",
-    "minutes_ago": "{{count}}min fa"
+    "minutes_ago": "{{count}}min fa",
+    "nurse": "Infermiere",
+    "doctor": "Medico",
+    "patient": "Paziente"
   },
   "users": {
     "first_name": "Nome",
@@ -299,7 +302,8 @@
     "city_eg": "Milano",
     "state_eg": "MI",
     "country_eg": "Italia",
-    "pincode_eg": "20100"
+    "pincode_eg": "20100",
+    "select_profile": "Seleziona un profilo"
   },
   "actions": {
     "bed_actions": "Azioni Letto",
@@ -350,7 +354,10 @@
     "no_wards": "Nessun reparto trovato.",
     "no_beds": "Nessun letto trovato.",
     "assigned": "Assegnato",
-    "admitted": "Ricoverato"
+    "admitted": "Ricoverato",
+    "select_shift": "Seleziona turno",
+    "pick_shift_ward_bed": "Scegli un turno, un reparto e un letto",
+    "pick_patient_ward_bed": "Scegli un paziente, un reparto e un letto"
   },
   "settings": {
     "account": "Account",
@@ -418,7 +425,22 @@
     "verify_cert": "Certificato",
     "usage_fixed": "Fisso",
     "usage_mobile": "Mobile",
-    "code_already_exists": "Il codice dispositivo \"{{code}}\" è già registrato. Utilizzare un codice diverso."
+    "code_already_exists": "Il codice dispositivo \"{{code}}\" è già registrato. Utilizzare un codice diverso.",
+    "config_title": "Aggiungi configurazione",
+    "config_comm_mode": "MODALITÀ DI COMUNICAZIONE",
+    "config_push_hint": "WIFI_PUSH: il dispositivo invia i dati al server. Richiede porta e indirizzo IP.",
+    "config_pull_hint": "WIFI_PULL: il server interroga il dispositivo. Richiede solo la porta.",
+    "config_parameters": "PARAMETRI DI CONFIGURAZIONE",
+    "config_device_type": "Tipo dispositivo (config)",
+    "config_device_type_placeholder": "es. NK, ComenV7",
+    "config_port": "Porta",
+    "config_port_placeholder": "es. 4001",
+    "config_ip": "Indirizzo IP",
+    "config_ip_placeholder": "es. 192.168.1.100",
+    "config_preview": "ANTEPRIMA PAYLOAD",
+    "config_submit": "Salva configurazione",
+    "config_saved": "Configurazione salvata per {{code}}.",
+    "config_failed": "Impossibile salvare la configurazione."
   },
   "records": {
     "VITAL_SIGNS": "Segni vitali",
@@ -468,5 +490,57 @@
     "title": "Notifiche",
     "all_caught_up": "Sei aggiornato",
     "empty_hint": "Nessuna nuova notifica al momento."
+  },
+  "gateway": {
+    "detail_title": "Dettagli gateway",
+    "details_section": "Dettagli",
+    "code": "Codice gateway",
+    "type": "Tipo gateway",
+    "os": "Sistema operativo",
+    "comm": "Comunicazione",
+    "hospital": "Codice ospedale",
+    "org": "Organizzazione"
+  },
+  "consent": {
+    "title": "Gestione del consenso",
+    "no_consents": "Nessun consenso registrato.",
+    "record_new": "Registra nuovo consenso",
+    "record_title": "Registra consenso",
+    "type": "Tipo di consenso",
+    "consented_by_type": "Consenso da",
+    "consented_by_name": "Nome del consenziente",
+    "consented_by_name_placeholder": "es. Dott. Rossi",
+    "emergency_justification": "Giustificazione di emergenza",
+    "emergency_justification_placeholder": "Motivo per cui il medico presta consenso per il paziente…",
+    "relationship": "Relazione con il paziente",
+    "relationship_placeholder": "es. Madre, tutore legale",
+    "poa_ref": "Riferimento procura",
+    "poa_ref_placeholder": "Numero di riferimento documento (opzionale)",
+    "notes": "Note",
+    "notes_placeholder": "Note aggiuntive…",
+    "submit": "Registra consenso",
+    "recorded_success": "Consenso registrato con successo.",
+    "record_failed": "Impossibile registrare il consenso."
+  },
+  "bootstrap_user": {
+    "screen_title": "Crea utente bootstrap",
+    "create_btn": "Utente bootstrap",
+    "info_title": "Utente bootstrap",
+    "info_body": "Crea un utente di sistema con un ruolo gateway o bootstrap. La password viene generata automaticamente dal server.",
+    "section_identity": "Identità",
+    "section_roles": "Ruoli",
+    "username": "Nome utente",
+    "username_placeholder": "es. GATEWAY_01",
+    "first_name": "Nome",
+    "first_name_placeholder": "Facoltativo",
+    "last_name": "Cognome",
+    "last_name_placeholder": "Facoltativo",
+    "description": "Descrizione",
+    "description_placeholder": "Descrizione facoltativa",
+    "roles_hint": "Seleziona almeno un ruolo per questo utente.",
+    "password_auto": "Una password sicura verrà generata automaticamente dal server e restituita nella risposta.",
+    "submit": "Crea utente",
+    "created_success": "Utente bootstrap creato con successo.",
+    "create_failed": "Impossibile creare l'utente bootstrap."
   }
 }

@@ -11,7 +11,7 @@ import {
   IconHospital, IconUsers, IconPulse, IconGateway, IconShield, IconChart,
   IconAlert, IconChevron, IconMenu, IconSettings, IconDashboard, IconBack, IconUser, IconMoon, IconLogout, IconCpu
 } from '../../icons';
-import { organisationApi, userApi, deviceApi, gatewayApi } from '../../services/api';
+import { organisationApi, userApi, summaryApi } from '../../services/api';
 import { NotificationSheet } from '../../components/NotificationSheet';
 import { HospitalsScreen } from '../Hospitals/HospitalsScreen';
 import { UsersScreen } from '../Users/UsersScreen';
@@ -30,6 +30,7 @@ import { DeviceTypeDetailScreen } from '../Devices/DeviceTypeDetailScreen';
 import { EditDeviceTypeScreen } from '../Devices/EditDeviceTypeScreen';
 import { HospitalDetailScreen } from '../Hospitals/HospitalDetailScreen';
 import { EditHospitalScreen } from '../Hospitals/EditHospitalScreen';
+import { CreateBootstrapUserScreen } from '../Users/CreateBootstrapUserScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -65,54 +66,28 @@ const OrgHomeContent = ({ role }) => {
 
   const [hospitals, setHospitals] = useState([]);
   const [admins, setAdmins] = useState([]);
-  const [devices, setDevices] = useState([]);
-  const [gateways, setGateways] = useState([]);
+  const [orgSummary, setOrgSummary] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user?.orgName) return;
-    const fetchData = async () => {
-      try {
-        const [hospData, adminData] = await Promise.all([
-          organisationApi.listHospitals(user.orgName, token),
-          userApi.listOrgAdmins(user.orgName, token).catch(() => []),
-        ]);
-        const hospList = Array.isArray(hospData) ? hospData : [];
-        const adminList = Array.isArray(adminData) ? adminData : [];
-        setHospitals(hospList);
-        setAdmins(adminList.filter(u => u.roles?.includes('ORG_ADMIN') || u.role === 'ORG_ADMIN'));
-
-        if (hospList.length > 0) {
-          const [allDeviceLists, allGatewayLists] = await Promise.all([
-            Promise.all(hospList.map(h =>
-              deviceApi.listAll(user.orgName, h.hospitalCode, token).catch(() => [])
-            )),
-            Promise.all(hospList.map(h =>
-              gatewayApi.listAll(user.orgName, h.hospitalCode, token).catch(() => [])
-            )),
-          ]);
-          setDevices(allDeviceLists.flat().filter(Boolean));
-          setGateways(allGatewayLists.flat().filter(Boolean));
-        }
-      } catch (err) {
-        console.error('Home fetch data error:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    Promise.all([
+      organisationApi.listHospitals(user.orgName, token),
+      userApi.listOrgAdmins(user.orgName, token).catch(() => []),
+      summaryApi.getOrgSummary(user.orgName, token).catch(() => null),
+    ]).then(([hospData, adminData, summaryData]) => {
+      const hospList = Array.isArray(hospData) ? hospData : [];
+      const adminList = Array.isArray(adminData) ? adminData : [];
+      setHospitals(hospList);
+      setAdmins(adminList.filter(u => u.roles?.includes('ORG_ADMIN') || u.role === 'ORG_ADMIN'));
+      setOrgSummary(summaryData);
+    }).catch(err => console.error('Home fetch data error:', err))
+      .finally(() => setLoading(false));
   }, [user?.orgName, token]);
 
   const activeHospitals = hospitals.filter(h => (h.status || 'ACTIVE') === 'ACTIVE').length;
-
-  const onlineDevices = devices.filter(d => ['ACTIVE', 'ONLINE'].includes(d.status)).length;
-  const warnDevices   = devices.filter(d => ['WARNING', 'WARN'].includes(d.status)).length;
-  const offlineDevices = devices.length - onlineDevices - warnDevices;
-  const totalDevices  = devices.length;
-
-  const onlinePct  = totalDevices > 0 ? `${Math.round((onlineDevices / totalDevices) * 100)}%` : '0%';
-  const warnPct    = totalDevices > 0 ? `${Math.round((warnDevices / totalDevices) * 100)}%` : '0%';
-  const offlinePct = totalDevices > 0 ? `${Math.round((offlineDevices / totalDevices) * 100)}%` : '0%';
+  const totalDevices  = orgSummary?.stats?.totalDevices  ?? 0;
+  const totalGateways = orgSummary?.stats?.totalGateways ?? 0;
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -128,7 +103,7 @@ const OrgHomeContent = ({ role }) => {
         <StatCard label="dashboard.hospitals" value={loading ? '...' : hospitals.length.toString()} icon={<IconHospital />} color={T.accent} />
         <StatCard label="dashboard.admins" value={loading ? '...' : admins.length.toString()} icon={<IconUsers />} color="#2DD4BF" accent="rgba(45,212,191,.14)" />
         <StatCard label="dashboard.devices" value={loading ? '...' : totalDevices.toString()} icon={<IconPulse />} color="#22D3EE" accent="rgba(34,211,238,.14)" />
-        <StatCard label="dashboard.gateways" value={loading ? '...' : gateways.length.toString()} icon={<IconGateway />} color="#A78BFA" accent="rgba(167,139,250,.14)" />
+        <StatCard label="dashboard.gateways" value={loading ? '...' : totalGateways.toString()} icon={<IconGateway />} color="#A78BFA" accent="rgba(167,139,250,.14)" />
       </View>
 
       <Card style={styles.alertCard}>
@@ -180,22 +155,10 @@ const OrgHomeContent = ({ role }) => {
         ) : totalDevices === 0 ? (
           <Text style={{ color: T.textFaint, fontSize: 13, textAlign: 'center', paddingVertical: 12 }}>{t('dashboard.no_devices')}</Text>
         ) : (
-          <>
-            <View style={styles.capacityHeader}>
-              <Text style={styles.capacityValue}>{onlineDevices.toLocaleString()}</Text>
-              <Text style={styles.capacityTotal}>/ {totalDevices.toLocaleString()} {t('dashboard.devices').toLowerCase()} · {onlinePct} {t('dashboard.online').toLowerCase()}</Text>
-            </View>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressSegment, { width: onlinePct, backgroundColor: T.good }]} />
-              <View style={[styles.progressSegment, { width: warnPct, backgroundColor: T.warn }]} />
-              <View style={[styles.progressSegment, { width: offlinePct, backgroundColor: T.surface2 }]} />
-            </View>
-            <View style={styles.progressLegend}>
-              <Text style={styles.legendItem}><Text style={{ color: T.good }}>●</Text> {t('dashboard.online')} {onlineDevices}</Text>
-              <Text style={styles.legendItem}><Text style={{ color: T.warn }}>●</Text> {t('dashboard.warn')} {warnDevices}</Text>
-              <Text style={styles.legendItem}><Text style={{ color: T.textFaint }}>●</Text> {t('dashboard.offline')} {offlineDevices}</Text>
-            </View>
-          </>
+          <View style={styles.capacityHeader}>
+            <Text style={styles.capacityValue}>{totalDevices.toLocaleString()}</Text>
+            <Text style={styles.capacityTotal}> {t('dashboard.devices').toLowerCase()} · {totalGateways.toLocaleString()} {t('dashboard.gateways').toLowerCase()}</Text>
+          </View>
         )}
       </Card>
     </ScrollView>
@@ -222,6 +185,7 @@ export const OrgDashboard = ({ navigation, route }) => {
   const [isCreatingRole, setIsCreatingRole] = useState(false);
   const [isEditingDeviceType, setIsEditingDeviceType] = useState(false);
   const [isEditingHospital, setIsEditingHospital] = useState(false);
+  const [isCreatingBootstrapUser, setIsCreatingBootstrapUser] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const drawerAnim = React.useRef(new Animated.Value(-width)).current;
@@ -236,6 +200,7 @@ export const OrgDashboard = ({ navigation, route }) => {
     if (isInvitingAdmin) { setIsInvitingAdmin(false); return; }
     if (isProvisioningHospital) { setIsProvisioningHospital(false); return; }
     if (isCreatingRole) { setIsCreatingRole(false); return; }
+    if (isCreatingBootstrapUser) { setIsCreatingBootstrapUser(false); return; }
     if (selectedUserId) { setSelectedUserId(null); return; }
     if (selectedRoleId) { setSelectedRoleId(null); return; }
     if (activeTab !== 'home') { handleTabChange('home'); }
@@ -243,7 +208,7 @@ export const OrgDashboard = ({ navigation, route }) => {
 
   const isSubScreen = !!(selectedUserId || isInvitingAdmin || selectedRoleId || isProvisioningHospital ||
     selectedHospital || isCreatingDeviceType || selectedDeviceType || isCreatingRole ||
-    isEditingDeviceType || isEditingHospital);
+    isEditingDeviceType || isEditingHospital || isCreatingBootstrapUser);
 
   useEffect(() => {
     const backAction = () => {
@@ -272,6 +237,7 @@ export const OrgDashboard = ({ navigation, route }) => {
     setSelectedDeviceType(null);
     setIsEditingHospital(false);
     setIsCreatingRole(false);
+    setIsCreatingBootstrapUser(false);
     setActiveTab(tabId);
   };
 
@@ -294,6 +260,7 @@ export const OrgDashboard = ({ navigation, route }) => {
     if (isEditingHospital && selectedHospital) return <EditHospitalScreen hospital={selectedHospital} onCancel={() => setIsEditingHospital(false)} onSave={(updated) => { setSelectedHospital(updated); setIsEditingHospital(false); }} />;
     if (selectedHospital) return <HospitalDetailScreen hospital={selectedHospital} onBack={() => setSelectedHospital(null)} onEdit={() => setIsEditingHospital(true)} />;
     if (isCreatingRole) return <CreateRoleScreen onCancel={() => setIsCreatingRole(false)} />;
+    if (isCreatingBootstrapUser) return <CreateBootstrapUserScreen onCancel={() => setIsCreatingBootstrapUser(false)} onSuccess={() => { setIsCreatingBootstrapUser(false); }} />;
     if (selectedUserId) return <UserDetailScreen userId={selectedUserId} onBack={() => setSelectedUserId(null)} />;
     if (selectedRoleId) return <RoleDetailScreen roleId={selectedRoleId} onBack={() => setSelectedRoleId(null)} />;
     switch (activeTab) {
@@ -301,7 +268,7 @@ export const OrgDashboard = ({ navigation, route }) => {
       case 'admins': return <OrgAdminsScreen onInvite={() => setIsInvitingAdmin(true)} onSelectUser={setSelectedUserId} />;
       case 'hospitals': return <HospitalsScreen onProvision={() => setIsProvisioningHospital(true)} onSelect={setSelectedHospital} />;
       case 'types': return <DeviceTypesScreen onCreate={() => setIsCreatingDeviceType(true)} onSelect={setSelectedDeviceType} />;
-      case 'users': return <UsersScreen onSelectUser={setSelectedUserId} />;
+      case 'users': return <UsersScreen onSelectUser={setSelectedUserId} onCreateBootstrapUser={isOwner ? () => setIsCreatingBootstrapUser(true) : undefined} />;
       case 'roles': return <RolesScreen onSelectRole={setSelectedRoleId} onCreate={() => setIsCreatingRole(true)} />;
       case 'summary': return <OrgSummaryScreen />;
       case 'settings': return <SettingsScreen onLogout={() => { logout(); navigation.replace('Login'); }} />;
@@ -318,6 +285,7 @@ export const OrgDashboard = ({ navigation, route }) => {
     if (isEditingHospital) return t('dashboard.edit_hospital');
     if (selectedHospital) return t('dashboard.hospital_details');
     if (isCreatingRole) return t('dashboard.create_role');
+    if (isCreatingBootstrapUser) return t('bootstrap_user.screen_title');
     if (selectedUserId) return t('dashboard.user_details');
     if (selectedRoleId) return t('dashboard.role_details');
     switch (activeTab) {

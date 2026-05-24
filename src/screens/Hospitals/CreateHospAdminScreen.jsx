@@ -39,7 +39,8 @@ export const CreateHospAdminScreen = ({ onCancel }) => {
     setForm(prev => ({ ...prev, [key]: value }));
   };
 
-  const isFormValid = form.userName && form.firstName && form.lastName && form.contactEmail;
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.contactEmail);
+  const isFormValid = form.userName && form.firstName && form.lastName && isEmailValid;
 
   const handleCreate = async () => {
     if (!user?.orgName) {

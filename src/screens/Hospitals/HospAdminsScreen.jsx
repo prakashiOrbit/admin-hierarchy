@@ -76,7 +76,7 @@ export const HospAdminsScreen = ({ onSelectUser, onInvite }) => {
                     </View>
                     <Text style={styles.userEmail}>{u.userName}</Text>
                     <View style={styles.badgesRow}>
-                      <StatusPill status={u.status ?? 'ACTIVE'} />
+                      <StatusPill status={u.status ?? 'INACTIVE'} />
                       {u.hospitalCode && (
                         <Text style={styles.hospitalText}>{u.hospitalCode}</Text>
                       )}

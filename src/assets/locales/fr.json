@@ -29,7 +29,7 @@
     "welcome_back": "Bon retour",
     "subtitle": "Connectez-vous pour gérer votre domaine IoMT.",
     "username": "Nom d'utilisateur",
-    "username_placeholder": "Entrez votre nom d'utilisateur",
+    "username_placeholder": "Nom d'utilisateur ou e-mail",
     "password": "Mot de passe",
     "password_placeholder": "••••••••",
     "forgot_password": "Mot de passe oublié ?",
@@ -150,7 +150,10 @@
     "roles_perms": "Rôles et Perms",
     "device_types": "Types Appareils",
     "hours_ago": "il y a {{count}}h",
-    "minutes_ago": "il y a {{count}}m"
+    "minutes_ago": "il y a {{count}}m",
+    "nurse": "Infirmier/ière",
+    "doctor": "Médecin",
+    "patient": "Patient"
   },
   "users": {
     "first_name": "Prénom",
@@ -299,7 +302,8 @@
     "city_eg": "Paris",
     "state_eg": "Île-de-France",
     "country_eg": "France",
-    "pincode_eg": "75001"
+    "pincode_eg": "75001",
+    "select_profile": "Sélectionner un profil"
   },
   "actions": {
     "bed_actions": "Actions Lit",
@@ -350,7 +354,10 @@
     "no_wards": "Aucun service.",
     "no_beds": "Aucun lit.",
     "assigned": "Assigné",
-    "admitted": "Admis"
+    "admitted": "Admis",
+    "select_shift": "Sélectionner le quart",
+    "pick_shift_ward_bed": "Choisir un quart, un service, puis un lit",
+    "pick_patient_ward_bed": "Choisir un patient, un service, puis un lit"
   },
   "settings": {
     "account": "Compte",
@@ -418,7 +425,22 @@
     "verify_cert": "Certificat",
     "usage_fixed": "Fixe",
     "usage_mobile": "Mobile",
-    "code_already_exists": "Le code appareil \"{{code}}\" est déjà enregistré. Veuillez utiliser un code différent."
+    "code_already_exists": "Le code appareil \"{{code}}\" est déjà enregistré. Veuillez utiliser un code différent.",
+    "config_title": "Ajouter une configuration",
+    "config_comm_mode": "MODE DE COMMUNICATION",
+    "config_push_hint": "WIFI_PUSH: l'appareil envoie les données au serveur. Nécessite un port et une adresse IP.",
+    "config_pull_hint": "WIFI_PULL: le serveur interroge l'appareil. Nécessite uniquement un port.",
+    "config_parameters": "PARAMÈTRES DE CONFIGURATION",
+    "config_device_type": "Type d'appareil (config)",
+    "config_device_type_placeholder": "ex. NK, ComenV7",
+    "config_port": "Port",
+    "config_port_placeholder": "ex. 4001",
+    "config_ip": "Adresse IP",
+    "config_ip_placeholder": "ex. 192.168.1.100",
+    "config_preview": "APERÇU DU PAYLOAD",
+    "config_submit": "Enregistrer la configuration",
+    "config_saved": "Configuration enregistrée pour {{code}}.",
+    "config_failed": "Échec de l'enregistrement de la configuration."
   },
   "records": {
     "VITAL_SIGNS": "Signes vitaux",
@@ -468,5 +490,57 @@
     "title": "Notifications",
     "all_caught_up": "Vous êtes à jour",
     "empty_hint": "Aucune nouvelle notification pour le moment."
+  },
+  "gateway": {
+    "detail_title": "Détails de la passerelle",
+    "details_section": "Détails",
+    "code": "Code passerelle",
+    "type": "Type de passerelle",
+    "os": "Système d'exploitation",
+    "comm": "Communication",
+    "hospital": "Code hôpital",
+    "org": "Organisation"
+  },
+  "consent": {
+    "title": "Gestion des consentements",
+    "no_consents": "Aucun consentement enregistré.",
+    "record_new": "Enregistrer un nouveau consentement",
+    "record_title": "Enregistrer le consentement",
+    "type": "Type de consentement",
+    "consented_by_type": "Consentement par",
+    "consented_by_name": "Nom de la personne consentante",
+    "consented_by_name_placeholder": "ex. Dr. Martin",
+    "emergency_justification": "Justification d'urgence",
+    "emergency_justification_placeholder": "Raison pour laquelle le médecin consent au nom du patient…",
+    "relationship": "Relation avec le patient",
+    "relationship_placeholder": "ex. Mère, tuteur légal",
+    "poa_ref": "Référence de procuration",
+    "poa_ref_placeholder": "Numéro de référence du document (optionnel)",
+    "notes": "Notes",
+    "notes_placeholder": "Notes supplémentaires…",
+    "submit": "Enregistrer le consentement",
+    "recorded_success": "Consentement enregistré avec succès.",
+    "record_failed": "Échec de l'enregistrement du consentement."
+  },
+  "bootstrap_user": {
+    "screen_title": "Créer un utilisateur bootstrap",
+    "create_btn": "Utilisateur bootstrap",
+    "info_title": "Utilisateur bootstrap",
+    "info_body": "Crée un utilisateur système avec un rôle passerelle ou bootstrap. Le mot de passe est généré automatiquement par le serveur.",
+    "section_identity": "Identité",
+    "section_roles": "Rôles",
+    "username": "Nom d'utilisateur",
+    "username_placeholder": "ex. GATEWAY_01",
+    "first_name": "Prénom",
+    "first_name_placeholder": "Optionnel",
+    "last_name": "Nom de famille",
+    "last_name_placeholder": "Optionnel",
+    "description": "Description",
+    "description_placeholder": "Description optionnelle",
+    "roles_hint": "Sélectionnez au moins un rôle pour cet utilisateur.",
+    "password_auto": "Un mot de passe sécurisé sera automatiquement généré par le serveur et renvoyé dans la réponse.",
+    "submit": "Créer l'utilisateur",
+    "created_success": "Utilisateur bootstrap créé avec succès.",
+    "create_failed": "Échec de la création de l'utilisateur bootstrap."
   }
 }

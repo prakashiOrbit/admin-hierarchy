@@ -8,7 +8,7 @@ import { StatusPill } from '../../components/StatusPill';
 import { IconGateway, IconPulse, IconPlus, IconCpu, IconChevron } from '../../icons';
 import { gatewayApi, deviceApi } from '../../services/api';
 
-export const DevicesScreen = ({ onNewGateway, onNewDevice }) => {
+export const DevicesScreen = ({ onNewGateway, onNewDevice, onGatewayPress, onDevicePress }) => {
   const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
@@ -96,21 +96,23 @@ export const DevicesScreen = ({ onNewGateway, onNewDevice }) => {
 
         <View style={styles.headerRow}>
           <SectionHeader title={mode === 'gateways' ? t('entity.iot_gateways') : t('entity.medical_devices')} />
-          <Btn
-            variant="primary"
-            size="sm"
-            style={styles.newBtn}
-            onPress={mode === 'gateways' ? onNewGateway : onNewDevice}
-          >
-            <IconPlus size={14} color="#FFF" />
-             {mode === 'gateways' ? ` ${t('actions.new_gateway')}` : ` ${t('actions.new_device')}`}
-          </Btn>
+          {((mode === 'gateways' && onNewGateway) || (mode === 'devices' && onNewDevice)) && (
+            <Btn
+              variant="primary"
+              size="sm"
+              style={styles.newBtn}
+              onPress={mode === 'gateways' ? onNewGateway : onNewDevice}
+            >
+              <IconPlus size={14} color="#FFF" />
+              {mode === 'gateways' ? ` ${t('actions.new_gateway')}` : ` ${t('actions.new_device')}`}
+            </Btn>
+          )}
         </View>
 
         <View style={styles.list}>
           {mode === 'gateways' ? (
             filteredGateways.length > 0 ? filteredGateways.map(g => (
-              <Card key={g.gatewayCode || g.gatewayId}>
+              <Card key={g.gatewayCode || g.gatewayId} onPress={() => onGatewayPress && onGatewayPress(g.gatewayCode)}>
                 <View style={styles.itemRow}>
                   <View style={styles.iconBox}>
                     <IconGateway size={20} color={T.accent} />
@@ -136,7 +138,7 @@ export const DevicesScreen = ({ onNewGateway, onNewDevice }) => {
             )
           ) : (
             filteredDevices.length > 0 ? filteredDevices.map(d => (
-              <Card key={d.deviceCode || d.deviceId}>
+              <Card key={d.deviceCode || d.deviceId} onPress={() => onDevicePress && onDevicePress(d)}>
                 <View style={styles.itemRow}>
                   <View style={styles.iconBox}>
                     <IconPulse size={20} color={T.accent} />
