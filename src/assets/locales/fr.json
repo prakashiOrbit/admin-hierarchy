@@ -303,7 +303,9 @@
     "state_eg": "Île-de-France",
     "country_eg": "France",
     "pincode_eg": "75001",
-    "select_profile": "Sélectionner un profil"
+    "select_profile": "Sélectionner un profil",
+    "profile_code": "ex. Comen",
+    "profile_code_hint": "Saisissez le nom du fichier .xml (sans extension)"
   },
   "actions": {
     "bed_actions": "Actions Lit",

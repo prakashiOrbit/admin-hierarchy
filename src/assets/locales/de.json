@@ -303,7 +303,9 @@
     "state_eg": "Berlin",
     "country_eg": "Deutschland",
     "pincode_eg": "10115",
-    "select_profile": "Profil auswählen"
+    "select_profile": "Profil auswählen",
+    "profile_code": "z.B. Comen",
+    "profile_code_hint": "Geben Sie den .xml-Dateinamen ein (ohne Erweiterung)"
   },
   "actions": {
     "bed_actions": "Bett-Aktionen",

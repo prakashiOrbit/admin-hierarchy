@@ -396,7 +396,9 @@
     "princeton": "Princeton",
     "lena": "Lena",
     "kowalski": "Kowalski",
-    "select_profile": "Select a profile"
+    "select_profile": "Select a profile",
+    "profile_code": "e.g. Comen",
+    "profile_code_hint": "Enter the .xml profile filename (without extension)"
   },
   "actions": {
     "bed_actions": "Bed Actions",

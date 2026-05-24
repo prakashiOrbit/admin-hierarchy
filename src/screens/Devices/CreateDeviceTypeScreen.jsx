@@ -1,22 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert, TouchableOpacity, Modal } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { deviceTypeApi } from '../../services/api';
-import { Card, Field, TextInput, Btn } from '../../components/Shared';
-import { IconCpu, IconActivity, IconShield, IconBuilding } from '../../icons';
+import { Field, TextInput, Btn } from '../../components/Shared';
+import { IconCpu, IconActivity, IconShield } from '../../icons';
 
 export const CreateDeviceTypeScreen = ({ onCancel }) => {
   const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
   const styles = createStyles(T);
-  
+
   const [loading, setLoading] = useState(false);
-  const [profiles, setProfiles] = useState([]);
-  const [loadingProfiles, setLoadingProfiles] = useState(false);
-  const [showProfilePicker, setShowProfilePicker] = useState(false);
   const [form, setForm] = useState({
     deviceType: '',
     category: 'PMS',
@@ -26,15 +23,6 @@ export const CreateDeviceTypeScreen = ({ onCancel }) => {
     deviceFirmware: '1.0.0',
     maxFirmware: '2.0.0'
   });
-
-  useEffect(() => {
-    if (!user?.orgName) return;
-    setLoadingProfiles(true);
-    deviceTypeApi.listProfiles(user.orgName, token)
-      .then(data => setProfiles(Array.isArray(data) ? data : []))
-      .catch(() => setProfiles([]))
-      .finally(() => setLoadingProfiles(false));
-  }, []);
 
   const updateForm = (key, value) => {
     setForm(prev => ({ ...prev, [key]: value }));
@@ -118,24 +106,15 @@ export const CreateDeviceTypeScreen = ({ onCancel }) => {
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label={t('entity.profile_code')} required>
-                <Card
-                  style={styles.selectCard}
-                  padding={12}
-                  onPress={() => setShowProfilePicker(true)}
-                >
-                  {loadingProfiles ? (
-                    <ActivityIndicator size="small" color={T.accent} />
-                  ) : (
-                    <>
-                      <IconActivity size={16} color={T.textFaint} />
-                      <Text style={[styles.selectText, !form.deviceProfile && { color: T.textFaint }]}>
-                        {form.deviceProfile || t('placeholders.select_profile')}
-                      </Text>
-                      <Text style={styles.chevron}>▾</Text>
-                    </>
-                  )}
-                </Card>
+              <Field label={t('entity.profile_code')} required hint={t('placeholders.profile_code_hint')}>
+                <TextInput
+                  value={form.deviceProfile}
+                  onChangeText={v => updateForm('deviceProfile', v)}
+                  placeholder={t('placeholders.profile_code')}
+                  leading={<IconActivity size={16} color={T.textFaint} />}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
               </Field>
             </View>
           </View>
@@ -176,29 +155,6 @@ export const CreateDeviceTypeScreen = ({ onCancel }) => {
         </View>
       </ScrollView>
 
-      <Modal visible={showProfilePicker} transparent animationType="fade">
-        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowProfilePicker(false)}>
-          <Card style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{t('entity.profile_code')}</Text>
-            <ScrollView style={{ maxHeight: 300 }}>
-              {profiles.map(p => (
-                <TouchableOpacity
-                  key={p}
-                  style={[styles.pickerOption, form.deviceProfile === p && { backgroundColor: T.accentSoft }]}
-                  onPress={() => { updateForm('deviceProfile', p); setShowProfilePicker(false); }}
-                >
-                  <Text style={[styles.pickerOptionText, form.deviceProfile === p && { color: T.accent, fontWeight: '700' }]}>
-                    {p}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-              {!profiles.length && (
-                <Text style={[styles.pickerOptionText, { color: T.textFaint, padding: 12 }]}>{t('common.no_data')}</Text>
-              )}
-            </ScrollView>
-          </Card>
-        </TouchableOpacity>
-      </Modal>
     </View>
   );
 };
@@ -220,12 +176,4 @@ const createStyles = (T) => StyleSheet.create({
   sectionTitle: { fontSize: 11, fontWeight: '700', color: T.textDim, letterSpacing: 1, marginBottom: 16 },
   row: { flexDirection: 'row', gap: 12 },
   actionRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
-  selectCard: { height: 48, flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: T.surface },
-  selectText: { flex: 1, color: T.text, fontSize: 14 },
-  chevron: { fontSize: 16, color: T.textDim },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 24 },
-  modalContent: { padding: 16 },
-  modalTitle: { fontSize: 16, fontWeight: '700', color: T.text, marginBottom: 12, textAlign: 'center' },
-  pickerOption: { padding: 14, borderRadius: 8, marginBottom: 4 },
-  pickerOptionText: { fontSize: 14, color: T.text },
 });

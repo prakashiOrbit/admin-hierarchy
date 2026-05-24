@@ -303,7 +303,9 @@
     "state_eg": "Noord-Holland",
     "country_eg": "Nederland",
     "pincode_eg": "1000 AA",
-    "select_profile": "Selecteer een profiel"
+    "select_profile": "Selecteer een profiel",
+    "profile_code": "bijv. Comen",
+    "profile_code_hint": "Voer de .xml-bestandsnaam in (zonder extensie)"
   },
   "actions": {
     "bed_actions": "Bed Acties",

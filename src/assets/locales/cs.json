@@ -303,7 +303,9 @@
     "state_eg": "Praha",
     "country_eg": "Česká republika",
     "pincode_eg": "11000",
-    "select_profile": "Vyberte profil"
+    "select_profile": "Vyberte profil",
+    "profile_code": "např. Comen",
+    "profile_code_hint": "Zadejte název souboru .xml (bez přípony)"
   },
   "actions": {
     "bed_actions": "Akce lůžka",

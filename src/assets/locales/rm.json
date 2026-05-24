@@ -303,7 +303,9 @@
     "state_eg": "Grischun",
     "country_eg": "Svizra",
     "pincode_eg": "7000",
-    "select_profile": "Tscherner in profil"
+    "select_profile": "Tscherner in profil",
+    "profile_code": "ex. Comen",
+    "profile_code_hint": "Endatescha il num dal fichier .xml (senza extensiun)"
   },
   "actions": {
     "bed_actions": "Acziuns letg",

@@ -303,7 +303,9 @@
     "state_eg": "منطقة الرياض",
     "country_eg": "السعودية",
     "pincode_eg": "12345",
-    "select_profile": "اختر ملف تعريف"
+    "select_profile": "اختر ملف تعريف",
+    "profile_code": "مثال: Comen",
+    "profile_code_hint": "أدخل اسم ملف .xml (بدون الامتداد)"
   },
   "actions": {
     "bed_actions": "إجراءات السرير",

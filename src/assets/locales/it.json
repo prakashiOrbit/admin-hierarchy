@@ -303,7 +303,9 @@
     "state_eg": "MI",
     "country_eg": "Italia",
     "pincode_eg": "20100",
-    "select_profile": "Seleziona un profilo"
+    "select_profile": "Seleziona un profilo",
+    "profile_code": "es. Comen",
+    "profile_code_hint": "Inserisci il nome del file .xml (senza estensione)"
   },
   "actions": {
     "bed_actions": "Azioni Letto",
