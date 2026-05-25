@@ -522,7 +522,12 @@
     "notes_placeholder": "Jakékoli další poznámky…",
     "submit": "Zaznamenat souhlas",
     "recorded_success": "Souhlas byl úspěšně zaznamenán.",
-    "record_failed": "Nepodařilo se zaznamenat souhlas."
+    "record_failed": "Nepodařilo se zaznamenat souhlas.",
+    "onboarding_notice": "Souhlas pacienta musí být získan před registrací. Povinné souhlasy jsou předvybrány a nelze je přeskočit.",
+    "loading_types": "Načítání typů souhlasů…",
+    "no_types_configured": "Žádné typy souhlasů nejsou nakonfigurovány. Kontaktujte správce.",
+    "required": "Povinné",
+    "view_manage": "Zobrazit / Spravovat souhlasy"
   },
   "bootstrap_user": {
     "screen_title": "Vytvořit bootstrap uživatele",

@@ -522,7 +522,12 @@
     "notes_placeholder": "Weitere Anmerkungen…",
     "submit": "Einwilligung aufzeichnen",
     "recorded_success": "Einwilligung erfolgreich aufgezeichnet.",
-    "record_failed": "Einwilligung konnte nicht aufgezeichnet werden."
+    "record_failed": "Einwilligung konnte nicht aufgezeichnet werden.",
+    "onboarding_notice": "Die Einwilligung des Patienten muss vor der Registrierung eingeholt werden. Erforderliche Einwilligungen sind vorausgewählt und können nicht übersprungen werden.",
+    "loading_types": "Einwilligungstypen werden geladen…",
+    "no_types_configured": "Keine Einwilligungstypen konfiguriert. Bitte wenden Sie sich an Ihren Administrator.",
+    "required": "Erforderlich",
+    "view_manage": "Einwilligungen anzeigen / verwalten"
   },
   "bootstrap_user": {
     "screen_title": "Bootstrap-Benutzer erstellen",

@@ -121,7 +121,7 @@ export const PatientDetailScreen = ({ patientId: patientCode, onBack, onAssign, 
 
         <Btn variant="surface" style={[styles.secondaryBtn, { marginTop: 8 }]} onPress={() => setShowConsent(true)}>
           <IconShield size={16} color={T.text} />
-          <Text style={styles.btnText}>{t('consent.title')}</Text>
+          <Text style={styles.btnText}>{t('consent.view_manage')}</Text>
         </Btn>
 
         <Btn variant="surface" style={[styles.secondaryBtn, { marginTop: 8 }]} onPress={() => setShowInfoSheet(true)}>

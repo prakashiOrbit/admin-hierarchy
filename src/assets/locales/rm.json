@@ -522,7 +522,12 @@
     "notes_placeholder": "Ulteriuras annotaziuns…",
     "submit": "Registrar consentiment",
     "recorded_success": "Consentiment registrà cun success.",
-    "record_failed": "Registraziun dal consentiment fallida."
+    "record_failed": "Registraziun dal consentiment fallida.",
+    "onboarding_notice": "Il consentiment dal pazient sto vegnir racoltà avant la registraziun. Consentiments obligatorics èn preschels e na pon betg vegnir saltads.",
+    "loading_types": "Chargiament da tips da consentiment…",
+    "no_types_configured": "Nagins tips da consentiment configurads. Contactai il voss administratur.",
+    "required": "Obligatoric",
+    "view_manage": "Visualisar / Administrar consentiments"
   },
   "bootstrap_user": {
     "screen_title": "Crear utilisader bootstrap",

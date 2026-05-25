@@ -522,7 +522,12 @@
     "notes_placeholder": "Aanvullende notities…",
     "submit": "Toestemming vastleggen",
     "recorded_success": "Toestemming succesvol vastgelegd.",
-    "record_failed": "Vastleggen van toestemming mislukt."
+    "record_failed": "Vastleggen van toestemming mislukt.",
+    "onboarding_notice": "Patiënttoestemming moet worden verzameld vóór registratie. Vereiste toestemmingen zijn vooraf geselecteerd en kunnen niet worden overgeslagen.",
+    "loading_types": "Toestemmingstypen laden…",
+    "no_types_configured": "Geen toestemmingstypen geconfigureerd. Neem contact op met uw beheerder.",
+    "required": "Vereist",
+    "view_manage": "Toestemmingen bekijken / beheren"
   },
   "bootstrap_user": {
     "screen_title": "Bootstrap-gebruiker aanmaken",

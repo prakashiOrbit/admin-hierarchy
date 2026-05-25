@@ -522,7 +522,12 @@
     "notes_placeholder": "Notes supplémentaires…",
     "submit": "Enregistrer le consentement",
     "recorded_success": "Consentement enregistré avec succès.",
-    "record_failed": "Échec de l'enregistrement du consentement."
+    "record_failed": "Échec de l'enregistrement du consentement.",
+    "onboarding_notice": "Le consentement du patient doit être recueilli avant l’enregistrement. Les consentements requis sont présélectionnés et ne peuvent pas être ignorés.",
+    "loading_types": "Chargement des types de consentement…",
+    "no_types_configured": "Aucun type de consentement configuré. Veuillez contacter votre administrateur.",
+    "required": "Requis",
+    "view_manage": "Voir / Gérer les consentements"
   },
   "bootstrap_user": {
     "screen_title": "Créer un utilisateur bootstrap",

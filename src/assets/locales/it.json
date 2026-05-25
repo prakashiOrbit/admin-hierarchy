@@ -522,7 +522,12 @@
     "notes_placeholder": "Note aggiuntive…",
     "submit": "Registra consenso",
     "recorded_success": "Consenso registrato con successo.",
-    "record_failed": "Impossibile registrare il consenso."
+    "record_failed": "Impossibile registrare il consenso.",
+    "onboarding_notice": "Il consenso del paziente deve essere raccolto prima della registrazione. I consensi obbligatori sono preselezionati e non possono essere saltati.",
+    "loading_types": "Caricamento dei tipi di consenso…",
+    "no_types_configured": "Nessun tipo di consenso configurato. Contatta il tuo amministratore.",
+    "required": "Obbligatorio",
+    "view_manage": "Visualizza / Gestisci consensi"
   },
   "bootstrap_user": {
     "screen_title": "Crea utente bootstrap",

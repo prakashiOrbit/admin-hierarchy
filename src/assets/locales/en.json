@@ -881,7 +881,12 @@
     "notes_placeholder": "Any additional notes…",
     "submit": "Record Consent",
     "recorded_success": "Consent recorded successfully.",
-    "record_failed": "Failed to record consent."
+    "record_failed": "Failed to record consent.",
+    "onboarding_notice": "Patient consent must be collected before registration. Required consents are pre-selected and cannot be skipped.",
+    "loading_types": "Loading consent types…",
+    "no_types_configured": "No consent types configured. Please contact your administrator.",
+    "required": "Required",
+    "view_manage": "View / Manage Consents"
   },
   "bootstrap_user": {
     "screen_title": "Create Bootstrap User",
