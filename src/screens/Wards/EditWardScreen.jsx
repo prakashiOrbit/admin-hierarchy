@@ -30,7 +30,7 @@ export const EditWardScreen = ({ ward, onCancel, onSave, onDelete }) => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await wardApi.update(user.orgName, user.hospitalCode, ward.wardCode, form, token);
+      await wardApi.update(user.orgName, user.hospitalCode, ward.wardId, form, token);
       Alert.alert(t('alerts.success'), t('alerts.ward_updated'), [
         { text: t('actions.ok'), onPress: () => onSave({ ...ward, ...form }) },
       ]);
@@ -52,7 +52,7 @@ export const EditWardScreen = ({ ward, onCancel, onSave, onDelete }) => {
           onPress: async () => {
             setDeleting(true);
             try {
-              await wardApi.delete(user.orgName, user.hospitalCode, ward.wardCode, token);
+              await wardApi.delete(user.orgName, user.hospitalCode, ward.wardId, token);
               onDelete?.();
             } catch (e) {
               Alert.alert(t('alerts.error'), e.message || t('alerts.delete_failed'));

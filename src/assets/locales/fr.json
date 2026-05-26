@@ -527,6 +527,11 @@
     "loading_types": "Chargement des types de consentement…",
     "no_types_configured": "Aucun type de consentement configuré. Veuillez contacter votre administrateur.",
     "required": "Requis",
+    "step_select": "Sélectionner les consentements accordés",
+    "step_details": "Détails du consentement",
+    "witness_note": "Enregistré par {{name}} — cette entrée constitue le document témoin numérique du consentement obtenu en personne.",
+    "additional_title": "Consentement supplémentaire",
+    "additional_hint": "Optionnel. Sélectionnez et complétez ci-dessous uniquement si un nouveau consentement est recueilli lors de cette visite.",
     "view_manage": "Voir / Gérer les consentements"
   },
   "bootstrap_user": {

@@ -23,10 +23,9 @@ const LOCALES = [
 
 const CONSENTED_BY_TYPES = ['SELF', 'GUARDIAN', 'PHYSICIAN'];
 
-const emptyGrant = (userName = '') => ({
-  enabled: false,
+const emptySharedGrant = () => ({
   consentedByType: 'SELF',
-  consentedByName: userName,
+  consentedByName: '',
   emergencyJustification: '',
   relationshipToPatient: '',
   powerOfAttorneyRef: '',
@@ -56,36 +55,32 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
   const [saving, setSaving] = useState(false);
 
   // Consent state
-  const [consentTypes, setConsentTypes] = useState(null); // null = loading
-  const [consentGrants, setConsentGrants] = useState({});  // { [code]: grantObj }
+  const [consentTypes, setConsentTypes] = useState(null);
+  const [selectedCodes, setSelectedCodes] = useState(new Set());
+  const [sharedGrant, setSharedGrant] = useState(emptySharedGrant());
 
-  // ── Load consent types on mount ────────────────────────────────────────────
+  // Load consent types on mount
   useEffect(() => {
     if (!user?.orgName || !token) return;
+    let cancelled = false;
     consentApi.getTypes(user.orgName, token)
       .then(types => {
+        if (cancelled) return;
         const arr = Array.isArray(types) ? types : [];
         setConsentTypes(arr);
-        // Pre-enable required types so they show expanded immediately
-        const initial = {};
-        arr.forEach(ct => {
-          initial[ct.code] = {
-            ...emptyGrant(user?.userName || ''),
-            enabled: ct.required === true,
-          };
-        });
-        setConsentGrants(initial);
+        // Pre-select required types
+        setSelectedCodes(new Set(arr.filter(ct => ct.required).map(ct => ct.code)));
       })
       .catch(() => {
-        // Fallback: treat DATA_COLLECTION as the only required type if the API is unavailable
-        setConsentTypes([{ code: 'DATA_COLLECTION', required: true, name: 'Data Collection Consent' }]);
-        setConsentGrants({
-          DATA_COLLECTION: { ...emptyGrant(user?.userName || ''), enabled: true },
-        });
+        if (cancelled) return;
+        const fallback = [{ code: 'DATA_COLLECTION', required: true, name: 'Data Collection Consent' }];
+        setConsentTypes(fallback);
+        setSelectedCodes(new Set(['DATA_COLLECTION']));
       });
+    return () => { cancelled = true; };
   }, [user?.orgName, token]);
 
-  // ── Form helpers ────────────────────────────────────────────────────────────
+  // Form helpers
   const updatePatient = (key, value) =>
     setForm(prev => ({ ...prev, patient: { ...prev.patient, [key]: value } }));
   const updateContact = (key, value) =>
@@ -99,56 +94,53 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
       return { ...prev, patientinfo: info };
     });
 
-  // ── Consent helpers ─────────────────────────────────────────────────────────
-  const toggleConsent = useCallback((code) => {
-    setConsentGrants(prev => ({
-      ...prev,
-      [code]: { ...prev[code], enabled: !prev[code]?.enabled },
-    }));
+  const updateSharedGrant = useCallback((key, value) => {
+    setSharedGrant(prev => ({ ...prev, [key]: value }));
   }, []);
 
-  const updateGrant = useCallback((code, key, value) => {
-    setConsentGrants(prev => ({
-      ...prev,
-      [code]: { ...prev[code], [key]: value },
-    }));
+  const toggleCode = useCallback((code, required) => {
+    if (required) return; // required types cannot be deselected
+    setSelectedCodes(prev => {
+      const next = new Set(prev);
+      if (next.has(code)) next.delete(code); else next.add(code);
+      return next;
+    });
   }, []);
 
-  const isGrantValid = (grant) => {
-    if (!grant?.enabled) return false;
-    if (!grant.consentedByName.trim()) return false;
-    if (grant.consentedByType === 'PHYSICIAN' && !grant.emergencyJustification.trim()) return false;
-    if (grant.consentedByType === 'GUARDIAN' && !grant.relationshipToPatient.trim()) return false;
-    return true;
-  };
-
+  // Validation
   const requiredTypes = (consentTypes || []).filter(ct => ct.required);
-  const allRequiredGranted = requiredTypes.every(ct => isGrantValid(consentGrants[ct.code]));
+  const allRequiredSelected = requiredTypes.every(ct => selectedCodes.has(ct.code));
+  const atLeastOne = selectedCodes.size > 0;
+  const grantFormValid =
+    sharedGrant.consentedByName.trim().length > 0 &&
+    (sharedGrant.consentedByType !== 'PHYSICIAN' || sharedGrant.emergencyJustification.trim().length > 0) &&
+    (sharedGrant.consentedByType !== 'GUARDIAN' || sharedGrant.relationshipToPatient.trim().length > 0);
+
+  const isConsentValid = atLeastOne && allRequiredSelected && grantFormValid;
 
   const isFormValid =
     form.patient.patientCode &&
     form.patient.firstName &&
     form.patient.lastName &&
     form.patient.myContact.email &&
-    allRequiredGranted;
+    isConsentValid;
 
-  // ── Build payload ────────────────────────────────────────────────────────────
+  // Build payload
   const buildConsentGrants = () =>
-    Object.entries(consentGrants)
-      .filter(([, g]) => g.enabled)
-      .map(([code, g]) => ({
-        consentTypeCode: code,
-        consentedByType: g.consentedByType,
-        consentedByName: g.consentedByName.trim(),
-        ...(g.consentedByType === 'PHYSICIAN' && g.emergencyJustification.trim() && {
-          emergencyJustification: g.emergencyJustification.trim(),
-        }),
-        ...(g.consentedByType === 'GUARDIAN' && {
-          relationshipToPatient: g.relationshipToPatient.trim(),
-          ...(g.powerOfAttorneyRef.trim() && { powerOfAttorneyRef: g.powerOfAttorneyRef.trim() }),
-        }),
-        ...(g.notes.trim() && { notes: g.notes.trim() }),
-      }));
+    Array.from(selectedCodes).map(code => ({
+      consentTypeCode: code,
+      consentedByType: sharedGrant.consentedByType,
+      consentedByName: sharedGrant.consentedByName.trim(),
+      ...(user?.userId && { consentedByUserId: user.userId }),
+      ...(sharedGrant.consentedByType === 'PHYSICIAN' && sharedGrant.emergencyJustification.trim() && {
+        emergencyJustification: sharedGrant.emergencyJustification.trim(),
+      }),
+      ...(sharedGrant.consentedByType === 'GUARDIAN' && {
+        relationshipToPatient: sharedGrant.relationshipToPatient.trim(),
+        ...(sharedGrant.powerOfAttorneyRef.trim() && { powerOfAttorneyRef: sharedGrant.powerOfAttorneyRef.trim() }),
+      }),
+      ...(sharedGrant.notes.trim() && { notes: sharedGrant.notes.trim() }),
+    }));
 
   const handleCreate = async () => {
     if (!isFormValid || !user?.orgName || !user?.hospitalCode) return;
@@ -175,7 +167,7 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
     }
   };
 
-  // ── Consent section renderer ─────────────────────────────────────────────────
+  // Consent section
   const renderConsentSection = () => {
     if (consentTypes === null) {
       return (
@@ -195,124 +187,142 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
       );
     }
 
-    return consentTypes.map(ct => {
-      const grant = consentGrants[ct.code] || emptyGrant();
-      const isEnabled = grant.enabled;
-      const valid = isGrantValid(grant);
+    const anySelected = selectedCodes.size > 0;
+    const staffName = [user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.userName || '';
 
-      return (
-        <View
-          key={ct.code}
-          style={[
-            styles.consentCard,
-            ct.required && styles.consentCardRequired,
-            isEnabled && valid && styles.consentCardGranted,
-          ]}
-        >
-          {/* Type header row */}
-          <TouchableOpacity
-            style={styles.consentCardHeader}
-            onPress={() => !ct.required && toggleConsent(ct.code)}
-            activeOpacity={ct.required ? 1 : 0.7}
-          >
-            <View style={[styles.consentCheck, isEnabled && { backgroundColor: T.accent, borderColor: T.accent }]}>
-              {isEnabled && <IconCheck size={11} color="#fff" />}
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.consentTypeName}>{ct.name || ct.code}</Text>
-              <Text style={styles.consentTypeCode}>{ct.code}</Text>
-            </View>
-            {ct.required && (
-              <View style={[styles.requiredBadge, { backgroundColor: T.accentSoft }]}>
-                <Text style={[styles.requiredBadgeText, { color: T.accent }]}>{t('consent.required')}</Text>
+    return (
+      <View style={styles.consentBox}>
+
+        {/* ── Step 1: Select consent types ── */}
+        <Text style={styles.consentStepLabel}>{t('consent.step_select')}</Text>
+        {consentTypes.map(ct => {
+          const isSelected = selectedCodes.has(ct.code);
+          return (
+            <TouchableOpacity
+              key={ct.code}
+              style={styles.consentRow}
+              onPress={() => toggleCode(ct.code, ct.required)}
+              activeOpacity={ct.required ? 1 : 0.7}
+            >
+              <View style={[
+                styles.consentCheck,
+                isSelected && { backgroundColor: T.accent, borderColor: T.accent },
+              ]}>
+                {isSelected && <IconCheck size={11} color="#fff" />}
               </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.consentRowName, isSelected && { color: T.accent }]}>
+                  {ct.name || ct.code}
+                </Text>
+                <Text style={styles.consentRowCode}>{ct.code}</Text>
+              </View>
+              {ct.required && (
+                <View style={[styles.requiredBadge, { backgroundColor: T.accentSoft }]}>
+                  <Text style={[styles.requiredBadgeText, { color: T.accent }]}>
+                    {t('consent.required')}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          );
+        })}
+
+        {/* ── Step 2: Fill details (shown only when at least one selected) ── */}
+        {anySelected && (
+          <View style={styles.consentFormWrap}>
+            <View style={styles.consentDivider} />
+            <Text style={styles.consentStepLabel}>{t('consent.step_details')}</Text>
+
+            {/* Consented-by type */}
+            <Text style={styles.consentFieldLabel}>{t('consent.consented_by_type')} *</Text>
+            <View style={styles.chipRow}>
+              {CONSENTED_BY_TYPES.map(type => {
+                const active = sharedGrant.consentedByType === type;
+                return (
+                  <TouchableOpacity
+                    key={type}
+                    style={[styles.chip, active && { backgroundColor: T.accent, borderColor: T.accent }]}
+                    onPress={() => updateSharedGrant('consentedByType', type)}
+                  >
+                    <Text style={[styles.chipText, active && { color: '#fff' }]}>{type}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            {/* Name of person consenting */}
+            <Text style={styles.consentFieldLabel}>{t('consent.consented_by_name')} *</Text>
+            <RNTextInput
+              style={styles.consentInput}
+              value={sharedGrant.consentedByName}
+              onChangeText={v => updateSharedGrant('consentedByName', v)}
+              placeholder={t('consent.consented_by_name_placeholder')}
+              placeholderTextColor={T.textFaint}
+            />
+
+            {/* PHYSICIAN: emergency justification */}
+            {sharedGrant.consentedByType === 'PHYSICIAN' && (
+              <>
+                <Text style={styles.consentFieldLabel}>{t('consent.emergency_justification')} *</Text>
+                <RNTextInput
+                  style={[styles.consentInput, styles.consentTextarea]}
+                  value={sharedGrant.emergencyJustification}
+                  onChangeText={v => updateSharedGrant('emergencyJustification', v)}
+                  placeholder={t('consent.emergency_justification_placeholder')}
+                  placeholderTextColor={T.textFaint}
+                  multiline
+                  numberOfLines={3}
+                />
+              </>
             )}
-          </TouchableOpacity>
 
-          {/* Inline grant form */}
-          {isEnabled && (
-            <View style={styles.consentForm}>
-              {/* Consented-by type */}
-              <Text style={styles.consentFieldLabel}>{t('consent.consented_by_type')} *</Text>
-              <View style={styles.chipRow}>
-                {CONSENTED_BY_TYPES.map(type => {
-                  const active = grant.consentedByType === type;
-                  return (
-                    <TouchableOpacity
-                      key={type}
-                      style={[styles.chip, active && { backgroundColor: T.accent, borderColor: T.accent }]}
-                      onPress={() => updateGrant(ct.code, 'consentedByType', type)}
-                    >
-                      <Text style={[styles.chipText, active && { color: '#fff' }]}>{type}</Text>
-                    </TouchableOpacity>
-                  );
-                })}
+            {/* GUARDIAN: relationship + POA */}
+            {sharedGrant.consentedByType === 'GUARDIAN' && (
+              <>
+                <Text style={styles.consentFieldLabel}>{t('consent.relationship')} *</Text>
+                <RNTextInput
+                  style={styles.consentInput}
+                  value={sharedGrant.relationshipToPatient}
+                  onChangeText={v => updateSharedGrant('relationshipToPatient', v)}
+                  placeholder={t('consent.relationship_placeholder')}
+                  placeholderTextColor={T.textFaint}
+                />
+                <Text style={styles.consentFieldLabel}>{t('consent.poa_ref')}</Text>
+                <RNTextInput
+                  style={styles.consentInput}
+                  value={sharedGrant.powerOfAttorneyRef}
+                  onChangeText={v => updateSharedGrant('powerOfAttorneyRef', v)}
+                  placeholder={t('consent.poa_ref_placeholder')}
+                  placeholderTextColor={T.textFaint}
+                />
+              </>
+            )}
+
+            {/* Notes */}
+            <Text style={styles.consentFieldLabel}>{t('consent.notes')}</Text>
+            <RNTextInput
+              style={[styles.consentInput, styles.consentTextarea]}
+              value={sharedGrant.notes}
+              onChangeText={v => updateSharedGrant('notes', v)}
+              placeholder={t('consent.notes_placeholder')}
+              placeholderTextColor={T.textFaint}
+              multiline
+              numberOfLines={2}
+            />
+
+            {/* Proof panel — staff witness record */}
+            {staffName ? (
+              <View style={[styles.witnessPanel, { backgroundColor: T.accentSoft, borderColor: T.accent + '44' }]}>
+                <IconShield size={14} color={T.accent} />
+                <Text style={[styles.witnessText, { color: T.textDim }]}>
+                  {t('consent.witness_note', { name: staffName })}
+                </Text>
               </View>
-
-              {/* Consented-by name */}
-              <Text style={styles.consentFieldLabel}>{t('consent.consented_by_name')} *</Text>
-              <RNTextInput
-                style={styles.consentInput}
-                value={grant.consentedByName}
-                onChangeText={v => updateGrant(ct.code, 'consentedByName', v)}
-                placeholder={t('consent.consented_by_name_placeholder')}
-                placeholderTextColor={T.textFaint}
-              />
-
-              {/* PHYSICIAN extra field */}
-              {grant.consentedByType === 'PHYSICIAN' && (
-                <>
-                  <Text style={styles.consentFieldLabel}>{t('consent.emergency_justification')} *</Text>
-                  <RNTextInput
-                    style={[styles.consentInput, styles.consentTextarea]}
-                    value={grant.emergencyJustification}
-                    onChangeText={v => updateGrant(ct.code, 'emergencyJustification', v)}
-                    placeholder={t('consent.emergency_justification_placeholder')}
-                    placeholderTextColor={T.textFaint}
-                    multiline
-                    numberOfLines={3}
-                  />
-                </>
-              )}
-
-              {/* GUARDIAN extra fields */}
-              {grant.consentedByType === 'GUARDIAN' && (
-                <>
-                  <Text style={styles.consentFieldLabel}>{t('consent.relationship')} *</Text>
-                  <RNTextInput
-                    style={styles.consentInput}
-                    value={grant.relationshipToPatient}
-                    onChangeText={v => updateGrant(ct.code, 'relationshipToPatient', v)}
-                    placeholder={t('consent.relationship_placeholder')}
-                    placeholderTextColor={T.textFaint}
-                  />
-                  <Text style={styles.consentFieldLabel}>{t('consent.poa_ref')}</Text>
-                  <RNTextInput
-                    style={styles.consentInput}
-                    value={grant.powerOfAttorneyRef}
-                    onChangeText={v => updateGrant(ct.code, 'powerOfAttorneyRef', v)}
-                    placeholder={t('consent.poa_ref_placeholder')}
-                    placeholderTextColor={T.textFaint}
-                  />
-                </>
-              )}
-
-              {/* Notes */}
-              <Text style={styles.consentFieldLabel}>{t('consent.notes')}</Text>
-              <RNTextInput
-                style={[styles.consentInput, styles.consentTextarea]}
-                value={grant.notes}
-                onChangeText={v => updateGrant(ct.code, 'notes', v)}
-                placeholder={t('consent.notes_placeholder')}
-                placeholderTextColor={T.textFaint}
-                multiline
-                numberOfLines={2}
-              />
-            </View>
-          )}
-        </View>
-      );
-    });
+            ) : null}
+          </View>
+        )}
+      </View>
+    );
   };
 
   return (
@@ -451,7 +461,7 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
           </View>
         </View>
 
-        {/* ── Consent Section ──────────────────────────────────────────────── */}
+        {/* Consent Section */}
         <View style={styles.section}>
           <SectionHeader title={t('consent.title')} />
           <View style={[styles.consentNotice, { backgroundColor: T.accentSoft, borderColor: T.accent }]}>
@@ -535,44 +545,43 @@ const createStyles = (T) => StyleSheet.create({
   localeOption: { padding: 14, borderRadius: 8, marginBottom: 4 },
   localeOptionText: { fontSize: 14, color: T.text },
 
-  // ── Consent styles ────────────────────────────────────────────────────────
+  // Consent
   consentNotice: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 10,
     padding: 12, borderRadius: 10, borderWidth: 1, marginBottom: 12,
   },
   consentNoticeText: { flex: 1, fontSize: 12.5, lineHeight: 18 },
-
   consentLoading: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 16 },
   consentLoadingText: { fontSize: 13, color: T.textDim },
   consentEmpty: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12 },
   consentEmptyText: { fontSize: 13, color: T.textFaint },
 
-  consentCard: {
+  consentBox: {
     borderRadius: 12, borderWidth: 1.5, borderColor: T.borderSoft,
-    backgroundColor: T.surface, marginBottom: 10, overflow: 'hidden',
+    backgroundColor: T.surface, overflow: 'hidden',
   },
-  consentCardRequired: { borderColor: T.accent + '55' },
-  consentCardGranted: { borderColor: T.accent },
-
-  consentCardHeader: {
-    flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14,
+  consentStepLabel: {
+    fontSize: 10, fontWeight: '700', color: T.textDim,
+    letterSpacing: 0.6, textTransform: 'uppercase',
+    paddingHorizontal: 14, paddingTop: 14, paddingBottom: 8,
+  },
+  consentRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    paddingHorizontal: 14, paddingVertical: 11,
+    borderTopWidth: 1, borderTopColor: T.borderSoft,
   },
   consentCheck: {
     width: 22, height: 22, borderRadius: 6, borderWidth: 2,
     borderColor: T.borderSoft, alignItems: 'center', justifyContent: 'center',
   },
-  consentTypeName: { fontSize: 14, fontWeight: '700', color: T.text },
-  consentTypeCode: { fontSize: 11, color: T.textDim, marginTop: 1 },
-
-  requiredBadge: {
-    paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6,
-  },
+  consentRowName: { fontSize: 13.5, fontWeight: '600', color: T.text },
+  consentRowCode: { fontSize: 10.5, color: T.textFaint, marginTop: 1 },
+  requiredBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
   requiredBadgeText: { fontSize: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
 
-  consentForm: {
-    paddingHorizontal: 14, paddingBottom: 14, paddingTop: 2,
-    borderTopWidth: 1, borderTopColor: T.borderSoft,
-  },
+  consentFormWrap: { paddingHorizontal: 14, paddingBottom: 14 },
+  consentDivider: { height: 1, backgroundColor: T.borderSoft, marginVertical: 12 },
+
   consentFieldLabel: {
     fontSize: 11, fontWeight: '600', color: T.textDim,
     marginTop: 10, marginBottom: 5, textTransform: 'uppercase', letterSpacing: 0.4,
@@ -589,4 +598,10 @@ const createStyles = (T) => StyleSheet.create({
     color: T.text, backgroundColor: T.bg,
   },
   consentTextarea: { height: 72, textAlignVertical: 'top' },
+
+  witnessPanel: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 8,
+    marginTop: 14, padding: 10, borderRadius: 8, borderWidth: 1,
+  },
+  witnessText: { flex: 1, fontSize: 11.5, lineHeight: 17 },
 });

@@ -527,6 +527,11 @@
     "loading_types": "Caricamento dei tipi di consenso…",
     "no_types_configured": "Nessun tipo di consenso configurato. Contatta il tuo amministratore.",
     "required": "Obbligatorio",
+    "step_select": "Seleziona i consensi concessi",
+    "step_details": "Dettagli del consenso",
+    "witness_note": "Registrato da {{name}} — questa voce funge da testimonianza digitale del consenso ottenuto di persona.",
+    "additional_title": "Consenso aggiuntivo",
+    "additional_hint": "Facoltativo. Selezionare e compilare di seguito solo se viene raccolta una nuova autorizzazione durante questa visita.",
     "view_manage": "Visualizza / Gestisci consensi"
   },
   "bootstrap_user": {

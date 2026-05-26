@@ -527,6 +527,11 @@
     "loading_types": "Toestemmingstypen laden…",
     "no_types_configured": "Geen toestemmingstypen geconfigureerd. Neem contact op met uw beheerder.",
     "required": "Vereist",
+    "step_select": "Selecteer verleende toestemmingen",
+    "step_details": "Toestemmingsgegevens",
+    "witness_note": "Vastgelegd door {{name}} — dit item dient als digitaal getuigenverslag van persoonlijk verkregen toestemming.",
+    "additional_title": "Aanvullende toestemming",
+    "additional_hint": "Optioneel. Selecteer en vul hieronder alleen in als er tijdens dit bezoek nieuwe toestemming wordt verzameld.",
     "view_manage": "Toestemmingen bekijken / beheren"
   },
   "bootstrap_user": {

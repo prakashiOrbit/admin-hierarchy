@@ -527,6 +527,11 @@
     "loading_types": "Chargiament da tips da consentiment…",
     "no_types_configured": "Nagins tips da consentiment configurads. Contactai il voss administratur.",
     "required": "Obligatoric",
+    "step_select": "Tscherner ils consentiments concedids",
+    "step_details": "Detagls dal consentiment",
+    "witness_note": "Registrà da {{name}} — questa entrada serva sco documentaziun digitala dal consentiment obtegnì persunalamain.",
+    "additional_title": "Consentiment supplementar",
+    "additional_hint": "Opziunal. Tscherner ed emplenir qua sutvart mo sche in nov consentiment vegn collecà durant questa visita.",
     "view_manage": "Visualisar / Administrar consentiments"
   },
   "bootstrap_user": {

@@ -527,6 +527,11 @@
     "loading_types": "Načítání typů souhlasů…",
     "no_types_configured": "Žádné typy souhlasů nejsou nakonfigurovány. Kontaktujte správce.",
     "required": "Povinné",
+    "step_select": "Vyberte udělované souhlasy",
+    "step_details": "Podrobnosti souhlasu",
+    "witness_note": "Zaznamenal(a) {{name}} — tento záznam slouží jako digitální svědectví souhlasu získaného osobně.",
+    "additional_title": "Dodatečný souhlas",
+    "additional_hint": "Volitelné. Vyberte a vyplňte níže pouze pokud je při této návštěvě shromažďován nový souhlas.",
     "view_manage": "Zobrazit / Spravovat souhlasy"
   },
   "bootstrap_user": {

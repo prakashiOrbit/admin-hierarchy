@@ -125,9 +125,9 @@ export const organisationApi = {
       headers: { 'Authorization': `Bearer ${token}` },
     });
   },
-  updateHospital: (orgName, hospCode, hospitalData, token) =>
-    apiRequest(`/${orgName}/hospital/${hospCode}/update`, {
-      method: 'PUT',
+  updateHospital: (orgName, hospitalData, token) =>
+    apiRequest(`/${orgName}/hospital/update`, {
+      method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(hospitalData),
     }),
@@ -251,7 +251,7 @@ export const deviceTypeApi = {
     }),
   updateType: (orgName, deviceTypeCode, deviceData, token) =>
     apiRequest(`/${orgName}/devicetype/${deviceTypeCode}/update`, {
-      method: 'PUT',
+      method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(deviceData),
     }),
@@ -274,14 +274,14 @@ export const wardApi = {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
-  update: (orgName, hospCode, wardCode, wardData, token) =>
-    apiRequest(`/${orgName}/ward/${hospCode}/${wardCode}/update`, {
+  update: (orgName, hospCode, wardId, wardData, token) =>
+    apiRequest(`/${orgName}/ward/${hospCode}/update/${wardId}`, {
       method: 'PUT',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(wardData),
     }),
-  delete: (orgName, hospCode, wardCode, token) =>
-    apiRequest(`/${orgName}/ward/${hospCode}/${wardCode}`, {
+  delete: (orgName, hospCode, wardId, token) =>
+    apiRequest(`/${orgName}/ward/${hospCode}/delete/${wardId}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
@@ -348,6 +348,11 @@ export const doctorApi = {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
+  listAllOrg: (orgName, token) =>
+    apiRequest(`/${orgName}/doctor/all`, {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${token}` },
+    }),
   getDetail: (orgName, hospCode, doctorCode, token) =>
     apiRequest(`/${orgName}/doctor/${hospCode}/${doctorCode}/doctordetail`, {
       method: 'GET',
@@ -355,7 +360,7 @@ export const doctorApi = {
     }),
   update: (orgName, hospCode, doctorCode, doctorData, token) =>
     apiRequest(`/${orgName}/doctor/${hospCode}/${doctorCode}/update`, {
-      method: 'PUT',
+      method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(doctorData),
     }),
@@ -373,6 +378,11 @@ export const nurseApi = {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
+  listAllOrg: (orgName, token) =>
+    apiRequest(`/${orgName}/nurse/all`, {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${token}` },
+    }),
   getDetail: (orgName, hospCode, nurseCode, token) =>
     apiRequest(`/${orgName}/nurse/${hospCode}/${nurseCode}/nursedetail`, {
       method: 'GET',
@@ -380,7 +390,7 @@ export const nurseApi = {
     }),
   update: (orgName, hospCode, nurseCode, nurseData, token) =>
     apiRequest(`/${orgName}/nurse/${hospCode}/${nurseCode}/update`, {
-      method: 'PUT',
+      method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(nurseData),
     }),
@@ -416,8 +426,8 @@ export const patientApi = {
       headers: { 'Authorization': `Bearer ${token}` },
     }),
   update: (orgName, hospCode, patientCode, patientData, token) =>
-    apiRequest(`/${orgName}/patient/${hospCode}/${patientCode}/update`, {
-      method: 'PUT',
+    apiRequest(`/${orgName}/patient/${hospCode}/update`, {
+      method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(patientData),
     }),
@@ -484,12 +494,12 @@ export const shiftApi = {
     }),
   update: (orgName, hospCode, shiftCode, shiftData, token) =>
     apiRequest(`/${orgName}/shift/${hospCode}/${shiftCode}/update`, {
-      method: 'PUT',
+      method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(shiftData),
     }),
   delete: (orgName, hospCode, shiftCode, token) =>
-    apiRequest(`/${orgName}/shift/${hospCode}/${shiftCode}`, {
+    apiRequest(`/${orgName}/shift/${hospCode}/${shiftCode}/delete`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` },
     }),

@@ -527,6 +527,11 @@
     "loading_types": "Einwilligungstypen werden geladen…",
     "no_types_configured": "Keine Einwilligungstypen konfiguriert. Bitte wenden Sie sich an Ihren Administrator.",
     "required": "Erforderlich",
+    "step_select": "Erteilte Einwilligungen auswählen",
+    "step_details": "Einwilligungsdetails",
+    "witness_note": "Erfasst von {{name}} — dieser Eintrag dient als digitaler Nachweis der persönlich eingeholten Einwilligung.",
+    "additional_title": "Zusätzliche Einwilligung",
+    "additional_hint": "Optional. Nur ausfüllen, wenn bei diesem Besuch eine neue Einwilligung eingeholt wird.",
     "view_manage": "Einwilligungen anzeigen / verwalten"
   },
   "bootstrap_user": {

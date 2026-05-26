@@ -8,7 +8,7 @@ import { Card, SectionHeader, Btn } from '../../components/Shared';
 import { TopBar, BottomNav } from '../../components/Navigation';
 import { StatusPill } from '../../components/StatusPill';
 import { 
-  IconHospital, IconUsers, IconPulse, IconGateway, IconShield, IconChart,
+  IconHospital, IconUsers, IconPulse, IconGateway, IconShield,
   IconAlert, IconChevron, IconMenu, IconSettings, IconDashboard, IconBack, IconUser, IconMoon, IconLogout, IconCpu
 } from '../../icons';
 import { organisationApi, userApi, summaryApi } from '../../services/api';
@@ -16,7 +16,6 @@ import { NotificationSheet } from '../../components/NotificationSheet';
 import { HospitalsScreen } from '../Hospitals/HospitalsScreen';
 import { UsersScreen } from '../Users/UsersScreen';
 import { RolesScreen } from '../Roles/RolesScreen';
-import { OrgSummaryScreen } from '../Organisations/OrgSummaryScreen';
 import { UserDetailScreen } from '../Users/UserDetailScreen';
 import { InviteOrgAdminScreen } from '../Organisations/InviteOrgAdminScreen';
 import { OrgAdminsScreen } from '../Organisations/OrgAdminsScreen';
@@ -31,6 +30,8 @@ import { EditDeviceTypeScreen } from '../Devices/EditDeviceTypeScreen';
 import { HospitalDetailScreen } from '../Hospitals/HospitalDetailScreen';
 import { EditHospitalScreen } from '../Hospitals/EditHospitalScreen';
 import { CreateBootstrapUserScreen } from '../Users/CreateBootstrapUserScreen';
+import { EditDoctorScreen } from '../Users/EditDoctorScreen';
+import { EditNurseScreen } from '../Users/EditNurseScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -193,6 +194,7 @@ export const OrgDashboard = ({ navigation, route }) => {
   const [isEditingDeviceType, setIsEditingDeviceType] = useState(false);
   const [isEditingHospital, setIsEditingHospital] = useState(false);
   const [isCreatingBootstrapUser, setIsCreatingBootstrapUser] = useState(false);
+  const [selectedStaffForEdit, setSelectedStaffForEdit] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const drawerAnim = React.useRef(new Animated.Value(-width)).current;
@@ -208,14 +210,15 @@ export const OrgDashboard = ({ navigation, route }) => {
     if (isProvisioningHospital) { setIsProvisioningHospital(false); return; }
     if (isCreatingRole) { setIsCreatingRole(false); return; }
     if (isCreatingBootstrapUser) { setIsCreatingBootstrapUser(false); return; }
+    if (selectedStaffForEdit) { setSelectedStaffForEdit(null); return; }
     if (selectedUserId) { setSelectedUserId(null); return; }
     if (selectedRoleId) { setSelectedRoleId(null); return; }
     if (activeTab !== 'home') { handleTabChange('home'); }
-  }, [drawerOpen, activeTab, selectedUserId, isInvitingAdmin, selectedRoleId, isProvisioningHospital, selectedHospital, isCreatingDeviceType, selectedDeviceType, isCreatingRole, isEditingDeviceType, isEditingHospital, toggleDrawer]);
+  }, [drawerOpen, activeTab, selectedUserId, isInvitingAdmin, selectedRoleId, isProvisioningHospital, selectedHospital, isCreatingDeviceType, selectedDeviceType, isCreatingRole, isEditingDeviceType, isEditingHospital, selectedStaffForEdit, toggleDrawer]);
 
   const isSubScreen = !!(selectedUserId || isInvitingAdmin || selectedRoleId || isProvisioningHospital ||
     selectedHospital || isCreatingDeviceType || selectedDeviceType || isCreatingRole ||
-    isEditingDeviceType || isEditingHospital || isCreatingBootstrapUser);
+    isEditingDeviceType || isEditingHospital || isCreatingBootstrapUser || selectedStaffForEdit);
 
   useEffect(() => {
     const backAction = () => {
@@ -245,6 +248,7 @@ export const OrgDashboard = ({ navigation, route }) => {
     setIsEditingHospital(false);
     setIsCreatingRole(false);
     setIsCreatingBootstrapUser(false);
+    setSelectedStaffForEdit(null);
     setActiveTab(tabId);
   };
 
@@ -255,7 +259,6 @@ export const OrgDashboard = ({ navigation, route }) => {
     { id: 'types', label: t('dashboard.device_type'), icon: <IconCpu /> },
     { id: 'users', label: t('dashboard.users'), icon: <IconUser /> },
     { id: 'roles', label: t('dashboard.roles_perms'), icon: <IconShield /> },
-    { id: 'summary', label: t('dashboard.summary'), icon: <IconChart /> },
   ];
 
   const renderContent = () => {
@@ -268,6 +271,12 @@ export const OrgDashboard = ({ navigation, route }) => {
     if (selectedHospital) return <HospitalDetailScreen hospital={selectedHospital} onBack={() => setSelectedHospital(null)} onEdit={() => setIsEditingHospital(true)} />;
     if (isCreatingRole) return <CreateRoleScreen onCancel={() => setIsCreatingRole(false)} />;
     if (isCreatingBootstrapUser) return <CreateBootstrapUserScreen onCancel={() => setIsCreatingBootstrapUser(false)} onSuccess={() => { setIsCreatingBootstrapUser(false); }} />;
+    if (selectedStaffForEdit) {
+      const isDoctor = !!selectedStaffForEdit.doctorCode;
+      return isDoctor
+        ? <EditDoctorScreen doctor={selectedStaffForEdit} onCancel={() => setSelectedStaffForEdit(null)} onSave={() => setSelectedStaffForEdit(null)} />
+        : <EditNurseScreen nurse={selectedStaffForEdit} onCancel={() => setSelectedStaffForEdit(null)} onSave={() => setSelectedStaffForEdit(null)} />;
+    }
     if (selectedUserId) return <UserDetailScreen userId={selectedUserId} onBack={() => setSelectedUserId(null)} />;
     if (selectedRoleId) return <RoleDetailScreen roleId={selectedRoleId} onBack={() => setSelectedRoleId(null)} />;
     switch (activeTab) {
@@ -275,9 +284,8 @@ export const OrgDashboard = ({ navigation, route }) => {
       case 'admins': return <OrgAdminsScreen onInvite={() => setIsInvitingAdmin(true)} onSelectUser={setSelectedUserId} />;
       case 'hospitals': return <HospitalsScreen onProvision={() => setIsProvisioningHospital(true)} onSelect={setSelectedHospital} />;
       case 'types': return <DeviceTypesScreen onCreate={() => setIsCreatingDeviceType(true)} onSelect={setSelectedDeviceType} />;
-      case 'users': return <UsersScreen onSelectUser={setSelectedUserId} onCreateBootstrapUser={isOwner ? () => setIsCreatingBootstrapUser(true) : undefined} />;
+      case 'users': return <UsersScreen onSelectUser={setSelectedUserId} onSelectStaff={setSelectedStaffForEdit} onCreateBootstrapUser={isOwner ? () => setIsCreatingBootstrapUser(true) : undefined} />;
       case 'roles': return <RolesScreen onSelectRole={setSelectedRoleId} onCreate={() => setIsCreatingRole(true)} />;
-      case 'summary': return <OrgSummaryScreen />;
       case 'settings': return <SettingsScreen onLogout={() => { logout(); navigation.replace('Login'); }} />;
       default: return <OrgHomeContent role={role} />;
     }
@@ -293,6 +301,7 @@ export const OrgDashboard = ({ navigation, route }) => {
     if (selectedHospital) return t('dashboard.hospital_details');
     if (isCreatingRole) return t('dashboard.create_role');
     if (isCreatingBootstrapUser) return t('bootstrap_user.screen_title');
+    if (selectedStaffForEdit) return selectedStaffForEdit.doctorCode ? t('dashboard.edit_doctor') : t('dashboard.edit_nurse');
     if (selectedUserId) return t('dashboard.user_details');
     if (selectedRoleId) return t('dashboard.role_details');
     switch (activeTab) {
@@ -302,7 +311,6 @@ export const OrgDashboard = ({ navigation, route }) => {
       case 'types': return t('dashboard.device_types');
       case 'users': return t('dashboard.users');
       case 'roles': return t('dashboard.roles_perms');
-      case 'summary': return t('dashboard.summary');
       case 'settings': return t('dashboard.system_settings');
       default: return t('dashboard.org_console');
     }

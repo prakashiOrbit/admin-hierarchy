@@ -40,7 +40,11 @@ export const EditHospitalScreen = ({ hospital, onCancel, onSave }) => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      await organisationApi.updateHospital(user.orgName, hospital.hospitalCode, form, token);
+      await organisationApi.updateHospital(user.orgName, {
+        hospitalId: hospital.hospitalId,
+        hospitalCode: hospital.hospitalCode,
+        ...form,
+      }, token);
       Alert.alert(t('alerts.success'), t('alerts.hospital_updated'), [
         { text: t('actions.ok'), onPress: () => onSave({ ...hospital, ...form }) }
       ]);

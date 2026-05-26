@@ -886,6 +886,11 @@
     "loading_types": "Loading consent types…",
     "no_types_configured": "No consent types configured. Please contact your administrator.",
     "required": "Required",
+    "step_select": "Select consents being granted",
+    "step_details": "Consent details",
+    "witness_note": "Recorded by {{name}} — this entry serves as the digital witness record of consent obtained in person.",
+    "additional_title": "Additional Consent",
+    "additional_hint": "Optional. Select and complete below only if new consent is being collected at this visit.",
     "view_manage": "View / Manage Consents"
   },
   "bootstrap_user": {

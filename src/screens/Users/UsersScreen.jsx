@@ -3,12 +3,12 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Activit
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { userApi } from '../../services/api';
+import { userApi, doctorApi, nurseApi } from '../../services/api';
 import { Card, SectionHeader, SearchBar, Chip, Avatar, RoleBadge, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
 import { IconFilter, IconPlus, IconUsers, IconShield } from '../../icons';
 
-export const UsersScreen = ({ onSelectUser, onCreateBootstrapUser }) => {
+export const UsersScreen = ({ onSelectUser, onSelectStaff, onCreateBootstrapUser }) => {
   const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
@@ -25,24 +25,29 @@ export const UsersScreen = ({ onSelectUser, onCreateBootstrapUser }) => {
     if (showLoading) setLoading(true);
     setError(null);
     try {
-      const [adminsRes, ownersRes, hospAdminsRes] = await Promise.all([
+      const [adminsRes, ownersRes, hospAdminsRes, doctorsRes, nursesRes] = await Promise.all([
         userApi.listOrgAdmins(user.orgName, token).catch(() => []),
         userApi.listHospOwners(user.orgName, token).catch(() => []),
         userApi.listAllHospAdmins(user.orgName, token).catch(() => []),
+        doctorApi.listAllOrg(user.orgName, token).catch(() => []),
+        nurseApi.listAllOrg(user.orgName, token).catch(() => []),
       ]);
-      
+
       const getList = (res) => Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
       const admins = getList(adminsRes);
       const owners = getList(ownersRes);
       const hospAdmins = getList(hospAdminsRes);
+      const doctors = getList(doctorsRes);
+      const nurses = getList(nursesRes);
 
-      // Combine and ensure roles are set correctly for categorization
       const allUsers = [
-        ...admins.map(u => ({ ...u, role: u.role || 'ORG_ADMIN' })),
-        ...owners.map(u => ({ ...u, role: u.role || 'HOSP_OWNER' })),
-        ...hospAdmins.map(u => ({ ...u, role: u.role || 'HOSP_ADMIN' }))
+        ...admins.map(u => ({ ...u, role: 'ORG_ADMIN' })),
+        ...owners.map(u => ({ ...u, role: 'HOSP_OWNER' })),
+        ...hospAdmins.map(u => ({ ...u, role: 'HOSP_ADMIN' })),
+        ...doctors.map(d => ({ ...d, role: 'DOCTOR', userName: `${d.firstName} ${d.lastName}`, email: d.myContact?.email })),
+        ...nurses.map(n => ({ ...n, role: 'NURSE', userName: `${n.firstName} ${n.lastName}`, email: n.myContact?.email })),
       ];
-      
+
       setUsers(allUsers);
     } catch (err) {
       console.error('Fetch users error:', err);
@@ -66,9 +71,13 @@ export const UsersScreen = ({ onSelectUser, onCreateBootstrapUser }) => {
 
   const filtered = users.filter(u => {
     const role = getRole(u);
-    const matchesSearch = (u.userName?.toLowerCase().includes(query.toLowerCase()) || 
-                           u.email?.toLowerCase().includes(query.toLowerCase()));
-    
+    const q = query.toLowerCase();
+    const matchesSearch = !q ||
+      u.userName?.toLowerCase().includes(q) ||
+      u.email?.toLowerCase().includes(q) ||
+      u.doctorCode?.toLowerCase().includes(q) ||
+      u.nurseCode?.toLowerCase().includes(q);
+
     if (!matchesSearch) return false;
     if (tab === 'all') return true;
     if (tab === 'DOCTOR') return (role === 'DOCTOR' || role === 'NURSE');
@@ -141,30 +150,36 @@ export const UsersScreen = ({ onSelectUser, onCreateBootstrapUser }) => {
           </View>
         ) : (
           <View style={styles.list}>
-            {filtered.map((u, idx) => (
-              <Card 
-                key={u.userName || idx}
-                onPress={() => onSelectUser?.(u.userName)}
-              >
-                <View style={styles.userRow}>
-                  <Avatar name={u.userName} size={42} />
-                  <View style={styles.userInfo}>
-                    <View style={styles.titleRow}>
-                      <Text style={styles.userName} numberOfLines={1}>{u.userName}</Text>
-                      <StatusPill status={u.status || 'ACTIVE'} />
-                    </View>
-                    <Text style={styles.userEmail}>{u.email || t('users.no_email', 'No email')}</Text>
-                    
-                    <View style={styles.badgesRow}>
-                      <RoleBadge role={getRole(u)} />
-                      {u.hospitalCode && (
-                        <Text style={styles.hospitalText}>{u.hospitalCode}</Text>
-                      )}
+            {filtered.map((u, idx) => {
+              const role = getRole(u);
+              const isStaff = role === 'DOCTOR' || role === 'NURSE';
+              const staffCode = u.doctorCode || u.nurseCode;
+              return (
+                <Card
+                  key={staffCode || u.userName || idx}
+                  onPress={() => isStaff ? onSelectStaff?.(u) : onSelectUser?.(u.userName)}
+                >
+                  <View style={styles.userRow}>
+                    <Avatar name={u.userName} size={42} />
+                    <View style={styles.userInfo}>
+                      <View style={styles.titleRow}>
+                        <Text style={styles.userName} numberOfLines={1}>{u.userName}</Text>
+                        <StatusPill status={u.status || 'ACTIVE'} />
+                      </View>
+                      <Text style={styles.userEmail}>
+                        {isStaff ? (staffCode || u.email || t('users.no_email', 'No email')) : (u.email || t('users.no_email', 'No email'))}
+                      </Text>
+                      <View style={styles.badgesRow}>
+                        <RoleBadge role={role} />
+                        {u.hospitalCode && (
+                          <Text style={styles.hospitalText}>{u.hospitalCode}</Text>
+                        )}
+                      </View>
                     </View>
                   </View>
-                </View>
-              </Card>
-            ))}
+                </Card>
+              );
+            })}
             {filtered.length === 0 && (
               <View style={styles.emptyState}>
                 <IconUsers size={48} color={T.textFaint} />
