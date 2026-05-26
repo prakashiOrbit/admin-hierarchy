@@ -20,12 +20,14 @@ export const GatewayDetailScreen = ({ gatewayCode, onBack }) => {
 
   useEffect(() => {
     if (!gatewayCode || !user?.orgName || !user?.hospitalCode) return;
+    let cancelled = false;
     setLoading(true);
     setError(null);
     gatewayApi.getDetail(user.orgName, user.hospitalCode, gatewayCode, token)
-      .then(setGateway)
-      .catch(e => setError(e.message || t('common.load_failed')))
-      .finally(() => setLoading(false));
+      .then(data => { if (!cancelled) setGateway(data); })
+      .catch(e => { if (!cancelled) setError(e.message || t('common.load_failed')); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [gatewayCode, user?.orgName, user?.hospitalCode, token]);
 
   if (loading) {

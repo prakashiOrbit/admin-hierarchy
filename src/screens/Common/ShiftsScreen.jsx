@@ -21,16 +21,19 @@ export const ShiftsScreen = ({ onNewNurse, onNewShift, onSelectNurse, onSelectSh
 
   useEffect(() => {
     if (!user?.orgName || !user?.hospitalCode) return;
+    let cancelled = false;
     Promise.all([
       shiftApi.listAll(user.orgName, user.hospitalCode, token),
       nurseApi.listAll(user.orgName, user.hospitalCode, token),
     ])
       .then(([s, n]) => {
+        if (cancelled) return;
         setShifts(Array.isArray(s) ? s : []);
         setNurses(Array.isArray(n) ? n : []);
       })
-      .catch(e => setError(e.message || 'Failed to load shifts'))
-      .finally(() => setLoading(false));
+      .catch(e => { if (!cancelled) setError(e.message || 'Failed to load shifts'); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [user?.orgName, user?.hospitalCode, token]);
 
   const filteredShifts = shifts.filter(s =>

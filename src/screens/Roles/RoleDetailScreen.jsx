@@ -19,10 +19,12 @@ export const RoleDetailScreen = ({ roleId, onBack }) => {
 
   useEffect(() => {
     if (!user?.orgName || !roleId) return;
+    let cancelled = false;
     rolesApi.getByName(user.orgName, roleId, token)
-      .then(data => setRole(data))
-      .catch(err => console.warn('RoleDetail fetch failed:', err))
-      .finally(() => setLoading(false));
+      .then(data => { if (!cancelled) setRole(data); })
+      .catch(err => { if (!cancelled) console.warn('RoleDetail fetch failed:', err); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [user?.orgName, roleId, token]);
 
   if (loading) {

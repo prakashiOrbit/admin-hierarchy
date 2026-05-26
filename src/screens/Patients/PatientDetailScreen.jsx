@@ -26,10 +26,12 @@ export const PatientDetailScreen = ({ patientId: patientCode, onBack, onAssign, 
 
   useEffect(() => {
     if (!patientCode || !user?.orgName || !user?.hospitalCode) return;
+    let cancelled = false;
     patientApi.getDetail(user.orgName, user.hospitalCode, patientCode, token)
-      .then(setDetail)
-      .catch(e => setError(e.message))
-      .finally(() => setLoading(false));
+      .then(data => { if (!cancelled) setDetail(data); })
+      .catch(e => { if (!cancelled) setError(e.message); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [patientCode, user?.orgName, user?.hospitalCode, token]);
 
   if (loading) {

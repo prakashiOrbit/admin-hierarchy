@@ -24,10 +24,12 @@ export const DoctorDetailScreen = ({ doctorId: doctorCode, onBack, onAssign, onE
 
   useEffect(() => {
     if (!doctorCode || !user?.orgName || !user?.hospitalCode) return;
+    let cancelled = false;
     doctorApi.getDetail(user.orgName, user.hospitalCode, doctorCode, token)
-      .then(setDoctor)
-      .catch(e => setError(e.message))
-      .finally(() => setLoading(false));
+      .then(data => { if (!cancelled) setDoctor(data); })
+      .catch(e => { if (!cancelled) setError(e.message); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [doctorCode, user?.orgName, user?.hospitalCode, token]);
 
   if (loading) {

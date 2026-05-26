@@ -33,6 +33,7 @@ export const AssignmentScreen = ({
 
   useEffect(() => {
     if (!user?.orgName || !user?.hospitalCode) return;
+    let cancelled = false;
     setLoading(true);
     setError(null);
     Promise.all([
@@ -40,6 +41,7 @@ export const AssignmentScreen = ({
       patientApi.listAll(user.orgName, user.hospitalCode, token),
     ])
       .then(([docs, pats]) => {
+        if (cancelled) return;
         const docList = Array.isArray(docs) ? docs : [];
         const patList = Array.isArray(pats) ? pats : [];
         setDoctors(docList);
@@ -49,8 +51,9 @@ export const AssignmentScreen = ({
           if (found) setSelectedDoctor(found);
         }
       })
-      .catch(err => setError(err.message || t('common.load_failed')))
-      .finally(() => setLoading(false));
+      .catch(err => { if (!cancelled) setError(err.message || t('common.load_failed')); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [user?.orgName, user?.hospitalCode, token]);
 
   const filteredDoctors = doctors.filter(d =>

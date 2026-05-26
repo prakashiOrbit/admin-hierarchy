@@ -23,29 +23,36 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
 
   useEffect(() => {
     if (!org?.orgName) return;
+    let cancelled = false;
     setLoading(true);
     setHospError(null);
     setOwnersError(null);
 
     const fetchHospitals = organisationApi.listHospitals(org.orgName, token)
       .then(data => {
+        if (cancelled) return;
         const list = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
         setHospitals(list);
       })
-      .catch(err => setHospError(err.message || t('orgs.error_load_hospitals')));
+      .catch(err => { if (!cancelled) setHospError(err.message || t('orgs.error_load_hospitals')); });
 
     const fetchOwners = userApi.listOrgOwners(org.orgName, token)
       .then(data => {
+        if (cancelled) return;
         const list = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
         setOwners(list);
       })
-      .catch(err => setOwnersError(err.message || t('orgs.error_load_owners')));
+      .catch(err => { if (!cancelled) setOwnersError(err.message || t('orgs.error_load_owners')); });
 
     const fetchSummary = summaryApi.getOrgSummary(org.orgName, token)
-      .then(setSummary)
+      .then(data => { if (!cancelled) setSummary(data); })
       .catch(() => {});
 
-    Promise.all([fetchHospitals, fetchOwners, fetchSummary]).finally(() => setLoading(false));
+    Promise.all([fetchHospitals, fetchOwners, fetchSummary]).finally(() => {
+      if (!cancelled) setLoading(false);
+    });
+
+    return () => { cancelled = true; };
   }, [org?.orgName, token]);
 
   const initials = (org.businessName || org.orgName || '??').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);

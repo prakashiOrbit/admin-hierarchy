@@ -19,14 +19,17 @@ export const UserDetailScreen = ({ userId, onBack }) => {
 
   useEffect(() => {
     if (!authUser?.orgName || !userId) return;
+    let cancelled = false;
     userApi.getUserDetails(authUser.orgName, userId, token)
       .then(res => {
+        if (cancelled) return;
         const userData = res?.data || res;
         setU(userData);
       })
       .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [userId]);
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [userId, authUser?.orgName, token]);
 
   if (loading) {
     return <View style={styles.center}><ActivityIndicator color={T.accent} /></View>;

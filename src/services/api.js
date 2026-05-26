@@ -4,49 +4,60 @@ const BASE_URL = 'http://139.59.46.163:8080/api';
 
 export const apiRequest = async (endpoint, options = {}) => {
   let url = `${BASE_URL}${endpoint}`;
-  
+
   if (options.params) {
     const searchParams = new URLSearchParams(options.params);
     url += `?${searchParams.toString()}`;
   }
-  
+
   const headers = {
     'Content-Type': 'application/json',
     'X-Locale': (i18n.language || 'en').split('-')[0],
     ...options.headers,
   };
 
+  // Auto-abort after 30 s if caller didn't supply a signal
+  const ownController = options.signal ? null : new AbortController();
+  const timeoutId = ownController
+    ? setTimeout(() => ownController.abort(), 30000)
+    : null;
+
   const config = {
-    ...options,
+    method: options.method,
     headers,
+    body: options.body,
+    signal: options.signal ?? ownController?.signal,
   };
 
   try {
     console.log(`API Request: ${config.method || 'GET'} ${url}`);
     const response = await fetch(url, config);
-    
+
     let data;
     const contentType = response.headers.get('content-type');
-    
+
     if (contentType && contentType.includes('application/json')) {
       data = await response.json();
     } else {
       data = { message: await response.text() };
     }
-    
+
     console.log(`API Response [${response.status}]:`, data);
-    
+
     if (!response.ok) {
       const error = new Error(data.message || 'Something went wrong');
       error.status = response.status;
       error.data = data;
       throw error;
     }
-    
+
     return data;
   } catch (error) {
+    if (error.name === 'AbortError') throw error;
     console.error('API Request Error:', error);
     throw error;
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
   }
 };
 

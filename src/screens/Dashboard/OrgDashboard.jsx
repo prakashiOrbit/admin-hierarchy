@@ -71,18 +71,25 @@ const OrgHomeContent = ({ role }) => {
 
   useEffect(() => {
     if (!user?.orgName) return;
+    let cancelled = false;
+    setLoading(true);
     Promise.all([
-      organisationApi.listHospitals(user.orgName, token),
+      organisationApi.listHospitals(user.orgName, token).catch(() => []),
       userApi.listOrgAdmins(user.orgName, token).catch(() => []),
       summaryApi.getOrgSummary(user.orgName, token).catch(() => null),
     ]).then(([hospData, adminData, summaryData]) => {
+      if (cancelled) return;
       const hospList = Array.isArray(hospData) ? hospData : [];
       const adminList = Array.isArray(adminData) ? adminData : [];
       setHospitals(hospList);
       setAdmins(adminList.filter(u => u.roles?.includes('ORG_ADMIN') || u.role === 'ORG_ADMIN'));
       setOrgSummary(summaryData);
-    }).catch(err => console.error('Home fetch data error:', err))
-      .finally(() => setLoading(false));
+    }).catch(err => {
+      if (!cancelled) console.error('Home fetch data error:', err);
+    }).finally(() => {
+      if (!cancelled) setLoading(false);
+    });
+    return () => { cancelled = true; };
   }, [user?.orgName, token]);
 
   const activeHospitals = hospitals.filter(h => (h.status || 'ACTIVE') === 'ACTIVE').length;

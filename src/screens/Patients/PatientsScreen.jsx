@@ -22,10 +22,12 @@ export const PatientsScreen = ({ onNewPatient, onSelectPatient }) => {
 
   useEffect(() => {
     if (!user?.orgName || !user?.hospitalCode) return;
+    let cancelled = false;
     patientApi.listAll(user.orgName, user.hospitalCode, token)
-      .then(data => setPatients(Array.isArray(data) ? data : []))
-      .catch(e => setError(e.message))
-      .finally(() => setLoading(false));
+      .then(data => { if (!cancelled) setPatients(Array.isArray(data) ? data : []); })
+      .catch(e => { if (!cancelled) setError(e.message); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [user?.orgName, user?.hospitalCode, token]);
 
   const filtered = patients.filter(p => {

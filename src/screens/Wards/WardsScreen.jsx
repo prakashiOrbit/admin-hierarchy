@@ -26,23 +26,26 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
 
   useEffect(() => {
     if (!user?.orgName || !user?.hospitalCode) return;
+    let cancelled = false;
     setLoading(true);
     setError(null);
     wardApi.listAll(user.orgName, user.hospitalCode, token)
       .then(res => {
+        if (cancelled) return;
         const list = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : (Array.isArray(res?.wards) ? res.wards : []));
         setWards(list);
       })
       .catch(e => {
+        if (cancelled) return;
         const msg = (e.message || '').toLowerCase();
-        // If backend throws an error for "no wards" or "not found", treat as empty list
         if (msg.includes('no_wards') || msg.includes('notfound') || msg.includes('not found') || msg.includes('no wards')) {
           setWards([]);
         } else {
           setError(e.message);
         }
       })
-      .finally(() => setLoading(false));
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [user?.orgName, user?.hospitalCode, token]);
 
   const handleExpand = (wardCode) => {

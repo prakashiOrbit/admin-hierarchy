@@ -20,14 +20,17 @@ export const HospAdminsScreen = ({ onSelectUser, onInvite }) => {
 
   useEffect(() => {
     if (!user?.orgName || !user?.hospitalCode) return;
+    let cancelled = false;
     userApi.listHospAdminsByHospital(user.orgName, user.hospitalCode, token)
       .then(res => {
+        if (cancelled) return;
         const list = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
         setAdmins(list);
       })
       .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [user?.orgName, user?.hospitalCode, token]);
 
   const filtered = admins.filter(u =>
     (`${u.firstName} ${u.lastName}`).toLowerCase().includes(query.toLowerCase()) ||
