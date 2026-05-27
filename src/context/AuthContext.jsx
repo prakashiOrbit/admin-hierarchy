@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import i18n from '../i18n';
 import { userApi } from '../services/api';
 
@@ -8,6 +8,12 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [locale, setLocale] = useState(() => (i18n.language || 'en').split('-')[0]);
+  const localeUpdateRef = useRef({ timer: null, controller: null });
+
+  useEffect(() => () => {
+    if (localeUpdateRef.current.timer) clearTimeout(localeUpdateRef.current.timer);
+    if (localeUpdateRef.current.controller) localeUpdateRef.current.controller.abort();
+  }, []);
 
   // Keep locale in sync with i18n regardless of who calls i18n.changeLanguage()
   useEffect(() => {
@@ -43,16 +49,24 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
   };
 
-  const changeLanguage = async (newLocale) => {
+  const changeLanguage = (newLocale) => {
     i18n.changeLanguage(newLocale);
     setLocale(newLocale);
 
     if (token && user?.orgName) {
-      try {
-        await userApi.updatePreferredLocale(user.orgName, newLocale, token);
-      } catch (err) {
-        console.error('Failed to update preferred locale on back-end:', err);
-      }
+      if (localeUpdateRef.current.timer) clearTimeout(localeUpdateRef.current.timer);
+      if (localeUpdateRef.current.controller) localeUpdateRef.current.controller.abort();
+
+      const controller = new AbortController();
+      localeUpdateRef.current.controller = controller;
+      localeUpdateRef.current.timer = setTimeout(() => {
+        userApi.updatePreferredLocale(user.orgName, newLocale, token, { signal: controller.signal })
+          .catch(err => {
+            if (err?.code !== 'ABORTED') {
+              console.error('Failed to update preferred locale on back-end:', err);
+            }
+          });
+      }, 500);
     }
   };
 

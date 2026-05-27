@@ -20,12 +20,24 @@ export const DoctorsScreen = ({ onNewDoctor, onSelectDoctor }) => {
 
   useEffect(() => {
     if (!user?.orgName || !user?.hospitalCode) return;
+    const controller = new AbortController();
     let cancelled = false;
-    doctorApi.listAll(user.orgName, user.hospitalCode, token)
+    const timer = setTimeout(() => {
+    setLoading(true);
+    setError(null);
+    doctorApi.listAll(user.orgName, user.hospitalCode, token, { signal: controller.signal })
       .then(data => { if (!cancelled) setDoctors(Array.isArray(data) ? data : []); })
-      .catch(e => { if (!cancelled) setError(e.message); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+      .catch(e => {
+        if (e?.code === 'ABORTED') return;
+        if (!cancelled) setError(e.message);
+      })
+      .finally(() => { if (!cancelled && !controller.signal.aborted) setLoading(false); });
+    }, 200);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [user?.orgName, user?.hospitalCode, token]);
 
   const filtered = doctors.filter(d =>

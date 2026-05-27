@@ -20,17 +20,32 @@ export const UsersScreen = ({ onSelectUser, onSelectStaff, onCreateBootstrapUser
   const [users, setUsers] = useState([]);
   const [error, setError] = useState(null);
 
-  const fetchUsers = useCallback(async (showLoading = true) => {
+  const fetchUsers = useCallback(async (showLoading = true, options = {}) => {
     if (!user?.orgName) return;
     if (showLoading) setLoading(true);
     setError(null);
     try {
       const [adminsRes, ownersRes, hospAdminsRes, doctorsRes, nursesRes] = await Promise.all([
-        userApi.listOrgAdmins(user.orgName, token).catch(() => []),
-        userApi.listHospOwners(user.orgName, token).catch(() => []),
-        userApi.listAllHospAdmins(user.orgName, token).catch(() => []),
-        doctorApi.listAllOrg(user.orgName, token).catch(() => []),
-        nurseApi.listAllOrg(user.orgName, token).catch(() => []),
+        userApi.listOrgAdmins(user.orgName, token, { signal: options.signal }).catch(err => {
+          if (err?.code === 'ABORTED') throw err;
+          return [];
+        }),
+        userApi.listHospOwners(user.orgName, token, { signal: options.signal }).catch(err => {
+          if (err?.code === 'ABORTED') throw err;
+          return [];
+        }),
+        userApi.listAllHospAdmins(user.orgName, token, { signal: options.signal }).catch(err => {
+          if (err?.code === 'ABORTED') throw err;
+          return [];
+        }),
+        doctorApi.listAllOrg(user.orgName, token, { signal: options.signal }).catch(err => {
+          if (err?.code === 'ABORTED') throw err;
+          return [];
+        }),
+        nurseApi.listAllOrg(user.orgName, token, { signal: options.signal }).catch(err => {
+          if (err?.code === 'ABORTED') throw err;
+          return [];
+        }),
       ]);
 
       const getList = (res) => Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
@@ -50,16 +65,24 @@ export const UsersScreen = ({ onSelectUser, onSelectStaff, onCreateBootstrapUser
 
       setUsers(allUsers);
     } catch (err) {
+      if (err?.code === 'ABORTED') return;
       console.error('Fetch users error:', err);
       setError(err.message || t('common.error'));
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      if (!options.signal?.aborted) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
   }, [user?.orgName, token, t]);
 
   useEffect(() => {
-    fetchUsers();
+    const controller = new AbortController();
+    const timer = setTimeout(() => fetchUsers(true, { signal: controller.signal }), 200);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [fetchUsers]);
 
   const onRefresh = () => {

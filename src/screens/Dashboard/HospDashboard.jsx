@@ -91,10 +91,12 @@ const HospHomeContent = ({ role, onNavigate }) => {
 
   useEffect(() => {
     if (!user?.orgName || !user?.hospitalCode) { setHomeLoading(false); return; }
+    const controller = new AbortController();
     let cancelled = false;
+    const timer = setTimeout(() => {
     setHomeLoading(true);
     setHomeError(null);
-    summaryApi.getHospitalSummary(user.orgName, user.hospitalCode, token)
+    summaryApi.getHospitalSummary(user.orgName, user.hospitalCode, token, { signal: controller.signal })
       .then(summary => {
         if (cancelled) return;
         setHomeStats({
@@ -109,12 +111,18 @@ const HospHomeContent = ({ role, onNavigate }) => {
         });
       })
       .catch(err => {
+        if (err?.code === 'ABORTED') return;
         if (!cancelled) setHomeError(getApiErrorMessage(err));
       })
       .finally(() => {
         if (!cancelled) setHomeLoading(false);
       });
-    return () => { cancelled = true; };
+    }, 200);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [user?.orgName, user?.hospitalCode, token, reloadKey]);
 
   const fmt = (v) => v == null ? '—' : String(v);

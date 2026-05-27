@@ -19,26 +19,34 @@ export const OrgAdminsScreen = ({ onSelectUser, onInvite }) => {
   const [admins, setAdmins] = useState([]);
   const [error, setError] = useState(null);
 
-  const fetchAdmins = useCallback(async (showLoading = true) => {
+  const fetchAdmins = useCallback(async (showLoading = true, options = {}) => {
     if (!user?.orgName) return;
     if (showLoading) setLoading(true);
     setError(null);
     try {
-      const response = await userApi.listOrgAdmins(user.orgName, token);
+      const response = await userApi.listOrgAdmins(user.orgName, token, { signal: options.signal });
       const list = Array.isArray(response) ? response : (Array.isArray(response?.data) ? response.data : []);
       const filteredAdmins = list.filter(u => u.userRoles?.includes('ORG_ADMIN') || u.role === 'ORG_ADMIN');
       setAdmins(filteredAdmins);
     } catch (err) {
+      if (err?.code === 'ABORTED') return;
       console.error('Fetch admins error:', err);
       setError(err.message || t('admins.failed_load'));
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      if (!options.signal?.aborted) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
   }, [user?.orgName, token, t]);
 
   useEffect(() => {
-    fetchAdmins();
+    const controller = new AbortController();
+    const timer = setTimeout(() => fetchAdmins(true, { signal: controller.signal }), 200);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [fetchAdmins]);
 
   const onRefresh = () => {

@@ -55,8 +55,12 @@ export const apiRequest = async (endpoint, options = {}) => {
 
   // Auto-abort if caller didn't supply a signal.
   const ownController = options.signal ? null : new AbortController();
+  let timedOut = false;
   const timeoutId = ownController
-    ? setTimeout(() => ownController.abort(), timeoutMs)
+    ? setTimeout(() => {
+        timedOut = true;
+        ownController.abort();
+      }, timeoutMs)
     : null;
 
   const config = {
@@ -101,9 +105,14 @@ export const apiRequest = async (endpoint, options = {}) => {
       return data;
     } catch (error) {
       const apiError = error.name === 'AbortError'
-        ? new ApiError('Request timed out', { code: 'TIMEOUT', endpoint })
+        ? new ApiError(
+            timedOut ? 'Request timed out' : 'Request cancelled',
+            { code: timedOut ? 'TIMEOUT' : 'ABORTED', endpoint }
+          )
         : error;
-      console.error('API Request Error:', apiError);
+      if (apiError.code !== 'ABORTED') {
+        console.error('API Request Error:', apiError);
+      }
       throw apiError;
     } finally {
       if (timeoutId) clearTimeout(timeoutId);
@@ -150,10 +159,11 @@ export const organisationApi = {
       body: JSON.stringify(orgData),
     });
   },
-  listAll: (token) => {
+  listAll: (token, options = {}) => {
     return apiRequest('/organisation/all', {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
+      signal: options.signal,
     });
   },
   getByName: (orgName, token) => {
@@ -170,10 +180,11 @@ export const organisationApi = {
       body: JSON.stringify(hospitalData),
     });
   },
-  listHospitals: (orgName, token) => {
+  listHospitals: (orgName, token, options = {}) => {
     return apiRequest(`/${orgName}/hospital/all`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
+      signal: options.signal,
     });
   },
   getHospitalByCode: (orgName, hospCode, token) => {
@@ -207,18 +218,20 @@ export const userApi = {
       body: JSON.stringify(userData),
     });
   },
-  listOrgAdmins: (orgName, token) => {
+  listOrgAdmins: (orgName, token, options = {}) => {
     return apiRequest(`/${orgName}/user/orgadmins`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
+      signal: options.signal,
     });
   },
 
   // --- Hospital Owner ---
-  listHospOwners: (orgName, token) => {
+  listHospOwners: (orgName, token, options = {}) => {
     return apiRequest(`/${orgName}/user/hospowners`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
+      signal: options.signal,
     });
   },
 
@@ -230,10 +243,11 @@ export const userApi = {
       body: JSON.stringify(userData),
     });
   },
-  listAllHospAdmins: (orgName, token) => {
+  listAllHospAdmins: (orgName, token, options = {}) => {
     return apiRequest(`/${orgName}/user/hospadmins`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
+      signal: options.signal,
     });
   },
   listHospAdminsByHospital: (orgName, hospCode, token) => {
@@ -250,11 +264,12 @@ export const userApi = {
       headers: { 'Authorization': `Bearer ${token}` },
     });
   },
-  updatePreferredLocale: (orgName, locale, token) => {
+  updatePreferredLocale: (orgName, locale, token, options = {}) => {
     return apiRequest(`/${orgName}/user/locale`, {
       method: 'PATCH',
       headers: { 'Authorization': `Bearer ${token}` },
       params: { locale }, // Note: Back-end expects this as a @RequestParam
+      signal: options.signal,
     });
   },
 
@@ -269,22 +284,25 @@ export const userApi = {
 };
 
 export const summaryApi = {
-  getPlatformSummary: (token) => {
+  getPlatformSummary: (token, options = {}) => {
     return apiRequest('/summary', {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
+      signal: options.signal,
     });
   },
-  getOrgSummary: (orgName, token) => {
+  getOrgSummary: (orgName, token, options = {}) => {
     return apiRequest(`/${orgName}/summary`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
+      signal: options.signal,
     });
   },
-  getHospitalSummary: (orgName, hospCode, token) => {
+  getHospitalSummary: (orgName, hospCode, token, options = {}) => {
     return apiRequest(`/${orgName}/${hospCode}/summary`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
+      signal: options.signal,
     });
   },
 };
@@ -400,15 +418,17 @@ export const doctorApi = {
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(doctorData),
     }),
-  listAll: (orgName, hospCode, token) =>
+  listAll: (orgName, hospCode, token, options = {}) =>
     apiRequest(`/${orgName}/doctor/${hospCode}/all`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
+      signal: options.signal,
     }),
-  listAllOrg: (orgName, token) =>
+  listAllOrg: (orgName, token, options = {}) =>
     apiRequest(`/${orgName}/doctor/all`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
+      signal: options.signal,
     }),
   getDetail: (orgName, hospCode, doctorCode, token) =>
     apiRequest(`/${orgName}/doctor/${hospCode}/${doctorCode}/doctordetail`, {
@@ -435,10 +455,11 @@ export const nurseApi = {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
-  listAllOrg: (orgName, token) =>
+  listAllOrg: (orgName, token, options = {}) =>
     apiRequest(`/${orgName}/nurse/all`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
+      signal: options.signal,
     }),
   getDetail: (orgName, hospCode, nurseCode, token) =>
     apiRequest(`/${orgName}/nurse/${hospCode}/${nurseCode}/nursedetail`, {

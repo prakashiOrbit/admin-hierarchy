@@ -59,20 +59,24 @@ const HomeContent = ({ onNavigate }) => {
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
+    const controller = new AbortController();
     let cancelled = false;
+    const timer = setTimeout(() => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
       try {
         let summaryError = null;
         let orgsError = null;
-        const summaryPromise = summaryApi.getPlatformSummary(token).catch(err => {
+        const summaryPromise = summaryApi.getPlatformSummary(token, { signal: controller.signal }).catch(err => {
+          if (err?.code === 'ABORTED') throw err;
           console.error('Summary API error:', err);
           summaryError = err;
           return null;
         });
         
-        const orgsPromise = organisationApi.listAll(token).catch(err => {
+        const orgsPromise = organisationApi.listAll(token, { signal: controller.signal }).catch(err => {
+          if (err?.code === 'ABORTED') throw err;
           console.error('Orgs API error:', err);
           orgsError = err;
           return [];
@@ -138,6 +142,7 @@ const HomeContent = ({ onNavigate }) => {
 
         setActivities(dynamicActivities);
       } catch (err) {
+        if (err?.code === 'ABORTED') return;
         console.error('Fetch platform data error:', err);
         if (!cancelled) setError(getApiErrorMessage(err));
       } finally {
@@ -145,8 +150,13 @@ const HomeContent = ({ onNavigate }) => {
       }
     };
     fetchData();
-    return () => { cancelled = true; };
-  }, [token, T, t, reloadKey]);
+    }, 200);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [token, reloadKey]);
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>

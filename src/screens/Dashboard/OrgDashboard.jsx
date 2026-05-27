@@ -74,14 +74,28 @@ const OrgHomeContent = ({ role }) => {
 
   useEffect(() => {
     if (!user?.orgName) return;
+    const controller = new AbortController();
     let cancelled = false;
+    const timer = setTimeout(() => {
     setLoading(true);
     setError(null);
     let firstError = null;
     Promise.all([
-      organisationApi.listHospitals(user.orgName, token).catch(err => { firstError = firstError || err; return []; }),
-      userApi.listOrgAdmins(user.orgName, token).catch(err => { firstError = firstError || err; return []; }),
-      summaryApi.getOrgSummary(user.orgName, token).catch(err => { firstError = firstError || err; return null; }),
+      organisationApi.listHospitals(user.orgName, token, { signal: controller.signal }).catch(err => {
+        if (err?.code === 'ABORTED') throw err;
+        firstError = firstError || err;
+        return [];
+      }),
+      userApi.listOrgAdmins(user.orgName, token, { signal: controller.signal }).catch(err => {
+        if (err?.code === 'ABORTED') throw err;
+        firstError = firstError || err;
+        return [];
+      }),
+      summaryApi.getOrgSummary(user.orgName, token, { signal: controller.signal }).catch(err => {
+        if (err?.code === 'ABORTED') throw err;
+        firstError = firstError || err;
+        return null;
+      }),
     ]).then(([hospData, adminData, summaryData]) => {
       if (cancelled) return;
       const hospList = Array.isArray(hospData) ? hospData : [];
@@ -93,6 +107,7 @@ const OrgHomeContent = ({ role }) => {
         setError(getApiErrorMessage(firstError));
       }
     }).catch(err => {
+      if (err?.code === 'ABORTED') return;
       if (!cancelled) {
         console.error('Home fetch data error:', err);
         setError(getApiErrorMessage(err));
@@ -100,7 +115,12 @@ const OrgHomeContent = ({ role }) => {
     }).finally(() => {
       if (!cancelled) setLoading(false);
     });
-    return () => { cancelled = true; };
+    }, 200);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [user?.orgName, token, reloadKey]);
 
   const activeHospitals = hospitals.filter(h => (h.status || 'ACTIVE') === 'ACTIVE').length;

@@ -20,25 +20,33 @@ export const HospitalsScreen = ({ onProvision, onSelect }) => {
   const [hospitals, setHospitals] = useState([]);
   const [error, setError] = useState(null);
 
-  const fetchHospitals = useCallback(async (showLoading = true) => {
+  const fetchHospitals = useCallback(async (showLoading = true, options = {}) => {
     if (!user?.orgName) return;
     if (showLoading) setLoading(true);
     setError(null);
     try {
-      const response = await organisationApi.listHospitals(user.orgName, token);
+      const response = await organisationApi.listHospitals(user.orgName, token, { signal: options.signal });
       const list = Array.isArray(response) ? response : (Array.isArray(response?.data) ? response.data : []);
       setHospitals(list);
     } catch (err) {
+      if (err?.code === 'ABORTED') return;
       console.error('Fetch hospitals error:', err);
       setError(err.message || t('messages.failed_load_hospitals'));
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      if (!options.signal?.aborted) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
   }, [user?.orgName, token, t]);
 
   useEffect(() => {
-    fetchHospitals();
+    const controller = new AbortController();
+    const timer = setTimeout(() => fetchHospitals(true, { signal: controller.signal }), 200);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [fetchHospitals]);
 
   const onRefresh = () => {
