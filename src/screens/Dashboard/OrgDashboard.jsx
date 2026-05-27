@@ -4,12 +4,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { Card, SectionHeader, Btn } from '../../components/Shared';
+import { Card, SectionHeader, Btn, getGreeting } from '../../components/Shared';
 import { TopBar, BottomNav } from '../../components/Navigation';
 import { StatusPill } from '../../components/StatusPill';
 import { 
   IconHospital, IconUsers, IconPulse, IconGateway, IconShield,
-  IconAlert, IconChevron, IconMenu, IconSettings, IconDashboard, IconBack, IconUser, IconMoon, IconLogout, IconCpu
+  IconAlert, IconChevron, IconMenu, IconSettings, IconDashboard, IconBack, IconUser, IconLogout, IconCpu
 } from '../../icons';
 import { organisationApi, userApi, summaryApi, getApiErrorMessage } from '../../services/api';
 import { NotificationSheet } from '../../components/NotificationSheet';
@@ -131,7 +131,7 @@ const OrgHomeContent = ({ role }) => {
     <ScrollView contentContainerStyle={styles.scrollContent}>
       <View style={styles.greetingHeader}>
         <Text style={styles.date}>{new Date().toLocaleDateString(t('i18n_locale_tag', 'en-US'), { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()} · {user?.orgName || 'ORGANISATION'}</Text>
-        <Text style={styles.greeting}>{t('dashboard.good_morning', { name: user?.userName || 'User' })}</Text>
+        <Text style={styles.greeting}>{getGreeting(t, user?.userName || 'User')}</Text>
         <Text style={styles.status}>
           <Text style={{ color: T.good, fontWeight: '600' }}>{t('dashboard.provisioned', { count: hospitals.length })}</Text> · {t('dashboard.online_count', { count: activeHospitals })}
         </Text>
@@ -220,7 +220,7 @@ export const OrgDashboard = ({ navigation, route }) => {
   const isOwner = role === 'ORG_OWNER';
 
   const insets = useSafeAreaInsets();
-  const { theme: T, isDark, toggleTheme } = useTheme();
+  const { theme: T } = useTheme();
   const { user, logout } = useAuth();
   const { t } = useTranslation();
   const styles = createStyles(T);
@@ -375,10 +375,6 @@ export const OrgDashboard = ({ navigation, route }) => {
             <TouchableOpacity style={styles.drawerItem} onPress={() => { handleTabChange('settings'); toggleDrawer(); }}>
               <IconSettings size={20} color={T.textDim} />
               <Text style={styles.drawerItemText}>{t('dashboard.system_settings')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.drawerItem} onPress={() => { toggleTheme(); toggleDrawer(); }}>
-              <IconMoon size={20} color={T.textDim} />
-              <Text style={styles.drawerItemText}>{t('common.theme')}: {isDark ? t('settings.theme_dark') : t('settings.theme_light')}</Text>
             </TouchableOpacity>
             <View style={styles.drawerDivider} />
             <TouchableOpacity style={[styles.drawerItem, { marginTop: 'auto' }]} onPress={() => { logout(); navigation.replace('Login'); }}>

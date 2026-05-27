@@ -16,11 +16,11 @@ import './src/i18n';
 const Stack = createNativeStackNavigator();
 
 function AppContent() {
-  const { theme, isDark } = useTheme();
-  
+  const { theme } = useTheme();
+
   return (
     <>
-      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor={theme.bg} />
+      <StatusBar barStyle="dark-content" backgroundColor={theme.bg} />
       <Stack.Navigator 
         initialRouteName="Login"
         screenOptions={{

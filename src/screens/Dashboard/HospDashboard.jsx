@@ -5,12 +5,12 @@ import { summaryApi, getApiErrorMessage } from '../../services/api';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { Card, SectionHeader, Btn } from '../../components/Shared';
+import { Card, SectionHeader, Btn, getGreeting } from '../../components/Shared';
 import { TopBar, BottomNav } from '../../components/Navigation';
 import { StatusPill } from '../../components/StatusPill';
 import { 
   IconHospital, IconUsers, IconPulse, IconGateway, IconShield, IconChart,
-  IconAlert, IconChevron, IconMenu, IconSettings, IconDashboard, IconBack, IconUser, IconMoon, IconLogout, IconBed, IconStethoscope, IconDoor, IconPatient, IconPlus, IconClock
+  IconAlert, IconChevron, IconMenu, IconSettings, IconDashboard, IconBack, IconUser, IconLogout, IconBed, IconStethoscope, IconDoor, IconPatient, IconPlus, IconClock
 } from '../../icons';
 import { CreateHospAdminScreen } from '../Hospitals/CreateHospAdminScreen';
 import { HospAdminsScreen } from '../Hospitals/HospAdminsScreen';
@@ -131,7 +131,7 @@ const HospHomeContent = ({ role, onNavigate }) => {
     <ScrollView contentContainerStyle={styles.scrollContent}>
       <View style={styles.greetingHeader}>
         <Text style={styles.date}>{new Date().toLocaleDateString(t('i18n_locale_tag', 'en-US'), { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()} · {user?.hospitalCode || 'HOSPITAL'}</Text>
-        <Text style={styles.greeting}>{t('dashboard.good_morning', { name: user?.userName || 'User' })}</Text>
+        <Text style={styles.greeting}>{getGreeting(t, user?.userName || 'User')}</Text>
         {homeLoading ? (
           <ActivityIndicator size="small" color={T.textDim} style={{ marginTop: 4 }} />
         ) : (
@@ -222,7 +222,7 @@ export const HospDashboard = ({ navigation, route }) => {
   const isPatient = role === 'PATIENT';
   
   const insets = useSafeAreaInsets();
-  const { theme: T, isDark, toggleTheme } = useTheme();
+  const { theme: T } = useTheme();
   const { user, logout } = useAuth();
   const { t } = useTranslation();
   const styles = createStyles(T);
@@ -408,7 +408,6 @@ export const HospDashboard = ({ navigation, route }) => {
           <ScrollView style={styles.drawerMenu}>
             <TouchableOpacity style={styles.drawerItem} onPress={() => { handleTabChange('home'); toggleDrawer(); }}><IconDashboard size={20} color={T.textDim} /><Text style={styles.drawerItemText}>{t('dashboard.title')}</Text></TouchableOpacity>
             <TouchableOpacity style={styles.drawerItem} onPress={() => { handleTabChange('settings'); toggleDrawer(); }}><IconSettings size={20} color={T.textDim} /><Text style={styles.drawerItemText}>{t('dashboard.system_settings')}</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.drawerItem} onPress={() => { toggleTheme(); toggleDrawer(); }}><IconMoon size={20} color={T.textDim} /><Text style={styles.drawerItemText}>{t('common.theme')}: {isDark ? t('settings.theme_dark') : t('settings.theme_light')}</Text></TouchableOpacity>
             <View style={styles.drawerDivider} />
             <TouchableOpacity style={[styles.drawerItem, { marginTop: 'auto' }]} onPress={() => { logout(); navigation.replace('Login'); }}><IconLogout size={20} color={T.bad} /><Text style={[styles.drawerItemText, { color: T.bad }]}>{t('common.logout')}</Text></TouchableOpacity>
           </ScrollView>

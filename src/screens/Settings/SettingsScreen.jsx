@@ -5,10 +5,10 @@ import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, Btn } from '../../components/Shared';
 import { LanguageSheet } from '../../components/LanguageSheet';
-import { IconUser, IconShield, IconLock, IconMoon, IconGlobe, IconChevron, IconLogout } from '../../icons';
+import { IconUser, IconShield, IconLock, IconGlobe, IconChevron, IconLogout } from '../../icons';
 
 export const SettingsScreen = ({ onLogout }) => {
-  const { theme: T, isDark, toggleTheme } = useTheme();
+  const { theme: T } = useTheme();
   const { user, locale, changeLanguage } = useAuth();
   const { t } = useTranslation();
   const styles = createStyles(T);
@@ -43,12 +43,6 @@ export const SettingsScreen = ({ onLogout }) => {
         
         <Card style={styles.listCard}>
           {[
-            { 
-              label: t('settings.theme'), 
-              sub: isDark ? t('settings.theme_dark') : t('settings.theme_light'), 
-              icon: <IconMoon size={18} color={T.accent} />,
-              onPress: toggleTheme 
-            },
             { 
               label: t('settings.language'), 
               sub: t(`languages.${locale || 'en'}`), 

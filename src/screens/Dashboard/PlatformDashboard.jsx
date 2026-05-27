@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { Card, Btn } from '../../components/Shared';
+import { Card, Btn, getGreeting } from '../../components/Shared';
 import { TopBar, BottomNav } from '../../components/Navigation';
 import { OrganisationsScreen } from '../Organisations/OrganisationsScreen';
 import { NewOrganisationScreen } from '../Organisations/NewOrganisationScreen';
@@ -163,7 +163,7 @@ const HomeContent = ({ onNavigate }) => {
       <View style={styles.greetingHeader}>
         <View>
           <Text style={styles.date}>{new Date().toLocaleDateString(t('i18n_locale_tag', 'en-US'), { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()}</Text>
-          <Text style={styles.greeting}>{t('dashboard.good_morning', { name: user?.userName || 'User' })}</Text>
+          <Text style={styles.greeting}>{getGreeting(t, user?.userName || 'User')}</Text>
           <Text style={styles.status}>
             <Text style={{ color: T.good, fontWeight: '700' }}>{t('dashboard.health_nominal')}</Text> · {t('dashboard.incidents', { count: 0 })}
           </Text>

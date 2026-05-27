@@ -62,7 +62,8 @@ export const Btn = ({ children, variant = 'primary', size = 'md', onPress, full,
       activeOpacity={0.8}
       style={[
         {
-          height: sizes.h,
+          minHeight: sizes.h,
+          paddingVertical: 4,
           paddingHorizontal: sizes.px,
           borderRadius: 12,
           backgroundColor: bg,
@@ -70,13 +71,24 @@ export const Btn = ({ children, variant = 'primary', size = 'md', onPress, full,
           borderColor: border,
           alignItems: 'center',
           justifyContent: 'center',
+          flexDirection: 'row',
+          gap: 6,
           width: full ? '100%' : undefined,
           opacity: disabled ? 0.5 : 1,
         },
         style,
       ]}
     >
-      <Text style={{ color, fontSize: sizes.fs, fontWeight: '600' }}>{children}</Text>
+      {typeof children === 'string' ? (
+        <Text style={{ color, fontSize: sizes.fs, fontWeight: '600', textAlign: 'center', flexShrink: 1 }}>{children}</Text>
+      ) : (
+        React.Children.map(children, child => {
+          if (typeof child === 'string') {
+            return <Text style={{ color, fontSize: sizes.fs, fontWeight: '600', textAlign: 'center', flexShrink: 1 }}>{child}</Text>;
+          }
+          return child;
+        })
+      )}
     </TouchableOpacity>
   );
 };
@@ -297,3 +309,11 @@ const createStyles = (T) => StyleSheet.create({
     marginTop: 4,
   },
 });
+
+export const getGreeting = (t, name) => {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) return t('dashboard.good_morning', { name });
+  if (hour === 12) return t('dashboard.good_noon', { name });
+  if (hour > 12 && hour < 17) return t('dashboard.good_afternoon', { name });
+  return t('dashboard.good_evening', { name });
+};

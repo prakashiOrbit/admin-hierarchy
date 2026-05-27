@@ -194,11 +194,12 @@ const createStyles = (T) => StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
+    flexWrap: 'wrap',
+    gap: 8,
   },
   newBtn: {
     flexDirection: 'row',
     gap: 4,
-    height: 32,
     paddingHorizontal: 10,
   },
   chipScroll: {

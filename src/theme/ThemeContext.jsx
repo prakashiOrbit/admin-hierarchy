@@ -1,18 +1,13 @@
-import React, { createContext, useContext, useState } from 'react';
-import { DarkTheme, LightTheme } from './tokens';
-
-
+import React, { createContext, useContext } from 'react';
+import { LightTheme } from './tokens';
 
 const ThemeContext = createContext(undefined);
 
 export const ThemeProvider = ({ children }) => {
-  const [isDark, setIsDark] = useState(true);
-  const theme = isDark ? DarkTheme : LightTheme;
-
-  const toggleTheme = () => setIsDark(!isDark);
+  const theme = LightTheme;
 
   return (
-    <ThemeContext.Provider value={{ theme, isDark, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme }}>
       {children}
     </ThemeContext.Provider>
   );

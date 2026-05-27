@@ -133,8 +133,8 @@ export const DeviceTypesScreen = ({ onCreate, onSelect = () => {} }) => {
 const createStyles = (T) => StyleSheet.create({
   container: { flex: 1 },
   scrollContent: { padding: 16, flexGrow: 1 },
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  newBtn: { flexDirection: 'row', gap: 4, height: 32, paddingHorizontal: 10 },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 },
+  newBtn: { flexDirection: 'row', gap: 4, paddingHorizontal: 10 },
   list: { gap: 10 },
   typeRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   typeIcon: { width: 40, height: 40, borderRadius: 10, backgroundColor: T.surface2, alignItems: 'center', justifyContent: 'center' },
