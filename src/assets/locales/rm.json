@@ -502,7 +502,9 @@
     "return_to_registry": "Returnar al register",
     "return_to_staff_list": "Returnar a la glista dal persunal",
     "delete_ward": "Stizzar staziun",
-    "delete_shift": "Stizzar tura"
+    "delete_shift": "Stizzar tura",
+    "no_shifts": "Naginas turas chattadas.",
+    "search_shifts": "Tschertgar turas..."
   },
   "settings": {
     "account": "Conto",
@@ -605,7 +607,8 @@
     "max_firmware": "Firmware max.",
     "category": "Categoria",
     "description": "Descripziun",
-    "unknown": "Nunenconuschent"
+    "unknown": "Nunenconuschent",
+    "years_exp_badge": "{{years}}a esp."
   },
   "roles": {
     "PLATFORM_ADMIN": "PLATTAFURMA",
@@ -745,7 +748,8 @@
     "editing_patient_banner": "Modifitgar dossier da pazient da {{name}}.",
     "device_type_create_banner": "Definir in nov tip d'apparat IoMT per questa organisaziun.",
     "editing_device_type_hint": "Modifitgar profil da tip d'apparat.",
-    "gateway_create_banner": "Registrar ina nova porta IoT per quest ospital."
+    "gateway_create_banner": "Registrar ina nova porta IoT per quest ospital.",
+    "nurse_not_found": "Unfermiera na chattada betg."
   },
   "notifications": {
     "title": "Communicaziuns",
@@ -916,6 +920,14 @@
     "assign_to_shift": "Attribuir a tura",
     "staff_assigned": "Persunal attribuì",
     "staff_assigned_msg": "{{name}} attribuì/da a la tura {{shift}}.",
-    "assignment_failed": "Attribuir ha fallì."
+    "assignment_failed": "Attribuir ha fallì.",
+    "active_shifts": "Turas activas",
+    "nursing_staff": "Persunal da tgirar",
+    "current_shifts": "TURAS ACTUAELAS",
+    "registered_nurses": "INFERMIARAS REGISTRADAS",
+    "new_shift": "Nova tura",
+    "search_by_ward_or_name": "Tschertgar per staziun u num da tura...",
+    "create_first_hint": "Crear ina tura per attribuir persunal da tgirar a staziuns.",
+    "load_failed": "Chargiar turas ha fallì."
   }
 }

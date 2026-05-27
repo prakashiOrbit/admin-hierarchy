@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, Avatar, Btn } from '../../components/Shared';
@@ -9,6 +10,7 @@ import { StaffShiftSheet } from '../../components/StaffShiftSheet';
 import { NurseActionsSheet } from '../../components/NurseActionsSheet';
 
 export const NurseDetailScreen = ({ nurseId: nurseCode, onBack, onEdit }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user, token } = useAuth();
@@ -36,8 +38,8 @@ export const NurseDetailScreen = ({ nurseId: nurseCode, onBack, onEdit }) => {
   if (error || !nurse) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorText}>{error || 'Nurse not found.'}</Text>
-        <Btn variant="surface" style={{ marginTop: 16 }} onPress={onBack}>Go Back</Btn>
+        <Text style={styles.errorText}>{error || t('messages.nurse_not_found')}</Text>
+        <Btn variant="surface" style={{ marginTop: 16 }} onPress={onBack}>{t('common.go_back')}</Btn>
       </View>
     );
   }
@@ -57,30 +59,30 @@ export const NurseDetailScreen = ({ nurseId: nurseCode, onBack, onEdit }) => {
               <Text style={styles.nurseCode}>{n.nurseCode} · {n.nurseType || 'REGISTERED'}</Text>
               <View style={styles.badgesRow}>
                 <View style={styles.expBadge}>
-                  <Text style={styles.expText}>{n.nurseExperience}y Experience</Text>
+                  <Text style={styles.expText}>{t('entity.years_exp_badge', { years: n.nurseExperience })}</Text>
                 </View>
               </View>
             </View>
           </View>
         </Card>
 
-        <SectionHeader title="Clinical Profile" />
+        <SectionHeader title={t('entity.clinical_profile')} />
         <Card style={{ marginBottom: 24, padding: 16 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 }}>
             <IconUser size={16} color={T.accent} />
-            <Text style={{ fontSize: 11, fontWeight: '700', color: T.textDim, letterSpacing: 0.5 }}>SPECIALITIES</Text>
+            <Text style={{ fontSize: 11, fontWeight: '700', color: T.textDim, letterSpacing: 0.5 }}>{t('entity.specialties')}</Text>
           </View>
           <Text style={{ fontSize: 14, color: T.text, lineHeight: 20 }}>
             {specialities.length > 0 ? specialities.join(', ') : '—'}
           </Text>
         </Card>
 
-        <SectionHeader title="Contact Information" />
+        <SectionHeader title={t('entity.contact_information')} />
         <Card style={styles.detailsCard}>
           {[
-            { l: 'Email', v: n.myContact?.email || '—', i: <IconMail size={16} color={T.textDim} /> },
-            { l: 'Phone', v: n.myContact?.phone || '—', i: <IconPhone size={16} color={T.textDim} /> },
-            { l: 'City', v: n.myAddress?.city || '—', i: <IconLocation size={16} color={T.textDim} /> },
+            { l: t('entity.email'), v: n.myContact?.email || '—', i: <IconMail size={16} color={T.textDim} /> },
+            { l: t('entity.phone'), v: n.myContact?.phone || '—', i: <IconPhone size={16} color={T.textDim} /> },
+            { l: t('entity.city'), v: n.myAddress?.city || '—', i: <IconLocation size={16} color={T.textDim} /> },
           ].map((row, i) => (
             <View key={i} style={[styles.detailItem, i > 0 && styles.itemBorder]}>
               <View style={styles.detailIcon}>{row.i}</View>
@@ -95,21 +97,21 @@ export const NurseDetailScreen = ({ nurseId: nurseCode, onBack, onEdit }) => {
         <View style={styles.actionGrid}>
           <Btn variant="surface" style={styles.actionBtn} onPress={() => onEdit?.(n)}>
             <IconEdit size={16} color={T.text} />
-            <Text style={styles.btnText}>Edit Profile</Text>
+            <Text style={styles.btnText}>{t('actions.edit_profile')}</Text>
           </Btn>
           <Btn variant="surface" style={styles.actionBtn} onPress={() => setShowShiftSheet(true)}>
             <IconClock size={16} color={T.text} />
-            <Text style={styles.btnText}>Assign Shift</Text>
+            <Text style={styles.btnText}>{t('actions.assign_to_shift')}</Text>
           </Btn>
         </View>
 
         <Btn variant="surface" style={[styles.secondaryBtn, { marginTop: 8 }]} onPress={() => setShowActions(true)}>
           <IconBed size={16} color={T.text} />
-          <Text style={styles.btnText}>Nurse Actions</Text>
+          <Text style={styles.btnText}>{t('actions.nurse_actions')}</Text>
         </Btn>
 
         <Btn variant="surface" style={[styles.secondaryBtn, { marginTop: 8 }]} onPress={() => onBack?.()}>
-          <Text style={styles.btnText}>Return to Staff List</Text>
+          <Text style={styles.btnText}>{t('actions.return_to_staff_list')}</Text>
         </Btn>
       </ScrollView>
 

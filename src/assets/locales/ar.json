@@ -502,7 +502,9 @@
     "return_to_registry": "العودة إلى السجل",
     "return_to_staff_list": "العودة إلى قائمة الموظفين",
     "delete_ward": "حذف الجناح",
-    "delete_shift": "حذف الوردية"
+    "delete_shift": "حذف الوردية",
+    "no_shifts": "لا توجد ورديات.",
+    "search_shifts": "بحث في الورديات..."
   },
   "settings": {
     "account": "الحساب",
@@ -605,7 +607,8 @@
     "max_firmware": "الحد الأقصى للبرنامج الثابت",
     "category": "الفئة",
     "description": "الوصف",
-    "unknown": "غير معروف"
+    "unknown": "غير معروف",
+    "years_exp_badge": "{{years}} سنة خبرة"
   },
   "roles": {
     "PLATFORM_ADMIN": "منصة",
@@ -745,7 +748,8 @@
     "editing_patient_banner": "تعديل سجل المريض {{name}}.",
     "device_type_create_banner": "تعريف نوع جهاز IoMT جديد لهذه المنظمة.",
     "editing_device_type_hint": "تعديل ملف نوع الجهاز.",
-    "gateway_create_banner": "تسجيل بوابة IoT جديدة لهذا المستشفى."
+    "gateway_create_banner": "تسجيل بوابة IoT جديدة لهذا المستشفى.",
+    "nurse_not_found": "الممرضة غير موجودة."
   },
   "notifications": {
     "title": "الإشعارات",
@@ -916,6 +920,14 @@
     "assign_to_shift": "تخصيص للوردية",
     "staff_assigned": "تم تخصيص الموظف",
     "staff_assigned_msg": "تم تخصيص {{name}} للوردية {{shift}}.",
-    "assignment_failed": "فشل التخصيص."
+    "assignment_failed": "فشل التخصيص.",
+    "active_shifts": "الورديات النشطة",
+    "nursing_staff": "هيئة التمريض",
+    "current_shifts": "الورديات الحالية",
+    "registered_nurses": "الممرضات المسجلات",
+    "new_shift": "وردية جديدة",
+    "search_by_ward_or_name": "البحث بالجناح أو اسم الوردية...",
+    "create_first_hint": "أنشئ وردية لتخصيص هيئة التمريض للأجنحة.",
+    "load_failed": "فشل تحميل الورديات."
   }
 }

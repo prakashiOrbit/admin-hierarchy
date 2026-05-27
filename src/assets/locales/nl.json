@@ -502,7 +502,9 @@
     "return_to_registry": "Terug naar register",
     "return_to_staff_list": "Terug naar personeelslijst",
     "delete_ward": "Afdeling verwijderen",
-    "delete_shift": "Dienst verwijderen"
+    "delete_shift": "Dienst verwijderen",
+    "no_shifts": "Geen diensten gevonden.",
+    "search_shifts": "Zoek diensten..."
   },
   "settings": {
     "account": "Account",
@@ -605,7 +607,8 @@
     "max_firmware": "Max. firmware",
     "category": "Categorie",
     "description": "Beschrijving",
-    "unknown": "Onbekend"
+    "unknown": "Onbekend",
+    "years_exp_badge": "{{years}}j erv."
   },
   "roles": {
     "PLATFORM_ADMIN": "PLATFORM",
@@ -745,7 +748,8 @@
     "editing_patient_banner": "Patiëntdossier van {{name}} bewerken.",
     "device_type_create_banner": "Nieuw IoMT-apparaattype definiëren voor deze organisatie.",
     "editing_device_type_hint": "Apparaattype-profiel bewerken.",
-    "gateway_create_banner": "Nieuwe IoT-gateway registreren voor dit ziekenhuis."
+    "gateway_create_banner": "Nieuwe IoT-gateway registreren voor dit ziekenhuis.",
+    "nurse_not_found": "Verpleegkundige niet gevonden."
   },
   "notifications": {
     "title": "Meldingen",
@@ -916,6 +920,14 @@
     "assign_to_shift": "Toewijzen aan dienst",
     "staff_assigned": "Personeel toegewezen",
     "staff_assigned_msg": "{{name}} toegewezen aan dienst {{shift}}.",
-    "assignment_failed": "Toewijzing mislukt."
+    "assignment_failed": "Toewijzing mislukt.",
+    "active_shifts": "Actieve diensten",
+    "nursing_staff": "Verplegend personeel",
+    "current_shifts": "HUIDIGE DIENSTEN",
+    "registered_nurses": "GEREGISTREERDE VERPLEEGKUNDIGEN",
+    "new_shift": "Nieuwe dienst",
+    "search_by_ward_or_name": "Zoek op afdeling of dienstnaam...",
+    "create_first_hint": "Maak een dienst aan om verplegend personeel aan afdelingen toe te wijzen.",
+    "load_failed": "Laden van diensten mislukt."
   }
 }

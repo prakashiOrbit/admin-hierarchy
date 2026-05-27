@@ -502,7 +502,9 @@
     "return_to_registry": "Torna al registro",
     "return_to_staff_list": "Torna alla lista del personale",
     "delete_ward": "Elimina reparto",
-    "delete_shift": "Elimina turno"
+    "delete_shift": "Elimina turno",
+    "no_shifts": "Nessun turno trovato.",
+    "search_shifts": "Cerca turni..."
   },
   "settings": {
     "account": "Account",
@@ -605,7 +607,8 @@
     "max_firmware": "Firmware max.",
     "category": "Categoria",
     "description": "Descrizione",
-    "unknown": "Sconosciuto"
+    "unknown": "Sconosciuto",
+    "years_exp_badge": "{{years}}a esp."
   },
   "roles": {
     "PLATFORM_ADMIN": "PIATTAFORMA",
@@ -745,7 +748,8 @@
     "editing_patient_banner": "Modifica cartella paziente di {{name}}.",
     "device_type_create_banner": "Definire un nuovo tipo di dispositivo IoMT per questa organizzazione.",
     "editing_device_type_hint": "Modifica profilo tipo di dispositivo.",
-    "gateway_create_banner": "Registrare un nuovo gateway IoT per questo ospedale."
+    "gateway_create_banner": "Registrare un nuovo gateway IoT per questo ospedale.",
+    "nurse_not_found": "Infermiera non trovata."
   },
   "notifications": {
     "title": "Notifiche",
@@ -916,6 +920,14 @@
     "assign_to_shift": "Assegna al turno",
     "staff_assigned": "Personale assegnato",
     "staff_assigned_msg": "{{name}} assegnato/a al turno {{shift}}.",
-    "assignment_failed": "Assegnazione fallita."
+    "assignment_failed": "Assegnazione fallita.",
+    "active_shifts": "Turni attivi",
+    "nursing_staff": "Personale infermieristico",
+    "current_shifts": "TURNI IN CORSO",
+    "registered_nurses": "INFERMIERI REGISTRATI",
+    "new_shift": "Nuovo turno",
+    "search_by_ward_or_name": "Cerca per reparto o nome turno...",
+    "create_first_hint": "Crea un turno per assegnare il personale infermieristico ai reparti.",
+    "load_failed": "Caricamento turni fallito."
   }
 }

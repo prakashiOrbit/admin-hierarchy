@@ -502,7 +502,9 @@
     "return_to_registry": "Zurück zum Register",
     "return_to_staff_list": "Zurück zur Personalliste",
     "delete_ward": "Station löschen",
-    "delete_shift": "Schicht löschen"
+    "delete_shift": "Schicht löschen",
+    "no_shifts": "Keine Schichten gefunden.",
+    "search_shifts": "Schichten suchen..."
   },
   "settings": {
     "account": "Konto",
@@ -605,7 +607,8 @@
     "max_firmware": "Max. Firmware",
     "category": "Kategorie",
     "description": "Beschreibung",
-    "unknown": "Unbekannt"
+    "unknown": "Unbekannt",
+    "years_exp_badge": "{{years}}J Erf."
   },
   "roles": {
     "PLATFORM_ADMIN": "PLATTFORM",
@@ -745,7 +748,8 @@
     "editing_patient_banner": "Patientenakte für {{name}} bearbeiten.",
     "device_type_create_banner": "Neuen IoMT-Gerätetyp für diese Organisation definieren.",
     "editing_device_type_hint": "Gerätetypenprofil bearbeiten.",
-    "gateway_create_banner": "Neues IoT-Gateway für dieses Krankenhaus registrieren."
+    "gateway_create_banner": "Neues IoT-Gateway für dieses Krankenhaus registrieren.",
+    "nurse_not_found": "Pflegekraft nicht gefunden."
   },
   "notifications": {
     "title": "Benachrichtigungen",
@@ -916,6 +920,14 @@
     "assign_to_shift": "Schicht zuweisen",
     "staff_assigned": "Personal zugewiesen",
     "staff_assigned_msg": "{{name}} der Schicht {{shift}} zugewiesen.",
-    "assignment_failed": "Zuweisung fehlgeschlagen."
+    "assignment_failed": "Zuweisung fehlgeschlagen.",
+    "active_shifts": "Aktive Schichten",
+    "nursing_staff": "Pflegepersonal",
+    "current_shifts": "AKTUELLE SCHICHTEN",
+    "registered_nurses": "REGISTRIERTES PFLEGEPERSONAL",
+    "new_shift": "Neue Schicht",
+    "search_by_ward_or_name": "Nach Station oder Schichtname suchen...",
+    "create_first_hint": "Schicht erstellen, um Pflegepersonal Stationen zuzuweisen.",
+    "load_failed": "Schichten konnten nicht geladen werden."
   }
 }

@@ -502,7 +502,9 @@
     "delete_shift": "Delete Shift",
     "select_shift": "Select Shift",
     "pick_shift_ward_bed": "Pick a shift, ward, then a bed",
-    "pick_patient_ward_bed": "Pick a patient, ward, then a bed"
+    "pick_patient_ward_bed": "Pick a patient, ward, then a bed",
+    "no_shifts": "No shifts found.",
+    "search_shifts": "Search shifts..."
   },
   "settings": {
     "account": "Account",
@@ -705,7 +707,8 @@
     "filter_monitoring": "Monitoring",
     "filter_registered": "Registered",
     "filter_outpatient": "Outpatient",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "years_exp_badge": "{{years}}y Exp"
   },
   "messages": {
     "success": "Operation completed successfully.",
@@ -766,7 +769,8 @@
     "editing_patient_banner": "Editing patient record for {{name}}.",
     "device_type_create_banner": "Define a new IoMT device type for this organisation.",
     "editing_device_type_hint": "Editing device type profile.",
-    "gateway_create_banner": "Register a new IoT gateway for this hospital."
+    "gateway_create_banner": "Register a new IoT gateway for this hospital.",
+    "nurse_not_found": "Nurse not found."
   },
   "patients": {
     "health_records": "HEALTH RECORDS",
@@ -849,7 +853,15 @@
     "assign_to_shift": "Assign to Shift",
     "staff_assigned": "Staff Assigned",
     "staff_assigned_msg": "{{name}} assigned to shift {{shift}}.",
-    "assignment_failed": "Assignment failed."
+    "assignment_failed": "Assignment failed.",
+    "active_shifts": "Active Shifts",
+    "nursing_staff": "Nursing Staff",
+    "current_shifts": "CURRENT SHIFTS",
+    "registered_nurses": "REGISTERED NURSES",
+    "new_shift": "New Shift",
+    "search_by_ward_or_name": "Search by ward or shift name...",
+    "create_first_hint": "Create a shift to assign nursing staff to wards.",
+    "load_failed": "Failed to load shifts."
   },
   "notifications": {
     "title": "Notifications",

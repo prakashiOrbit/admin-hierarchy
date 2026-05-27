@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, SearchBar, Btn, Chip, Avatar } from '../../components/Shared';
@@ -8,6 +9,7 @@ import { IconClock, IconPlus, IconChevron } from '../../icons';
 import { shiftApi, nurseApi } from '../../services/api';
 
 export const ShiftsScreen = ({ onNewNurse, onNewShift, onSelectNurse, onSelectShift }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user, token } = useAuth();
@@ -31,7 +33,7 @@ export const ShiftsScreen = ({ onNewNurse, onNewShift, onSelectNurse, onSelectSh
         setShifts(Array.isArray(s) ? s : []);
         setNurses(Array.isArray(n) ? n : []);
       })
-      .catch(e => { if (!cancelled) setError(e.message || 'Failed to load shifts'); })
+      .catch(e => { if (!cancelled) setError(e.message || t('shifts.load_failed')); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [user?.orgName, user?.hospitalCode, token]);
@@ -64,24 +66,24 @@ export const ShiftsScreen = ({ onNewNurse, onNewShift, onSelectNurse, onSelectSh
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={{ marginBottom: 20 }}>
           <SearchBar
-            placeholder={mode === 'shifts' ? 'Search by ward or shift name...' : 'Search nurses...'}
+            placeholder={mode === 'shifts' ? t('shifts.search_by_ward_or_name') : t('shifts.search_nurses')}
             value={query}
             onChangeText={setQuery}
           />
         </View>
 
         <View style={styles.modeRow}>
-          <Chip active={mode === 'shifts'} onPress={() => setMode('shifts')}>Active Shifts</Chip>
-          <Chip active={mode === 'nurses'} onPress={() => setMode('nurses')}>Nursing Staff</Chip>
+          <Chip active={mode === 'shifts'} onPress={() => setMode('shifts')}>{t('shifts.active_shifts')}</Chip>
+          <Chip active={mode === 'nurses'} onPress={() => setMode('nurses')}>{t('shifts.nursing_staff')}</Chip>
         </View>
 
         <View style={styles.headerRow}>
           <SectionHeader
-            title={mode === 'shifts' ? 'CURRENT SHIFTS' : 'REGISTERED NURSES'}
+            title={mode === 'shifts' ? t('shifts.current_shifts') : t('shifts.registered_nurses')}
             count={mode === 'shifts' ? filteredShifts.length : filteredNurses.length}
           />
           <Btn variant="primary" size="sm" style={styles.newBtn} onPress={mode === 'shifts' ? onNewShift : onNewNurse}>
-            <IconPlus size={14} color="#fff" /> {mode === 'shifts' ? 'New Shift' : 'Onboard Nurse'}
+            <IconPlus size={14} color="#fff" /> {mode === 'shifts' ? t('shifts.new_shift') : t('dashboard.onboard_nurse')}
           </Btn>
         </View>
 
@@ -119,7 +121,7 @@ export const ShiftsScreen = ({ onNewNurse, onNewShift, onSelectNurse, onSelectSh
                         <Text style={styles.itemName}>{n.firstName} {n.lastName}</Text>
                       </View>
                       <Text style={styles.itemMeta}>
-                        {n.nurseCode} · {specialities[0] || '—'} · {n.nurseExperience}y exp
+                        {n.nurseCode} · {specialities[0] || '—'} · {t('entity.years_exp_badge', { years: n.nurseExperience })}
                       </Text>
                       <Text style={styles.emailText}>{n.myContact?.email || ''}</Text>
                     </View>
@@ -133,8 +135,8 @@ export const ShiftsScreen = ({ onNewNurse, onNewShift, onSelectNurse, onSelectSh
           {mode === 'shifts' && filteredShifts.length === 0 && (
             <View style={styles.emptyState}>
               <IconClock size={48} color={T.textFaint} />
-              <Text style={styles.emptyTitle}>No shifts found</Text>
-              <Text style={styles.emptyHint}>Create a shift to assign nursing staff to wards.</Text>
+              <Text style={styles.emptyTitle}>{t('shifts.no_shifts')}</Text>
+              <Text style={styles.emptyHint}>{t('shifts.create_first_hint')}</Text>
             </View>
           )}
         </View>

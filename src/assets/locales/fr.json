@@ -502,7 +502,9 @@
     "return_to_registry": "Retour au registre",
     "return_to_staff_list": "Retour à la liste du personnel",
     "delete_ward": "Supprimer le service",
-    "delete_shift": "Supprimer le quart"
+    "delete_shift": "Supprimer le quart",
+    "no_shifts": "Aucune équipe trouvée.",
+    "search_shifts": "Rechercher des équipes..."
   },
   "settings": {
     "account": "Compte",
@@ -605,7 +607,8 @@
     "max_firmware": "Firmware max.",
     "category": "Catégorie",
     "description": "Description",
-    "unknown": "Inconnu"
+    "unknown": "Inconnu",
+    "years_exp_badge": "{{years}}a d'exp."
   },
   "roles": {
     "PLATFORM_ADMIN": "PLATEFORME",
@@ -745,7 +748,8 @@
     "editing_patient_banner": "Modification du dossier patient de {{name}}.",
     "device_type_create_banner": "Définir un nouveau type d'appareil IoMT pour cette organisation.",
     "editing_device_type_hint": "Modification du profil du type d'appareil.",
-    "gateway_create_banner": "Enregistrer une nouvelle passerelle IoT pour cet hôpital."
+    "gateway_create_banner": "Enregistrer une nouvelle passerelle IoT pour cet hôpital.",
+    "nurse_not_found": "Infirmier introuvable."
   },
   "notifications": {
     "title": "Notifications",
@@ -916,6 +920,14 @@
     "assign_to_shift": "Affecter à l'équipe",
     "staff_assigned": "Personnel affecté",
     "staff_assigned_msg": "{{name}} affecté(e) à l'équipe {{shift}}.",
-    "assignment_failed": "Échec de l'affectation."
+    "assignment_failed": "Échec de l'affectation.",
+    "active_shifts": "Équipes actives",
+    "nursing_staff": "Personnel infirmier",
+    "current_shifts": "ÉQUIPES EN COURS",
+    "registered_nurses": "INFIRMIERS ENREGISTRÉS",
+    "new_shift": "Nouvelle équipe",
+    "search_by_ward_or_name": "Rechercher par service ou nom d'équipe...",
+    "create_first_hint": "Créer une équipe pour affecter le personnel infirmier aux services.",
+    "load_failed": "Échec du chargement des équipes."
   }
 }
