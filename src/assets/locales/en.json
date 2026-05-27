@@ -48,7 +48,11 @@
     "verifying": "Verifying...",
     "resend_code": "Didn't receive a code? Resend",
     "otp_email_hint": "Enter the 6-digit code sent to your email for {{org}}.",
-    "otp_2fa_hint": "Enter the security code from your authenticator app for {{org}}."
+    "otp_2fa_hint": "Enter the security code from your authenticator app for {{org}}.",
+    "invalid_credentials": "Incorrect username or password.",
+    "too_many_attempts": "Too many failed attempts. Please try again later.",
+    "network_error": "Unable to connect. Check your network and try again.",
+    "login_failed": "Sign in failed. Please try again."
   },
   "dashboard": {
     "title": "Dashboard",

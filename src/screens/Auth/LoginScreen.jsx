@@ -87,9 +87,19 @@ export const LoginScreen = ({ navigation }) => {
       }
     } catch (err) {
       if (err.data && processLoginResponse(err.data)) return;
-      if (processLoginResponse({ message: err.message })) return;
 
-      setError(err.message || 'Invalid username or password');
+      const status = err.status;
+      let msg;
+      if (status === 401 || status === 403) {
+        msg = t('auth.invalid_credentials');
+      } else if (status === 429) {
+        msg = t('auth.too_many_attempts');
+      } else if (!status || err.name === 'AbortError') {
+        msg = t('auth.network_error');
+      } else {
+        msg = t('auth.login_failed');
+      }
+      setError(msg);
       setState('idle');
     }
   };
