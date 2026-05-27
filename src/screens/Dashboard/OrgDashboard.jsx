@@ -11,7 +11,7 @@ import {
   IconHospital, IconUsers, IconPulse, IconGateway, IconShield,
   IconAlert, IconChevron, IconMenu, IconSettings, IconDashboard, IconBack, IconUser, IconMoon, IconLogout, IconCpu
 } from '../../icons';
-import { organisationApi, userApi, summaryApi } from '../../services/api';
+import { organisationApi, userApi, summaryApi, getApiErrorMessage } from '../../services/api';
 import { NotificationSheet } from '../../components/NotificationSheet';
 import { HospitalsScreen } from '../Hospitals/HospitalsScreen';
 import { UsersScreen } from '../Users/UsersScreen';
@@ -69,15 +69,19 @@ const OrgHomeContent = ({ role }) => {
   const [admins, setAdmins] = useState([]);
   const [orgSummary, setOrgSummary] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     if (!user?.orgName) return;
     let cancelled = false;
     setLoading(true);
+    setError(null);
+    let firstError = null;
     Promise.all([
-      organisationApi.listHospitals(user.orgName, token).catch(() => []),
-      userApi.listOrgAdmins(user.orgName, token).catch(() => []),
-      summaryApi.getOrgSummary(user.orgName, token).catch(() => null),
+      organisationApi.listHospitals(user.orgName, token).catch(err => { firstError = firstError || err; return []; }),
+      userApi.listOrgAdmins(user.orgName, token).catch(err => { firstError = firstError || err; return []; }),
+      summaryApi.getOrgSummary(user.orgName, token).catch(err => { firstError = firstError || err; return null; }),
     ]).then(([hospData, adminData, summaryData]) => {
       if (cancelled) return;
       const hospList = Array.isArray(hospData) ? hospData : [];
@@ -85,13 +89,19 @@ const OrgHomeContent = ({ role }) => {
       setHospitals(hospList);
       setAdmins(adminList.filter(u => u.roles?.includes('ORG_ADMIN') || u.role === 'ORG_ADMIN'));
       setOrgSummary(summaryData);
+      if (firstError && hospList.length === 0 && adminList.length === 0 && !summaryData) {
+        setError(getApiErrorMessage(firstError));
+      }
     }).catch(err => {
-      if (!cancelled) console.error('Home fetch data error:', err);
+      if (!cancelled) {
+        console.error('Home fetch data error:', err);
+        setError(getApiErrorMessage(err));
+      }
     }).finally(() => {
       if (!cancelled) setLoading(false);
     });
     return () => { cancelled = true; };
-  }, [user?.orgName, token]);
+  }, [user?.orgName, token, reloadKey]);
 
   const activeHospitals = hospitals.filter(h => (h.status || 'ACTIVE') === 'ACTIVE').length;
   const totalDevices  = orgSummary?.stats?.totalDevices  ?? 0;
@@ -114,6 +124,17 @@ const OrgHomeContent = ({ role }) => {
         <StatCard label="dashboard.gateways" value={loading ? '...' : totalGateways.toString()} icon={<IconGateway />} color="#A78BFA" accent="rgba(167,139,250,.14)" />
       </View>
 
+      {error && !loading && (
+        <Card style={styles.errorCard}>
+          <View style={styles.errorRow}>
+            <IconAlert size={18} color={T.bad} />
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+          <Btn variant="tonal" size="sm" onPress={() => setReloadKey(key => key + 1)}>Retry</Btn>
+        </Card>
+      )}
+
+      {!error && (
       <Card style={styles.alertCard}>
         <View style={styles.alertContent}>
           <View style={[styles.alertIcon, { backgroundColor: 'rgba(245,158,11,.15)' }]}>
@@ -125,6 +146,7 @@ const OrgHomeContent = ({ role }) => {
           </View>
         </View>
       </Card>
+      )}
 
       <View style={styles.section}>
         <SectionHeader title={t('dashboard.top_hospitals')} />
@@ -386,6 +408,9 @@ const createStyles = (T) => StyleSheet.create({
   capacityHeader: { flexDirection: 'row', alignItems: 'baseline', gap: 6, marginBottom: 10 },
   capacityValue: { fontSize: 22, fontWeight: '700', color: T.text, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
   capacityTotal: { fontSize: 12, color: T.textDim },
+  errorCard: { borderColor: T.bad, marginBottom: 16, gap: 12 },
+  errorRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  errorText: { flex: 1, color: T.text, fontSize: 12.5, lineHeight: 18 },
   progressBar: { height: 8, backgroundColor: T.surface2, borderRadius: 4, overflow: 'hidden', flexDirection: 'row' },
   progressSegment: { height: '100%' },
   progressLegend: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },

@@ -1,6 +1,40 @@
 import i18n from '../i18n';
 
 const BASE_URL = 'http://139.59.46.163:8080/api';
+const DEFAULT_TIMEOUT_MS = 15000;
+const inFlightGetRequests = new Map();
+
+export class ApiError extends Error {
+  constructor(message, { status, data, code, endpoint } = {}) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.data = data;
+    this.code = code;
+    this.endpoint = endpoint;
+  }
+}
+
+export const getApiErrorMessage = (error) => {
+  if (error?.code === 'TIMEOUT') {
+    return 'Unable to load data. The server is taking too long to respond.';
+  }
+  if (error?.status >= 500) {
+    return 'Unable to load data. The server is currently unavailable.';
+  }
+  if (error?.message) {
+    return error.message;
+  }
+  return 'Unable to load data. Please try again.';
+};
+
+const normalizeMethod = (method) => (method || 'GET').toUpperCase();
+
+const createRequestKey = (url, config) => {
+  const auth = config.headers?.Authorization || '';
+  const locale = config.headers?.['X-Locale'] || '';
+  return `${config.method}:${url}:${auth}:${locale}`;
+};
 
 export const apiRequest = async (endpoint, options = {}) => {
   let url = `${BASE_URL}${endpoint}`;
@@ -16,49 +50,72 @@ export const apiRequest = async (endpoint, options = {}) => {
     ...options.headers,
   };
 
-  // Auto-abort after 30 s if caller didn't supply a signal
+  const method = normalizeMethod(options.method);
+  const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+
+  // Auto-abort if caller didn't supply a signal.
   const ownController = options.signal ? null : new AbortController();
   const timeoutId = ownController
-    ? setTimeout(() => ownController.abort(), 30000)
+    ? setTimeout(() => ownController.abort(), timeoutMs)
     : null;
 
   const config = {
-    method: options.method,
+    method,
     headers,
     body: options.body,
     signal: options.signal ?? ownController?.signal,
   };
 
-  try {
-    console.log(`API Request: ${config.method || 'GET'} ${url}`);
-    const response = await fetch(url, config);
+  const requestKey = !options.signal && method === 'GET' && !options.body
+    ? createRequestKey(url, config)
+    : null;
 
-    let data;
-    const contentType = response.headers.get('content-type');
-
-    if (contentType && contentType.includes('application/json')) {
-      data = await response.json();
-    } else {
-      data = { message: await response.text() };
-    }
-
-    console.log(`API Response [${response.status}]:`, data);
-
-    if (!response.ok) {
-      const error = new Error(data.message || 'Something went wrong');
-      error.status = response.status;
-      error.data = data;
-      throw error;
-    }
-
-    return data;
-  } catch (error) {
-    if (error.name === 'AbortError') throw error;
-    console.error('API Request Error:', error);
-    throw error;
-  } finally {
-    if (timeoutId) clearTimeout(timeoutId);
+  if (requestKey && inFlightGetRequests.has(requestKey)) {
+    return inFlightGetRequests.get(requestKey);
   }
+
+  const requestPromise = (async () => {
+    console.log(`API Request: ${config.method || 'GET'} ${url}`);
+    try {
+      const response = await fetch(url, config);
+
+      let data;
+      const contentType = response.headers.get('content-type');
+
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        data = { message: await response.text() };
+      }
+
+      console.log(`API Response [${response.status}]:`, data);
+
+      if (!response.ok) {
+        throw new ApiError(data.message || 'Something went wrong', {
+          status: response.status,
+          data,
+          endpoint,
+        });
+      }
+
+      return data;
+    } catch (error) {
+      const apiError = error.name === 'AbortError'
+        ? new ApiError('Request timed out', { code: 'TIMEOUT', endpoint })
+        : error;
+      console.error('API Request Error:', apiError);
+      throw apiError;
+    } finally {
+      if (timeoutId) clearTimeout(timeoutId);
+      if (requestKey) inFlightGetRequests.delete(requestKey);
+    }
+  })();
+
+  if (requestKey) {
+    inFlightGetRequests.set(requestKey, requestPromise);
+  }
+
+  return requestPromise;
 };
 
 export const authApi = {

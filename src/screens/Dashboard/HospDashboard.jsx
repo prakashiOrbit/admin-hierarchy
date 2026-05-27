@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, Platform, BackHandler, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { summaryApi } from '../../services/api';
+import { summaryApi, getApiErrorMessage } from '../../services/api';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -86,11 +86,17 @@ const HospHomeContent = ({ role, onNavigate }) => {
   const styles = createStyles(T);
   const [homeStats, setHomeStats] = useState({ wards: null, beds: null, devices: null, staffing: null, patients: null, dayShiftNurses: null, eveningShiftNurses: null, nightShiftNurses: null });
   const [homeLoading, setHomeLoading] = useState(true);
+  const [homeError, setHomeError] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     if (!user?.orgName || !user?.hospitalCode) { setHomeLoading(false); return; }
+    let cancelled = false;
+    setHomeLoading(true);
+    setHomeError(null);
     summaryApi.getHospitalSummary(user.orgName, user.hospitalCode, token)
       .then(summary => {
+        if (cancelled) return;
         setHomeStats({
           wards:              summary?.stats?.wards              ?? null,
           beds:               summary?.stats?.beds               ?? null,
@@ -102,9 +108,14 @@ const HospHomeContent = ({ role, onNavigate }) => {
           nightShiftNurses:   summary?.stats?.nightShiftNurses   ?? null,
         });
       })
-      .catch(() => {})
-      .finally(() => setHomeLoading(false));
-  }, [user?.orgName, user?.hospitalCode, token]);
+      .catch(err => {
+        if (!cancelled) setHomeError(getApiErrorMessage(err));
+      })
+      .finally(() => {
+        if (!cancelled) setHomeLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [user?.orgName, user?.hospitalCode, token, reloadKey]);
 
   const fmt = (v) => v == null ? '—' : String(v);
 
@@ -130,6 +141,16 @@ const HospHomeContent = ({ role, onNavigate }) => {
         <StatCard label="dashboard.devices" value={homeLoading ? '…' : fmt(homeStats.devices)} icon={<IconPulse />} color="#22D3EE" accent="rgba(34,211,238,.14)" />
         <StatCard label="dashboard.staffing" value={homeLoading ? '…' : fmt(homeStats.staffing)} icon={<IconUsers />} color="#A78BFA" accent="rgba(167,139,250,.14)" />
       </View>
+
+      {homeError && !homeLoading && (
+        <Card style={styles.errorCard}>
+          <View style={styles.errorRow}>
+            <IconAlert size={18} color={T.bad} />
+            <Text style={styles.errorText}>{homeError}</Text>
+          </View>
+          <Btn variant="tonal" size="sm" onPress={() => setReloadKey(key => key + 1)}>Retry</Btn>
+        </Card>
+      )}
 
       <Card style={{ marginBottom: 24 }}>
         <View style={styles.sectionHeaderRow}>
@@ -428,6 +449,9 @@ const createStyles = (T) => StyleSheet.create({
   alertIconBox: { width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
   alertId: { fontSize: 13, fontWeight: '600', color: T.text, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
   alertMeta: { fontSize: 11, color: T.textFaint, marginTop: 2 },
+  errorCard: { borderColor: T.bad, marginBottom: 16, gap: 12 },
+  errorRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  errorText: { flex: 1, color: T.text, fontSize: 12.5, lineHeight: 18 },
   listBorder: { borderTopWidth: 1, borderTopColor: T.borderSoft },
   drawerOverlay: { position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 10 },
   drawer: { position: 'absolute', left: 0, top: 0, bottom: 0, width: width * 0.75, backgroundColor: T.surface, zIndex: 20, borderRightWidth: 1, borderRightColor: T.border },

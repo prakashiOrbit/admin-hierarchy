@@ -4,14 +4,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { Card } from '../../components/Shared';
+import { Card, Btn } from '../../components/Shared';
 import { TopBar, BottomNav } from '../../components/Navigation';
 import { OrganisationsScreen } from '../Organisations/OrganisationsScreen';
 import { NewOrganisationScreen } from '../Organisations/NewOrganisationScreen';
 import { OrgDetailScreen } from '../Organisations/OrgDetailScreen';
 import { SettingsScreen } from '../Settings/SettingsScreen';
 import { CreateOrgOwnerScreen } from '../Organisations/CreateOrgOwnerScreen';
-import { organisationApi, summaryApi, userApi } from '../../services/api';
+import { organisationApi, summaryApi, getApiErrorMessage } from '../../services/api';
 import { NotificationSheet } from '../../components/NotificationSheet';
 
 import { 
@@ -55,22 +55,34 @@ const HomeContent = ({ onNavigate }) => {
   const [orgsCount, setOrgsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [activities, setActivities] = useState([]);
+  const [error, setError] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
+    let cancelled = false;
     const fetchData = async () => {
       setLoading(true);
+      setError(null);
       try {
+        let summaryError = null;
+        let orgsError = null;
         const summaryPromise = summaryApi.getPlatformSummary(token).catch(err => {
           console.error('Summary API error:', err);
+          summaryError = err;
           return null;
         });
         
         const orgsPromise = organisationApi.listAll(token).catch(err => {
           console.error('Orgs API error:', err);
+          orgsError = err;
           return [];
         });
 
         const [summaryData, orgsData] = await Promise.all([summaryPromise, orgsPromise]);
+        if (cancelled) return;
+        if (!summaryData && orgsError) {
+          setError(getApiErrorMessage(summaryError || orgsError));
+        }
         
         const orgList = Array.isArray(orgsData) ? orgsData : (Array.isArray(orgsData.data) ? orgsData.data : []);
         setOrgsCount(orgList.length);
@@ -127,12 +139,14 @@ const HomeContent = ({ onNavigate }) => {
         setActivities(dynamicActivities);
       } catch (err) {
         console.error('Fetch platform data error:', err);
+        if (!cancelled) setError(getApiErrorMessage(err));
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
     fetchData();
-  }, [token, T, t]);
+    return () => { cancelled = true; };
+  }, [token, T, t, reloadKey]);
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -172,6 +186,16 @@ const HomeContent = ({ onNavigate }) => {
           icon={<IconPulse />} color="#22D3EE" accent="rgba(34,211,238,.14)" 
         />
       </View>
+
+      {error && !loading && (
+        <Card style={styles.errorCard}>
+          <View style={styles.errorRow}>
+            <IconAlert size={18} color={T.bad} />
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+          <Btn variant="tonal" size="sm" onPress={() => setReloadKey(key => key + 1)}>Retry</Btn>
+        </Card>
+      )}
 
       <View style={styles.section}>
         <View style={styles.section}>
@@ -355,6 +379,9 @@ const createStyles = (T) => StyleSheet.create({
   activityText: { fontSize: 13, color: T.text, fontWeight: '500' },
   activityMeta: { fontSize: 11, color: T.textFaint, marginTop: 2 },
   activityTime: { fontSize: 11, color: T.textFaint },
+  errorCard: { borderColor: T.bad, marginBottom: 16, gap: 12 },
+  errorRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  errorText: { flex: 1, color: T.text, fontSize: 12.5, lineHeight: 18 },
   drawerOverlay: { position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 10 },
   drawer: { position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: T.surface, zIndex: 20, borderRightWidth: 1, borderRightColor: T.border },
   drawerHeader: { padding: 24, borderBottomWidth: 1, borderBottomColor: T.borderSoft },
