@@ -151,10 +151,22 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
         ...i,
         infoData: JSON.stringify(i.infoData),
       })),
-      consentGrants: buildConsentGrants(),
     };
     try {
-      await patientApi.create(user.orgName, user.hospitalCode, payload, token);
+      const result = await patientApi.create(user.orgName, user.hospitalCode, payload, token);
+      const created = result?.data ?? result;
+      // Record consents via the dedicated consent endpoint so they appear in View/Manage Consents
+      const grants = buildConsentGrants();
+      await Promise.all(
+        grants.map(grant =>
+          consentApi.record(
+            user.orgName,
+            created.patientCode || form.patient.patientCode,
+            { orgId: created.orgId, patientId: created.patientId, ...grant },
+            token,
+          )
+        )
+      );
       Alert.alert(
         t('messages.success'),
         t('messages.patient_registered', { code: form.patient.patientCode }),
