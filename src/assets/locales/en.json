@@ -653,7 +653,7 @@
     "nurse_identity": "NURSE IDENTITY",
     "patient_identity": "PATIENT IDENTITY",
     "patient_code": "Patient Code",
-    "patient_code_label": "Patient Code (MRN)",
+    "patient_code_label": "MRN: {{code}}",
     "patient_mrn_code": "Patient MRN Code",
     "professional_identity": "PROFESSIONAL IDENTITY",
     "speciality_csv": "Speciality (comma-separated)",
