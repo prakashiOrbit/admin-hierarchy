@@ -257,6 +257,13 @@ export const PlatformDashboard = ({ navigation }) => {
     setActiveTab(tabId);
   };
 
+  const footerItems = [
+    { id: 'home',     label: t('dashboard.home'),             icon: <IconDashboard /> },
+    { id: 'orgs',     label: t('dashboard.organisations'),    icon: <IconGlobe /> },
+    { id: 'new',      label: t('dashboard.new_organisation'), icon: <IconPlus /> },
+    { id: 'settings', label: t('dashboard.system_settings'),  icon: <IconSettings /> },
+  ];
+
   const renderContent = () => {
     if (isInvitingOwner) return <CreateOrgOwnerScreen onCancel={() => setIsInvitingOwner(false)} presetOrgName={selectedOrg?.orgName} />;
     if (selectedOrg) return <OrgDetailScreen org={selectedOrg} onBack={() => setSelectedOrg(null)} onInviteOwner={() => setIsInvitingOwner(true)} />;
@@ -312,7 +319,7 @@ export const PlatformDashboard = ({ navigation }) => {
       </Animated.View>
       <TopBar title={getTitle()} leading={(selectedOrg || isInvitingOwner) ? <IconBack /> : <IconMenu />} onLeadingPress={(selectedOrg || isInvitingOwner) ? () => { if (isInvitingOwner) setIsInvitingOwner(false); else setSelectedOrg(null); } : toggleDrawer} onNotificationPress={() => setShowNotifications(true)} onProfilePress={() => handleTabChange('settings')} />
       <View style={{ flex: 1 }}>{renderContent()}</View>
-      <BottomNav active={activeTab} onChange={handleTabChange} />
+      <BottomNav items={footerItems} active={activeTab} onChange={handleTabChange} />
       <NotificationSheet visible={showNotifications} onClose={() => setShowNotifications(false)} />
     </View>
   );

@@ -79,8 +79,8 @@ export const SettingsScreen = ({ onLogout }) => {
         </Btn>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>iOrbit Tech Admin</Text>
-          <Text style={styles.footerText}>© 2026 iOrbit Digital Technologies</Text>
+          <Text style={styles.footerText}>{t('common.app_name')}</Text>
+          <Text style={styles.footerText}>{t('common.copyright')}</Text>
         </View>
       </ScrollView>
 

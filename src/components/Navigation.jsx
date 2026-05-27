@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeContext';
 import { IconBack, IconDashboard, IconGlobe, IconPlus, IconSettings, IconUsers, IconShield, IconChart, IconHospital, IconBell, IconUser } from '../icons';
 
@@ -36,14 +37,15 @@ export const TopBar = ({ title, subtitle, onLeadingPress, leading, onNotificatio
 // --- Bottom Nav ---
 export const BottomNav = ({ active, onChange, items }) => {
   const { theme: T } = useTheme();
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const styles = createStyles(T);
 
   const defaultItems = [
-    { id: 'home', label: 'Home', icon: <IconDashboard /> },
-    { id: 'orgs', label: 'Orgs', icon: <IconGlobe /> },
-    { id: 'new', label: 'New Org', icon: <IconPlus /> },
-    { id: 'settings', label: 'Settings', icon: <IconSettings /> },
+    { id: 'home',     label: t('dashboard.home'),             icon: <IconDashboard /> },
+    { id: 'orgs',     label: t('dashboard.organisations'),    icon: <IconGlobe /> },
+    { id: 'new',      label: t('dashboard.new_organisation'), icon: <IconPlus /> },
+    { id: 'settings', label: t('dashboard.system_settings'),  icon: <IconSettings /> },
   ];
 
   const displayItems = items || defaultItems;
