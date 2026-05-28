@@ -5,6 +5,15 @@ import { userApi } from '../services/api';
 
 const AuthContext = createContext(undefined);
 
+const decodeJwtPayload = (token) => {
+  try {
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(base64));
+  } catch {
+    return {};
+  }
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
@@ -24,12 +33,14 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (userData) => {
+    // preferredLocale is not in the response body — extract it from the JWT claim
+    const jwtPayload = userData.token ? decodeJwtPayload(userData.token) : {};
     const userProfile = {
       userName: userData.userName,
       orgName: userData.orgName,
       hospitalCode: userData.hospitalCode,
       userData: userData.userData,
-      preferredLocale: userData.preferredLocale || userData.userData?.preferredLocale,
+      preferredLocale: userData.preferredLocale || userData.userData?.preferredLocale || jwtPayload.preferred_locale,
     };
     
     setUser(userProfile);
