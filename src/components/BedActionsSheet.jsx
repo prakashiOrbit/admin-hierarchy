@@ -111,7 +111,11 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
   const handleAssign = async (patient) => {
     setSaving(true);
     try {
-      await bedApi.assignPatient(user.orgName, user.hospitalCode, bed.bedCode, { patientCode: patient.patientCode }, token);
+      await bedApi.assignPatient(user.orgName, user.hospitalCode, bed.bedCode, {
+        patientCode: patient.patientCode,
+        wardCode: wardCode,
+        gatewayCode: bed.gatewayCode,
+      }, token);
       Alert.alert(t('common.done'), t('actions.patient_assigned', { name: `${patient.firstName} ${patient.lastName}`, code: bed.bedCode }), [
         { text: 'OK', onPress: handleClose },
       ]);

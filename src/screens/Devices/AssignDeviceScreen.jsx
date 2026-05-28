@@ -5,9 +5,9 @@ import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SearchBar, Btn, Avatar } from '../../components/Shared';
 import { IconGateway, IconPatient, IconPulse, IconChevron } from '../../icons';
-import { deviceApi, gatewayApi, patientApi } from '../../services/api';
+import { deviceApi, bedApi } from '../../services/api';
 
-const STEPS = ['device', 'gateway', 'patient'];
+const STEPS = ['device', 'bed'];
 
 export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
   const { t } = useTranslation();
@@ -16,15 +16,13 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
   const { user, token } = useAuth();
 
   const [devices, setDevices] = useState([]);
-  const [gateways, setGateways] = useState([]);
-  const [patients, setPatients] = useState([]);
+  const [beds, setBeds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const [step, setStep] = useState('device');
   const [selectedDevice, setSelectedDevice] = useState(null);
-  const [selectedGateway, setSelectedGateway] = useState(null);
-  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [selectedBed, setSelectedBed] = useState(null);
   const [query, setQuery] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -39,22 +37,16 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
         if (msg.includes('not found') || msg.includes('no device')) return [];
         throw e;
       }),
-      gatewayApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
+      bedApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
         const msg = (e.message || '').toLowerCase();
-        if (msg.includes('not found') || msg.includes('no gateway')) return [];
-        throw e;
-      }),
-      patientApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
-        const msg = (e.message || '').toLowerCase();
-        if (msg.includes('not found') || msg.includes('no patient')) return [];
+        if (msg.includes('not found') || msg.includes('no bed')) return [];
         throw e;
       }),
     ])
-      .then(([dRes, gRes, pRes]) => {
+      .then(([dRes, bRes]) => {
         if (cancelled) return;
         setDevices(Array.isArray(dRes) ? dRes : (Array.isArray(dRes?.data) ? dRes.data : []));
-        setGateways(Array.isArray(gRes) ? gRes : (Array.isArray(gRes?.data) ? gRes.data : []));
-        setPatients(Array.isArray(pRes) ? pRes : (Array.isArray(pRes?.data) ? pRes.data : []));
+        setBeds(Array.isArray(bRes) ? bRes : (Array.isArray(bRes?.data) ? bRes.data : []));
       })
       .catch(err => { if (!cancelled) setError(err.message || t('common.load_failed')); })
       .finally(() => { if (!cancelled) setLoading(false); });
@@ -66,34 +58,38 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
     if (step === 'device') return devices.filter(d =>
       d.deviceCode?.toLowerCase().includes(q) || d.deviceType?.toLowerCase().includes(q)
     );
-    if (step === 'gateway') return gateways.filter(g =>
-      g.gatewayCode?.toLowerCase().includes(q) || g.gatewayType?.toLowerCase().includes(q)
-    );
-    return patients.filter(p =>
-      (`${p.firstName} ${p.lastName}`).toLowerCase().includes(q) ||
-      p.patientCode?.toLowerCase().includes(q)
+    return beds.filter(b =>
+      b.bedCode?.toLowerCase().includes(q) || b.wardCode?.toLowerCase().includes(q)
     );
   })();
 
   const goBack = () => {
     setQuery('');
-    if (step === 'gateway') setStep('device');
-    else if (step === 'patient') setStep('gateway');
+    if (step === 'bed') setStep('device');
     else onCancel();
   };
 
   const handleFinish = async () => {
-    if (!selectedDevice || !selectedGateway || !selectedPatient) return;
+    if (!selectedDevice || !selectedBed) return;
+    if (!selectedBed.patientCode) {
+      Alert.alert(
+        'No Patient Assigned',
+        `Bed ${selectedBed.bedCode} has no patient yet. Assign a patient to the bed first, then add the device.`,
+        [{ text: 'OK' }]
+      );
+      return;
+    }
     setSaving(true);
     try {
-      await deviceApi.assign(user.orgName, user.hospitalCode, {
-        deviceCode: selectedDevice.deviceCode,
-        gatewayCode: selectedGateway.gatewayCode,
-        patientCode: selectedPatient.patientCode,
+      await bedApi.assignPatient(user.orgName, user.hospitalCode, selectedBed.bedCode, {
+        patientCode: selectedBed.patientCode,
+        wardCode: selectedBed.wardCode,
+        gatewayCode: selectedBed.gatewayCode,
+        devices: [{ deviceCode: selectedDevice.deviceCode }],
       }, token);
       Alert.alert(
         t('common.success'),
-        `Device ${selectedDevice.deviceCode} connected via ${selectedGateway.gatewayCode} to ${selectedPatient.firstName} ${selectedPatient.lastName}.`,
+        `Device ${selectedDevice.deviceCode} added to bed ${selectedBed.bedCode}.`,
         [{ text: t('common.ok'), onPress: onSuccess || onCancel }]
       );
     } catch (e) {
@@ -104,16 +100,11 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
   };
 
   const stepIndex = STEPS.indexOf(step);
-
-  const stepTitle = step === 'device' ? 'Select Device'
-    : step === 'gateway' ? 'Select Gateway'
-    : 'Select Patient';
-
+  const stepTitle = step === 'device' ? 'Select Device' : 'Select Bed';
   const subtitle = [
     selectedDevice?.deviceCode,
-    selectedGateway?.gatewayCode,
-    selectedPatient ? `${selectedPatient.firstName} ${selectedPatient.lastName}` : null,
-  ].filter(Boolean).join(' → ') || 'Choose a device to begin';
+    selectedBed ? `Bed ${selectedBed.bedCode}` : null,
+  ].filter(Boolean).join(' → ') || 'Choose a device to add to a bed';
 
   if (loading) {
     return <View style={styles.center}><ActivityIndicator color={T.accent} /></View>;
@@ -144,11 +135,7 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
 
       <View style={styles.searchWrap}>
         <SearchBar
-          placeholder={
-            step === 'device' ? 'Search devices…'
-            : step === 'gateway' ? 'Search gateways…'
-            : 'Search patients…'
-          }
+          placeholder={step === 'device' ? 'Search devices…' : 'Search beds…'}
           value={query}
           onChangeText={setQuery}
         />
@@ -162,7 +149,7 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
               <Card
                 key={d.deviceCode}
                 style={[styles.itemCard, isActive && styles.activeCard]}
-                onPress={() => { setSelectedDevice(d); setStep('gateway'); setQuery(''); }}
+                onPress={() => { setSelectedDevice(d); setStep('bed'); setQuery(''); }}
               >
                 <View style={styles.row}>
                   <View style={[styles.iconBox, { backgroundColor: T.accentSoft }]}>
@@ -178,42 +165,23 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
             );
           })}
 
-          {step === 'gateway' && filtered.map(g => {
-            const isActive = selectedGateway?.gatewayCode === g.gatewayCode;
+          {step === 'bed' && filtered.map(b => {
+            const isActive = selectedBed?.bedCode === b.bedCode;
             return (
               <Card
-                key={g.gatewayCode}
+                key={b.bedCode}
                 style={[styles.itemCard, isActive && styles.activeCard]}
-                onPress={() => { setSelectedGateway(g); setStep('patient'); setQuery(''); }}
+                onPress={() => setSelectedBed(b)}
               >
                 <View style={styles.row}>
                   <View style={[styles.iconBox, { backgroundColor: T.accentSoft }]}>
                     <IconGateway size={20} color={T.accent} />
                   </View>
                   <View style={styles.info}>
-                    <Text style={styles.name}>{g.gatewayCode}</Text>
-                    <Text style={styles.meta}>{g.gatewayType} · {g.os}</Text>
-                  </View>
-                  <IconChevron size={20} color={T.textDim} />
-                </View>
-              </Card>
-            );
-          })}
-
-          {step === 'patient' && filtered.map(p => {
-            const initials = `${p.firstName?.[0] ?? ''}${p.lastName?.[0] ?? ''}`.toUpperCase();
-            const isActive = selectedPatient?.patientCode === p.patientCode;
-            return (
-              <Card
-                key={p.patientCode}
-                style={[styles.itemCard, isActive && styles.activeCard]}
-                onPress={() => setSelectedPatient(p)}
-              >
-                <View style={styles.row}>
-                  <Avatar initials={initials} color={T.warn} />
-                  <View style={styles.info}>
-                    <Text style={styles.name}>{p.firstName} {p.lastName}</Text>
-                    <Text style={styles.meta}>{p.patientCode} · {p.patientStatus}</Text>
+                    <Text style={styles.name}>{b.bedCode}</Text>
+                    <Text style={styles.meta}>
+                      {b.wardCode} · {b.patientCode ? `Patient: ${b.patientCode}` : 'No patient'}
+                    </Text>
                   </View>
                   <View style={[styles.checkbox, isActive && styles.checkboxActive]}>
                     {isActive && <View style={styles.checkboxInner} />}
@@ -234,13 +202,13 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
           <Btn style={{ flex: 1 }} variant="ghost" onPress={goBack}>
             {step === 'device' ? t('common.cancel') : '← Back'}
           </Btn>
-          {step === 'patient' && (
+          {step === 'bed' && (
             <Btn
               style={{ flex: 2 }}
               onPress={handleFinish}
-              disabled={!selectedPatient || saving}
+              disabled={!selectedBed || saving}
             >
-              {saving ? t('common.saving') : 'Assign Device'}
+              {saving ? t('common.saving') : 'Add Device to Bed'}
             </Btn>
           )}
         </View>

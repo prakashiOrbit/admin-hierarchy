@@ -600,8 +600,8 @@ export const gatewayApi = {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
-  assign: (orgName, hospCode, payload, token) =>
-    apiRequest(`/${orgName}/gateway/${hospCode}/assign`, {
+  assignToBed: (orgName, hospCode, payload, token) =>
+    apiRequest(`/${orgName}/gateway/${hospCode}/assign/bed`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(payload),

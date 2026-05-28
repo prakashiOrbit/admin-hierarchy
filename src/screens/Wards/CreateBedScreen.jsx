@@ -42,6 +42,12 @@ export const CreateBedScreen = ({ onCancel, onSuccess, wardCode }) => {
     setSaving(true);
     try {
       await bedApi.create(user.orgName, user.hospitalCode, form, token);
+      if (form.gatewayCode) {
+        await gatewayApi.assignToBed(user.orgName, user.hospitalCode, {
+          gatewayCode: form.gatewayCode,
+          bedCode: form.bedCode,
+        }, token);
+      }
       Alert.alert(t('alerts.success'), t('messages.bed_provisioned', { bedCode: form.bedCode, wardCode: form.wardCode }), [
         { text: t('actions.ok'), onPress: onSuccess || onCancel },
       ]);
