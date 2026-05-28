@@ -27,7 +27,7 @@ export const LoginScreen = ({ navigation }) => {
   const [pendingOrg, setPendingOrg] = useState(null);
   const [pendingUserName, setPendingUserName] = useState(null);
 
-  const { login } = useAuth();
+  const { login, changeLanguage } = useAuth();
 
   const handleLogin = async () => {
     setError(null);
@@ -216,7 +216,7 @@ export const LoginScreen = ({ navigation }) => {
           visible={showLocalePicker}
           onClose={() => setShowLocalePicker(false)}
           currentLanguage={currentLangCode}
-          onSelect={(code) => { i18n.changeLanguage(code); setShowLocalePicker(false); }}
+          onSelect={(code) => { changeLanguage(code); setShowLocalePicker(false); }}
         />
       </View>
     );

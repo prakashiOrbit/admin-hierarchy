@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -12,6 +12,7 @@ import { HospDashboard } from './src/screens/Dashboard/HospDashboard';
 import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 import { AuthProvider } from './src/context/AuthContext';
 import './src/i18n';
+import { restoreLanguage } from './src/i18n';
 
 const Stack = createNativeStackNavigator();
 
@@ -38,6 +39,14 @@ function AppContent() {
 }
 
 function App() {
+  const [langReady, setLangReady] = useState(false);
+
+  useEffect(() => {
+    restoreLanguage().finally(() => setLangReady(true));
+  }, []);
+
+  if (!langReady) return null;
+
   return (
     <SafeAreaProvider>
       <AuthProvider>

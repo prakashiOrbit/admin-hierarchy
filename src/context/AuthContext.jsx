@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import i18n from '../i18n';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import i18n, { LOCALE_STORAGE_KEY } from '../i18n';
 import { userApi } from '../services/api';
 
 const AuthContext = createContext(undefined);
@@ -36,10 +37,10 @@ export const AuthProvider = ({ children }) => {
 
     const backendLocale = (userProfile.preferredLocale || '').split('-')[0];
     const currentLocale = (i18n.language || '').split('-')[0];
-    // Only override the current language if the backend has an explicit non-default preference.
-    // If backend says 'en' (never changed from default), preserve whatever the user
-    // selected before logging in (e.g. from the login screen language picker).
-    if (backendLocale && backendLocale !== 'en' && backendLocale !== currentLocale) {
+    // Apply the server-side preference whenever it differs from the current UI language.
+    // Exception: if the backend has never been changed from 'en', keep whatever the user
+    // pre-selected on the login screen (e.g. they picked French before logging in).
+    if (backendLocale && backendLocale !== currentLocale && backendLocale !== 'en') {
       changeLanguage(backendLocale);
     }
   };
@@ -52,6 +53,7 @@ export const AuthProvider = ({ children }) => {
   const changeLanguage = (newLocale) => {
     i18n.changeLanguage(newLocale);
     setLocale(newLocale);
+    AsyncStorage.setItem(LOCALE_STORAGE_KEY, newLocale).catch(() => {});
 
     if (token && user?.orgName) {
       if (localeUpdateRef.current.timer) clearTimeout(localeUpdateRef.current.timer);
