@@ -8,7 +8,7 @@ import { StatusPill } from '../../components/StatusPill';
 import { IconGateway } from '../../icons';
 import { gatewayApi } from '../../services/api';
 
-export const GatewayDetailScreen = ({ gatewayCode, onBack }) => {
+export const GatewayDetailScreen = ({ gatewayCode, onBack, onAssign }) => {
   const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
@@ -82,7 +82,12 @@ export const GatewayDetailScreen = ({ gatewayCode, onBack }) => {
           ))}
         </Card>
 
-        <Btn variant="ghost" full style={{ marginTop: 24 }} onPress={onBack}>
+        {onAssign && (
+          <Btn full style={{ marginTop: 24 }} onPress={() => onAssign(gatewayCode)}>
+            Assign to Patient
+          </Btn>
+        )}
+        <Btn variant="ghost" full style={{ marginTop: 12 }} onPress={onBack}>
           {t('common.go_back')}
         </Btn>
       </ScrollView>

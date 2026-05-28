@@ -42,6 +42,8 @@ import { EditNurseScreen } from '../Users/EditNurseScreen';
 import { ShiftDetailScreen } from '../Common/ShiftDetailScreen';
 import { EditShiftScreen } from '../Common/EditShiftScreen';
 import { NotificationSheet } from '../../components/NotificationSheet';
+import { AssignGatewayScreen } from '../Devices/AssignGatewayScreen';
+import { AssignDeviceScreen } from '../Devices/AssignDeviceScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -249,11 +251,13 @@ export const HospDashboard = ({ navigation, route }) => {
   const [selectedNurseForEdit, setSelectedNurseForEdit] = useState(null);
   const [selectedShiftId, setSelectedShiftId] = useState(null);
   const [selectedShiftForEdit, setSelectedShiftForEdit] = useState(null);
+  const [assigningGatewayCode, setAssigningGatewayCode] = useState(null);
+  const [isAssigningDevice, setIsAssigningDevice] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const drawerAnim = React.useRef(new Animated.Value(-width)).current;
 
-  const isDeep = isInvitingHospAdmin || selectedUserId || isProvisioningWard || selectedWardForBed || isProvisioningGateway || isProvisioningDevice || !!selectedGatewayCode || !!selectedDeviceForConfig || isRegisteringPatient || selectedPatientId || isCreatingDoctor || selectedDoctorId || isCreatingNurse || isCreatingShift || !!assignmentData || !!selectedWardForEdit || !!selectedPatientForEdit || !!selectedDoctorForEdit || selectedNurseId || !!selectedNurseForEdit || selectedShiftId || !!selectedShiftForEdit;
+  const isDeep = isInvitingHospAdmin || selectedUserId || isProvisioningWard || selectedWardForBed || isProvisioningGateway || isProvisioningDevice || !!selectedGatewayCode || !!selectedDeviceForConfig || isRegisteringPatient || selectedPatientId || isCreatingDoctor || selectedDoctorId || isCreatingNurse || isCreatingShift || !!assignmentData || !!selectedWardForEdit || !!selectedPatientForEdit || !!selectedDoctorForEdit || selectedNurseId || !!selectedNurseForEdit || selectedShiftId || !!selectedShiftForEdit || !!assigningGatewayCode || isAssigningDevice;
 
   useEffect(() => {
     const backAction = () => {
@@ -289,6 +293,8 @@ export const HospDashboard = ({ navigation, route }) => {
     setSelectedNurseForEdit(null);
     setSelectedShiftId(null);
     setSelectedShiftForEdit(null);
+    setAssigningGatewayCode(null);
+    setIsAssigningDevice(false);
   };
 
   const toggleDrawer = React.useCallback(() => {
@@ -330,7 +336,9 @@ export const HospDashboard = ({ navigation, route }) => {
     if (selectedWardForBed) return <CreateBedScreen onCancel={() => setSelectedWardForBed(null)} wardCode={selectedWardForBed} />;
     if (isProvisioningGateway) return <CreateGatewayScreen onCancel={() => setIsProvisioningGateway(false)} />;
     if (isProvisioningDevice) return <CreateDeviceScreen onCancel={() => setIsProvisioningDevice(false)} />;
-    if (selectedGatewayCode) return <GatewayDetailScreen gatewayCode={selectedGatewayCode} onBack={() => setSelectedGatewayCode(null)} />;
+    if (assigningGatewayCode) return <AssignGatewayScreen initialGatewayCode={assigningGatewayCode} onCancel={() => setAssigningGatewayCode(null)} onSuccess={() => setAssigningGatewayCode(null)} />;
+    if (isAssigningDevice) return <AssignDeviceScreen onCancel={() => setIsAssigningDevice(false)} onSuccess={() => setIsAssigningDevice(false)} />;
+    if (selectedGatewayCode) return <GatewayDetailScreen gatewayCode={selectedGatewayCode} onBack={() => setSelectedGatewayCode(null)} onAssign={(code) => { setSelectedGatewayCode(null); setAssigningGatewayCode(code); }} />;
     if (selectedDeviceForConfig) return <AddDeviceConfigScreen device={selectedDeviceForConfig} onCancel={() => setSelectedDeviceForConfig(null)} onSuccess={() => setSelectedDeviceForConfig(null)} />;
     if (isRegisteringPatient) return <CreatePatientScreen onCancel={() => setIsRegisteringPatient(false)} />;
     if (isCreatingDoctor) return <CreateDoctorScreen onCancel={() => setIsCreatingDoctor(false)} hospCode="CLV-MAIN" />;
@@ -351,7 +359,7 @@ export const HospDashboard = ({ navigation, route }) => {
       case 'home': return <HospHomeContent role={role} onNavigate={handleTabChange} />;
       case 'admins': return <HospAdminsScreen onInvite={() => setIsInvitingHospAdmin(true)} onSelectUser={setSelectedUserId} />;
       case 'wards': return <WardsScreen onNewWard={() => setIsProvisioningWard(true)} onNewBed={setSelectedWardForBed} onEditWard={setSelectedWardForEdit} />;
-      case 'devices': return <DevicesScreen onNewGateway={(isNurse || isDoctor || isPatient) ? undefined : () => setIsProvisioningGateway(true)} onNewDevice={(isNurse || isDoctor || isPatient) ? undefined : () => setIsProvisioningDevice(true)} onGatewayPress={setSelectedGatewayCode} onDevicePress={setSelectedDeviceForConfig} />;
+      case 'devices': return <DevicesScreen onNewGateway={(isNurse || isDoctor || isPatient) ? undefined : () => setIsProvisioningGateway(true)} onNewDevice={(isNurse || isDoctor || isPatient) ? undefined : () => setIsProvisioningDevice(true)} onGatewayPress={setSelectedGatewayCode} onDevicePress={setSelectedDeviceForConfig} onDeviceAssign={(isNurse || isDoctor || isPatient) ? undefined : () => setIsAssigningDevice(true)} />;
       case 'patients': return <PatientsScreen onNewPatient={() => setIsRegisteringPatient(true)} onSelectPatient={setSelectedPatientId} />;
       case 'doctors': return <DoctorsScreen onNewDoctor={() => setIsCreatingDoctor(true)} onSelectDoctor={setSelectedDoctorId} />;
       case 'shifts': return <ShiftsScreen onNewNurse={() => setIsCreatingNurse(true)} onNewShift={() => setIsCreatingShift(true)} onSelectNurse={setSelectedNurseId} onSelectShift={setSelectedShiftId} />;
@@ -366,6 +374,8 @@ export const HospDashboard = ({ navigation, route }) => {
     if (selectedWardForBed) return t('dashboard.provision_bed');
     if (isProvisioningGateway) return t('dashboard.create_gateway');
     if (isProvisioningDevice) return t('dashboard.create_device');
+    if (assigningGatewayCode) return 'Assign Gateway to Patient';
+    if (isAssigningDevice) return 'Assign Device';
     if (selectedGatewayCode) return t('gateway.detail_title');
     if (selectedDeviceForConfig) return t('device.config_title');
     if (isRegisteringPatient) return t('dashboard.register_patient');

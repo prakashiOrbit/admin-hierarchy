@@ -600,6 +600,12 @@ export const gatewayApi = {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
+  assign: (orgName, hospCode, payload, token) =>
+    apiRequest(`/${orgName}/gateway/${hospCode}/assign`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify(payload),
+    }),
 };
 
 export const deviceApi = {
@@ -629,6 +635,12 @@ export const deviceApi = {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(configs),
+    }),
+  assign: (orgName, hospCode, payload, token) =>
+    apiRequest(`/${orgName}/device/${hospCode}/assign`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify(payload),
     }),
 };
 

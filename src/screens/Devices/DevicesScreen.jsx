@@ -8,7 +8,7 @@ import { StatusPill } from '../../components/StatusPill';
 import { IconGateway, IconPulse, IconPlus, IconCpu, IconChevron } from '../../icons';
 import { gatewayApi, deviceApi } from '../../services/api';
 
-export const DevicesScreen = ({ onNewGateway, onNewDevice, onGatewayPress, onDevicePress }) => {
+export const DevicesScreen = ({ onNewGateway, onNewDevice, onGatewayPress, onDevicePress, onDeviceAssign }) => {
   const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
@@ -96,17 +96,24 @@ export const DevicesScreen = ({ onNewGateway, onNewDevice, onGatewayPress, onDev
 
         <View style={styles.headerRow}>
           <SectionHeader title={mode === 'gateways' ? t('entity.iot_gateways') : t('entity.medical_devices')} />
-          {((mode === 'gateways' && onNewGateway) || (mode === 'devices' && onNewDevice)) && (
-            <Btn
-              variant="primary"
-              size="sm"
-              style={styles.newBtn}
-              onPress={mode === 'gateways' ? onNewGateway : onNewDevice}
-            >
-              <IconPlus size={14} color="#FFF" />
-              {mode === 'gateways' ? ` ${t('actions.new_gateway')}` : ` ${t('actions.new_device')}`}
-            </Btn>
-          )}
+          <View style={styles.headerActions}>
+            {mode === 'devices' && onDeviceAssign && (
+              <Btn variant="surface" size="sm" style={styles.newBtn} onPress={onDeviceAssign}>
+                Assign
+              </Btn>
+            )}
+            {((mode === 'gateways' && onNewGateway) || (mode === 'devices' && onNewDevice)) && (
+              <Btn
+                variant="primary"
+                size="sm"
+                style={styles.newBtn}
+                onPress={mode === 'gateways' ? onNewGateway : onNewDevice}
+              >
+                <IconPlus size={14} color="#FFF" />
+                {mode === 'gateways' ? ` ${t('actions.new_gateway')}` : ` ${t('actions.new_device')}`}
+              </Btn>
+            )}
+          </View>
         </View>
 
         <View style={styles.list}>
@@ -175,6 +182,7 @@ const createStyles = (T) => StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   modeRow: { flexDirection: 'row', marginBottom: 20 },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 },
+  headerActions: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   newBtn: { flexDirection: 'row', gap: 4, paddingHorizontal: 10 },
   list: { gap: 10 },
   itemRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
