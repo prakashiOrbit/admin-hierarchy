@@ -51,13 +51,18 @@ export const ShiftsScreen = ({ onNewNurse, onNewShift, onSelectNurse, onSelectSh
 
   const formatTime = (dt) => {
     if (!dt) return '—';
+    if (Array.isArray(dt)) {
+      const h = dt[3] ?? 0;
+      const min = String(dt[4] ?? 0).padStart(2, '0');
+      const period = h >= 12 ? 'PM' : 'AM';
+      return `${h % 12 || 12}:${min} ${period}`;
+    }
     if (typeof dt === 'string') {
       const m = dt.match(/T(\d{2}):(\d{2})/);
       if (m) {
         const h = parseInt(m[1], 10);
         const period = h >= 12 ? 'PM' : 'AM';
-        const h12 = h % 12 || 12;
-        return `${h12}:${m[2]} ${period}`;
+        return `${h % 12 || 12}:${m[2]} ${period}`;
       }
     }
     try {

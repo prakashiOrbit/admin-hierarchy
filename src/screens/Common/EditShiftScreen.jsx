@@ -17,6 +17,11 @@ export const EditShiftScreen = ({ shift, onCancel, onSave, onDelete }) => {
 
   const extractTime = (dt) => {
     if (!dt) return '';
+    if (Array.isArray(dt)) {
+      const h = String(dt[3] ?? 0).padStart(2, '0');
+      const min = String(dt[4] ?? 0).padStart(2, '0');
+      return `${h}:${min}`;
+    }
     if (typeof dt === 'string') {
       const m = dt.match(/T(\d{2}:\d{2})/);
       if (m) return m[1];
