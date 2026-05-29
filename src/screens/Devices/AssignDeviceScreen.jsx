@@ -5,7 +5,7 @@ import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SearchBar, Btn, Avatar } from '../../components/Shared';
 import { IconGateway, IconPatient, IconPulse, IconChevron } from '../../icons';
-import { deviceApi } from '../../services/api';
+import { deviceApi, bedApi } from '../../services/api';
 
 const STEPS = ['device', 'bed'];
 
