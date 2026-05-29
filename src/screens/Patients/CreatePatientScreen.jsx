@@ -355,7 +355,8 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
           <Field label={t('entity.patient_mrn_code')} required>
             <TextInput
               value={form.patient.patientCode}
-              onChangeText={v => updatePatient('patientCode', v.toUpperCase())}
+              onChangeText={v => updatePatient('patientCode', v)}
+              autoCapitalize="characters"
               placeholder={t('placeholders.mrn_example')}
             />
           </Field>

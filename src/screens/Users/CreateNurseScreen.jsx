@@ -79,7 +79,7 @@ export const CreateNurseScreen = ({ onCancel, onSuccess }) => {
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
               <Field label={t('entity.staff_code')} required>
-                <TextInput value={form.nurseCode} onChangeText={v => updateRoot('nurseCode', v.toUpperCase())} placeholder={t('placeholders.nurse_code_example')} />
+                <TextInput value={form.nurseCode} onChangeText={v => updateRoot('nurseCode', v)} autoCapitalize="characters" placeholder={t('placeholders.nurse_code_example')} />
               </Field>
             </View>
             <View style={{ flex: 1 }}>

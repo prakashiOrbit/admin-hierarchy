@@ -101,7 +101,8 @@ export const CreateHospitalScreen = ({ onCancel }) => {
           <Field label={t('hospital.code')}>
             <TextInput
               value={form.hospitalCode}
-              onChangeText={(v) => updateRoot('hospitalCode', v.toUpperCase())}
+              onChangeText={(v) => updateRoot('hospitalCode', v)}
+              autoCapitalize="characters"
               placeholder={t('placeholders.hospital_code')}
             />
           </Field>

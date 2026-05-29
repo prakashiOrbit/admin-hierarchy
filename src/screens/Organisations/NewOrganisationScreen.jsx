@@ -100,7 +100,8 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
           <Field label={t('orgs.id')}>
             <TextInput 
               value={form.orgName} 
-              onChangeText={(v) => updateRoot('orgName', v.toUpperCase())}
+              onChangeText={(v) => updateRoot('orgName', v)}
+              autoCapitalize="characters"
               placeholder={t('placeholders.org_id_eg')}
             />
           </Field>

@@ -59,7 +59,8 @@ export const CreateGatewayScreen = ({ onCancel, onSuccess }) => {
           <Field label={t('entity.gateway_code')} required>
             <TextInput
               value={form.gatewayCode}
-              onChangeText={v => updateForm('gatewayCode', v.toUpperCase())}
+              onChangeText={v => updateForm('gatewayCode', v)}
+              autoCapitalize="characters"
               placeholder={t('placeholders.gateway_code')}
               leading={<IconShield size={16} color={T.textFaint} />}
             />

@@ -76,7 +76,8 @@ export const CreateDeviceTypeScreen = ({ onCancel }) => {
           <Field label={t('entity.category')} required>
             <TextInput
               value={form.category}
-              onChangeText={v => updateForm('category', v.toUpperCase())}
+              onChangeText={v => updateForm('category', v)}
+              autoCapitalize="characters"
               placeholder={t('placeholders.category')}
               leading={<IconShield size={16} color={T.textFaint} />}
             />

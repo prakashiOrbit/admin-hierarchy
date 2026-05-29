@@ -80,7 +80,7 @@ export const CreateShiftScreen = ({ onCancel, onSuccess }) => {
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
               <Field label={t('shift.code')} required>
-                <TextInput value={form.shiftCode} onChangeText={v => updateForm('shiftCode', v.toUpperCase())} placeholder={t('shift.code_placeholder')} />
+                <TextInput value={form.shiftCode} onChangeText={v => updateForm('shiftCode', v)} autoCapitalize="characters" placeholder={t('shift.code_placeholder')} />
               </Field>
             </View>
             <View style={{ flex: 1 }}>

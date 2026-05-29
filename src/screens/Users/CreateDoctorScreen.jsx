@@ -83,7 +83,7 @@ export const CreateDoctorScreen = ({ onCancel, onSuccess }) => {
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
               <Field label={t('entity.doctor_code')} required>
-                <TextInput value={form.doctorCode} onChangeText={v => updateRoot('doctorCode', v.toUpperCase())} placeholder={t('placeholders.doctor_code_example')} />
+                <TextInput value={form.doctorCode} onChangeText={v => updateRoot('doctorCode', v)} autoCapitalize="characters" placeholder={t('placeholders.doctor_code_example')} />
               </Field>
             </View>
             <View style={{ flex: 1 }}>

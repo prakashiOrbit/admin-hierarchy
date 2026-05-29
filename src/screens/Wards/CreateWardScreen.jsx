@@ -56,7 +56,8 @@ export const CreateWardScreen = ({ onCancel, onSuccess }) => {
           <Field label={t('ward.ward_code')} required>
             <TextInput
               value={form.wardCode}
-              onChangeText={v => updateForm('wardCode', v.toUpperCase())}
+              onChangeText={v => updateForm('wardCode', v)}
+              autoCapitalize="characters"
               placeholder={t('placeholders.ward_code')}
             />
           </Field>

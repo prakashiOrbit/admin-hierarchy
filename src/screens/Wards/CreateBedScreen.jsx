@@ -74,7 +74,8 @@ export const CreateBedScreen = ({ onCancel, onSuccess, wardCode }) => {
           <Field label={t('ward.bed_identifier')} required>
             <TextInput
               value={form.bedCode}
-              onChangeText={v => updateForm('bedCode', v.toUpperCase())}
+              onChangeText={v => updateForm('bedCode', v)}
+              autoCapitalize="characters"
               placeholder={t('placeholders.bed_code')}
               leading={<IconShield size={16} color={T.textFaint} />}
             />

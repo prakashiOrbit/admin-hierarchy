@@ -77,7 +77,8 @@ export const CreateDeviceScreen = ({ onCancel, onSuccess }) => {
           <Field label={t('device.code')} required>
             <TextInput
               value={form.deviceCode}
-              onChangeText={v => updateForm('deviceCode', v.toUpperCase())}
+              onChangeText={v => updateForm('deviceCode', v)}
+              autoCapitalize="characters"
               placeholder={t('device.code_placeholder')}
               leading={<IconShield size={16} color={T.textFaint} />}
             />
