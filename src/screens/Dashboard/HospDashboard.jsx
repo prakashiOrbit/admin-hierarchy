@@ -229,6 +229,8 @@ export const HospDashboard = ({ navigation, route }) => {
   const { t } = useTranslation();
   const styles = createStyles(T);
   const [activeTab, setActiveTab] = useState('home');
+  const [shiftsMode, setShiftsMode] = useState('shifts');
+  const [devicesMode, setDevicesMode] = useState('gateways');
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedPatientId, setSelectedPatientId] = useState(null);
   const [selectedDoctorId, setSelectedDoctorId] = useState(null);
@@ -359,10 +361,10 @@ export const HospDashboard = ({ navigation, route }) => {
       case 'home': return <HospHomeContent role={role} onNavigate={handleTabChange} />;
       case 'admins': return <HospAdminsScreen onInvite={() => setIsInvitingHospAdmin(true)} onSelectUser={setSelectedUserId} />;
       case 'wards': return <WardsScreen onNewWard={() => setIsProvisioningWard(true)} onNewBed={setSelectedWardForBed} onEditWard={setSelectedWardForEdit} />;
-      case 'devices': return <DevicesScreen onNewGateway={(isNurse || isDoctor || isPatient) ? undefined : () => setIsProvisioningGateway(true)} onNewDevice={(isNurse || isDoctor || isPatient) ? undefined : () => setIsProvisioningDevice(true)} onGatewayPress={setSelectedGatewayCode} onDevicePress={setSelectedDeviceForConfig} onDeviceAssign={(isNurse || isDoctor || isPatient) ? undefined : () => setIsAssigningDevice(true)} />;
+      case 'devices': return <DevicesScreen onNewGateway={(isNurse || isDoctor || isPatient) ? undefined : () => setIsProvisioningGateway(true)} onNewDevice={(isNurse || isDoctor || isPatient) ? undefined : () => setIsProvisioningDevice(true)} onGatewayPress={setSelectedGatewayCode} onDevicePress={setSelectedDeviceForConfig} onDeviceAssign={(isNurse || isDoctor || isPatient) ? undefined : () => setIsAssigningDevice(true)} mode={devicesMode} onModeChange={setDevicesMode} />;
       case 'patients': return <PatientsScreen onNewPatient={() => setIsRegisteringPatient(true)} onSelectPatient={setSelectedPatientId} />;
       case 'doctors': return <DoctorsScreen onNewDoctor={() => setIsCreatingDoctor(true)} onSelectDoctor={setSelectedDoctorId} />;
-      case 'shifts': return <ShiftsScreen onNewNurse={() => setIsCreatingNurse(true)} onNewShift={() => setIsCreatingShift(true)} onSelectNurse={setSelectedNurseId} onSelectShift={setSelectedShiftId} />;
+      case 'shifts': return <ShiftsScreen onNewNurse={() => setIsCreatingNurse(true)} onNewShift={() => setIsCreatingShift(true)} onSelectNurse={setSelectedNurseId} onSelectShift={setSelectedShiftId} mode={shiftsMode} onModeChange={setShiftsMode} />;
       case 'settings': return <SettingsScreen onLogout={() => { logout(); navigation.replace('Login'); }} />;
       default: return <HospHomeContent role={role} onNavigate={handleTabChange} />;
     }

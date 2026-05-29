@@ -17,12 +17,15 @@ export const EditShiftScreen = ({ shift, onCancel, onSave, onDelete }) => {
 
   const extractTime = (dt) => {
     if (!dt) return '';
+    if (typeof dt === 'string') {
+      const m = dt.match(/T(\d{2}:\d{2})/);
+      if (m) return m[1];
+    }
     try {
       const d = new Date(dt);
-      const hh = String(d.getHours()).padStart(2, '0');
-      const mm = String(d.getMinutes()).padStart(2, '0');
-      return `${hh}:${mm}`;
-    } catch { return dt; }
+      if (isNaN(d.getTime())) return '';
+      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    } catch { return ''; }
   };
 
   const [form, setForm] = useState({

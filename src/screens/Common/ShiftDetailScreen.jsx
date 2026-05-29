@@ -36,7 +36,20 @@ export const ShiftDetailScreen = ({ shiftId: shiftCode, onBack, onEdit }) => {
 
   const formatTime = (dt) => {
     if (!dt) return '—';
-    try { return new Date(dt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch { return dt; }
+    if (typeof dt === 'string') {
+      const m = dt.match(/T(\d{2}):(\d{2})/);
+      if (m) {
+        const h = parseInt(m[1], 10);
+        const period = h >= 12 ? 'PM' : 'AM';
+        const h12 = h % 12 || 12;
+        return `${h12}:${m[2]} ${period}`;
+      }
+    }
+    try {
+      const d = new Date(dt);
+      if (isNaN(d.getTime())) return String(dt);
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch { return String(dt); }
   };
 
   const confirmUnassignNurse = (nurse) => {

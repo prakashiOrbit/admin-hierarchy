@@ -8,7 +8,7 @@ import { StatusPill } from '../../components/StatusPill';
 import { IconGateway, IconPulse, IconPlus, IconCpu, IconChevron } from '../../icons';
 import { gatewayApi, deviceApi } from '../../services/api';
 
-export const DevicesScreen = ({ onNewGateway, onNewDevice, onGatewayPress, onDevicePress, onDeviceAssign }) => {
+export const DevicesScreen = ({ onNewGateway, onNewDevice, onGatewayPress, onDevicePress, onDeviceAssign, mode: modeProp, onModeChange }) => {
   const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
@@ -19,7 +19,8 @@ export const DevicesScreen = ({ onNewGateway, onNewDevice, onGatewayPress, onDev
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [query, setQuery] = useState('');
-  const [mode, setMode] = useState('gateways');
+  const [mode, setModeInternal] = useState(modeProp || 'gateways');
+  const setMode = (m) => { setModeInternal(m); onModeChange?.(m); };
 
   const fetchAll = useCallback(async () => {
     if (!user?.orgName || !user?.hospitalCode) return;

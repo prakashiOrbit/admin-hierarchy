@@ -8,7 +8,7 @@ import { StatusPill } from '../../components/StatusPill';
 import { IconClock, IconPlus, IconChevron } from '../../icons';
 import { shiftApi, nurseApi } from '../../services/api';
 
-export const ShiftsScreen = ({ onNewNurse, onNewShift, onSelectNurse, onSelectShift }) => {
+export const ShiftsScreen = ({ onNewNurse, onNewShift, onSelectNurse, onSelectShift, mode: modeProp, onModeChange }) => {
   const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
@@ -19,7 +19,8 @@ export const ShiftsScreen = ({ onNewNurse, onNewShift, onSelectNurse, onSelectSh
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [query, setQuery] = useState('');
-  const [mode, setMode] = useState('shifts');
+  const [mode, setModeInternal] = useState(modeProp || 'shifts');
+  const setMode = (m) => { setModeInternal(m); onModeChange?.(m); };
 
   useEffect(() => {
     if (!user?.orgName || !user?.hospitalCode) return;
@@ -50,7 +51,20 @@ export const ShiftsScreen = ({ onNewNurse, onNewShift, onSelectNurse, onSelectSh
 
   const formatTime = (dt) => {
     if (!dt) return '—';
-    try { return new Date(dt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch { return dt; }
+    if (typeof dt === 'string') {
+      const m = dt.match(/T(\d{2}):(\d{2})/);
+      if (m) {
+        const h = parseInt(m[1], 10);
+        const period = h >= 12 ? 'PM' : 'AM';
+        const h12 = h % 12 || 12;
+        return `${h12}:${m[2]} ${period}`;
+      }
+    }
+    try {
+      const d = new Date(dt);
+      if (isNaN(d.getTime())) return String(dt);
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch { return String(dt); }
   };
 
   if (loading) {
