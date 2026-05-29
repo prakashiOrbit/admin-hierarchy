@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
-import { bedApi, patientApi, wardApi } from '../services/api';
+import { bedApi, wardApi } from '../services/api';
 import { Avatar } from './Shared';
 import { IconBed, IconPatient, IconDoor, IconAlert, IconCheck, IconChevron } from '../icons';
 
@@ -32,7 +32,6 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
   });
 
   const ACTION_LIST = [
-    { key: 'assign',    label: t('actions.assign_patient'),    icon: IconPatient, color: '#22D3EE' },
     { key: 'unassign',  label: t('actions.unassign_patient'),  icon: IconPatient, color: '#F59E0B' },
     { key: 'discharge', label: t('actions.discharge_patient'), icon: IconCheck,   color: '#10B981' },
     { key: 'transfer',  label: t('actions.transfer_ward'),  icon: IconDoor,    color: '#8B5CF6' },
@@ -83,16 +82,6 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
       ]);
       return;
     }
-    if (key === 'assign') {
-      setMode('assign');
-      setLoading(true);
-      try {
-        const data = await patientApi.listAll(user.orgName, user.hospitalCode, token);
-        setItems(Array.isArray(data) ? data : []);
-      } catch { setItems([]); }
-      finally { setLoading(false); }
-      return;
-    }
     if (key === 'transfer') {
       setMode('transfer');
       setLoading(true);
@@ -106,27 +95,6 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
     if (key === 'alarm') {
       setMode('alarm');
     }
-  };
-
-  const handleAssign = async (patient) => {
-    setSaving(true);
-    try {
-      const assignedDevices = await bedApi.getAssignedDevices(user.orgName, user.hospitalCode, bed.bedCode, token)
-        .catch(() => []);
-      const deviceList = Array.isArray(assignedDevices)
-        ? assignedDevices.map(d => ({ deviceCode: d.deviceCode }))
-        : [];
-      await bedApi.assignPatient(user.orgName, user.hospitalCode, bed.bedCode, {
-        patientCode: patient.patientCode,
-        wardCode: wardCode,
-        gatewayCode: bed.gatewayCode,
-        devices: deviceList,
-      }, token);
-      Alert.alert(t('common.done'), t('actions.patient_assigned', { name: `${patient.firstName} ${patient.lastName}`, code: bed.bedCode }), [
-        { text: 'OK', onPress: handleClose },
-      ]);
-    } catch (e) { Alert.alert(t('common.error'), e.message || 'Failed.'); }
-    finally { setSaving(false); }
   };
 
   const handleTransfer = async (ward) => {
@@ -158,10 +126,6 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
 
   const filteredItems = items.filter(item => {
     const q = query.toLowerCase();
-    if (mode === 'assign') {
-      return `${item.firstName} ${item.lastName}`.toLowerCase().includes(q) ||
-        item.patientCode?.toLowerCase().includes(q);
-    }
     return item.wardName?.toLowerCase().includes(q) || item.wardCode?.toLowerCase().includes(q);
   });
 
@@ -200,19 +164,18 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
       );
     }
 
-    if (mode === 'assign' || mode === 'transfer') {
-      const isAssign = mode === 'assign';
+    if (mode === 'transfer') {
       return (
         <>
           <View style={styles.subHeader}>
             <TouchableOpacity onPress={() => { setMode('main'); setQuery(''); }}>
               <Text style={styles.backLink}>← {t('common.back')}</Text>
             </TouchableOpacity>
-            <Text style={styles.subTitle}>{t(isAssign ? 'actions.select_patient' : 'actions.select_ward')}</Text>
+            <Text style={styles.subTitle}>{t('actions.select_ward')}</Text>
           </View>
           <RNTextInput
             style={[styles.searchInput, { color: T.text, borderColor: T.borderSoft, backgroundColor: T.surface }]}
-            placeholder={t(isAssign ? 'actions.search_patients' : 'actions.search_wards')}
+            placeholder={t('actions.search_wards')}
             placeholderTextColor={T.textFaint}
             value={query}
             onChangeText={setQuery}
@@ -223,30 +186,18 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
             <ScrollView style={{ maxHeight: 280 }}>
               {filteredItems.map((item) => (
                 <TouchableOpacity
-                  key={isAssign ? item.patientCode : item.wardCode}
+                  key={item.wardCode}
                   style={styles.listItem}
-                  onPress={() => isAssign ? handleAssign(item) : handleTransfer(item)}
+                  onPress={() => handleTransfer(item)}
                   disabled={saving}
                 >
-                  {isAssign ? (
-                    <>
-                      <Avatar name={`${item.firstName} ${item.lastName}`} size={36} />
-                      <View style={{ flex: 1, marginLeft: 12 }}>
-                        <Text style={styles.listName}>{item.firstName} {item.lastName}</Text>
-                        <Text style={styles.listMeta}>{item.patientCode} · {item.patientStatus}</Text>
-                      </View>
-                    </>
-                  ) : (
-                    <>
-                      <View style={[styles.actionIcon, { backgroundColor: T.surface2 }]}>
-                        <IconDoor size={16} color={T.textDim} />
-                      </View>
-                      <View style={{ flex: 1, marginLeft: 12 }}>
-                        <Text style={styles.listName}>{item.wardName}</Text>
-                        <Text style={styles.listMeta}>{item.wardCode} · {item.wardType}</Text>
-                      </View>
-                    </>
-                  )}
+                  <View style={[styles.actionIcon, { backgroundColor: T.surface2 }]}>
+                    <IconDoor size={16} color={T.textDim} />
+                  </View>
+                  <View style={{ flex: 1, marginLeft: 12 }}>
+                    <Text style={styles.listName}>{item.wardName}</Text>
+                    <Text style={styles.listMeta}>{item.wardCode} · {item.wardType}</Text>
+                  </View>
                   <IconChevron size={14} color={T.textFaint} />
                 </TouchableOpacity>
               ))}
