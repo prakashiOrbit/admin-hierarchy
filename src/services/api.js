@@ -379,6 +379,11 @@ export const bedApi = {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
+  getAssignedDevices: (orgName, hospCode, bedCode, token) =>
+    apiRequest(`/${orgName}/bed/${hospCode}/${bedCode}/devicesassigned`, {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${token}` },
+    }),
   assignPatient: (orgName, hospCode, bedCode, payload, token) =>
     apiRequest(`/${orgName}/bed/${hospCode}/assign/patient`, {
       method: 'POST',
