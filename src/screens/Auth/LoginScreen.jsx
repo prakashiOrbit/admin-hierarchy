@@ -279,21 +279,25 @@ export const LoginScreen = ({ navigation }) => {
               </View>
             )}
 
-            <TouchableOpacity style={styles.forgotBtn}>
-              <Text style={styles.forgotText}>{t('auth.forgot_password')}</Text>
-            </TouchableOpacity>
+            <View style={styles.formMeta}>
+              <TouchableOpacity
+                testID="keep-signed-in-toggle"
+                style={styles.keepSignedInRow}
+                onPress={() => setKeepSignedIn(v => !v)}
+                activeOpacity={0.7}
+              >
+                <View style={[styles.checkbox, keepSignedIn && styles.checkboxActive]}>
+                  {keepSignedIn && (
+                    <View style={styles.checkmark} />
+                  )}
+                </View>
+                <Text style={styles.keepSignedInText}>{t('auth.keep_signed_in')}</Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              testID="keep-signed-in-toggle"
-              style={styles.keepSignedInRow}
-              onPress={() => setKeepSignedIn(v => !v)}
-              activeOpacity={0.7}
-            >
-              <View style={[styles.checkbox, keepSignedIn && styles.checkboxActive]}>
-                {keepSignedIn && <Text style={styles.checkmark}>✓</Text>}
-              </View>
-              <Text style={styles.keepSignedInText}>{t('auth.keep_signed_in')}</Text>
-            </TouchableOpacity>
+              <TouchableOpacity style={styles.forgotBtn}>
+                <Text style={styles.forgotText}>{t('auth.forgot_password')}</Text>
+              </TouchableOpacity>
+            </View>
 
             <Btn
               full 
@@ -365,24 +369,23 @@ const createStyles = (T) => StyleSheet.create({
     fontWeight: '500',
     textAlign: 'center',
   },
-  forgotBtn: {
-    alignSelf: 'flex-end',
-    paddingVertical: 8,
-  },
-  forgotText: {
-    color: T.accent,
-    fontSize: 13,
-    fontWeight: '500',
+  // Row that holds "keep signed in" (left) and "forgot password" (right)
+  formMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 4,
+    marginBottom: 4,
   },
   keepSignedInRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
-    gap: 10,
+    gap: 8,
+    paddingVertical: 6,
   },
   checkbox: {
-    width: 20,
-    height: 20,
+    width: 18,
+    height: 18,
     borderRadius: 4,
     borderWidth: 1.5,
     borderColor: T.border,
@@ -394,15 +397,25 @@ const createStyles = (T) => StyleSheet.create({
     backgroundColor: T.accent,
     borderColor: T.accent,
   },
+  // White inner dot shown when checked
   checkmark: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '700',
-    lineHeight: 14,
+    width: 9,
+    height: 9,
+    borderRadius: 2,
+    backgroundColor: '#fff',
   },
   keepSignedInText: {
-    fontSize: 14,
-    color: T.text,
+    fontSize: 13,
+    color: T.textDim,
+    fontWeight: '500',
+  },
+  forgotBtn: {
+    paddingVertical: 6,
+  },
+  forgotText: {
+    color: T.accent,
+    fontSize: 13,
+    fontWeight: '500',
   },
   footer: {
     flexDirection: 'row',
