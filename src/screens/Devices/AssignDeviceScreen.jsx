@@ -5,9 +5,9 @@ import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SearchBar, Btn, Avatar } from '../../components/Shared';
 import { IconGateway, IconPatient, IconPulse, IconChevron } from '../../icons';
-import { deviceApi, bedApi } from '../../services/api';
+import { deviceApi, bedApi, patientApi } from '../../services/api';
 
-const STEPS = ['device', 'bed'];
+const STEPS = ['device', 'bed', 'patient'];
 
 export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
   const { t } = useTranslation();
@@ -17,12 +17,14 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
 
   const [devices, setDevices] = useState([]);
   const [beds, setBeds] = useState([]);
+  const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const [step, setStep] = useState('device');
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [selectedBed, setSelectedBed] = useState(null);
+  const [selectedPatient, setSelectedPatient] = useState(null);
   const [query, setQuery] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -42,11 +44,18 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
         if (msg.includes('not found') || msg.includes('no bed')) return [];
         throw e;
       }),
+      patientApi.listUnassigned(user.orgName, user.hospitalCode, token).catch(e => {
+        const msg = (e.message || '').toLowerCase();
+        if (msg.includes('not found') || msg.includes('no patient')) return [];
+        throw e;
+      }),
     ])
-      .then(([dRes, bRes]) => {
+      .then(([dRes, bRes, pRes]) => {
         if (cancelled) return;
         setDevices(Array.isArray(dRes) ? dRes : (Array.isArray(dRes?.data) ? dRes.data : []));
-        setBeds(Array.isArray(bRes) ? bRes : (Array.isArray(bRes?.data) ? bRes.data : []));
+        const allBeds = Array.isArray(bRes) ? bRes : (Array.isArray(bRes?.data) ? bRes.data : []);
+        setBeds(allBeds.filter(b => b.bedStatus === 'ACTIVE'));
+        setPatients(Array.isArray(pRes) ? pRes : (Array.isArray(pRes?.data) ? pRes.data : []));
       })
       .catch(err => { if (!cancelled) setError(err.message || t('common.load_failed')); })
       .finally(() => { if (!cancelled) setLoading(false); });
@@ -58,37 +67,36 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
     if (step === 'device') return devices.filter(d =>
       d.deviceCode?.toLowerCase().includes(q) || d.deviceType?.toLowerCase().includes(q)
     );
-    return beds.filter(b =>
+    if (step === 'bed') return beds.filter(b =>
       b.bedCode?.toLowerCase().includes(q) || b.wardCode?.toLowerCase().includes(q)
+    );
+    return patients.filter(p =>
+      p.patientCode?.toLowerCase().includes(q) ||
+      `${p.firstName} ${p.lastName}`.toLowerCase().includes(q) ||
+      (p.mrNumber || '').toLowerCase().includes(q)
     );
   })();
 
   const goBack = () => {
     setQuery('');
-    if (step === 'bed') setStep('device');
+    if (step === 'patient') { setStep('bed'); setSelectedPatient(null); }
+    else if (step === 'bed') { setStep('device'); setSelectedBed(null); }
     else onCancel();
   };
 
   const handleFinish = async () => {
-    if (!selectedDevice || !selectedBed) return;
-    if (!selectedBed.patientCode) {
-      Alert.alert(
-        'No Patient Assigned',
-        `Bed ${selectedBed.bedCode} has no patient yet. Assign a patient to the bed first, then add the device.`,
-        [{ text: 'OK' }]
-      );
-      return;
-    }
+    if (!selectedDevice || !selectedBed || !selectedPatient) return;
     setSaving(true);
     try {
-      await deviceApi.assign(user.orgName, user.hospitalCode, {
-        deviceCode: selectedDevice.deviceCode,
+      await bedApi.assignPatient(user.orgName, user.hospitalCode, selectedBed.bedCode, {
+        patientCode: selectedPatient.patientCode,
+        wardCode: selectedBed.wardCode,
         gatewayCode: selectedBed.gatewayCode,
-        patientCode: selectedBed.patientCode,
+        devices: [{ deviceCode: selectedDevice.deviceCode }],
       }, token);
       Alert.alert(
         t('common.success'),
-        `Device ${selectedDevice.deviceCode} added to bed ${selectedBed.bedCode}.`,
+        `Device ${selectedDevice.deviceCode} assigned to ${selectedPatient.firstName} ${selectedPatient.lastName} on bed ${selectedBed.bedCode}.`,
         [{ text: t('common.ok'), onPress: onSuccess || onCancel }]
       );
     } catch (e) {
@@ -99,11 +107,12 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
   };
 
   const stepIndex = STEPS.indexOf(step);
-  const stepTitle = step === 'device' ? 'Select Device' : 'Select Bed';
+  const stepTitles = { device: 'Select Device', bed: 'Select Bed', patient: 'Select Patient' };
   const subtitle = [
     selectedDevice?.deviceCode,
     selectedBed ? `Bed ${selectedBed.bedCode}` : null,
-  ].filter(Boolean).join(' → ') || 'Choose a device to add to a bed';
+    selectedPatient ? `${selectedPatient.firstName} ${selectedPatient.lastName}` : null,
+  ].filter(Boolean).join(' → ') || 'Choose a device, bed, and patient';
 
   if (loading) {
     return <View style={styles.center}><ActivityIndicator color={T.accent} /></View>;
@@ -122,7 +131,7 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
     <View style={styles.container}>
       <View style={styles.stepperHeader}>
         <View style={styles.stepInfo}>
-          <Text style={styles.stepTitle}>{stepTitle}</Text>
+          <Text style={styles.stepTitle}>{stepTitles[step]}</Text>
           <Text style={styles.stepSubtitle}>{subtitle}</Text>
         </View>
         <View style={styles.progressContainer}>
@@ -134,7 +143,7 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
 
       <View style={styles.searchWrap}>
         <SearchBar
-          placeholder={step === 'device' ? 'Search devices…' : 'Search beds…'}
+          placeholder={step === 'device' ? 'Search devices…' : step === 'bed' ? 'Search beds…' : 'Search patients…'}
           value={query}
           onChangeText={setQuery}
         />
@@ -142,45 +151,57 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.list}>
-          {step === 'device' && filtered.map(d => {
-            const isActive = selectedDevice?.deviceCode === d.deviceCode;
-            return (
-              <Card
-                key={d.deviceCode}
-                style={[styles.itemCard, isActive && styles.activeCard]}
-                onPress={() => { setSelectedDevice(d); setStep('bed'); setQuery(''); }}
-              >
-                <View style={styles.row}>
-                  <View style={[styles.iconBox, { backgroundColor: T.accentSoft }]}>
-                    <IconPulse size={20} color={T.accent} />
-                  </View>
-                  <View style={styles.info}>
-                    <Text style={styles.name}>{d.deviceCode}</Text>
-                    <Text style={styles.meta}>{d.deviceType} · {d.protocol}</Text>
-                  </View>
-                  <IconChevron size={20} color={T.textDim} />
+          {step === 'device' && filtered.map(d => (
+            <Card
+              key={d.deviceCode}
+              style={styles.itemCard}
+              onPress={() => { setSelectedDevice(d); setStep('bed'); setQuery(''); }}
+            >
+              <View style={styles.row}>
+                <View style={[styles.iconBox, { backgroundColor: T.accentSoft }]}>
+                  <IconPulse size={20} color={T.accent} />
                 </View>
-              </Card>
-            );
-          })}
+                <View style={styles.info}>
+                  <Text style={styles.name}>{d.deviceCode}</Text>
+                  <Text style={styles.meta}>{d.deviceType} · {d.protocol}</Text>
+                </View>
+                <IconChevron size={20} color={T.textDim} />
+              </View>
+            </Card>
+          ))}
 
-          {step === 'bed' && filtered.map(b => {
-            const isActive = selectedBed?.bedCode === b.bedCode;
+          {step === 'bed' && filtered.map(b => (
+            <Card
+              key={b.bedCode}
+              style={styles.itemCard}
+              onPress={() => { setSelectedBed(b); setStep('patient'); setQuery(''); }}
+            >
+              <View style={styles.row}>
+                <View style={[styles.iconBox, { backgroundColor: T.accentSoft }]}>
+                  <IconGateway size={20} color={T.accent} />
+                </View>
+                <View style={styles.info}>
+                  <Text style={styles.name}>{b.bedCode}</Text>
+                  <Text style={styles.meta}>{b.wardCode} · {b.gatewayCode ? `GW: ${b.gatewayCode}` : 'No gateway'}</Text>
+                </View>
+                <IconChevron size={20} color={T.textDim} />
+              </View>
+            </Card>
+          ))}
+
+          {step === 'patient' && filtered.map(p => {
+            const isActive = selectedPatient?.patientCode === p.patientCode;
             return (
               <Card
-                key={b.bedCode}
+                key={p.patientCode}
                 style={[styles.itemCard, isActive && styles.activeCard]}
-                onPress={() => setSelectedBed(b)}
+                onPress={() => setSelectedPatient(p)}
               >
                 <View style={styles.row}>
-                  <View style={[styles.iconBox, { backgroundColor: T.accentSoft }]}>
-                    <IconGateway size={20} color={T.accent} />
-                  </View>
+                  <Avatar name={`${p.firstName} ${p.lastName}`} size={40} />
                   <View style={styles.info}>
-                    <Text style={styles.name}>{b.bedCode}</Text>
-                    <Text style={styles.meta}>
-                      {b.wardCode} · {b.patientCode ? `Patient: ${b.patientCode}` : 'No patient'}
-                    </Text>
+                    <Text style={styles.name}>{p.firstName} {p.lastName}</Text>
+                    <Text style={styles.meta}>{p.patientCode}{p.mrNumber ? ` · MR: ${p.mrNumber}` : ''}</Text>
                   </View>
                   <View style={[styles.checkbox, isActive && styles.checkboxActive]}>
                     {isActive && <View style={styles.checkboxInner} />}
@@ -201,13 +222,13 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
           <Btn style={{ flex: 1 }} variant="ghost" onPress={goBack}>
             {step === 'device' ? t('common.cancel') : '← Back'}
           </Btn>
-          {step === 'bed' && (
+          {step === 'patient' && (
             <Btn
               style={{ flex: 2 }}
               onPress={handleFinish}
-              disabled={!selectedBed || saving}
+              disabled={!selectedPatient || saving}
             >
-              {saving ? t('common.saving') : 'Add Device to Bed'}
+              {saving ? t('common.saving') : 'Assign'}
             </Btn>
           )}
         </View>
