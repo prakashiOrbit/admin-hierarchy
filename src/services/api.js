@@ -1,6 +1,6 @@
 import i18n from '../i18n';
 
-const BASE_URL = 'http://139.59.46.163:8080/api';
+const BASE_URL = 'http://139.59.46.163/api';
 const DEFAULT_TIMEOUT_MS = 15000;
 const inFlightGetRequests = new Map();
 
