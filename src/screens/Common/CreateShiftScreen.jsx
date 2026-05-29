@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
 import { IconClock, IconDoor } from '../../icons';
 import { wardApi, shiftApi } from '../../services/api';
+import { buildDateTime } from '../../utils/shiftTime';
 
 export const CreateShiftScreen = ({ onCancel, onSuccess }) => {
   const { t } = useTranslation();
@@ -35,10 +36,6 @@ export const CreateShiftScreen = ({ onCancel, onSuccess }) => {
 
   const updateForm = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
-  const buildDateTime = (timeStr) => {
-    const today = new Date().toISOString().split('T')[0];
-    return `${today}T${timeStr}:00`;
-  };
 
   const isFormValid = form.shiftCode && form.shiftName && form.wardCode;
 

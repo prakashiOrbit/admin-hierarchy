@@ -7,6 +7,7 @@ import { StatusPill } from '../../components/StatusPill';
 import { IconClock, IconEdit, IconDoor, IconUser, IconStethoscope, IconPlus, IconTrash } from '../../icons';
 import { shiftApi } from '../../services/api';
 import { ShiftStaffSheet } from '../../components/ShiftStaffSheet';
+import { formatTime } from '../../utils/shiftTime';
 
 export const ShiftDetailScreen = ({ shiftId: shiftCode, onBack, onEdit }) => {
   const { theme: T } = useTheme();
@@ -34,29 +35,6 @@ export const ShiftDetailScreen = ({ shiftId: shiftCode, onBack, onEdit }) => {
 
   useEffect(() => { fetchDetail(); }, [fetchDetail]);
 
-  const formatTime = (dt) => {
-    if (!dt) return '—';
-    if (Array.isArray(dt)) {
-      // Jackson LocalDateTime array: [year, month, day, hour, minute, second?, nano?]
-      const h = dt[3] ?? 0;
-      const min = String(dt[4] ?? 0).padStart(2, '0');
-      const period = h >= 12 ? 'PM' : 'AM';
-      return `${h % 12 || 12}:${min} ${period}`;
-    }
-    if (typeof dt === 'string') {
-      const m = dt.match(/T(\d{2}):(\d{2})/);
-      if (m) {
-        const h = parseInt(m[1], 10);
-        const period = h >= 12 ? 'PM' : 'AM';
-        return `${h % 12 || 12}:${m[2]} ${period}`;
-      }
-    }
-    try {
-      const d = new Date(dt);
-      if (isNaN(d.getTime())) return String(dt);
-      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    } catch { return String(dt); }
-  };
 
   const confirmUnassignNurse = (nurse) => {
     Alert.alert(

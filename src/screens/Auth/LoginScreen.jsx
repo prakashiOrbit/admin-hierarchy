@@ -284,6 +284,7 @@ export const LoginScreen = ({ navigation }) => {
             </TouchableOpacity>
 
             <TouchableOpacity
+              testID="keep-signed-in-toggle"
               style={styles.keepSignedInRow}
               onPress={() => setKeepSignedIn(v => !v)}
               activeOpacity={0.7}

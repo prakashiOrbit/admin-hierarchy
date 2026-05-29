@@ -7,6 +7,7 @@ import { Card, SectionHeader, SearchBar, Btn, Chip, Avatar } from '../../compone
 import { StatusPill } from '../../components/StatusPill';
 import { IconClock, IconPlus, IconChevron } from '../../icons';
 import { shiftApi, nurseApi } from '../../services/api';
+import { formatTime } from '../../utils/shiftTime';
 
 export const ShiftsScreen = ({ onNewNurse, onNewShift, onSelectNurse, onSelectShift, mode: modeProp, onModeChange }) => {
   const { t } = useTranslation();
@@ -49,28 +50,6 @@ export const ShiftsScreen = ({ onNewNurse, onNewShift, onSelectNurse, onSelectSh
     n.nurseCode?.toLowerCase().includes(query.toLowerCase())
   );
 
-  const formatTime = (dt) => {
-    if (!dt) return '—';
-    if (Array.isArray(dt)) {
-      const h = dt[3] ?? 0;
-      const min = String(dt[4] ?? 0).padStart(2, '0');
-      const period = h >= 12 ? 'PM' : 'AM';
-      return `${h % 12 || 12}:${min} ${period}`;
-    }
-    if (typeof dt === 'string') {
-      const m = dt.match(/T(\d{2}):(\d{2})/);
-      if (m) {
-        const h = parseInt(m[1], 10);
-        const period = h >= 12 ? 'PM' : 'AM';
-        return `${h % 12 || 12}:${m[2]} ${period}`;
-      }
-    }
-    try {
-      const d = new Date(dt);
-      if (isNaN(d.getTime())) return String(dt);
-      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    } catch { return String(dt); }
-  };
 
   if (loading) {
     return <View style={styles.center}><ActivityIndicator color={T.accent} /></View>;

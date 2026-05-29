@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Card, Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
 import { IconClock, IconDoor, IconTrash, IconBuilding } from '../../icons';
 import { shiftApi, wardApi } from '../../services/api';
+import { extractTime, buildDateTime } from '../../utils/shiftTime';
 
 const STATUSES = ['ACTIVE', 'INACTIVE', 'COMPLETED'];
 
@@ -15,23 +16,6 @@ export const EditShiftScreen = ({ shift, onCancel, onSave, onDelete }) => {
   const { user, token } = useAuth();
   const styles = createStyles(T);
 
-  const extractTime = (dt) => {
-    if (!dt) return '';
-    if (Array.isArray(dt)) {
-      const h = String(dt[3] ?? 0).padStart(2, '0');
-      const min = String(dt[4] ?? 0).padStart(2, '0');
-      return `${h}:${min}`;
-    }
-    if (typeof dt === 'string') {
-      const m = dt.match(/T(\d{2}:\d{2})/);
-      if (m) return m[1];
-    }
-    try {
-      const d = new Date(dt);
-      if (isNaN(d.getTime())) return '';
-      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-    } catch { return ''; }
-  };
 
   const [form, setForm] = useState({
     shiftName: shift.shiftName || '',
@@ -55,10 +39,6 @@ export const EditShiftScreen = ({ shift, onCancel, onSave, onDelete }) => {
 
   const set = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
-  const buildDateTime = (timeStr) => {
-    const today = new Date().toISOString().split('T')[0];
-    return `${today}T${timeStr || '00:00'}:00`;
-  };
 
   const isValid = form.shiftName && form.wardCode;
 
