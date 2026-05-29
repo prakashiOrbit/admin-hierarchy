@@ -27,6 +27,9 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [query, setQuery] = useState('');
   const [saving, setSaving] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const refresh = () => { setQuery(''); setRefreshKey(k => k + 1); };
 
   useEffect(() => {
     if (!user?.orgName || !user?.hospitalCode) return;
@@ -54,17 +57,17 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
         if (cancelled) return;
         setDevices(Array.isArray(dRes) ? dRes : (Array.isArray(dRes?.data) ? dRes.data : []));
         const allBeds = Array.isArray(bRes) ? bRes : (Array.isArray(bRes?.data) ? bRes.data : []);
-        setBeds(allBeds.filter(b => b.bedStatus === 'ACTIVE'));
         const assignedPatientCodes = new Set(
           allBeds.filter(b => b.patientCode).map(b => b.patientCode)
         );
+        setBeds(allBeds.filter(b => !b.patientCode));
         const allPatients = Array.isArray(pRes) ? pRes : (Array.isArray(pRes?.data) ? pRes.data : []);
         setPatients(allPatients.filter(p => !assignedPatientCodes.has(p.patientCode)));
       })
       .catch(err => { if (!cancelled) setError(err.message || t('common.load_failed')); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [user?.orgName, user?.hospitalCode, token]);
+  }, [user?.orgName, user?.hospitalCode, token, refreshKey]);
 
   const filtered = (() => {
     const q = query.toLowerCase();
@@ -216,7 +219,12 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
           })}
 
           {filtered.length === 0 && (
-            <Text style={styles.emptyText}>No {step}s found.</Text>
+            <View style={{ alignItems: 'center', marginTop: 24 }}>
+              <Text style={styles.emptyText}>No {step}s found.</Text>
+              <Btn variant="ghost" size="sm" style={{ marginTop: 12 }} onPress={refresh}>
+                ↻ Refresh
+              </Btn>
+            </View>
           )}
         </View>
       </ScrollView>
