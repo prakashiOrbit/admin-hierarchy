@@ -149,6 +149,11 @@ export const authApi = {
       body: JSON.stringify({ otpCode }),
     });
   },
+  refresh: (refreshToken) =>
+    apiRequest('/refresh', {
+      method: 'POST',
+      body: JSON.stringify({ refreshToken }),
+    }),
 };
 
 export const organisationApi = {

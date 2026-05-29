@@ -41,6 +41,7 @@
     "password": "كلمة المرور",
     "password_placeholder": "••••••••",
     "forgot_password": "نسيت كلمة المرور؟",
+    "keep_signed_in": "ابق متصلاً",
     "verify_email": "تحقق من البريد",
     "two_fa": "المصادقة الثنائية",
     "back_to_login": "العودة لتسجيل الدخول",

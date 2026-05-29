@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n, { LOCALE_STORAGE_KEY } from '../i18n';
-import { userApi } from '../services/api';
+import { userApi, authApi } from '../services/api';
 
 const AuthContext = createContext(undefined);
+const SESSION_KEY = '@auth:session';
 
 const decodeJwtPayload = (token) => {
   try {
@@ -18,6 +19,8 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [locale, setLocale] = useState(() => (i18n.language || 'en').split('-')[0]);
+  const [isRestoringSession, setIsRestoringSession] = useState(true);
+  const [restoredNav, setRestoredNav] = useState(null); // { screen, params }
   const localeUpdateRef = useRef({ timer: null, controller: null });
 
   useEffect(() => () => {
@@ -25,15 +28,41 @@ export const AuthProvider = ({ children }) => {
     if (localeUpdateRef.current.controller) localeUpdateRef.current.controller.abort();
   }, []);
 
-  // Keep locale in sync with i18n regardless of who calls i18n.changeLanguage()
   useEffect(() => {
     const sync = (lng) => setLocale((lng || 'en').split('-')[0]);
     i18n.on('languageChanged', sync);
     return () => i18n.off('languageChanged', sync);
   }, []);
 
-  const login = (userData) => {
-    // preferredLocale is not in the response body — extract it from the JWT claim
+  // Restore persisted session on mount
+  useEffect(() => {
+    AsyncStorage.getItem(SESSION_KEY)
+      .then(async (raw) => {
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        if (!saved?.refreshToken) return;
+        try {
+          const res = await authApi.refresh(saved.refreshToken);
+          if (res?.token) {
+            setUser(saved.userProfile);
+            setToken(res.token);
+            setRestoredNav({ screen: saved.navTarget, params: saved.navParams || {} });
+            // Persist updated access token
+            AsyncStorage.setItem(SESSION_KEY, JSON.stringify({
+              ...saved,
+              token: res.token,
+            })).catch(() => {});
+          }
+        } catch {
+          // Refresh token expired or invalid — clear stored session
+          AsyncStorage.removeItem(SESSION_KEY).catch(() => {});
+        }
+      })
+      .catch(() => {})
+      .finally(() => setIsRestoringSession(false));
+  }, []);
+
+  const login = (userData, { keepSignedIn = false, navTarget = null, navParams = {} } = {}) => {
     const jwtPayload = userData.token ? decodeJwtPayload(userData.token) : {};
     const userProfile = {
       userName: userData.userName,
@@ -42,23 +71,32 @@ export const AuthProvider = ({ children }) => {
       userData: userData.userData,
       preferredLocale: userData.preferredLocale || userData.userData?.preferredLocale || jwtPayload.preferred_locale,
     };
-    
+
     setUser(userProfile);
     setToken(userData.token);
 
     const backendLocale = (userProfile.preferredLocale || '').split('-')[0];
     const currentLocale = (i18n.language || '').split('-')[0];
-    // Apply the server-side preference whenever it differs from the current UI language.
-    // Exception: if the backend has never been changed from 'en', keep whatever the user
-    // pre-selected on the login screen (e.g. they picked French before logging in).
     if (backendLocale && backendLocale !== currentLocale && backendLocale !== 'en') {
       changeLanguage(backendLocale);
+    }
+
+    if (keepSignedIn && userData.token && userData.refreshToken) {
+      AsyncStorage.setItem(SESSION_KEY, JSON.stringify({
+        token: userData.token,
+        refreshToken: userData.refreshToken,
+        userProfile,
+        navTarget,
+        navParams,
+      })).catch(() => {});
     }
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
+    setRestoredNav(null);
+    AsyncStorage.removeItem(SESSION_KEY).catch(() => {});
   };
 
   const changeLanguage = (newLocale) => {
@@ -84,14 +122,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      token, 
+    <AuthContext.Provider value={{
+      user,
+      token,
       locale,
-      login, 
-      logout, 
+      isAuthenticated: !!token,
+      isRestoringSession,
+      restoredNav,
+      login,
+      logout,
       changeLanguage,
-      isAuthenticated: !!token 
     }}>
       {children}
     </AuthContext.Provider>

@@ -26,6 +26,7 @@ export const LoginScreen = ({ navigation }) => {
   const [otpValue, setOtpValue] = useState('');
   const [pendingOrg, setPendingOrg] = useState(null);
   const [pendingUserName, setPendingUserName] = useState(null);
+  const [keepSignedIn, setKeepSignedIn] = useState(false);
 
   const { login, changeLanguage } = useAuth();
 
@@ -58,7 +59,6 @@ export const LoginScreen = ({ navigation }) => {
 
       // 2. FINAL SUCCESS (ONLY IF CODE IS 200)
       if (resCode === "200" && hasToken) {
-        login(res);
         const roles = res.roles || res.userData?.roles || [];
         const isOrgOwner = roles.includes('ORG_OWNER');
         const isHospOwner = roles.includes('HOSP_OWNER');
@@ -66,14 +66,18 @@ export const LoginScreen = ({ navigation }) => {
         const isDoctor = roles.includes('DOCTOR');
         const isPatient = roles.includes('PATIENT');
 
+        let navTarget, navParams;
         if (res.orgName === 'SYSTEM' || username === 'iorbit') {
-          navigation.replace('PlatformDashboard', { role: 'PLATFORM_ADMIN' });
+          navTarget = 'PlatformDashboard'; navParams = { role: 'PLATFORM_ADMIN' };
         } else if (res.hospitalCode) {
           const hospRole = isHospOwner ? 'HOSP_OWNER' : isNurse ? 'NURSE' : isDoctor ? 'DOCTOR' : isPatient ? 'PATIENT' : 'HOSP_ADMIN';
-          navigation.replace('HospDashboard', { role: hospRole });
+          navTarget = 'HospDashboard'; navParams = { role: hospRole };
         } else {
-          navigation.replace('OrgDashboard', { role: isOrgOwner ? 'ORG_OWNER' : 'ORG_ADMIN' });
+          navTarget = 'OrgDashboard'; navParams = { role: isOrgOwner ? 'ORG_OWNER' : 'ORG_ADMIN' };
         }
+
+        login(res, { keepSignedIn, navTarget, navParams });
+        navigation.replace(navTarget, navParams);
         return true;
       }
 
@@ -122,8 +126,6 @@ export const LoginScreen = ({ navigation }) => {
     setState('loading');
     try {
       const response = await authApi.verify2fa(pendingOrg || 'UNKNOWN', pendingUserName || username, otpValue);
-      login(response);
-      
       const roles = response.roles || response.userData?.roles || [];
       const isOrgOwner = roles.includes('ORG_OWNER');
       const isHospOwner = roles.includes('HOSP_OWNER');
@@ -131,14 +133,18 @@ export const LoginScreen = ({ navigation }) => {
       const isDoctor = roles.includes('DOCTOR');
       const isPatient = roles.includes('PATIENT');
 
+      let navTarget, navParams;
       if (response.orgName === 'SYSTEM') {
-        navigation.replace('PlatformDashboard', { role: 'PLATFORM_ADMIN' });
+        navTarget = 'PlatformDashboard'; navParams = { role: 'PLATFORM_ADMIN' };
       } else if (response.hospitalCode) {
         const hospRole = isHospOwner ? 'HOSP_OWNER' : isNurse ? 'NURSE' : isDoctor ? 'DOCTOR' : isPatient ? 'PATIENT' : 'HOSP_ADMIN';
-        navigation.replace('HospDashboard', { role: hospRole });
+        navTarget = 'HospDashboard'; navParams = { role: hospRole };
       } else {
-        navigation.replace('OrgDashboard', { role: isOrgOwner ? 'ORG_OWNER' : 'ORG_ADMIN' });
+        navTarget = 'OrgDashboard'; navParams = { role: isOrgOwner ? 'ORG_OWNER' : 'ORG_ADMIN' };
       }
+
+      login(response, { keepSignedIn, navTarget, navParams });
+      navigation.replace(navTarget, navParams);
     } catch (err) {
       Alert.alert(t('common.error'), err.message);
       setState('twofa');
@@ -277,7 +283,18 @@ export const LoginScreen = ({ navigation }) => {
               <Text style={styles.forgotText}>{t('auth.forgot_password')}</Text>
             </TouchableOpacity>
 
-            <Btn 
+            <TouchableOpacity
+              style={styles.keepSignedInRow}
+              onPress={() => setKeepSignedIn(v => !v)}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.checkbox, keepSignedIn && styles.checkboxActive]}>
+                {keepSignedIn && <Text style={styles.checkmark}>✓</Text>}
+              </View>
+              <Text style={styles.keepSignedInText}>{t('auth.keep_signed_in')}</Text>
+            </TouchableOpacity>
+
+            <Btn
               full 
               size="lg" 
               onPress={handleLogin} 
@@ -355,6 +372,36 @@ const createStyles = (T) => StyleSheet.create({
     color: T.accent,
     fontSize: 13,
     fontWeight: '500',
+  },
+  keepSignedInRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
+    gap: 10,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    borderColor: T.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: T.surface,
+  },
+  checkboxActive: {
+    backgroundColor: T.accent,
+    borderColor: T.accent,
+  },
+  checkmark: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
+    lineHeight: 14,
+  },
+  keepSignedInText: {
+    fontSize: 14,
+    color: T.text,
   },
   footer: {
     flexDirection: 'row',

@@ -41,6 +41,7 @@
     "password": "Passwort",
     "password_placeholder": "••••••••",
     "forgot_password": "Passwort vergessen?",
+    "keep_signed_in": "Angemeldet bleiben",
     "verify_email": "E-Mail verifizieren",
     "two_fa": "Zwei-Faktor-Authentifizierung",
     "back_to_login": "Zurück zum Login",

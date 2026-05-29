@@ -41,6 +41,7 @@
     "password": "Heslo",
     "password_placeholder": "••••••••",
     "forgot_password": "Zapomenuté heslo?",
+    "keep_signed_in": "Zůstat přihlášen",
     "verify_email": "Ověřit e-mail",
     "two_fa": "Dvoufázové ověření",
     "back_to_login": "Zpět na přihlášení",

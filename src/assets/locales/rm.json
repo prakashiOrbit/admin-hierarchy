@@ -41,6 +41,7 @@
     "password": "Parola d'ordine",
     "password_placeholder": "••••••••",
     "forgot_password": "Oublià la parola d'ordine?",
+    "keep_signed_in": "Restar connectà",
     "verify_email": "Verifitgar e-mail",
     "two_fa": "Autentificaziun a dus facturs",
     "back_to_login": "Enavos al login",

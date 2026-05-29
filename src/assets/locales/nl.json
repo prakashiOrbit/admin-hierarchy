@@ -41,6 +41,7 @@
     "password": "Wachtwoord",
     "password_placeholder": "••••••••",
     "forgot_password": "Wachtwoord vergeten?",
+    "keep_signed_in": "Aangemeld blijven",
     "verify_email": "E-mail verifiëren",
     "two_fa": "Tweestapsverificatie",
     "back_to_login": "Terug naar inloggen",
