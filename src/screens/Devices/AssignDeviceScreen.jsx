@@ -44,7 +44,7 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
         if (msg.includes('not found') || msg.includes('no bed')) return [];
         throw e;
       }),
-      patientApi.listUnassigned(user.orgName, user.hospitalCode, token).catch(e => {
+      patientApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
         const msg = (e.message || '').toLowerCase();
         if (msg.includes('not found') || msg.includes('no patient')) return [];
         throw e;
@@ -55,7 +55,11 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
         setDevices(Array.isArray(dRes) ? dRes : (Array.isArray(dRes?.data) ? dRes.data : []));
         const allBeds = Array.isArray(bRes) ? bRes : (Array.isArray(bRes?.data) ? bRes.data : []);
         setBeds(allBeds.filter(b => b.bedStatus === 'ACTIVE'));
-        setPatients(Array.isArray(pRes) ? pRes : (Array.isArray(pRes?.data) ? pRes.data : []));
+        const assignedPatientCodes = new Set(
+          allBeds.filter(b => b.patientCode).map(b => b.patientCode)
+        );
+        const allPatients = Array.isArray(pRes) ? pRes : (Array.isArray(pRes?.data) ? pRes.data : []);
+        setPatients(allPatients.filter(p => !assignedPatientCodes.has(p.patientCode)));
       })
       .catch(err => { if (!cancelled) setError(err.message || t('common.load_failed')); })
       .finally(() => { if (!cancelled) setLoading(false); });

@@ -503,11 +503,6 @@ export const patientApi = {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
-  listUnassigned: (orgName, hospCode, token) =>
-    apiRequest(`/${orgName}/patient/${hospCode}/unassignedpatients`, {
-      method: 'GET',
-      headers: { 'Authorization': `Bearer ${token}` },
-    }),
   getDetail: (orgName, hospCode, patientCode, token) =>
     apiRequest(`/${orgName}/patient/${hospCode}/${patientCode}/patientdetail`, {
       method: 'GET',
