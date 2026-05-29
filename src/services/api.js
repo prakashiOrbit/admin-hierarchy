@@ -409,8 +409,8 @@ export const bedApi = {
       body: JSON.stringify({ bedCode, ...payload }),
     }),
   updateAlarmConfig: (orgName, hospCode, bedCode, alarmConfig, token) =>
-    apiRequest(`/${orgName}/bed/${hospCode}/${bedCode}/alarmconfig`, {
-      method: 'PUT',
+    apiRequest(`/${orgName}/bed/${hospCode}/${bedCode}/alarmconfig/save`, {
+      method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(alarmConfig),
     }),

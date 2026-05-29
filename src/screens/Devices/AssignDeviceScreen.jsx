@@ -5,7 +5,7 @@ import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SearchBar, Btn, Avatar } from '../../components/Shared';
 import { IconGateway, IconPatient, IconPulse, IconChevron } from '../../icons';
-import { deviceApi, bedApi } from '../../services/api';
+import { deviceApi } from '../../services/api';
 
 const STEPS = ['device', 'bed'];
 
@@ -32,7 +32,7 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
     setLoading(true);
     setError(null);
     Promise.all([
-      deviceApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
+      deviceApi.listUnassigned(user.orgName, user.hospitalCode, token).catch(e => {
         const msg = (e.message || '').toLowerCase();
         if (msg.includes('not found') || msg.includes('no device')) return [];
         throw e;
@@ -81,11 +81,10 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
     }
     setSaving(true);
     try {
-      await bedApi.assignPatient(user.orgName, user.hospitalCode, selectedBed.bedCode, {
-        patientCode: selectedBed.patientCode,
-        wardCode: selectedBed.wardCode,
+      await deviceApi.assign(user.orgName, user.hospitalCode, {
+        deviceCode: selectedDevice.deviceCode,
         gatewayCode: selectedBed.gatewayCode,
-        devices: [{ deviceCode: selectedDevice.deviceCode }],
+        patientCode: selectedBed.patientCode,
       }, token);
       Alert.alert(
         t('common.success'),
