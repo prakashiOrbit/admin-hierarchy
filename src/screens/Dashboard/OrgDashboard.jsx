@@ -32,6 +32,7 @@ import { EditHospitalScreen } from '../Hospitals/EditHospitalScreen';
 import { CreateBootstrapUserScreen } from '../Users/CreateBootstrapUserScreen';
 import { EditDoctorScreen } from '../Users/EditDoctorScreen';
 import { EditNurseScreen } from '../Users/EditNurseScreen';
+import { EditAdminScreen } from '../Users/EditAdminScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -237,12 +238,14 @@ export const OrgDashboard = ({ navigation, route }) => {
   const [isEditingHospital, setIsEditingHospital] = useState(false);
   const [isCreatingBootstrapUser, setIsCreatingBootstrapUser] = useState(false);
   const [selectedStaffForEdit, setSelectedStaffForEdit] = useState(null);
+  const [selectedUserForEdit, setSelectedUserForEdit] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const drawerAnim = React.useRef(new Animated.Value(-width)).current;
 
   const handleBack = React.useCallback(() => {
     if (drawerOpen) { toggleDrawer(); return; }
+    if (selectedUserForEdit) { setSelectedUserForEdit(null); return; }
     if (isEditingHospital) { setIsEditingHospital(false); return; }
     if (selectedHospital) { setSelectedHospital(null); return; }
     if (isCreatingDeviceType) { setIsCreatingDeviceType(false); return; }
@@ -256,11 +259,11 @@ export const OrgDashboard = ({ navigation, route }) => {
     if (selectedUserId) { setSelectedUserId(null); return; }
     if (selectedRoleId) { setSelectedRoleId(null); return; }
     if (activeTab !== 'home') { handleTabChange('home'); }
-  }, [drawerOpen, activeTab, selectedUserId, isInvitingAdmin, selectedRoleId, isProvisioningHospital, selectedHospital, isCreatingDeviceType, selectedDeviceType, isCreatingRole, isEditingDeviceType, isEditingHospital, selectedStaffForEdit, toggleDrawer]);
+  }, [drawerOpen, activeTab, selectedUserId, isInvitingAdmin, selectedRoleId, isProvisioningHospital, selectedHospital, isCreatingDeviceType, selectedDeviceType, isCreatingRole, isEditingDeviceType, isEditingHospital, selectedStaffForEdit, selectedUserForEdit, toggleDrawer]);
 
   const isSubScreen = !!(selectedUserId || isInvitingAdmin || selectedRoleId || isProvisioningHospital ||
     selectedHospital || isCreatingDeviceType || selectedDeviceType || isCreatingRole ||
-    isEditingDeviceType || isEditingHospital || isCreatingBootstrapUser || selectedStaffForEdit);
+    isEditingDeviceType || isEditingHospital || isCreatingBootstrapUser || selectedStaffForEdit || selectedUserForEdit);
 
   useEffect(() => {
     const backAction = () => {
@@ -291,6 +294,7 @@ export const OrgDashboard = ({ navigation, route }) => {
     setIsCreatingRole(false);
     setIsCreatingBootstrapUser(false);
     setSelectedStaffForEdit(null);
+    setSelectedUserForEdit(null);
     setActiveTab(tabId);
   };
 
@@ -319,7 +323,8 @@ export const OrgDashboard = ({ navigation, route }) => {
         ? <EditDoctorScreen doctor={selectedStaffForEdit} onCancel={() => setSelectedStaffForEdit(null)} onSave={() => setSelectedStaffForEdit(null)} />
         : <EditNurseScreen nurse={selectedStaffForEdit} onCancel={() => setSelectedStaffForEdit(null)} onSave={() => setSelectedStaffForEdit(null)} />;
     }
-    if (selectedUserId) return <UserDetailScreen userId={selectedUserId} onBack={() => setSelectedUserId(null)} />;
+    if (selectedUserForEdit) return <EditAdminScreen user={selectedUserForEdit} onCancel={() => setSelectedUserForEdit(null)} onSave={() => setSelectedUserForEdit(null)} />;
+    if (selectedUserId) return <UserDetailScreen userId={selectedUserId} onBack={() => setSelectedUserId(null)} onEdit={(u) => { setSelectedUserId(null); setSelectedUserForEdit(u); }} />;
     if (selectedRoleId) return <RoleDetailScreen roleId={selectedRoleId} onBack={() => setSelectedRoleId(null)} />;
     switch (activeTab) {
       case 'home': return <OrgHomeContent role={role} />;
@@ -344,6 +349,7 @@ export const OrgDashboard = ({ navigation, route }) => {
     if (isCreatingRole) return t('dashboard.create_role');
     if (isCreatingBootstrapUser) return t('bootstrap_user.screen_title');
     if (selectedStaffForEdit) return selectedStaffForEdit.doctorCode ? t('dashboard.edit_doctor') : t('dashboard.edit_nurse');
+    if (selectedUserForEdit) return t('dashboard.edit_admin');
     if (selectedUserId) return t('dashboard.user_details');
     if (selectedRoleId) return t('dashboard.role_details');
     switch (activeTab) {

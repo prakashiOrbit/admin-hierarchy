@@ -44,6 +44,7 @@ import { EditShiftScreen } from '../Common/EditShiftScreen';
 import { NotificationSheet } from '../../components/NotificationSheet';
 import { AssignGatewayScreen } from '../Devices/AssignGatewayScreen';
 import { AssignDeviceScreen } from '../Devices/AssignDeviceScreen';
+import { EditAdminScreen } from '../Users/EditAdminScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -255,11 +256,12 @@ export const HospDashboard = ({ navigation, route }) => {
   const [selectedShiftForEdit, setSelectedShiftForEdit] = useState(null);
   const [assigningGatewayCode, setAssigningGatewayCode] = useState(null);
   const [isAssigningDevice, setIsAssigningDevice] = useState(false);
+  const [selectedUserForEdit, setSelectedUserForEdit] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const drawerAnim = React.useRef(new Animated.Value(-width)).current;
 
-  const isDeep = isInvitingHospAdmin || selectedUserId || isProvisioningWard || selectedWardForBed || isProvisioningGateway || isProvisioningDevice || !!selectedGatewayCode || !!selectedDeviceForConfig || isRegisteringPatient || selectedPatientId || isCreatingDoctor || selectedDoctorId || isCreatingNurse || isCreatingShift || !!assignmentData || !!selectedWardForEdit || !!selectedPatientForEdit || !!selectedDoctorForEdit || selectedNurseId || !!selectedNurseForEdit || selectedShiftId || !!selectedShiftForEdit || !!assigningGatewayCode || isAssigningDevice;
+  const isDeep = isInvitingHospAdmin || selectedUserId || isProvisioningWard || selectedWardForBed || isProvisioningGateway || isProvisioningDevice || !!selectedGatewayCode || !!selectedDeviceForConfig || isRegisteringPatient || selectedPatientId || isCreatingDoctor || selectedDoctorId || isCreatingNurse || isCreatingShift || !!assignmentData || !!selectedWardForEdit || !!selectedPatientForEdit || !!selectedDoctorForEdit || selectedNurseId || !!selectedNurseForEdit || selectedShiftId || !!selectedShiftForEdit || !!assigningGatewayCode || isAssigningDevice || !!selectedUserForEdit;
 
   useEffect(() => {
     const backAction = () => {
@@ -297,6 +299,7 @@ export const HospDashboard = ({ navigation, route }) => {
     setSelectedShiftForEdit(null);
     setAssigningGatewayCode(null);
     setIsAssigningDevice(false);
+    setSelectedUserForEdit(null);
   };
 
   const toggleDrawer = React.useCallback(() => {
@@ -340,6 +343,7 @@ export const HospDashboard = ({ navigation, route }) => {
     if (isProvisioningDevice) return <CreateDeviceScreen onCancel={() => setIsProvisioningDevice(false)} />;
     if (assigningGatewayCode) return <AssignGatewayScreen initialGatewayCode={assigningGatewayCode} onCancel={() => setAssigningGatewayCode(null)} onSuccess={() => setAssigningGatewayCode(null)} />;
     if (isAssigningDevice) return <AssignDeviceScreen onCancel={() => setIsAssigningDevice(false)} onSuccess={() => setIsAssigningDevice(false)} />;
+    if (selectedUserForEdit) return <EditAdminScreen user={selectedUserForEdit} onCancel={() => setSelectedUserForEdit(null)} onSave={() => setSelectedUserForEdit(null)} />;
     if (selectedGatewayCode) return <GatewayDetailScreen gatewayCode={selectedGatewayCode} onBack={() => setSelectedGatewayCode(null)} onAssign={(code) => { setSelectedGatewayCode(null); setAssigningGatewayCode(code); }} />;
     if (selectedDeviceForConfig) return <AddDeviceConfigScreen device={selectedDeviceForConfig} onCancel={() => setSelectedDeviceForConfig(null)} onSuccess={() => setSelectedDeviceForConfig(null)} />;
     if (isRegisteringPatient) return <CreatePatientScreen onCancel={() => setIsRegisteringPatient(false)} />;
@@ -354,7 +358,7 @@ export const HospDashboard = ({ navigation, route }) => {
     if (selectedNurseId) return <NurseDetailScreen nurseId={selectedNurseId} onBack={() => setSelectedNurseId(null)} onEdit={(n) => setSelectedNurseForEdit(n)} />;
     if (selectedShiftForEdit) return <EditShiftScreen shift={selectedShiftForEdit} onCancel={() => setSelectedShiftForEdit(null)} onSave={() => setSelectedShiftForEdit(null)} onDelete={() => { setSelectedShiftForEdit(null); setSelectedShiftId(null); }} />;
     if (selectedShiftId) return <ShiftDetailScreen shiftId={selectedShiftId} onBack={() => setSelectedShiftId(null)} onEdit={(s) => setSelectedShiftForEdit(s)} />;
-    if (selectedUserId) return <UserDetailScreen userId={selectedUserId} onBack={() => setSelectedUserId(null)} />;
+    if (selectedUserId) return <UserDetailScreen userId={selectedUserId} onBack={() => setSelectedUserId(null)} onEdit={(u) => { setSelectedUserId(null); setSelectedUserForEdit(u); }} />;
     if (selectedPatientId) return <PatientDetailScreen patientId={selectedPatientId} onBack={() => setSelectedPatientId(null)} onAssign={() => setAssignmentData({ patientId: selectedPatientId })} onEdit={(detail) => setSelectedPatientForEdit(detail)} />;
     if (selectedDoctorId) return <DoctorDetailScreen doctorId={selectedDoctorId} onBack={() => setSelectedDoctorId(null)} onAssign={() => setAssignmentData({ doctorId: selectedDoctorId })} onEdit={(d) => setSelectedDoctorForEdit(d)} />;
     switch (activeTab) {
@@ -392,6 +396,7 @@ export const HospDashboard = ({ navigation, route }) => {
     if (selectedNurseId) return t('dashboard.nurse_details');
     if (selectedShiftForEdit) return t('dashboard.edit_shift');
     if (selectedShiftId) return t('dashboard.shift_details');
+    if (selectedUserForEdit) return t('dashboard.edit_admin');
     if (selectedUserId) return t('dashboard.user_details');
     if (selectedPatientId) return t('dashboard.patient_details');
     if (selectedDoctorId) return t('dashboard.doctor_details');

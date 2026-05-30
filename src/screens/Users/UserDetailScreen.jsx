@@ -8,7 +8,7 @@ import { StatusPill } from '../../components/StatusPill';
 import { IconHospital, IconUser, IconEdit, IconKey, IconPause, IconTrash } from '../../icons';
 import { userApi } from '../../services/api';
 
-export const UserDetailScreen = ({ userId, onBack }) => {
+export const UserDetailScreen = ({ userId, onBack, onEdit }) => {
   const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
@@ -81,7 +81,7 @@ export const UserDetailScreen = ({ userId, onBack }) => {
         </Card>
 
         <View style={styles.actionGrid}>
-          <Btn variant="surface" style={styles.actionBtn}>
+          <Btn variant="surface" style={styles.actionBtn} onPress={() => onEdit?.(u)}>
             <IconEdit size={16} color={T.text} />
             <Text style={styles.btnText}>{t('users.edit_profile')}</Text>
           </Btn>

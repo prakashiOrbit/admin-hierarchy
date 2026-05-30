@@ -269,6 +269,12 @@ export const userApi = {
       headers: { 'Authorization': `Bearer ${token}` },
     });
   },
+  updateAdmin: (orgName, userName, userData, token) =>
+    apiRequest(`/${orgName}/user/${userName}/update`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify(userData),
+    }),
   updatePreferredLocale: (orgName, locale, token, options = {}) => {
     return apiRequest(`/${orgName}/user/locale`, {
       method: 'PATCH',
