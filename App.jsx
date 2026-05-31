@@ -3,6 +3,7 @@ import { View, StatusBar } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 import { LoginScreen } from './src/screens/Auth/LoginScreen';
 import { PlatformDashboard } from './src/screens/Dashboard/PlatformDashboard';
@@ -13,6 +14,10 @@ import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
 import './src/i18n';
 import { restoreLanguage } from './src/i18n';
+
+GoogleSignin.configure({
+  webClientId: '420059277266-n57ermcdok8i2p2th64kbm9o3b2tndss.apps.googleusercontent.com',
+});
 
 const Stack = createNativeStackNavigator();
 

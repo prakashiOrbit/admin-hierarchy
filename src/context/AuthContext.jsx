@@ -92,7 +92,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      if (token) await authApi.logout(token);
+    } catch {
+      // best-effort — clear client state regardless
+    }
     setUser(null);
     setToken(null);
     setRestoredNav(null);

@@ -128,27 +128,48 @@ export const apiRequest = async (endpoint, options = {}) => {
 };
 
 export const authApi = {
-  login: (userName, password) => {
-    return apiRequest('/login', {
+  login: (userName, password) =>
+    apiRequest('/login', {
       method: 'POST',
-      headers: { 'X-Locale': 'en' },
       body: JSON.stringify({ userName, password }),
-    });
-  },
-  verifyEmail: (orgName, userName, otpCode) => {
-    return apiRequest(`/${orgName}/user/${userName}/verification`, {
+    }),
+
+  loginPhone: (phone, orgName) =>
+    apiRequest('/login/phone', {
       method: 'POST',
-      headers: { 'X-Locale': 'en' },
-      body: JSON.stringify({ otpCode }),
-    });
-  },
-  verify2fa: (orgName, userName, otpCode) => {
-    return apiRequest(`/${orgName}/user/${userName}/verify2fa`, {
+      body: JSON.stringify({ phone, orgName }),
+    }),
+
+  loginGoogle: (idToken) =>
+    apiRequest('/login/google', {
       method: 'POST',
-      headers: { 'X-Locale': 'en' },
+      body: JSON.stringify({ idToken }),
+    }),
+
+  logout: (token) =>
+    apiRequest('/logout', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+    }),
+
+  verifyEmail: (orgName, userName, otpCode) =>
+    apiRequest(`/${orgName}/user/${userName}/verification`, {
+      method: 'POST',
       body: JSON.stringify({ otpCode }),
-    });
-  },
+    }),
+
+  verify2fa: (orgName, userName, otpCode) =>
+    apiRequest(`/${orgName}/user/${userName}/verify2fa`, {
+      method: 'POST',
+      body: JSON.stringify({ otpCode }),
+    }),
+
+  resendEmailOtp: (orgName, userName) =>
+    apiRequest('/organisation/resend-otp', {
+      method: 'POST',
+      body: JSON.stringify({ orgName, userName }),
+    }),
+
   refresh: (refreshToken) =>
     apiRequest('/refresh', {
       method: 'POST',
