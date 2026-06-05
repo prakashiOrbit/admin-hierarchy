@@ -194,7 +194,9 @@
     "hosp_admins": "Admins hospitaliers",
     "patients": "Patients",
     "doctors": "Médecins",
-    "shifts": "Équipes"
+    "shifts": "Équipes",
+    "nursing_stations": "Postes de soins",
+    "nursing_stations_title": "Postes de soins"
   },
   "users": {
     "first_name": "Prénom",
@@ -430,7 +432,8 @@
     "house": "House",
     "princeton": "Princeton",
     "lena": "Léna",
-    "kowalski": "Kowalski"
+    "kowalski": "Kowalski",
+    "search_stations": "Rechercher des postes..."
   },
   "actions": {
     "bed_actions": "Actions Lit",
@@ -532,7 +535,12 @@
     "delete_ward": "Supprimer le service",
     "delete_shift": "Supprimer le quart",
     "no_shifts": "Aucune équipe trouvée.",
-    "search_shifts": "Rechercher des équipes..."
+    "search_shifts": "Rechercher des équipes...",
+    "end_assignment": "Terminer l'affectation",
+    "gdpr_erasure": "Effacement RGPD",
+    "gdpr_ref_placeholder": "Référence RGPD / ID ticket (facultatif)",
+    "gdpr_submit": "Demander l'effacement permanent",
+    "new_station": "Nouveau poste"
   },
   "settings": {
     "account": "Compte",
@@ -741,6 +749,15 @@
     "error_update_device_type": "Échec de la mise à jour du type d'appareil.",
     "error_create_gateway": "Échec de la création de la passerelle.",
     "error_load_devices": "Échec du chargement des appareils.",
+    "error_end_assignment": "Échec de la fin de l'affectation de l'appareil.",
+    "confirm_end_assignment": "Terminer l'affectation active pour l'appareil {{code}} ? L'appareil sera disponible pour une réaffectation.",
+    "error_gdpr": "Échec de la soumission de la demande d'effacement.",
+    "gdpr_warning": "Toutes les données personnelles de {{name}} seront définitivement effacées. Cette action est irréversible.",
+    "gdpr_request_status": "Statut de la demande d'effacement",
+    "gdpr_pending": "Demande en attente...",
+    "gdpr_in_progress": "Suppression des données du patient...",
+    "gdpr_complete": "Effacement terminé. ID anonyme : {{code}}",
+    "gdpr_failed": "Effacement échoué : {{reason}}",
     "error_load_device_types": "Échec du chargement des types d'appareils.",
     "failed_load_hospitals": "Échec du chargement des hôpitaux.",
     "failed_load_wards": "Échec du chargement des services.",
@@ -774,7 +791,8 @@
     "device_type_create_banner": "Définir un nouveau type d'appareil IoMT pour cette organisation.",
     "editing_device_type_hint": "Modification du profil du type d'appareil.",
     "gateway_create_banner": "Enregistrer une nouvelle passerelle IoT pour cet hôpital.",
-    "nurse_not_found": "Infirmier introuvable."
+    "nurse_not_found": "Infirmier introuvable.",
+    "error_load_stations": "Impossible de charger les postes de soins."
   },
   "notifications": {
     "title": "Notifications",
@@ -954,5 +972,30 @@
     "search_by_ward_or_name": "Rechercher par service ou nom d'équipe...",
     "create_first_hint": "Créer une équipe pour affecter le personnel infirmier aux services.",
     "load_failed": "Échec du chargement des équipes."
+  },
+  "nursingstation": {
+    "title": "POSTES DE SOINS",
+    "count": "{{count}} postes",
+    "ward": "Service",
+    "no_ward": "Aucun service assigné",
+    "none_found": "Aucun poste de soins trouvé",
+    "none_hint": "Créez un poste de soins pour commencer.",
+    "create_title": "Nouveau poste de soins",
+    "create_banner": "Enregistrer un nouveau poste de soins pour {{hospitalCode}}.",
+    "configuration": "CONFIGURATION DU POSTE",
+    "station_number": "Numéro de poste",
+    "station_number_placeholder": "ex. NS-001",
+    "created": "Poste de soins {{stationNumber}} créé.",
+    "create_failed": "Échec de la création du poste de soins.",
+    "detail_title": "Détails du poste",
+    "detail_banner": "Poste de soins {{stationNumber}}",
+    "identity_section": "IDENTITÉ DU POSTE",
+    "ward_assignment_section": "AFFECTATION AU SERVICE",
+    "assigned_ward": "SERVICE AFFECTÉ",
+    "assign_ward": "Affecter un service",
+    "unassign_ward": "Désaffecter le service",
+    "confirm_unassign": "Retirer le service {{wardCode}} du poste {{stationNumber}} ?",
+    "assign_failed": "Échec de l'affectation du service.",
+    "unassign_failed": "Échec de la désaffectation du service."
   }
 }

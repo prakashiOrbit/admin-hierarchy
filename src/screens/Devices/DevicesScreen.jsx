@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -21,6 +21,7 @@ export const DevicesScreen = ({ onNewGateway, onNewDevice, onGatewayPress, onDev
   const [query, setQuery] = useState('');
   const [mode, setModeInternal] = useState(modeProp || 'gateways');
   const setMode = (m) => { setModeInternal(m); onModeChange?.(m); };
+  const [endingDeviceCode, setEndingDeviceCode] = useState(null);
 
   const fetchAll = useCallback(async () => {
     if (!user?.orgName || !user?.hospitalCode) return;
@@ -51,6 +52,31 @@ export const DevicesScreen = ({ onNewGateway, onNewDevice, onGatewayPress, onDev
   }, [user?.orgName, user?.hospitalCode, token, t]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  const handleEndAssignment = (device) => {
+    Alert.alert(
+      t('actions.end_assignment'),
+      t('messages.confirm_end_assignment', { code: device.deviceCode }),
+      [
+        { text: t('actions.cancel'), style: 'cancel' },
+        {
+          text: t('actions.end_assignment'),
+          style: 'destructive',
+          onPress: async () => {
+            setEndingDeviceCode(device.deviceCode);
+            try {
+              await deviceApi.endAssignment(user.orgName, user.hospitalCode, device, token);
+              await fetchAll();
+            } catch (e) {
+              Alert.alert(t('messages.error'), e.message || t('messages.error_end_assignment'));
+            } finally {
+              setEndingDeviceCode(null);
+            }
+          },
+        },
+      ]
+    );
+  };
 
   const filteredGateways = gateways.filter(g =>
     g.gatewayCode?.toLowerCase().includes(query.toLowerCase()) ||
@@ -159,6 +185,22 @@ export const DevicesScreen = ({ onNewGateway, onNewDevice, onGatewayPress, onDev
                     <Text style={styles.itemMeta}>
                       {d.deviceType} · {d.protocol} · {d.usageType}
                     </Text>
+                    {d.deviceStatus === 'ASSIGNED' && (
+                      <View style={styles.cardActions}>
+                        {endingDeviceCode === d.deviceCode
+                          ? <ActivityIndicator size="small" color={T.bad} />
+                          : (
+                            <Btn
+                              variant="danger"
+                              size="xs"
+                              onPress={(e) => { e.stopPropagation?.(); handleEndAssignment(d); }}
+                            >
+                              {t('actions.end_assignment')}
+                            </Btn>
+                          )
+                        }
+                      </View>
+                    )}
                   </View>
                   <IconChevron size={18} color={T.textFaint} />
                 </View>
@@ -192,6 +234,7 @@ const createStyles = (T) => StyleSheet.create({
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 2 },
   itemName: { fontSize: 14, fontWeight: '600', color: T.text, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
   itemMeta: { fontSize: 11.5, color: T.textDim, marginTop: 4, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
+  cardActions: { flexDirection: 'row', marginTop: 8 },
   emptyState: { padding: 40, alignItems: 'center', justifyContent: 'center' },
   emptyTitle: { fontSize: 16, fontWeight: '600', color: T.text, marginTop: 12 },
   emptyHint: { fontSize: 13, color: T.textDim, textAlign: 'center', marginTop: 8, lineHeight: 18 },

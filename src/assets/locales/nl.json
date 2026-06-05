@@ -194,7 +194,9 @@
     "hosp_admins": "Ziekenhuisbeheerders",
     "patients": "Patiënten",
     "doctors": "Artsen",
-    "shifts": "Diensten"
+    "shifts": "Diensten",
+    "nursing_stations": "Verpleegposten",
+    "nursing_stations_title": "Verpleegposten"
   },
   "users": {
     "first_name": "Voornaam",
@@ -430,7 +432,8 @@
     "house": "House",
     "princeton": "Princeton",
     "lena": "Lena",
-    "kowalski": "Kowalski"
+    "kowalski": "Kowalski",
+    "search_stations": "Zoek verpleegposten..."
   },
   "actions": {
     "bed_actions": "Bed Acties",
@@ -532,7 +535,12 @@
     "delete_ward": "Afdeling verwijderen",
     "delete_shift": "Dienst verwijderen",
     "no_shifts": "Geen diensten gevonden.",
-    "search_shifts": "Zoek diensten..."
+    "search_shifts": "Zoek diensten...",
+    "end_assignment": "Toewijzing beëindigen",
+    "gdpr_erasure": "AVG-verwijdering",
+    "gdpr_ref_placeholder": "AVG-referentie / ticket-ID (optioneel)",
+    "gdpr_submit": "Permanente verwijdering aanvragen",
+    "new_station": "Nieuwe post"
   },
   "settings": {
     "account": "Account",
@@ -741,6 +749,15 @@
     "error_update_device_type": "Bijwerken apparaattype mislukt.",
     "error_create_gateway": "Aanmaken gateway mislukt.",
     "error_load_devices": "Laden apparaten mislukt.",
+    "error_end_assignment": "Beëindigen apparaattoewijzing mislukt.",
+    "confirm_end_assignment": "Actieve toewijzing voor apparaat {{code}} beëindigen? Het apparaat wordt beschikbaar voor hertoewijzing.",
+    "error_gdpr": "Verwijderingsverzoek kon niet worden ingediend.",
+    "gdpr_warning": "Alle persoonsgegevens van {{name}} worden permanent verwijderd. Dit kan niet ongedaan worden gemaakt.",
+    "gdpr_request_status": "Status verwijderingsverzoek",
+    "gdpr_pending": "Verzoek in wachtrij...",
+    "gdpr_in_progress": "Patiëntgegevens worden verwijderd...",
+    "gdpr_complete": "Verwijdering voltooid. Anonieme ID: {{code}}",
+    "gdpr_failed": "Verwijdering mislukt: {{reason}}",
     "error_load_device_types": "Laden apparaattypen mislukt.",
     "failed_load_hospitals": "Laden ziekenhuizen mislukt.",
     "failed_load_wards": "Laden afdelingen mislukt.",
@@ -774,7 +791,8 @@
     "device_type_create_banner": "Nieuw IoMT-apparaattype definiëren voor deze organisatie.",
     "editing_device_type_hint": "Apparaattype-profiel bewerken.",
     "gateway_create_banner": "Nieuwe IoT-gateway registreren voor dit ziekenhuis.",
-    "nurse_not_found": "Verpleegkundige niet gevonden."
+    "nurse_not_found": "Verpleegkundige niet gevonden.",
+    "error_load_stations": "Laden van verpleegposten mislukt."
   },
   "notifications": {
     "title": "Meldingen",
@@ -954,5 +972,30 @@
     "search_by_ward_or_name": "Zoek op afdeling of dienstnaam...",
     "create_first_hint": "Maak een dienst aan om verplegend personeel aan afdelingen toe te wijzen.",
     "load_failed": "Laden van diensten mislukt."
+  },
+  "nursingstation": {
+    "title": "VERPLEEGPOSTEN",
+    "count": "{{count}} posten",
+    "ward": "Afdeling",
+    "no_ward": "Geen afdeling toegewezen",
+    "none_found": "Geen verpleegposten gevonden",
+    "none_hint": "Maak een verpleegpost aan om te beginnen.",
+    "create_title": "Nieuwe verpleegpost",
+    "create_banner": "Nieuwe verpleegpost registreren voor {{hospitalCode}}.",
+    "configuration": "POSTCONFIGURATIE",
+    "station_number": "Postnummer",
+    "station_number_placeholder": "bijv. NS-001",
+    "created": "Verpleegpost {{stationNumber}} aangemaakt.",
+    "create_failed": "Aanmaken verpleegpost mislukt.",
+    "detail_title": "Postdetails",
+    "detail_banner": "Verpleegpost {{stationNumber}}",
+    "identity_section": "POSTIDENTITEIT",
+    "ward_assignment_section": "AFDELINGSTOEWIJZING",
+    "assigned_ward": "TOEGEWEZEN AFDELING",
+    "assign_ward": "Afdeling toewijzen",
+    "unassign_ward": "Toewijzing ongedaan maken",
+    "confirm_unassign": "Afdeling {{wardCode}} verwijderen van post {{stationNumber}}?",
+    "assign_failed": "Toewijzen afdeling mislukt.",
+    "unassign_failed": "Verwijderen toewijzing mislukt."
   }
 }

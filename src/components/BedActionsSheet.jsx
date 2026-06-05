@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
-import { bedApi, wardApi } from '../services/api';
+import { bedApi, wardApi, assignmentApi, admissionApi } from '../services/api';
 import { Avatar } from './Shared';
 import { IconBed, IconPatient, IconDoor, IconAlert, IconCheck, IconChevron } from '../icons';
 
@@ -74,6 +74,8 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
             setSaving(true);
             try {
               await bedApi.discharge(user.orgName, user.hospitalCode, bed.bedCode, token);
+              await admissionApi.close(user.orgName, user.hospitalCode, bed.patientCode, token);
+              assignmentApi.deactivateDevices(user.orgName, user.hospitalCode, bed.patientCode, token).catch(() => {});
               Alert.alert(t('common.done'), t('actions.patient_discharged'), [{ text: 'OK', onPress: handleClose }]);
             } catch (e) { Alert.alert(t('common.error'), e.message || 'Failed.'); }
             finally { setSaving(false); }

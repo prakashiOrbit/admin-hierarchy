@@ -194,7 +194,9 @@
     "hosp_admins": "Krankenhaus-Admins",
     "patients": "Patienten",
     "doctors": "Ärzte",
-    "shifts": "Schichten"
+    "shifts": "Schichten",
+    "nursing_stations": "Pflegestationen",
+    "nursing_stations_title": "Pflegestationen"
   },
   "users": {
     "first_name": "Vorname",
@@ -430,7 +432,8 @@
     "house": "House",
     "princeton": "Princeton",
     "lena": "Lena",
-    "kowalski": "Kowalski"
+    "kowalski": "Kowalski",
+    "search_stations": "Stationen suchen..."
   },
   "actions": {
     "bed_actions": "Bett-Aktionen",
@@ -532,7 +535,12 @@
     "delete_ward": "Station löschen",
     "delete_shift": "Schicht löschen",
     "no_shifts": "Keine Schichten gefunden.",
-    "search_shifts": "Schichten suchen..."
+    "search_shifts": "Schichten suchen...",
+    "end_assignment": "Zuweisung beenden",
+    "gdpr_erasure": "DSGVO-Löschung",
+    "gdpr_ref_placeholder": "DSGVO-Referenz / Ticket-ID (optional)",
+    "gdpr_submit": "Dauerhaftes Löschen beantragen",
+    "new_station": "Neue Station"
   },
   "settings": {
     "account": "Konto",
@@ -741,6 +749,15 @@
     "error_update_device_type": "Gerätetyp konnte nicht aktualisiert werden.",
     "error_create_gateway": "Gateway konnte nicht erstellt werden.",
     "error_load_devices": "Geräte konnten nicht geladen werden.",
+    "error_end_assignment": "Gerätezuweisung konnte nicht beendet werden.",
+    "confirm_end_assignment": "Aktive Zuweisung für Gerät {{code}} beenden? Das Gerät wird zur Neuzuweisung verfügbar.",
+    "error_gdpr": "Löschantrag konnte nicht eingereicht werden.",
+    "gdpr_warning": "Alle personenbezogenen Daten von {{name}} werden dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.",
+    "gdpr_request_status": "Status des Löschantrags",
+    "gdpr_pending": "Anfrage wird eingereiht...",
+    "gdpr_in_progress": "Patientendaten werden gelöscht...",
+    "gdpr_complete": "Löschung abgeschlossen. Anonyme ID: {{code}}",
+    "gdpr_failed": "Löschung fehlgeschlagen: {{reason}}",
     "error_load_device_types": "Gerätetypen konnten nicht geladen werden.",
     "failed_load_hospitals": "Krankenhäuser konnten nicht geladen werden.",
     "failed_load_wards": "Stationen konnten nicht geladen werden.",
@@ -774,7 +791,8 @@
     "device_type_create_banner": "Neuen IoMT-Gerätetyp für diese Organisation definieren.",
     "editing_device_type_hint": "Gerätetypenprofil bearbeiten.",
     "gateway_create_banner": "Neues IoT-Gateway für dieses Krankenhaus registrieren.",
-    "nurse_not_found": "Pflegekraft nicht gefunden."
+    "nurse_not_found": "Pflegekraft nicht gefunden.",
+    "error_load_stations": "Pflegestationen konnten nicht geladen werden."
   },
   "notifications": {
     "title": "Benachrichtigungen",
@@ -954,5 +972,30 @@
     "search_by_ward_or_name": "Nach Station oder Schichtname suchen...",
     "create_first_hint": "Schicht erstellen, um Pflegepersonal Stationen zuzuweisen.",
     "load_failed": "Schichten konnten nicht geladen werden."
+  },
+  "nursingstation": {
+    "title": "PFLEGESTATIONEN",
+    "count": "{{count}} Stationen",
+    "ward": "Station",
+    "no_ward": "Keine Station zugewiesen",
+    "none_found": "Keine Pflegestationen gefunden",
+    "none_hint": "Erstellen Sie eine Pflegestation, um zu beginnen.",
+    "create_title": "Neue Pflegestation",
+    "create_banner": "Neue Pflegestation für {{hospitalCode}} registrieren.",
+    "configuration": "STATIONSKONFIGURATION",
+    "station_number": "Stationsnummer",
+    "station_number_placeholder": "z.B. NS-001",
+    "created": "Pflegestation {{stationNumber}} erstellt.",
+    "create_failed": "Pflegestation konnte nicht erstellt werden.",
+    "detail_title": "Stationsdetails",
+    "detail_banner": "Pflegestation {{stationNumber}}",
+    "identity_section": "STATIONSIDENTITÄT",
+    "ward_assignment_section": "STATIONSZUWEISUNG",
+    "assigned_ward": "ZUGEWIESENE STATION",
+    "assign_ward": "Station zuweisen",
+    "unassign_ward": "Zuweisung aufheben",
+    "confirm_unassign": "Station {{wardCode}} von Pflegestation {{stationNumber}} entfernen?",
+    "assign_failed": "Station konnte nicht zugewiesen werden.",
+    "unassign_failed": "Zuweisung konnte nicht aufgehoben werden."
   }
 }

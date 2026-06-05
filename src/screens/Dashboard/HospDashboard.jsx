@@ -45,6 +45,9 @@ import { NotificationSheet } from '../../components/NotificationSheet';
 import { AssignGatewayScreen } from '../Devices/AssignGatewayScreen';
 import { AssignDeviceScreen } from '../Devices/AssignDeviceScreen';
 import { EditAdminScreen } from '../Users/EditAdminScreen';
+import { NursingStationsScreen } from '../NursingStations/NursingStationsScreen';
+import { CreateNursingStationScreen } from '../NursingStations/CreateNursingStationScreen';
+import { NursingStationDetailScreen } from '../NursingStations/NursingStationDetailScreen';
 
 const { width } = Dimensions.get('window');
 
@@ -257,11 +260,13 @@ export const HospDashboard = ({ navigation, route }) => {
   const [assigningGatewayCode, setAssigningGatewayCode] = useState(null);
   const [isAssigningDevice, setIsAssigningDevice] = useState(false);
   const [selectedUserForEdit, setSelectedUserForEdit] = useState(null);
+  const [isCreatingNursingStation, setIsCreatingNursingStation] = useState(false);
+  const [selectedNursingStation, setSelectedNursingStation] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const drawerAnim = React.useRef(new Animated.Value(-width)).current;
 
-  const isDeep = isInvitingHospAdmin || selectedUserId || isProvisioningWard || selectedWardForBed || isProvisioningGateway || isProvisioningDevice || !!selectedGatewayCode || !!selectedDeviceForConfig || isRegisteringPatient || selectedPatientId || isCreatingDoctor || selectedDoctorId || isCreatingNurse || isCreatingShift || !!assignmentData || !!selectedWardForEdit || !!selectedPatientForEdit || !!selectedDoctorForEdit || selectedNurseId || !!selectedNurseForEdit || selectedShiftId || !!selectedShiftForEdit || !!assigningGatewayCode || isAssigningDevice || !!selectedUserForEdit;
+  const isDeep = isInvitingHospAdmin || selectedUserId || isProvisioningWard || selectedWardForBed || isProvisioningGateway || isProvisioningDevice || !!selectedGatewayCode || !!selectedDeviceForConfig || isRegisteringPatient || selectedPatientId || isCreatingDoctor || selectedDoctorId || isCreatingNurse || isCreatingShift || !!assignmentData || !!selectedWardForEdit || !!selectedPatientForEdit || !!selectedDoctorForEdit || selectedNurseId || !!selectedNurseForEdit || selectedShiftId || !!selectedShiftForEdit || !!assigningGatewayCode || isAssigningDevice || !!selectedUserForEdit || isCreatingNursingStation || !!selectedNursingStation;
 
   useEffect(() => {
     const backAction = () => {
@@ -300,6 +305,8 @@ export const HospDashboard = ({ navigation, route }) => {
     setAssigningGatewayCode(null);
     setIsAssigningDevice(false);
     setSelectedUserForEdit(null);
+    setIsCreatingNursingStation(false);
+    setSelectedNursingStation(null);
   };
 
   const toggleDrawer = React.useCallback(() => {
@@ -333,6 +340,7 @@ export const HospDashboard = ({ navigation, route }) => {
     { id: 'patients', label: t('dashboard.patients'), icon: <IconPatient /> },
     { id: 'doctors', label: t('dashboard.doctors'), icon: <IconStethoscope /> },
     { id: 'shifts', label: t('dashboard.shifts'), icon: <IconClock /> },
+    { id: 'nursing', label: t('dashboard.nursing_stations'), icon: <IconBed /> },
   ];
 
   const renderContent = () => {
@@ -344,6 +352,8 @@ export const HospDashboard = ({ navigation, route }) => {
     if (assigningGatewayCode) return <AssignGatewayScreen initialGatewayCode={assigningGatewayCode} onCancel={() => setAssigningGatewayCode(null)} onSuccess={() => setAssigningGatewayCode(null)} />;
     if (isAssigningDevice) return <AssignDeviceScreen onCancel={() => setIsAssigningDevice(false)} onSuccess={() => setIsAssigningDevice(false)} />;
     if (selectedUserForEdit) return <EditAdminScreen user={selectedUserForEdit} onCancel={() => setSelectedUserForEdit(null)} onSave={() => setSelectedUserForEdit(null)} />;
+    if (isCreatingNursingStation) return <CreateNursingStationScreen onCancel={() => setIsCreatingNursingStation(false)} onSuccess={() => setIsCreatingNursingStation(false)} />;
+    if (selectedNursingStation) return <NursingStationDetailScreen station={selectedNursingStation} onBack={() => setSelectedNursingStation(null)} />;
     if (selectedGatewayCode) return <GatewayDetailScreen gatewayCode={selectedGatewayCode} onBack={() => setSelectedGatewayCode(null)} onAssign={(code) => { setSelectedGatewayCode(null); setAssigningGatewayCode(code); }} />;
     if (selectedDeviceForConfig) return <AddDeviceConfigScreen device={selectedDeviceForConfig} onCancel={() => setSelectedDeviceForConfig(null)} onSuccess={() => setSelectedDeviceForConfig(null)} />;
     if (isRegisteringPatient) return <CreatePatientScreen onCancel={() => setIsRegisteringPatient(false)} />;
@@ -369,6 +379,7 @@ export const HospDashboard = ({ navigation, route }) => {
       case 'patients': return <PatientsScreen onNewPatient={() => setIsRegisteringPatient(true)} onSelectPatient={setSelectedPatientId} />;
       case 'doctors': return <DoctorsScreen onNewDoctor={() => setIsCreatingDoctor(true)} onSelectDoctor={setSelectedDoctorId} />;
       case 'shifts': return <ShiftsScreen onNewNurse={() => setIsCreatingNurse(true)} onNewShift={() => setIsCreatingShift(true)} onSelectNurse={setSelectedNurseId} onSelectShift={setSelectedShiftId} mode={shiftsMode} onModeChange={setShiftsMode} />;
+      case 'nursing': return <NursingStationsScreen onNewStation={() => setIsCreatingNursingStation(true)} onSelectStation={setSelectedNursingStation} />;
       case 'settings': return <SettingsScreen onLogout={() => { logout(); navigation.replace('Login'); }} />;
       default: return <HospHomeContent role={role} onNavigate={handleTabChange} />;
     }
@@ -397,6 +408,8 @@ export const HospDashboard = ({ navigation, route }) => {
     if (selectedShiftForEdit) return t('dashboard.edit_shift');
     if (selectedShiftId) return t('dashboard.shift_details');
     if (selectedUserForEdit) return t('dashboard.edit_admin');
+    if (isCreatingNursingStation) return t('nursingstation.create_title');
+    if (selectedNursingStation) return t('nursingstation.detail_title');
     if (selectedUserId) return t('dashboard.user_details');
     if (selectedPatientId) return t('dashboard.patient_details');
     if (selectedDoctorId) return t('dashboard.doctor_details');
@@ -408,6 +421,7 @@ export const HospDashboard = ({ navigation, route }) => {
       case 'patients': return t('dashboard.patient_registry');
       case 'doctors': return t('dashboard.medical_staff');
       case 'shifts': return t('dashboard.nurses_shifts');
+      case 'nursing': return t('dashboard.nursing_stations_title');
       case 'settings': return t('dashboard.system_settings');
       default: return t('dashboard.hosp_console');
     }
@@ -425,6 +439,7 @@ export const HospDashboard = ({ navigation, route }) => {
           <ScrollView style={styles.drawerMenu}>
             <TouchableOpacity style={styles.drawerItem} onPress={() => { handleTabChange('home'); toggleDrawer(); }}><IconDashboard size={20} color={T.textDim} /><Text style={styles.drawerItemText}>{t('dashboard.title')}</Text></TouchableOpacity>
             <TouchableOpacity style={styles.drawerItem} onPress={() => { handleTabChange('settings'); toggleDrawer(); }}><IconSettings size={20} color={T.textDim} /><Text style={styles.drawerItemText}>{t('dashboard.system_settings')}</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.drawerItem} onPress={() => { handleTabChange('nursing'); toggleDrawer(); }}><IconBed size={20} color={T.textDim} /><Text style={styles.drawerItemText}>{t('dashboard.nursing_stations_title')}</Text></TouchableOpacity>
             <View style={styles.drawerDivider} />
             <TouchableOpacity style={[styles.drawerItem, { marginTop: 'auto' }]} onPress={() => { logout(); navigation.replace('Login'); }}><IconLogout size={20} color={T.bad} /><Text style={[styles.drawerItemText, { color: T.bad }]}>{t('common.logout')}</Text></TouchableOpacity>
           </ScrollView>

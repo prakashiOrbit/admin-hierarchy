@@ -194,7 +194,9 @@
     "hosp_admins": "Amministratori ospedale",
     "patients": "Pazienti",
     "doctors": "Medici",
-    "shifts": "Turni"
+    "shifts": "Turni",
+    "nursing_stations": "Postazioni infermieristiche",
+    "nursing_stations_title": "Postazioni infermieristiche"
   },
   "users": {
     "first_name": "Nome",
@@ -430,7 +432,8 @@
     "house": "House",
     "princeton": "Princeton",
     "lena": "Elena",
-    "kowalski": "Kowalski"
+    "kowalski": "Kowalski",
+    "search_stations": "Cerca postazioni..."
   },
   "actions": {
     "bed_actions": "Azioni Letto",
@@ -532,7 +535,12 @@
     "delete_ward": "Elimina reparto",
     "delete_shift": "Elimina turno",
     "no_shifts": "Nessun turno trovato.",
-    "search_shifts": "Cerca turni..."
+    "search_shifts": "Cerca turni...",
+    "end_assignment": "Termina assegnazione",
+    "gdpr_erasure": "Cancellazione GDPR",
+    "gdpr_ref_placeholder": "Riferimento GDPR / ID ticket (opzionale)",
+    "gdpr_submit": "Richiedi cancellazione permanente",
+    "new_station": "Nuova postazione"
   },
   "settings": {
     "account": "Account",
@@ -741,6 +749,15 @@
     "error_update_device_type": "Aggiornamento tipo di dispositivo fallito.",
     "error_create_gateway": "Creazione gateway fallita.",
     "error_load_devices": "Caricamento dispositivi fallito.",
+    "error_end_assignment": "Impossibile terminare l'assegnazione del dispositivo.",
+    "confirm_end_assignment": "Terminare l'assegnazione attiva per il dispositivo {{code}}? Il dispositivo sarà disponibile per la riassegnazione.",
+    "error_gdpr": "Invio della richiesta di cancellazione non riuscito.",
+    "gdpr_warning": "Tutti i dati personali di {{name}} saranno eliminati definitivamente. Questa azione non può essere annullata.",
+    "gdpr_request_status": "Stato richiesta di cancellazione",
+    "gdpr_pending": "Richiesta in coda...",
+    "gdpr_in_progress": "Eliminazione dati paziente in corso...",
+    "gdpr_complete": "Cancellazione completata. ID anonimo: {{code}}",
+    "gdpr_failed": "Cancellazione fallita: {{reason}}",
     "error_load_device_types": "Caricamento tipi di dispositivo fallito.",
     "failed_load_hospitals": "Caricamento ospedali fallito.",
     "failed_load_wards": "Caricamento reparti fallito.",
@@ -774,7 +791,8 @@
     "device_type_create_banner": "Definire un nuovo tipo di dispositivo IoMT per questa organizzazione.",
     "editing_device_type_hint": "Modifica profilo tipo di dispositivo.",
     "gateway_create_banner": "Registrare un nuovo gateway IoT per questo ospedale.",
-    "nurse_not_found": "Infermiera non trovata."
+    "nurse_not_found": "Infermiera non trovata.",
+    "error_load_stations": "Caricamento postazioni infermieristiche fallito."
   },
   "notifications": {
     "title": "Notifiche",
@@ -954,5 +972,30 @@
     "search_by_ward_or_name": "Cerca per reparto o nome turno...",
     "create_first_hint": "Crea un turno per assegnare il personale infermieristico ai reparti.",
     "load_failed": "Caricamento turni fallito."
+  },
+  "nursingstation": {
+    "title": "POSTAZIONI INFERMIERISTICHE",
+    "count": "{{count}} postazioni",
+    "ward": "Reparto",
+    "no_ward": "Nessun reparto assegnato",
+    "none_found": "Nessuna postazione infermieristica trovata",
+    "none_hint": "Crea una postazione infermieristica per iniziare.",
+    "create_title": "Nuova postazione infermieristica",
+    "create_banner": "Registra una nuova postazione infermieristica per {{hospitalCode}}.",
+    "configuration": "CONFIGURAZIONE POSTAZIONE",
+    "station_number": "Numero postazione",
+    "station_number_placeholder": "es. NS-001",
+    "created": "Postazione infermieristica {{stationNumber}} creata.",
+    "create_failed": "Creazione postazione infermieristica fallita.",
+    "detail_title": "Dettagli postazione",
+    "detail_banner": "Postazione infermieristica {{stationNumber}}",
+    "identity_section": "IDENTITÀ POSTAZIONE",
+    "ward_assignment_section": "ASSEGNAZIONE REPARTO",
+    "assigned_ward": "REPARTO ASSEGNATO",
+    "assign_ward": "Assegna reparto",
+    "unassign_ward": "Rimuovi reparto",
+    "confirm_unassign": "Rimuovere reparto {{wardCode}} dalla postazione {{stationNumber}}?",
+    "assign_failed": "Assegnazione reparto fallita.",
+    "unassign_failed": "Rimozione assegnazione fallita."
   }
 }

@@ -194,7 +194,9 @@
     "hosp_admins": "Administraturs d'ospital",
     "patients": "Pazients",
     "doctors": "Miedis",
-    "shifts": "Turas"
+    "shifts": "Turas",
+    "nursing_stations": "Staziuns da cura",
+    "nursing_stations_title": "Staziuns da cura"
   },
   "users": {
     "first_name": "Prenum",
@@ -430,7 +432,8 @@
     "house": "House",
     "princeton": "Princeton",
     "lena": "Lena",
-    "kowalski": "Kowalski"
+    "kowalski": "Kowalski",
+    "search_stations": "Tschertgar staziuns..."
   },
   "actions": {
     "bed_actions": "Acziuns letg",
@@ -532,7 +535,12 @@
     "delete_ward": "Stizzar staziun",
     "delete_shift": "Stizzar tura",
     "no_shifts": "Naginas turas chattadas.",
-    "search_shifts": "Tschertgar turas..."
+    "search_shifts": "Tschertgar turas...",
+    "end_assignment": "Terminar l'atribuziun",
+    "gdpr_erasure": "Stizzamaint GDPR",
+    "gdpr_ref_placeholder": "Referenza GDPR / ID ticket (opziunal)",
+    "gdpr_submit": "Dumandar stizzamaint permanent",
+    "new_station": "Nova staziun"
   },
   "settings": {
     "account": "Conto",
@@ -741,6 +749,15 @@
     "error_update_device_type": "Actualisar tip d'apparat ha fallì.",
     "error_create_gateway": "Crear porta ha fallì.",
     "error_load_devices": "Chargiar apparats ha fallì.",
+    "error_end_assignment": "Terminar l'atribuziun da l'apparat ha fallì.",
+    "confirm_end_assignment": "Terminar l'atribuziun activa per l'apparat {{code}}? L'apparat vegn disponibel per nova atribuziun.",
+    "error_gdpr": "Trametter la dumonda da stizzamaint ha fallì.",
+    "gdpr_warning": "Tut las datas persunalas da {{name}} vegnan stizzadas permanentamain. Quest'acziun na po betg vegnir revocada.",
+    "gdpr_request_status": "Status da la dumonda da stizzamaint",
+    "gdpr_pending": "Dumonda en la glista d'espetta...",
+    "gdpr_in_progress": "Stizzar datas da pazient...",
+    "gdpr_complete": "Stizzamaint cumplet. ID anonimà: {{code}}",
+    "gdpr_failed": "Stizzamaint ha fallì: {{reason}}",
     "error_load_device_types": "Chargiar tips d'apparat ha fallì.",
     "failed_load_hospitals": "Chargiar ospitals ha fallì.",
     "failed_load_wards": "Chargiar staziuns ha fallì.",
@@ -774,7 +791,8 @@
     "device_type_create_banner": "Definir in nov tip d'apparat IoMT per questa organisaziun.",
     "editing_device_type_hint": "Modifitgar profil da tip d'apparat.",
     "gateway_create_banner": "Registrar ina nova porta IoT per quest ospital.",
-    "nurse_not_found": "Unfermiera na chattada betg."
+    "nurse_not_found": "Unfermiera na chattada betg.",
+    "error_load_stations": "Chargiar staziuns da cura ha fallì."
   },
   "notifications": {
     "title": "Communicaziuns",
@@ -954,5 +972,30 @@
     "search_by_ward_or_name": "Tschertgar per staziun u num da tura...",
     "create_first_hint": "Crear ina tura per attribuir persunal da tgirar a staziuns.",
     "load_failed": "Chargiar turas ha fallì."
+  },
+  "nursingstation": {
+    "title": "STAZIUNS DA CURA",
+    "count": "{{count}} staziuns",
+    "ward": "Secziun",
+    "no_ward": "Nagina secziun attribuida",
+    "none_found": "Naginas staziuns da cura chattadas",
+    "none_hint": "Crear ina staziun da cura per cumenzar.",
+    "create_title": "Nova staziun da cura",
+    "create_banner": "Registrar ina nova staziun da cura per {{hospitalCode}}.",
+    "configuration": "CONFIGURAZIUM DA STAZIUN",
+    "station_number": "Numer da staziun",
+    "station_number_placeholder": "p.ex. NS-001",
+    "created": "Staziun da cura {{stationNumber}} creada.",
+    "create_failed": "Crear staziun da cura ha fallì.",
+    "detail_title": "Detagls da staziun",
+    "detail_banner": "Staziun da cura {{stationNumber}}",
+    "identity_section": "IDENTITAD DA STAZIUN",
+    "ward_assignment_section": "ATTRIBUZIUN DA SECZIUN",
+    "assigned_ward": "SECZIUN ATTRIBUIDA",
+    "assign_ward": "Attribuir secziun",
+    "unassign_ward": "Allontanar secziun",
+    "confirm_unassign": "Allontanar secziun {{wardCode}} da staziun {{stationNumber}}?",
+    "assign_failed": "Attribuir secziun ha fallì.",
+    "unassign_failed": "Allontanar secziun ha fallì."
   }
 }

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View, Text, Modal, TouchableOpacity, TouchableWithoutFeedback,
   StyleSheet, ScrollView, ActivityIndicator, Alert, TextInput as RNTextInput,
@@ -7,8 +7,8 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
-import { patientApi, wardApi } from '../services/api';
-import { IconPatient, IconDoor, IconCheck, IconChevron } from '../icons';
+import { patientApi, wardApi, assignmentApi, admissionApi } from '../services/api';
+import { IconPatient, IconDoor, IconCheck, IconChevron, IconShield } from '../icons';
 
 export const PatientActionsSheet = ({ patient, visible, onClose }) => {
   const { t } = useTranslation();
@@ -22,12 +22,20 @@ export const PatientActionsSheet = ({ patient, visible, onClose }) => {
   const [saving, setSaving] = useState(false);
   const [wards, setWards] = useState([]);
   const [query, setQuery] = useState('');
+  const [gdprRef, setGdprRef] = useState('');
+  const [gdprStatus, setGdprStatus] = useState(null);
+  const pollRef = useRef(null);
+
+  useEffect(() => () => { if (pollRef.current) clearInterval(pollRef.current); }, []);
 
   const reset = useCallback(() => {
     setMode('main');
     setWards([]);
     setQuery('');
     setSaving(false);
+    setGdprRef('');
+    setGdprStatus(null);
+    if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
   }, []);
 
   const handleClose = () => { reset(); onClose(); };
@@ -44,6 +52,8 @@ export const PatientActionsSheet = ({ patient, visible, onClose }) => {
             setSaving(true);
             try {
               await patientApi.discharge(user.orgName, user.hospitalCode, patient.patientCode, token);
+              await admissionApi.close(user.orgName, user.hospitalCode, patient.patientCode, token);
+              assignmentApi.deactivateDevices(user.orgName, user.hospitalCode, patient.patientCode, token).catch(() => {});
               Alert.alert(t('common.done'), t('actions.patient_discharged'), [{ text: t('common.ok'), onPress: handleClose }]);
             } catch (e) { Alert.alert(t('common.error'), e.message || t('common.failed')); }
             finally { setSaving(false); }
@@ -72,6 +82,33 @@ export const PatientActionsSheet = ({ patient, visible, onClose }) => {
       ]);
     } catch (e) { Alert.alert(t('common.error'), e.message || t('common.failed')); }
     finally { setSaving(false); }
+  };
+
+  const handleGdprSubmit = async () => {
+    setSaving(true);
+    try {
+      const res = await patientApi.anonymize(
+        user.orgName, user.hospitalCode, patient.patientCode, token,
+        gdprRef.trim() || undefined,
+      );
+      const requestId = res?.data?.requestId;
+      setGdprStatus({ status: res?.data?.status || 'PENDING' });
+      setMode('gdpr_polling');
+      pollRef.current = setInterval(async () => {
+        try {
+          const s = await patientApi.getGdprStatus(user.orgName, requestId, token);
+          setGdprStatus(s);
+          if (s.status === 'COMPLETE' || s.status === 'FAILED') {
+            clearInterval(pollRef.current);
+            pollRef.current = null;
+          }
+        } catch { /* keep polling */ }
+      }, 3000);
+    } catch (e) {
+      Alert.alert(t('common.error'), e.message || t('messages.error_gdpr'));
+    } finally {
+      setSaving(false);
+    }
   };
 
   const filteredWards = wards.filter(w =>
@@ -114,6 +151,18 @@ export const PatientActionsSheet = ({ patient, visible, onClose }) => {
               <IconDoor size={18} color="#8B5CF6" />
             </View>
             <Text style={styles.actionLabel}>{t('actions.transfer_ward')}</Text>
+            <IconChevron size={16} color={T.textFaint} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionItem}
+            onPress={() => setMode('gdpr')}
+            disabled={saving}
+          >
+            <View style={[styles.actionIcon, { backgroundColor: '#EF444418' }]}>
+              <IconShield size={18} color="#EF4444" />
+            </View>
+            <Text style={styles.actionLabel}>{t('actions.gdpr_erasure')}</Text>
             <IconChevron size={16} color={T.textFaint} />
           </TouchableOpacity>
         </>
@@ -161,6 +210,62 @@ export const PatientActionsSheet = ({ patient, visible, onClose }) => {
                 <Text style={styles.emptyText}>{t('actions.no_wards')}</Text>
               )}
             </ScrollView>
+          )}
+        </>
+      );
+    }
+
+    if (mode === 'gdpr') {
+      return (
+        <>
+          <View style={styles.subHeader}>
+            <TouchableOpacity onPress={() => setMode('main')}>
+              <Text style={styles.backLink}>← {t('common.back')}</Text>
+            </TouchableOpacity>
+            <Text style={styles.subTitle}>{t('actions.gdpr_erasure')}</Text>
+          </View>
+          <View style={styles.gdprWarning}>
+            <Text style={styles.gdprWarningText}>
+              {t('messages.gdpr_warning', { name: `${patient?.firstName} ${patient?.lastName}` })}
+            </Text>
+          </View>
+          <RNTextInput
+            style={[styles.searchInput, { color: T.text, borderColor: T.borderSoft, backgroundColor: T.surface }]}
+            placeholder={t('actions.gdpr_ref_placeholder')}
+            placeholderTextColor={T.textFaint}
+            value={gdprRef}
+            onChangeText={setGdprRef}
+          />
+          <TouchableOpacity style={styles.gdprSubmitRow} onPress={handleGdprSubmit} disabled={saving}>
+            {saving
+              ? <ActivityIndicator color="#EF4444" />
+              : <Text style={styles.gdprSubmitText}>{t('actions.gdpr_submit')}</Text>}
+          </TouchableOpacity>
+        </>
+      );
+    }
+
+    if (mode === 'gdpr_polling') {
+      const status = gdprStatus?.status;
+      const isDone = status === 'COMPLETE';
+      const isFailed = status === 'FAILED';
+      return (
+        <>
+          <Text style={styles.subTitle}>{t('messages.gdpr_request_status')}</Text>
+          <View style={styles.gdprStatusBox}>
+            {!isDone && !isFailed && <ActivityIndicator color={T.accent} style={{ marginBottom: 12 }} />}
+            <Text style={[styles.gdprStatusLabel, isDone && { color: '#10B981' }, isFailed && { color: '#EF4444' }]}>
+              {isDone
+                ? t('messages.gdpr_complete', { code: gdprStatus.anonymousCode })
+                : isFailed
+                ? t('messages.gdpr_failed', { reason: gdprStatus.failureReason || '' })
+                : t(`messages.gdpr_${(status || 'pending').toLowerCase()}`)}
+            </Text>
+          </View>
+          {(isDone || isFailed) && (
+            <TouchableOpacity style={styles.gdprSubmitRow} onPress={handleClose}>
+              <Text style={[styles.gdprSubmitText, { color: T.accent }]}>{t('common.done')}</Text>
+            </TouchableOpacity>
           )}
         </>
       );
@@ -216,4 +321,10 @@ const createStyles = (T) => StyleSheet.create({
   listName: { fontSize: 14, fontWeight: '600', color: T.text },
   listMeta: { fontSize: 11, color: T.textDim, marginTop: 2, fontFamily: 'monospace' },
   emptyText: { color: T.textFaint, fontSize: 13, textAlign: 'center', paddingVertical: 24 },
+  gdprWarning: { backgroundColor: '#EF444412', borderRadius: 10, padding: 12, marginBottom: 12 },
+  gdprWarningText: { fontSize: 13, color: '#EF4444', lineHeight: 18 },
+  gdprSubmitRow: { alignItems: 'center', paddingVertical: 16 },
+  gdprSubmitText: { fontSize: 15, fontWeight: '600', color: '#EF4444' },
+  gdprStatusBox: { alignItems: 'center', paddingVertical: 24 },
+  gdprStatusLabel: { fontSize: 14, color: T.text, textAlign: 'center', lineHeight: 20, marginTop: 8 },
 });

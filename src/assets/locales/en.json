@@ -194,7 +194,9 @@
     "minutes_ago": "{{count}}m ago",
     "nurse": "Nurse",
     "doctor": "Doctor",
-    "patient": "Patient"
+    "patient": "Patient",
+    "nursing_stations": "Nursing Stations",
+    "nursing_stations_title": "Nursing Stations"
   },
   "users": {
     "first_name": "First Name",
@@ -430,7 +432,8 @@
     "kowalski": "Kowalski",
     "select_profile": "Select a profile",
     "profile_code": "e.g. Comen",
-    "profile_code_hint": "Enter the .xml profile filename (without extension)"
+    "profile_code_hint": "Enter the .xml profile filename (without extension)",
+    "search_stations": "Search stations..."
   },
   "actions": {
     "bed_actions": "Bed Actions",
@@ -532,7 +535,12 @@
     "pick_shift_ward_bed": "Pick a shift, ward, then a bed",
     "pick_patient_ward_bed": "Pick a patient, ward, then a bed",
     "no_shifts": "No shifts found.",
-    "search_shifts": "Search shifts..."
+    "search_shifts": "Search shifts...",
+    "end_assignment": "End Assignment",
+    "gdpr_erasure": "GDPR Erasure",
+    "gdpr_ref_placeholder": "GDPR reference / ticket ID (optional)",
+    "gdpr_submit": "Request Permanent Erasure",
+    "new_station": "New Station"
   },
   "settings": {
     "account": "Account",
@@ -762,6 +770,15 @@
     "error_update_device_type": "Failed to update device type.",
     "error_create_gateway": "Failed to create gateway.",
     "error_load_devices": "Failed to load devices.",
+    "error_end_assignment": "Failed to end device assignment.",
+    "confirm_end_assignment": "End active assignment for device {{code}}? The device will become available for reassignment.",
+    "error_gdpr": "Failed to submit erasure request.",
+    "gdpr_warning": "This will permanently erase all personal data for {{name}}. This cannot be undone.",
+    "gdpr_request_status": "Erasure Request Status",
+    "gdpr_pending": "Request queued...",
+    "gdpr_in_progress": "Erasing patient data...",
+    "gdpr_complete": "Erasure complete. Anonymous ID: {{code}}",
+    "gdpr_failed": "Erasure failed: {{reason}}",
     "error_load_device_types": "Failed to load device types.",
     "failed_load_hospitals": "Failed to load hospitals.",
     "failed_load_wards": "Failed to load wards.",
@@ -795,7 +812,8 @@
     "device_type_create_banner": "Define a new IoMT device type for this organisation.",
     "editing_device_type_hint": "Editing device type profile.",
     "gateway_create_banner": "Register a new IoT gateway for this hospital.",
-    "nurse_not_found": "Nurse not found."
+    "nurse_not_found": "Nurse not found.",
+    "error_load_stations": "Failed to load nursing stations."
   },
   "patients": {
     "health_records": "HEALTH RECORDS",
@@ -954,5 +972,30 @@
     "submit": "Create User",
     "created_success": "Bootstrap user created successfully.",
     "create_failed": "Failed to create bootstrap user."
+  },
+  "nursingstation": {
+    "title": "NURSING STATIONS",
+    "count": "{{count}} stations",
+    "ward": "Ward",
+    "no_ward": "No ward assigned",
+    "none_found": "No nursing stations found",
+    "none_hint": "Create a nursing station to get started.",
+    "create_title": "New Nursing Station",
+    "create_banner": "Register a new nursing station for {{hospitalCode}}.",
+    "configuration": "STATION CONFIGURATION",
+    "station_number": "Station Number",
+    "station_number_placeholder": "e.g. NS-001",
+    "created": "Nursing station {{stationNumber}} created.",
+    "create_failed": "Failed to create nursing station.",
+    "detail_title": "Station Details",
+    "detail_banner": "Nursing station {{stationNumber}}",
+    "identity_section": "STATION IDENTITY",
+    "ward_assignment_section": "WARD ASSIGNMENT",
+    "assigned_ward": "ASSIGNED WARD",
+    "assign_ward": "Assign Ward",
+    "unassign_ward": "Unassign Ward",
+    "confirm_unassign": "Remove ward {{wardCode}} from station {{stationNumber}}?",
+    "assign_failed": "Failed to assign ward.",
+    "unassign_failed": "Failed to unassign ward."
   }
 }

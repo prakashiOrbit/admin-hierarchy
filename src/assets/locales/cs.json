@@ -194,7 +194,9 @@
     "hosp_admins": "Správci nemocnice",
     "patients": "Pacienti",
     "doctors": "Lékaři",
-    "shifts": "Směny"
+    "shifts": "Směny",
+    "nursing_stations": "Ošetřovatelské stanice",
+    "nursing_stations_title": "Ošetřovatelské stanice"
   },
   "users": {
     "first_name": "Křestní jméno",
@@ -430,7 +432,8 @@
     "house": "House",
     "princeton": "Princeton",
     "lena": "Lenka",
-    "kowalski": "Kowalski"
+    "kowalski": "Kowalski",
+    "search_stations": "Hledat stanice..."
   },
   "actions": {
     "bed_actions": "Akce lůžka",
@@ -532,7 +535,12 @@
     "delete_ward": "Smazat oddělení",
     "delete_shift": "Smazat směnu",
     "no_shifts": "Žádné směny nenalezeny.",
-    "search_shifts": "Hledat směny..."
+    "search_shifts": "Hledat směny...",
+    "end_assignment": "Ukončit přiřazení",
+    "gdpr_erasure": "Výmaz GDPR",
+    "gdpr_ref_placeholder": "Reference GDPR / ID tiketu (nepovinné)",
+    "gdpr_submit": "Požádat o trvalý výmaz",
+    "new_station": "Nová stanice"
   },
   "settings": {
     "account": "Účet",
@@ -741,6 +749,15 @@
     "error_update_device_type": "Aktualizace typu zařízení selhala.",
     "error_create_gateway": "Vytvoření brány selhalo.",
     "error_load_devices": "Načítání zařízení selhalo.",
+    "error_end_assignment": "Nepodařilo se ukončit přiřazení zařízení.",
+    "confirm_end_assignment": "Ukončit aktivní přiřazení zařízení {{code}}? Zařízení bude k dispozici pro nové přiřazení.",
+    "error_gdpr": "Nepodařilo se odeslat žádost o výmaz.",
+    "gdpr_warning": "Všechna osobní data pacienta {{name}} budou trvale vymazána. Tuto akci nelze vrátit zpět.",
+    "gdpr_request_status": "Stav žádosti o výmaz",
+    "gdpr_pending": "Žádost se zařazuje do fronty...",
+    "gdpr_in_progress": "Probíhá mazání dat pacienta...",
+    "gdpr_complete": "Výmaz dokončen. Anonymní ID: {{code}}",
+    "gdpr_failed": "Výmaz selhal: {{reason}}",
     "error_load_device_types": "Načítání typů zařízení selhalo.",
     "failed_load_hospitals": "Načítání nemocnic selhalo.",
     "failed_load_wards": "Načítání oddělení selhalo.",
@@ -774,7 +791,8 @@
     "device_type_create_banner": "Definovat nový typ zařízení IoMT pro tuto organizaci.",
     "editing_device_type_hint": "Úprava profilu typu zařízení.",
     "gateway_create_banner": "Zaregistrovat novou IoT bránu pro tuto nemocnici.",
-    "nurse_not_found": "Sestra nenalezena."
+    "nurse_not_found": "Sestra nenalezena.",
+    "error_load_stations": "Načítání ošetřovatelských stanic selhalo."
   },
   "notifications": {
     "title": "Oznámení",
@@ -954,5 +972,30 @@
     "search_by_ward_or_name": "Hledat podle oddělení nebo názvu směny...",
     "create_first_hint": "Vytvořte směnu pro přiřazení zdravotnického personálu na oddělení.",
     "load_failed": "Načítání směn selhalo."
+  },
+  "nursingstation": {
+    "title": "OŠETŘOVATELSKÉ STANICE",
+    "count": "{{count}} stanice",
+    "ward": "Oddělení",
+    "no_ward": "Žádné oddělení přiřazeno",
+    "none_found": "Žádné ošetřovatelské stanice nenalezeny",
+    "none_hint": "Vytvořte ošetřovatelskou stanici pro začátek.",
+    "create_title": "Nová ošetřovatelská stanice",
+    "create_banner": "Zaregistrovat novou ošetřovatelskou stanici pro {{hospitalCode}}.",
+    "configuration": "KONFIGURACE STANICE",
+    "station_number": "Číslo stanice",
+    "station_number_placeholder": "např. NS-001",
+    "created": "Ošetřovatelská stanice {{stationNumber}} vytvořena.",
+    "create_failed": "Vytvoření ošetřovatelské stanice selhalo.",
+    "detail_title": "Detaily stanice",
+    "detail_banner": "Ošetřovatelská stanice {{stationNumber}}",
+    "identity_section": "IDENTITA STANICE",
+    "ward_assignment_section": "PŘIŘAZENÍ ODDĚLENÍ",
+    "assigned_ward": "PŘIŘAZENÉ ODDĚLENÍ",
+    "assign_ward": "Přiřadit oddělení",
+    "unassign_ward": "Odebrat přiřazení",
+    "confirm_unassign": "Odebrat oddělení {{wardCode}} ze stanice {{stationNumber}}?",
+    "assign_failed": "Přiřazení oddělení selhalo.",
+    "unassign_failed": "Odebrání přiřazení selhalo."
   }
 }

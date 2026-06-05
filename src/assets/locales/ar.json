@@ -194,7 +194,9 @@
     "hosp_admins": "مسؤولو المستشفى",
     "patients": "المرضى",
     "doctors": "الأطباء",
-    "shifts": "الورديات"
+    "shifts": "الورديات",
+    "nursing_stations": "محطات التمريض",
+    "nursing_stations_title": "محطات التمريض"
   },
   "users": {
     "first_name": "الاسم الأول",
@@ -430,7 +432,8 @@
     "house": "هاوس",
     "princeton": "برينستون",
     "lena": "ليلى",
-    "kowalski": "كوفالسكي"
+    "kowalski": "كوفالسكي",
+    "search_stations": "بحث عن محطات..."
   },
   "actions": {
     "bed_actions": "إجراءات السرير",
@@ -532,7 +535,12 @@
     "delete_ward": "حذف الجناح",
     "delete_shift": "حذف الوردية",
     "no_shifts": "لا توجد ورديات.",
-    "search_shifts": "بحث في الورديات..."
+    "search_shifts": "بحث في الورديات...",
+    "end_assignment": "إنهاء التعيين",
+    "gdpr_erasure": "حذف البيانات (GDPR)",
+    "gdpr_ref_placeholder": "رقم مرجع GDPR / التذكرة (اختياري)",
+    "gdpr_submit": "طلب الحذف الدائم",
+    "new_station": "محطة جديدة"
   },
   "settings": {
     "account": "الحساب",
@@ -741,6 +749,15 @@
     "error_update_device_type": "فشل تحديث نوع الجهاز.",
     "error_create_gateway": "فشل إنشاء البوابة.",
     "error_load_devices": "فشل تحميل الأجهزة.",
+    "error_end_assignment": "فشل إنهاء تعيين الجهاز.",
+    "confirm_end_assignment": "إنهاء التعيين النشط للجهاز {{code}}؟ سيصبح الجهاز متاحاً لإعادة التعيين.",
+    "error_gdpr": "فشل تقديم طلب الحذف.",
+    "gdpr_warning": "سيتم حذف جميع البيانات الشخصية لـ {{name}} بشكل دائم. لا يمكن التراجع عن هذا الإجراء.",
+    "gdpr_request_status": "حالة طلب الحذف",
+    "gdpr_pending": "جاري وضع الطلب في قائمة الانتظار...",
+    "gdpr_in_progress": "جاري حذف بيانات المريض...",
+    "gdpr_complete": "اكتمل الحذف. المعرف المجهول: {{code}}",
+    "gdpr_failed": "فشل الحذف: {{reason}}",
     "error_load_device_types": "فشل تحميل أنواع الأجهزة.",
     "failed_load_hospitals": "فشل تحميل المستشفيات.",
     "failed_load_wards": "فشل تحميل الأجنحة.",
@@ -774,7 +791,8 @@
     "device_type_create_banner": "تعريف نوع جهاز IoMT جديد لهذه المنظمة.",
     "editing_device_type_hint": "تعديل ملف نوع الجهاز.",
     "gateway_create_banner": "تسجيل بوابة IoT جديدة لهذا المستشفى.",
-    "nurse_not_found": "الممرضة غير موجودة."
+    "nurse_not_found": "الممرضة غير موجودة.",
+    "error_load_stations": "فشل تحميل محطات التمريض."
   },
   "notifications": {
     "title": "الإشعارات",
@@ -954,5 +972,30 @@
     "search_by_ward_or_name": "البحث بالجناح أو اسم الوردية...",
     "create_first_hint": "أنشئ وردية لتخصيص هيئة التمريض للأجنحة.",
     "load_failed": "فشل تحميل الورديات."
+  },
+  "nursingstation": {
+    "title": "محطات التمريض",
+    "count": "{{count}} محطات",
+    "ward": "الجناح",
+    "no_ward": "لا يوجد جناح معين",
+    "none_found": "لا توجد محطات تمريض",
+    "none_hint": "أنشئ محطة تمريض للبدء.",
+    "create_title": "محطة تمريض جديدة",
+    "create_banner": "تسجيل محطة تمريض جديدة لـ {{hospitalCode}}.",
+    "configuration": "تكوين المحطة",
+    "station_number": "رقم المحطة",
+    "station_number_placeholder": "مثال: NS-001",
+    "created": "تم إنشاء محطة التمريض {{stationNumber}}.",
+    "create_failed": "فشل إنشاء محطة التمريض.",
+    "detail_title": "تفاصيل المحطة",
+    "detail_banner": "محطة التمريض {{stationNumber}}",
+    "identity_section": "هوية المحطة",
+    "ward_assignment_section": "تعيين الجناح",
+    "assigned_ward": "الجناح المعين",
+    "assign_ward": "تعيين جناح",
+    "unassign_ward": "إلغاء تعيين الجناح",
+    "confirm_unassign": "إزالة الجناح {{wardCode}} من المحطة {{stationNumber}}؟",
+    "assign_failed": "فشل تعيين الجناح.",
+    "unassign_failed": "فشل إلغاء تعيين الجناح."
   }
 }
