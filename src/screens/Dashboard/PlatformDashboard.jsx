@@ -93,8 +93,13 @@ const HomeContent = ({ onNavigate }) => {
 
         const relativeTime = (raw) => {
           if (!raw) return t('dashboard.just_now');
-          // API returns Instant as float seconds (e.g. 1779601553.919); JS Date needs ms
-          const ms = typeof raw === 'number' && raw < 1e12 ? raw * 1000 : Number(raw);
+          // Numeric seconds  → multiply by 1000
+          // Numeric ms       → use as-is
+          // ISO string / any → parse with Date (handles "2026-05-17T10:23:45.000Z" etc.)
+          const ms = typeof raw === 'number'
+            ? (raw < 1e12 ? raw * 1000 : raw)
+            : new Date(raw).getTime();
+          if (isNaN(ms)) return t('dashboard.just_now');
           const diff = Date.now() - ms;
           const mins = Math.floor(diff / 60000);
           if (mins < 2) return t('dashboard.just_now');
