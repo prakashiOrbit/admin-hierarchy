@@ -34,7 +34,7 @@ export const Btn = ({ children, variant = 'primary', size = 'md', onPress, full,
     sm: { h: 32, px: 12, fs: 12.5 },
     md: { h: 42, px: 16, fs: 14 },
     lg: { h: 48, px: 18, fs: 15 },
-  }[size];
+  }[size] ?? { h: 42, px: 16, fs: 14 };
 
   let bg = T.accent;
   let color = '#fff';
