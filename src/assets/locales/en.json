@@ -246,7 +246,11 @@
     "nurse_actions": "Nurse Actions",
     "go_back": "Go Back",
     "preferred_locale": "Preferred Language",
-    "select_locale": "Select Language"
+    "select_locale": "Select Language",
+    "reset_pin_confirm": "A password reset PIN will be sent to {{userName}}'s registered email. They can use it to set a new password.",
+    "send_reset_pin": "Send PIN",
+    "reset_pin_sent": "A reset PIN has been sent to the user's registered email.",
+    "reset_pin_failed": "Failed to send reset PIN. Please try again."
   },
   "roles_screen": {
     "role_name": "Role Name",
@@ -547,11 +551,12 @@
     "preferences": "Preferences",
     "profile": "Profile",
     "security": "Security",
-    "api_keys": "API Keys",
     "language": "Language",
     "select_language": "Select Language",
     "security_2fa_active": "2FA Active",
-    "manage_integrations": "Manage integrations"
+    "username": "Username",
+    "organisation": "Organisation",
+    "hospital_code": "Hospital Code"
   },
   "languages": {
     "en": "English (US)",
@@ -995,7 +1000,26 @@
     "assign_ward": "Assign Ward",
     "unassign_ward": "Unassign Ward",
     "confirm_unassign": "Remove ward {{wardCode}} from station {{stationNumber}}?",
+    "assign_success": "Ward {{wardCode}} assigned successfully.",
     "assign_failed": "Failed to assign ward.",
+    "unassign_success": "Ward unassigned from station {{stationNumber}}.",
     "unassign_failed": "Failed to unassign ward."
+  },
+  "permissions": {
+    "section": "Permissions",
+    "full_access": "Full Access",
+    "full_access_hint": "Admin receives all default role permissions",
+    "custom": "Custom",
+    "custom_hint": "Assign specific capabilities to this admin",
+    "group_admin": "Administration",
+    "group_create": "Create Resources",
+    "group_assign": "Assign & Allocate",
+    "group_data": "Data & Uploads",
+    "group_app": "App & System",
+    "select_all": "Select All",
+    "selected_count": "{{count}} of {{total}} selected",
+    "none_selected": "No permissions selected — admin will be locked out",
+    "pick_template": "Role Template",
+    "no_templates": "No role templates found. Create one in Roles & Permissions first."
   }
 }

@@ -5,6 +5,7 @@ import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { userApi } from '../../services/api';
 import { Card, Field, TextInput, Btn } from '../../components/Shared';
+import { PermissionPicker } from '../../components/PermissionPicker';
 import { IconUser, IconMail, IconBuilding, IconShield, IconChevron } from '../../icons';
 
 const LOCALES = [
@@ -25,6 +26,9 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
   const styles = createStyles(T);
 
   const [showLocalePicker, setShowLocalePicker] = useState(false);
+  const [permMode, setPermMode] = useState('full');
+  const [assignedRole, setAssignedRole] = useState(null);
+  const [customPermissions, setCustomPermissions] = useState(null);
   const [form, setForm] = useState({
     userName: '',
     firstName: '',
@@ -51,7 +55,12 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
 
     setLoading(true);
     try {
-      await userApi.createOrgAdmin(user.orgName, form, token);
+      const payload = {
+        ...form,
+        ...(permMode === 'template' && assignedRole ? { assignedRole } : {}),
+        ...(permMode === 'custom' && customPermissions ? { customPermissions } : {}),
+      };
+      await userApi.createOrgAdmin(user.orgName, payload, token);
       Alert.alert(t('common.success'), t('orgs.invite_sent'), [
         { text: t('common.done'), onPress: onCancel }
       ]);
@@ -138,6 +147,21 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
               <IconChevron size={18} color={T.textDim} />
             </Card>
           </Field>
+        </View>
+
+        {/* Permissions Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('permissions.section', 'Permissions').toUpperCase()}</Text>
+          <PermissionPicker
+            mode={permMode}
+            assignedRole={assignedRole}
+            customPermissions={customPermissions}
+            onModeChange={setPermMode}
+            onAssignedRoleChange={setAssignedRole}
+            onCustomPermissionsChange={setCustomPermissions}
+            orgName={user?.orgName}
+            token={token}
+          />
         </View>
 
         <View style={styles.infoBox}>

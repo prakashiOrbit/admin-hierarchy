@@ -175,6 +175,12 @@ export const authApi = {
       method: 'POST',
       body: JSON.stringify({ refreshToken }),
     }),
+
+  requestPasswordReset: (userName) =>
+    apiRequest('/user/forgot-password/request-pin', {
+      method: 'POST',
+      body: JSON.stringify({ userName }),
+    }),
 };
 
 export const organisationApi = {

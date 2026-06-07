@@ -22,6 +22,7 @@ import { OrgAdminsScreen } from '../Organisations/OrgAdminsScreen';
 import { RoleDetailScreen } from '../Roles/RoleDetailScreen';
 import { CreateRoleScreen } from '../Roles/CreateRoleScreen';
 import { CreateHospitalScreen } from '../Hospitals/CreateHospitalScreen';
+import { CreateHospAdminScreen } from '../Hospitals/CreateHospAdminScreen';
 import { SettingsScreen } from '../Settings/SettingsScreen';
 import { DeviceTypesScreen } from '../Devices/DeviceTypesScreen';
 import { CreateDeviceTypeScreen } from '../Devices/CreateDeviceTypeScreen';
@@ -102,7 +103,7 @@ const OrgHomeContent = ({ role }) => {
       const hospList = Array.isArray(hospData) ? hospData : [];
       const adminList = Array.isArray(adminData) ? adminData : [];
       setHospitals(hospList);
-      setAdmins(adminList.filter(u => u.roles?.includes('ORG_ADMIN') || u.role === 'ORG_ADMIN'));
+      setAdmins(adminList.filter(u => u.userRoles?.includes('ORG_ADMIN')));
       setOrgSummary(summaryData);
       if (firstError && hospList.length === 0 && adminList.length === 0 && !summaryData) {
         setError(getApiErrorMessage(firstError));
@@ -155,19 +156,6 @@ const OrgHomeContent = ({ role }) => {
         </Card>
       )}
 
-      {!error && (
-      <Card style={styles.alertCard}>
-        <View style={styles.alertContent}>
-          <View style={[styles.alertIcon, { backgroundColor: 'rgba(245,158,11,.15)' }]}>
-            <IconAlert size={20} color={T.warn} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.alertTitle}>{t('dashboard.monitoring_active')}</Text>
-            <Text style={styles.alertText}>{t('dashboard.gateways_ok')}</Text>
-          </View>
-        </View>
-      </Card>
-      )}
 
       <View style={styles.section}>
         <SectionHeader title={t('dashboard.top_hospitals')} />
@@ -237,6 +225,7 @@ export const OrgDashboard = ({ navigation, route }) => {
   const [isEditingDeviceType, setIsEditingDeviceType] = useState(false);
   const [isEditingHospital, setIsEditingHospital] = useState(false);
   const [isCreatingBootstrapUser, setIsCreatingBootstrapUser] = useState(false);
+  const [isCreatingHospAdmin, setIsCreatingHospAdmin] = useState(false);
   const [selectedStaffForEdit, setSelectedStaffForEdit] = useState(null);
   const [selectedUserForEdit, setSelectedUserForEdit] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -246,6 +235,7 @@ export const OrgDashboard = ({ navigation, route }) => {
   const handleBack = React.useCallback(() => {
     if (drawerOpen) { toggleDrawer(); return; }
     if (selectedUserForEdit) { setSelectedUserForEdit(null); return; }
+    if (isCreatingHospAdmin) { setIsCreatingHospAdmin(false); return; }
     if (isEditingHospital) { setIsEditingHospital(false); return; }
     if (selectedHospital) { setSelectedHospital(null); return; }
     if (isCreatingDeviceType) { setIsCreatingDeviceType(false); return; }
@@ -263,7 +253,8 @@ export const OrgDashboard = ({ navigation, route }) => {
 
   const isSubScreen = !!(selectedUserId || isInvitingAdmin || selectedRoleId || isProvisioningHospital ||
     selectedHospital || isCreatingDeviceType || selectedDeviceType || isCreatingRole ||
-    isEditingDeviceType || isEditingHospital || isCreatingBootstrapUser || selectedStaffForEdit || selectedUserForEdit);
+    isEditingDeviceType || isEditingHospital || isCreatingBootstrapUser || selectedStaffForEdit || selectedUserForEdit ||
+    isCreatingHospAdmin);
 
   useEffect(() => {
     const backAction = () => {
@@ -308,13 +299,14 @@ export const OrgDashboard = ({ navigation, route }) => {
   ];
 
   const renderContent = () => {
+    if (isCreatingHospAdmin && selectedHospital) return <CreateHospAdminScreen hospitalCode={selectedHospital.hospitalCode} onCancel={() => setIsCreatingHospAdmin(false)} />;
     if (isInvitingAdmin) return <InviteOrgAdminScreen onCancel={() => setIsInvitingAdmin(false)} />;
     if (isProvisioningHospital) return <CreateHospitalScreen onCancel={() => setIsProvisioningHospital(false)} />;
     if (isCreatingDeviceType) return <CreateDeviceTypeScreen onCancel={() => setIsCreatingDeviceType(false)} />;
     if (isEditingDeviceType && selectedDeviceType) return <EditDeviceTypeScreen deviceType={selectedDeviceType} onCancel={() => setIsEditingDeviceType(false)} onSave={(updated) => { setSelectedDeviceType(updated); setIsEditingDeviceType(false); }} />;
     if (selectedDeviceType) return <DeviceTypeDetailScreen deviceType={selectedDeviceType} onBack={() => setSelectedDeviceType(null)} onEdit={() => setIsEditingDeviceType(true)} />;
     if (isEditingHospital && selectedHospital) return <EditHospitalScreen hospital={selectedHospital} onCancel={() => setIsEditingHospital(false)} onSave={(updated) => { setSelectedHospital(updated); setIsEditingHospital(false); }} />;
-    if (selectedHospital) return <HospitalDetailScreen hospital={selectedHospital} onBack={() => setSelectedHospital(null)} onEdit={() => setIsEditingHospital(true)} />;
+    if (selectedHospital) return <HospitalDetailScreen hospital={selectedHospital} onBack={() => setSelectedHospital(null)} onEdit={() => setIsEditingHospital(true)} onAddAdmin={() => setIsCreatingHospAdmin(true)} />;
     if (isCreatingRole) return <CreateRoleScreen onCancel={() => setIsCreatingRole(false)} />;
     if (isCreatingBootstrapUser) return <CreateBootstrapUserScreen onCancel={() => setIsCreatingBootstrapUser(false)} onSuccess={() => { setIsCreatingBootstrapUser(false); }} />;
     if (selectedStaffForEdit) {
@@ -413,11 +405,6 @@ const createStyles = (T) => StyleSheet.create({
   statBody: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
   statValue: { fontSize: 18, fontWeight: '700', color: T.text, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
   statDelta: { fontSize: 10, fontWeight: '600' },
-  alertCard: { borderColor: 'rgba(245,158,11,.3)', marginBottom: 24 },
-  alertContent: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
-  alertIcon: { width: 32, height: 32, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
-  alertTitle: { fontSize: 13, fontWeight: '600', color: T.text },
-  alertText: { fontSize: 11.5, color: T.textDim, marginTop: 3, lineHeight: 18 },
   section: { marginBottom: 24 },
   list: { gap: 8 },
   listItem: { flexDirection: 'row', gap: 10, alignItems: 'center' },

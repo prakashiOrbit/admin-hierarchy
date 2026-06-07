@@ -246,7 +246,11 @@
     "no_email": "Nagin e-mail",
     "no_users_hint": "Empruvai in auter filter u termin da tschertga.",
     "preferred_locale": "Lingua preferida",
-    "select_locale": "Tscherner lingua"
+    "select_locale": "Tscherner lingua",
+    "reset_pin_confirm": "In PIN per resettar la pled-clav vegn tramess a l'adressa dad e-mail registrada da {{userName}}. El po utilisar quel per fixar in nov pled-clav.",
+    "send_reset_pin": "Trametter PIN",
+    "reset_pin_sent": "In PIN da reset è vegnì tramess a l'adressa dad e-mail registrada da l'utilisader.",
+    "reset_pin_failed": "Trametter il PIN è fallì. Empruvai anc ina giada."
   },
   "roles_screen": {
     "role_name": "Num da la rolla",
@@ -547,11 +551,12 @@
     "preferences": "Preferenzas",
     "profile": "Profil",
     "security": "Segirezza",
-    "api_keys": "Clavs API",
     "language": "Lingua",
     "select_language": "Tschernir lingua",
     "security_2fa_active": "2FA activ",
-    "manage_integrations": "Administrar integraziuns"
+    "username": "Num d'utilisader",
+    "organisation": "Organisaziun",
+    "hospital_code": "Kod da l'ospital"
   },
   "languages": {
     "en": "English (US)",
@@ -995,7 +1000,26 @@
     "assign_ward": "Attribuir secziun",
     "unassign_ward": "Allontanar secziun",
     "confirm_unassign": "Allontanar secziun {{wardCode}} da staziun {{stationNumber}}?",
+    "assign_success": "Ward {{wardCode}} assigned successfully.",
     "assign_failed": "Attribuir secziun ha fallì.",
+    "unassign_success": "Attribuziun da secziun annullada per staziun {{stationNumber}}.",
     "unassign_failed": "Allontanar secziun ha fallì."
+  },
+  "permissions": {
+    "section": "Permissiuns",
+    "full_access": "Access cumplain",
+    "full_access_hint": "L'administratur survegn tut ils dretgs da rolla standard",
+    "custom": "Persunalisà",
+    "custom_hint": "Attribuir capacitads spezificas a quest administratur",
+    "group_admin": "Administraziun",
+    "group_create": "Crear ressursas",
+    "group_assign": "Attribuir ed allocar",
+    "group_data": "Datas e uploads",
+    "group_app": "App e sistem",
+    "select_all": "Tscherner tut",
+    "selected_count": "{{count}} da {{total}} tschernì",
+    "none_selected": "Naginas permissiuns — administratur serà bloccà",
+    "pick_template": "Template da rolla",
+    "no_templates": "Nagin template chattà. Crear in Rollas & Permissiuns."
   }
 }

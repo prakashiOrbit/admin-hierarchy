@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
+import { TimePicker } from '../../components/TimePicker';
 import { IconClock, IconDoor, IconTrash, IconBuilding } from '../../icons';
 import { shiftApi, wardApi } from '../../services/api';
 import { extractTime, buildDateTime } from '../../utils/shiftTime';
@@ -114,22 +115,12 @@ export const EditShiftScreen = ({ shift, onCancel, onSave, onDelete }) => {
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
               <Field label={t('shift.start_time')}>
-                <TextInput
-                  value={form.startTime}
-                  onChangeText={v => set('startTime', v)}
-                  placeholder={t('shift.time_placeholder')}
-                  leading={<IconClock size={16} color={T.textFaint} />}
-                />
+                <TimePicker value={form.startTime} onChange={v => set('startTime', v)} />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
               <Field label={t('shift.end_time')}>
-                <TextInput
-                  value={form.endTime}
-                  onChangeText={v => set('endTime', v)}
-                  placeholder={t('shift.time_placeholder')}
-                  leading={<IconClock size={16} color={T.textFaint} />}
-                />
+                <TimePicker value={form.endTime} onChange={v => set('endTime', v)} />
               </Field>
             </View>
           </View>

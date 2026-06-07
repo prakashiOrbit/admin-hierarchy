@@ -5,7 +5,8 @@ import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, Btn } from '../../components/Shared';
 import { LanguageSheet } from '../../components/LanguageSheet';
-import { IconUser, IconShield, IconLock, IconGlobe, IconChevron, IconLogout } from '../../icons';
+import { ProfileSheet } from '../../components/ProfileSheet';
+import { IconUser, IconShield, IconGlobe, IconChevron, IconLogout } from '../../icons';
 
 export const SettingsScreen = ({ onLogout }) => {
   const { theme: T } = useTheme();
@@ -14,6 +15,7 @@ export const SettingsScreen = ({ onLogout }) => {
   const styles = createStyles(T);
   
   const [showLanguage, setShowLanguage] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   
   return (
     <View style={styles.container}>
@@ -22,11 +24,10 @@ export const SettingsScreen = ({ onLogout }) => {
         
         <Card style={styles.listCard}>
           {[
-            { label: t('settings.profile'), sub: user?.userName || 'User', icon: <IconUser size={18} color={T.accent} /> },
+            { label: t('settings.profile'), sub: user?.userName || 'User', icon: <IconUser size={18} color={T.accent} />, onPress: () => setShowProfile(true) },
             { label: t('settings.security'), sub: t('settings.security_2fa_active'), icon: <IconShield size={18} color={T.accent} /> },
-            { label: t('settings.api_keys'), sub: t('settings.manage_integrations'), icon: <IconLock size={18} color={T.accent} /> },
           ].map((item, i) => (
-            <TouchableOpacity key={i} style={[styles.listItem, i > 0 && styles.listBorder]}>
+            <TouchableOpacity key={i} style={[styles.listItem, i > 0 && styles.listBorder]} onPress={item.onPress}>
               <View style={styles.iconContainer}>{item.icon}</View>
               <View style={styles.listItemContent}>
                 <Text style={styles.itemLabel}>{item.label}</Text>
@@ -78,11 +79,17 @@ export const SettingsScreen = ({ onLogout }) => {
         </View>
       </ScrollView>
 
-      <LanguageSheet 
+      <LanguageSheet
         visible={showLanguage}
         onClose={() => setShowLanguage(false)}
         currentLanguage={locale || 'en'}
         onSelect={changeLanguage}
+      />
+
+      <ProfileSheet
+        visible={showProfile}
+        onClose={() => setShowProfile(false)}
+        user={user}
       />
     </View>
   );

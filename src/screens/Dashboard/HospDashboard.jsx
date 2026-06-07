@@ -9,7 +9,7 @@ import { Card, SectionHeader, Btn, getGreeting } from '../../components/Shared';
 import { TopBar, BottomNav } from '../../components/Navigation';
 import { StatusPill } from '../../components/StatusPill';
 import { 
-  IconHospital, IconUsers, IconPulse, IconGateway, IconShield, IconChart,
+  IconHospital, IconUsers, IconPulse, IconGateway, IconShield,
   IconAlert, IconChevron, IconMenu, IconSettings, IconDashboard, IconBack, IconUser, IconLogout, IconBed, IconStethoscope, IconDoor, IconPatient, IconPlus, IconClock
 } from '../../icons';
 import { CreateHospAdminScreen } from '../Hospitals/CreateHospAdminScreen';
@@ -75,15 +75,6 @@ const StatCard = ({ label, value, delta, icon, color, accent }) => {
   );
 };
 
-const PulseWave = ({ color }) => (
-  <View style={{ height: 40, justifyContent: 'flex-end', paddingBottom: 5 }}>
-    <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 2 }}>
-      {[20, 40, 15, 80, 10, 30, 25, 60, 40, 20].map((h, i) => (
-        <View key={i} style={{ width: 3, height: h * 0.4, backgroundColor: color, borderRadius: 1 }} />
-      ))}
-    </View>
-  </View>
-);
 
 const HospHomeContent = ({ role, onNavigate }) => {
   const { theme: T } = useTheme();
@@ -165,26 +156,6 @@ const HospHomeContent = ({ role, onNavigate }) => {
           <Btn variant="tonal" size="sm" onPress={() => setReloadKey(key => key + 1)}>Retry</Btn>
         </Card>
       )}
-
-      <Card style={{ marginBottom: 24 }}>
-        <View style={styles.sectionHeaderRow}>
-          <SectionHeader title={t('dashboard.live_vitals')} />
-          {homeStats.beds != null && <Text style={styles.bedsLabel}>● {homeStats.beds} {t('dashboard.beds').toUpperCase()}</Text>}
-        </View>
-        <View style={styles.vitalsGrid}>
-          {[
-            { l: t('dashboard.avg_hr'),   v: '—', u: 'bpm', c: '#F472B6' },
-            { l: t('dashboard.avg_spo2'), v: '—', u: '%',   c: '#22D3EE' },
-            { l: t('dashboard.alerts'),   v: '—', u: '',    c: T.warn    },
-          ].map((m, i) => (
-            <View key={i} style={{ flex: 1 }}>
-              <Text style={styles.vitalLabel}>{m.l}</Text>
-              <Text style={[styles.vitalValue, { color: m.c }]}>{m.v}<Text style={styles.vitalUnit}>{m.u}</Text></Text>
-            </View>
-          ))}
-        </View>
-        <View style={{ marginTop: 12 }}><PulseWave color={T.accent} /></View>
-      </Card>
 
       <View style={styles.section}>
         <View style={styles.sectionHeaderRow}>
@@ -439,7 +410,6 @@ export const HospDashboard = ({ navigation, route }) => {
           <ScrollView style={styles.drawerMenu}>
             <TouchableOpacity style={styles.drawerItem} onPress={() => { handleTabChange('home'); toggleDrawer(); }}><IconDashboard size={20} color={T.textDim} /><Text style={styles.drawerItemText}>{t('dashboard.title')}</Text></TouchableOpacity>
             <TouchableOpacity style={styles.drawerItem} onPress={() => { handleTabChange('settings'); toggleDrawer(); }}><IconSettings size={20} color={T.textDim} /><Text style={styles.drawerItemText}>{t('dashboard.system_settings')}</Text></TouchableOpacity>
-            <TouchableOpacity style={styles.drawerItem} onPress={() => { handleTabChange('nursing'); toggleDrawer(); }}><IconBed size={20} color={T.textDim} /><Text style={styles.drawerItemText}>{t('dashboard.nursing_stations_title')}</Text></TouchableOpacity>
             <View style={styles.drawerDivider} />
             <TouchableOpacity style={[styles.drawerItem, { marginTop: 'auto' }]} onPress={() => { logout(); navigation.replace('Login'); }}><IconLogout size={20} color={T.bad} /><Text style={[styles.drawerItemText, { color: T.bad }]}>{t('common.logout')}</Text></TouchableOpacity>
           </ScrollView>
@@ -470,11 +440,6 @@ const createStyles = (T) => StyleSheet.create({
   statDelta: { fontSize: 10, fontWeight: '600' },
   section: { marginBottom: 24 },
   sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
-  bedsLabel: { fontSize: 10, color: T.good, fontWeight: '700', fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
-  vitalsGrid: { flexDirection: 'row', gap: 14, marginTop: 4 },
-  vitalLabel: { fontSize: 10.5, color: T.textDim, letterSpacing: 0.5 },
-  vitalValue: { fontSize: 20, fontWeight: '700', fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', marginTop: 2 },
-  vitalUnit: { fontSize: 10, color: T.textDim, fontWeight: '500', marginLeft: 2 },
   viewLink: { color: T.accent, fontSize: 11.5, fontWeight: '600' },
   shiftRow: { flexDirection: 'row', gap: 8 },
   shiftBox: { flex: 1, padding: 10, borderRadius: 10, borderWidth: 1 },

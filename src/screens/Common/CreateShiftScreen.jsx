@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
+import { TimePicker } from '../../components/TimePicker';
 import { IconClock, IconDoor } from '../../icons';
 import { wardApi, shiftApi } from '../../services/api';
 import { buildDateTime } from '../../utils/shiftTime';
@@ -90,12 +91,12 @@ export const CreateShiftScreen = ({ onCancel, onSuccess }) => {
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
               <Field label={t('shift.start_time')}>
-                <TextInput value={form.startTime} onChangeText={v => updateForm('startTime', v)} placeholder={t('shift.time_placeholder')} leading={<IconClock size={16} color={T.textDim} />} />
+                <TimePicker value={form.startTime} onChange={v => updateForm('startTime', v)} />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
               <Field label={t('shift.end_time')}>
-                <TextInput value={form.endTime} onChangeText={v => updateForm('endTime', v)} placeholder={t('shift.time_placeholder')} leading={<IconClock size={16} color={T.textDim} />} />
+                <TimePicker value={form.endTime} onChange={v => updateForm('endTime', v)} />
               </Field>
             </View>
           </View>

@@ -54,9 +54,9 @@ export const OrgAdminsScreen = ({ onSelectUser, onInvite }) => {
     fetchAdmins(false);
   };
 
-  const filtered = admins.filter(u => 
+  const filtered = admins.filter(u =>
     (u.userName?.toLowerCase().includes(query.toLowerCase()) ||
-     u.email?.toLowerCase().includes(query.toLowerCase()))
+     u.contactEmail?.toLowerCase().includes(query.toLowerCase()))
   );
 
   return (
@@ -122,7 +122,7 @@ export const OrgAdminsScreen = ({ onSelectUser, onInvite }) => {
                       <Text style={styles.userName}>{u.userName}</Text>
                       <RoleBadge role={u.role || (u.roles && u.roles[0]) || 'ORG_ADMIN'} />
                     </View>
-                    <Text style={styles.userEmail}>{u.email || t('admins.no_email')}</Text>
+                    <Text style={styles.userEmail}>{u.contactEmail || t('admins.no_email')}</Text>
                     <View style={styles.badgesRow}>
                       <StatusPill status={u.status || 'INACTIVE'} />
                     </View>

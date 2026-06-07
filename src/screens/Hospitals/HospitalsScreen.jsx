@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { organisationApi } from '../../services/api';
 import { Card, SectionHeader, SearchBar, Chip, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
-import { IconHospital, IconFilter, IconBed, IconDoor, IconPulse, IconPlus } from '../../icons';
+import { IconHospital, IconFilter, IconPlus } from '../../icons';
 
 export const HospitalsScreen = ({ onProvision, onSelect }) => {
   const { t } = useTranslation();
@@ -153,21 +153,9 @@ export const HospitalsScreen = ({ onProvision, onSelect }) => {
                       <StatusPill status={h.status || 'ACTIVE'} />
                     </View>
                     <Text style={styles.orgName}>{h.hospitalCode} · {h.myAddress?.city || '—'}</Text>
-                    
-                    <View style={styles.statsRow}>
-                      <View style={styles.statItem}>
-                        <IconBed size={14} color={T.textDim} />
-                        <Text style={styles.statValue}>{h.beds || 0}</Text>
-                      </View>
-                      <View style={styles.statItem}>
-                        <IconDoor size={14} color={T.textDim} />
-                        <Text style={styles.statValue}>{h.wards || 0}</Text>
-                      </View>
-                      <View style={styles.statItem}>
-                        <IconPulse size={14} color={T.textDim} />
-                        <Text style={styles.statValue}>{h.devices || 0}</Text>
-                      </View>
-                    </View>
+                    {!!h.description && (
+                      <Text style={styles.orgDesc} numberOfLines={1}>{h.description}</Text>
+                    )}
                   </View>
                 </View>
               </Card>
@@ -242,21 +230,10 @@ const createStyles = (T) => StyleSheet.create({
     color: T.textDim,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
-  statsRow: {
-    flexDirection: 'row',
-    gap: 16,
-    marginTop: 10,
-  },
-  statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  statValue: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: T.text,
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+  orgDesc: {
+    fontSize: 11.5,
+    color: T.textDim,
+    marginTop: 4,
   },
   center: {
     flex: 1,

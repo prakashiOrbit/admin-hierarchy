@@ -56,9 +56,9 @@ export const UsersScreen = ({ onSelectUser, onSelectStaff, onCreateBootstrapUser
       const nurses = getList(nursesRes);
 
       const allUsers = [
-        ...admins.map(u => ({ ...u, role: 'ORG_ADMIN' })),
-        ...owners.map(u => ({ ...u, role: 'HOSP_OWNER' })),
-        ...hospAdmins.map(u => ({ ...u, role: 'HOSP_ADMIN' })),
+        ...admins.map(u => ({ ...u, role: 'ORG_ADMIN', email: u.contactEmail })),
+        ...owners.map(u => ({ ...u, role: 'HOSP_OWNER', email: u.contactEmail })),
+        ...hospAdmins.map(u => ({ ...u, role: 'HOSP_ADMIN', email: u.contactEmail })),
         ...doctors.map(d => ({ ...d, role: 'DOCTOR', userName: `${d.firstName} ${d.lastName}`, email: d.myContact?.email })),
         ...nurses.map(n => ({ ...n, role: 'NURSE', userName: `${n.firstName} ${n.lastName}`, email: n.myContact?.email })),
       ];

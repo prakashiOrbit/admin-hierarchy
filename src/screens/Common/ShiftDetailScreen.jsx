@@ -48,6 +48,7 @@ export const ShiftDetailScreen = ({ shiftId: shiftCode, onBack, onEdit }) => {
             setUnassigning(nurse.nurseCode);
             try {
               await shiftApi.unassignNurse(user.orgName, user.hospitalCode, { nurseCode: nurse.nurseCode, shiftCode }, token);
+              Alert.alert('Done', `${nurse.firstName} ${nurse.lastName} removed from this shift.`);
               fetchDetail();
             } catch (e) { Alert.alert('Error', e.message || 'Failed.'); }
             finally { setUnassigning(null); }
@@ -69,6 +70,7 @@ export const ShiftDetailScreen = ({ shiftId: shiftCode, onBack, onEdit }) => {
             setUnassigning(doctor.doctorCode);
             try {
               await shiftApi.unassignDoctor(user.orgName, user.hospitalCode, { doctorCode: doctor.doctorCode, shiftCode }, token);
+              Alert.alert('Done', `Dr. ${doctor.firstName} ${doctor.lastName} removed from this shift.`);
               fetchDetail();
             } catch (e) { Alert.alert('Error', e.message || 'Failed.'); }
             finally { setUnassigning(null); }

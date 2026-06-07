@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Avatar, RoleBadge, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
 import { IconHospital, IconUser, IconEdit, IconKey, IconPause, IconTrash } from '../../icons';
-import { userApi } from '../../services/api';
+import { userApi, authApi } from '../../services/api';
 
 export const UserDetailScreen = ({ userId, onBack, onEdit }) => {
   const { t } = useTranslation();
@@ -16,6 +16,7 @@ export const UserDetailScreen = ({ userId, onBack, onEdit }) => {
 
   const [u, setU] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [resetLoading, setResetLoading] = useState(false);
 
   useEffect(() => {
     if (!authUser?.orgName || !userId) return;
@@ -43,6 +44,31 @@ export const UserDetailScreen = ({ userId, onBack, onEdit }) => {
     );
   }
 
+  const handlePasswordReset = () => {
+    Alert.alert(
+      t('auth.forgot_password'),
+      t('users.reset_pin_confirm', { userName: u.userName }),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('users.send_reset_pin'),
+          style: 'destructive',
+          onPress: async () => {
+            setResetLoading(true);
+            try {
+              await authApi.requestPasswordReset(u.userName);
+              Alert.alert(t('common.success'), t('users.reset_pin_sent'));
+            } catch (err) {
+              Alert.alert(t('common.error'), err?.message || t('users.reset_pin_failed'));
+            } finally {
+              setResetLoading(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const firstName = u.firstName || '';
   const lastName = u.lastName || '';
   const fullName = (firstName || lastName) ? `${firstName} ${lastName}`.trim() : (u.userName || t('dashboard.users'));
@@ -57,7 +83,7 @@ export const UserDetailScreen = ({ userId, onBack, onEdit }) => {
             <Avatar initials={initials} size={64} />
             <View style={styles.profileInfo}>
               <Text style={styles.userName}>{fullName}</Text>
-              <Text style={styles.userEmail}>{u.email || u.userName || t('users.no_email')}</Text>
+              <Text style={styles.userEmail}>{u.contactEmail || u.userName || t('users.no_email')}</Text>
               <View style={styles.badgesRow}>
                 <StatusPill status={u.status ?? 'ACTIVE'} />
                 {role ? <RoleBadge role={role} /> : null}
@@ -85,9 +111,9 @@ export const UserDetailScreen = ({ userId, onBack, onEdit }) => {
             <IconEdit size={16} color={T.text} />
             <Text style={styles.btnText}>{t('users.edit_profile')}</Text>
           </Btn>
-          <Btn variant="surface" style={styles.actionBtn}>
+          <Btn variant="surface" style={styles.actionBtn} onPress={handlePasswordReset} disabled={resetLoading}>
             <IconKey size={16} color={T.text} />
-            <Text style={styles.btnText}>{t('auth.forgot_password')}</Text>
+            <Text style={styles.btnText}>{resetLoading ? t('common.loading') : t('auth.forgot_password')}</Text>
           </Btn>
         </View>
 

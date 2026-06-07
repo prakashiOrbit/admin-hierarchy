@@ -246,7 +246,11 @@
     "no_email": "لا يوجد بريد إلكتروني",
     "no_users_hint": "جرّب فلتراً أو مصطلح بحث مختلفاً.",
     "preferred_locale": "اللغة المفضلة",
-    "select_locale": "اختر اللغة"
+    "select_locale": "اختر اللغة",
+    "reset_pin_confirm": "سيتم إرسال رمز إعادة تعيين كلمة المرور إلى البريد الإلكتروني المسجل لـ {{userName}}. يمكنه استخدامه لتعيين كلمة مرور جديدة.",
+    "send_reset_pin": "إرسال الرمز",
+    "reset_pin_sent": "تم إرسال رمز إعادة التعيين إلى البريد الإلكتروني المسجل للمستخدم.",
+    "reset_pin_failed": "فشل إرسال رمز إعادة التعيين. يرجى المحاولة مرة أخرى."
   },
   "roles_screen": {
     "role_name": "اسم الدور",
@@ -547,11 +551,12 @@
     "preferences": "التفضيلات",
     "profile": "الملف الشخصي",
     "security": "الأمان",
-    "api_keys": "مفاتيح API",
     "language": "اللغة",
     "select_language": "اختر اللغة",
     "security_2fa_active": "2FA نشط",
-    "manage_integrations": "إدارة التكاملات"
+    "username": "اسم المستخدم",
+    "organisation": "المؤسسة",
+    "hospital_code": "رمز المستشفى"
   },
   "languages": {
     "en": "English (US)",
@@ -995,7 +1000,26 @@
     "assign_ward": "تعيين جناح",
     "unassign_ward": "إلغاء تعيين الجناح",
     "confirm_unassign": "إزالة الجناح {{wardCode}} من المحطة {{stationNumber}}؟",
+    "assign_success": "Ward {{wardCode}} assigned successfully.",
     "assign_failed": "فشل تعيين الجناح.",
+    "unassign_success": "تم إلغاء تعيين الجناح من المحطة {{stationNumber}}.",
     "unassign_failed": "فشل إلغاء تعيين الجناح."
+  },
+  "permissions": {
+    "section": "الأذونات",
+    "full_access": "وصول كامل",
+    "full_access_hint": "يحصل المسؤول على جميع أذونات الدور الافتراضية",
+    "custom": "مخصص",
+    "custom_hint": "تعيين إمكانيات محددة لهذا المسؤول",
+    "group_admin": "الإدارة",
+    "group_create": "إنشاء الموارد",
+    "group_assign": "التعيين والتخصيص",
+    "group_data": "البيانات والتحميلات",
+    "group_app": "التطبيق والنظام",
+    "select_all": "تحديد الكل",
+    "selected_count": "{{count}} من {{total}} محدد",
+    "none_selected": "لم يتم تحديد أذونات — سيتم تقييد المسؤول",
+    "pick_template": "قالب الدور",
+    "no_templates": "لم يتم العثور على قوالب أدوار. قم بإنشاء واحد أولاً."
   }
 }

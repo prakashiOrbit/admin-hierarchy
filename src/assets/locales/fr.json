@@ -246,7 +246,11 @@
     "no_email": "Aucun e-mail",
     "no_users_hint": "Essayez un autre filtre ou terme de recherche.",
     "preferred_locale": "Langue préférée",
-    "select_locale": "Sélectionner la langue"
+    "select_locale": "Sélectionner la langue",
+    "reset_pin_confirm": "Un code de réinitialisation du mot de passe sera envoyé à l'e-mail enregistré de {{userName}}. Il pourra l'utiliser pour définir un nouveau mot de passe.",
+    "send_reset_pin": "Envoyer le code",
+    "reset_pin_sent": "Un code de réinitialisation a été envoyé à l'e-mail enregistré de l'utilisateur.",
+    "reset_pin_failed": "Échec de l'envoi du code. Veuillez réessayer."
   },
   "roles_screen": {
     "role_name": "Nom du rôle",
@@ -547,11 +551,12 @@
     "preferences": "Préférences",
     "profile": "Profil",
     "security": "Sécurité",
-    "api_keys": "Clés API",
     "language": "Langue",
     "select_language": "Choisir la langue",
     "security_2fa_active": "2FA actif",
-    "manage_integrations": "Gérer les intégrations"
+    "username": "Nom d'utilisateur",
+    "organisation": "Organisation",
+    "hospital_code": "Code de l'hôpital"
   },
   "languages": {
     "en": "English (US)",
@@ -995,7 +1000,26 @@
     "assign_ward": "Affecter un service",
     "unassign_ward": "Désaffecter le service",
     "confirm_unassign": "Retirer le service {{wardCode}} du poste {{stationNumber}} ?",
+    "assign_success": "Ward {{wardCode}} assigned successfully.",
     "assign_failed": "Échec de l'affectation du service.",
+    "unassign_success": "Affectation du service annulée pour la station {{stationNumber}}.",
     "unassign_failed": "Échec de la désaffectation du service."
+  },
+  "permissions": {
+    "section": "Permissions",
+    "full_access": "Accès complet",
+    "full_access_hint": "L'administrateur reçoit toutes les permissions du rôle par défaut",
+    "custom": "Personnalisé",
+    "custom_hint": "Attribuer des capacités spécifiques à cet administrateur",
+    "group_admin": "Administration",
+    "group_create": "Créer des ressources",
+    "group_assign": "Attribuer et allouer",
+    "group_data": "Données et téléversements",
+    "group_app": "Application et système",
+    "select_all": "Tout sélectionner",
+    "selected_count": "{{count}} sur {{total}} sélectionné(s)",
+    "none_selected": "Aucune permission sélectionnée — accès bloqué",
+    "pick_template": "Modèle de rôle",
+    "no_templates": "Aucun modèle trouvé. Créez-en un dans Rôles & Permissions."
   }
 }

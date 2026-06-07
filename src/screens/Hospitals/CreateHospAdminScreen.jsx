@@ -5,6 +5,7 @@ import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { userApi } from '../../services/api';
 import { Card, Field, TextInput, Btn } from '../../components/Shared';
+import { PermissionPicker } from '../../components/PermissionPicker';
 import { IconUser, IconMail, IconBuilding, IconShield, IconChevron } from '../../icons';
 
 const LOCALES = [
@@ -18,14 +19,18 @@ const LOCALES = [
   { code: 'rm', label: 'Rumantsch' },
 ];
 
-export const CreateHospAdminScreen = ({ onCancel }) => {
+export const CreateHospAdminScreen = ({ onCancel, hospitalCode: propHospCode }) => {
   const { t, i18n } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
   const styles = createStyles(T);
+  const effectiveHospCode = propHospCode || user?.hospitalCode;
 
   const [loading, setLoading] = useState(false);
   const [showLocalePicker, setShowLocalePicker] = useState(false);
+  const [permMode, setPermMode] = useState('full');
+  const [assignedRole, setAssignedRole] = useState(null);
+  const [customPermissions, setCustomPermissions] = useState(null);
   const [form, setForm] = useState({
     userName: '',
     firstName: '',
@@ -50,7 +55,12 @@ export const CreateHospAdminScreen = ({ onCancel }) => {
 
     setLoading(true);
     try {
-      await userApi.createHospAdmin(user.orgName, user.hospitalCode, form, token);
+      const payload = {
+        ...form,
+        ...(permMode === 'template' && assignedRole ? { assignedRole } : {}),
+        ...(permMode === 'custom' && customPermissions ? { customPermissions } : {}),
+      };
+      await userApi.createHospAdmin(user.orgName, effectiveHospCode, payload, token);
       Alert.alert(t('alerts.success'), t('alerts.hosp_admin_created'), [
         { text: t('actions.ok'), onPress: onCancel }
       ]);
@@ -68,7 +78,7 @@ export const CreateHospAdminScreen = ({ onCancel }) => {
         <View style={styles.banner}>
           <IconShield color={T.accent} size={20} />
           <Text style={styles.bannerText}>
-            {t('hosp_admin.invite_banner', { hospitalCode: user?.hospitalCode })}
+            {t('hosp_admin.invite_banner', { hospitalCode: effectiveHospCode })}
           </Text>
         </View>
 
@@ -139,9 +149,24 @@ export const CreateHospAdminScreen = ({ onCancel }) => {
           </Field>
         </View>
 
+        {/* Permissions Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('permissions.section', 'Permissions').toUpperCase()}</Text>
+          <PermissionPicker
+            mode={permMode}
+            assignedRole={assignedRole}
+            customPermissions={customPermissions}
+            onModeChange={setPermMode}
+            onAssignedRoleChange={setAssignedRole}
+            onCustomPermissionsChange={setCustomPermissions}
+            orgName={user?.orgName}
+            token={token}
+          />
+        </View>
+
         <View style={styles.infoBox}>
           <Text style={styles.infoText}>
-            {t('hosp_admin.info_text', { hospitalCode: user?.hospitalCode })}
+            {t('hosp_admin.info_text', { hospitalCode: effectiveHospCode })}
           </Text>
         </View>
 

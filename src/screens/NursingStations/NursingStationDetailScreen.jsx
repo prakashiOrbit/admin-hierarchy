@@ -46,6 +46,7 @@ export const NursingStationDetailScreen = ({ station: initialStation, onBack }) 
       setStation(prev => ({ ...prev, wardCode: ward.wardCode, stationStatus: 'ASSIGNED' }));
       setMode('detail');
       setWardQuery('');
+      Alert.alert(t('alerts.success'), t('nursingstation.assign_success', { wardCode: ward.wardCode }));
     } catch (e) {
       Alert.alert(t('alerts.error'), e.message || t('nursingstation.assign_failed'));
     } finally {
@@ -68,6 +69,7 @@ export const NursingStationDetailScreen = ({ station: initialStation, onBack }) 
                 user.orgName, user.hospitalCode, station.wardCode, station.stationNumber, token,
               );
               setStation(prev => ({ ...prev, wardCode: null, stationStatus: 'ACTIVE' }));
+              Alert.alert(t('alerts.success'), t('nursingstation.unassign_success', { stationNumber: station.stationNumber }));
             } catch (e) {
               Alert.alert(t('alerts.error'), e.message || t('nursingstation.unassign_failed'));
             } finally {

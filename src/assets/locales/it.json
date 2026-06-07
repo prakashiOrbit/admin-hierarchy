@@ -246,7 +246,11 @@
     "no_email": "Nessuna email",
     "no_users_hint": "Prova un filtro o termine di ricerca diverso.",
     "preferred_locale": "Lingua preferita",
-    "select_locale": "Seleziona lingua"
+    "select_locale": "Seleziona lingua",
+    "reset_pin_confirm": "Un PIN di reimpostazione della password verrà inviato all'email registrata di {{userName}}. Potrà usarlo per impostare una nuova password.",
+    "send_reset_pin": "Invia PIN",
+    "reset_pin_sent": "Un PIN di reimpostazione è stato inviato all'email registrata dell'utente.",
+    "reset_pin_failed": "Invio del PIN non riuscito. Riprovare."
   },
   "roles_screen": {
     "role_name": "Nome ruolo",
@@ -547,11 +551,12 @@
     "preferences": "Preferenze",
     "profile": "Profilo",
     "security": "Sicurezza",
-    "api_keys": "Chiavi API",
     "language": "Lingua",
     "select_language": "Seleziona lingua",
     "security_2fa_active": "2FA attivo",
-    "manage_integrations": "Gestisci integrazioni"
+    "username": "Nome utente",
+    "organisation": "Organizzazione",
+    "hospital_code": "Codice ospedale"
   },
   "languages": {
     "en": "English (US)",
@@ -995,7 +1000,26 @@
     "assign_ward": "Assegna reparto",
     "unassign_ward": "Rimuovi reparto",
     "confirm_unassign": "Rimuovere reparto {{wardCode}} dalla postazione {{stationNumber}}?",
+    "assign_success": "Ward {{wardCode}} assigned successfully.",
     "assign_failed": "Assegnazione reparto fallita.",
+    "unassign_success": "Assegnazione reparto rimossa dalla stazione {{stationNumber}}.",
     "unassign_failed": "Rimozione assegnazione fallita."
+  },
+  "permissions": {
+    "section": "Permessi",
+    "full_access": "Accesso completo",
+    "full_access_hint": "L'amministratore riceve tutti i permessi del ruolo predefinito",
+    "custom": "Personalizzato",
+    "custom_hint": "Assegna capacità specifiche a questo amministratore",
+    "group_admin": "Amministrazione",
+    "group_create": "Crea risorse",
+    "group_assign": "Assegna e alloca",
+    "group_data": "Dati e caricamenti",
+    "group_app": "App e sistema",
+    "select_all": "Seleziona tutto",
+    "selected_count": "{{count}} di {{total}} selezionati",
+    "none_selected": "Nessun permesso selezionato — amministratore bloccato",
+    "pick_template": "Modello di ruolo",
+    "no_templates": "Nessun modello trovato. Crearne uno in Ruoli e Permessi."
   }
 }

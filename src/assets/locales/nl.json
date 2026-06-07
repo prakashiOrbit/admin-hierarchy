@@ -246,7 +246,11 @@
     "no_email": "Geen e-mail",
     "no_users_hint": "Probeer een ander filter of zoekterm.",
     "preferred_locale": "Voorkeurstaal",
-    "select_locale": "Selecteer taal"
+    "select_locale": "Selecteer taal",
+    "reset_pin_confirm": "Een PIN voor het opnieuw instellen van het wachtwoord wordt verstuurd naar het geregistreerde e-mailadres van {{userName}}. Hiermee kan een nieuw wachtwoord worden ingesteld.",
+    "send_reset_pin": "PIN verzenden",
+    "reset_pin_sent": "Een reset-PIN is verzonden naar het geregistreerde e-mailadres van de gebruiker.",
+    "reset_pin_failed": "Verzenden van PIN mislukt. Probeer opnieuw."
   },
   "roles_screen": {
     "role_name": "Rolnaam",
@@ -547,11 +551,12 @@
     "preferences": "Voorkeuren",
     "profile": "Profiel",
     "security": "Beveiliging",
-    "api_keys": "API-sleutels",
     "language": "Taal",
     "select_language": "Selecteer taal",
     "security_2fa_active": "2FA actief",
-    "manage_integrations": "Beheer integraties"
+    "username": "Gebruikersnaam",
+    "organisation": "Organisatie",
+    "hospital_code": "Ziekenhuiscode"
   },
   "languages": {
     "en": "English (US)",
@@ -995,7 +1000,26 @@
     "assign_ward": "Afdeling toewijzen",
     "unassign_ward": "Toewijzing ongedaan maken",
     "confirm_unassign": "Afdeling {{wardCode}} verwijderen van post {{stationNumber}}?",
+    "assign_success": "Ward {{wardCode}} assigned successfully.",
     "assign_failed": "Toewijzen afdeling mislukt.",
+    "unassign_success": "Afdelingtoewijzing van station {{stationNumber}} verwijderd.",
     "unassign_failed": "Verwijderen toewijzing mislukt."
+  },
+  "permissions": {
+    "section": "Machtigingen",
+    "full_access": "Volledige toegang",
+    "full_access_hint": "Beheerder krijgt alle standaard rolmachtigingen",
+    "custom": "Aangepast",
+    "custom_hint": "Wijs specifieke mogelijkheden toe aan deze beheerder",
+    "group_admin": "Beheer",
+    "group_create": "Maak bronnen aan",
+    "group_assign": "Toewijzen en verdelen",
+    "group_data": "Gegevens en uploads",
+    "group_app": "App en systeem",
+    "select_all": "Alles selecteren",
+    "selected_count": "{{count}} van {{total}} geselecteerd",
+    "none_selected": "Geen machtigingen geselecteerd — beheerder geblokkeerd",
+    "pick_template": "Rolsjabloon",
+    "no_templates": "Geen sjablonen gevonden. Maak er een in Rollen & Machtigingen."
   }
 }

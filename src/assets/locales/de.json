@@ -246,7 +246,11 @@
     "no_email": "Keine E-Mail",
     "no_users_hint": "Versuchen Sie einen anderen Filter oder Suchbegriff.",
     "preferred_locale": "Bevorzugte Sprache",
-    "select_locale": "Sprache auswählen"
+    "select_locale": "Sprache auswählen",
+    "reset_pin_confirm": "Eine PIN zum Zurücksetzen des Passworts wird an die registrierte E-Mail von {{userName}} gesendet. Damit kann ein neues Passwort gesetzt werden.",
+    "send_reset_pin": "PIN senden",
+    "reset_pin_sent": "Eine Reset-PIN wurde an die registrierte E-Mail des Benutzers gesendet.",
+    "reset_pin_failed": "PIN konnte nicht gesendet werden. Bitte versuchen Sie es erneut."
   },
   "roles_screen": {
     "role_name": "Rollenname",
@@ -547,11 +551,12 @@
     "preferences": "Einstellungen",
     "profile": "Profil",
     "security": "Sicherheit",
-    "api_keys": "API-Schlüssel",
     "language": "Sprache",
     "select_language": "Sprache wählen",
     "security_2fa_active": "2FA aktiv",
-    "manage_integrations": "Integrationen verwalten"
+    "username": "Benutzername",
+    "organisation": "Organisation",
+    "hospital_code": "Krankenhauscode"
   },
   "languages": {
     "en": "English (US)",
@@ -995,7 +1000,26 @@
     "assign_ward": "Station zuweisen",
     "unassign_ward": "Zuweisung aufheben",
     "confirm_unassign": "Station {{wardCode}} von Pflegestation {{stationNumber}} entfernen?",
+    "assign_success": "Ward {{wardCode}} assigned successfully.",
     "assign_failed": "Station konnte nicht zugewiesen werden.",
+    "unassign_success": "Stationszuordnung für {{stationNumber}} aufgehoben.",
     "unassign_failed": "Zuweisung konnte nicht aufgehoben werden."
+  },
+  "permissions": {
+    "section": "Berechtigungen",
+    "full_access": "Vollzugriff",
+    "full_access_hint": "Administrator erhält alle Standard-Rollenberechtigungen",
+    "custom": "Benutzerdefiniert",
+    "custom_hint": "Spezifische Berechtigungen für diesen Administrator vergeben",
+    "group_admin": "Verwaltung",
+    "group_create": "Ressourcen erstellen",
+    "group_assign": "Zuweisen und verteilen",
+    "group_data": "Daten und Uploads",
+    "group_app": "App und System",
+    "select_all": "Alle auswählen",
+    "selected_count": "{{count}} von {{total}} ausgewählt",
+    "none_selected": "Keine Berechtigungen — Administrator wird ausgesperrt",
+    "pick_template": "Rollenvorlage",
+    "no_templates": "Keine Vorlagen gefunden. Erstellen Sie eine in Rollen & Berechtigungen."
   }
 }

@@ -6,7 +6,7 @@ import { Card, SectionHeader, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
 import { IconHospital, IconUser, IconMail, IconLocation, IconPhone, IconBed, IconDoor, IconPulse, IconBack } from '../../icons';
 
-export const HospitalDetailScreen = ({ hospital, onBack, onEdit }) => {
+export const HospitalDetailScreen = ({ hospital, onBack, onEdit, onAddAdmin }) => {
   const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
@@ -106,6 +106,11 @@ export const HospitalDetailScreen = ({ hospital, onBack, onEdit }) => {
           <Btn variant="surface" style={{ flex: 1 }} onPress={onBack}>
             {t('actions.back_to_list')}
           </Btn>
+          {onAddAdmin && (
+            <Btn variant="tonal" style={{ flex: 1 }} onPress={onAddAdmin}>
+              {t('actions.create_hosp_admin')}
+            </Btn>
+          )}
           <Btn variant="primary" style={{ flex: 1 }} onPress={onEdit}>
             {t('actions.manage_console')}
           </Btn>

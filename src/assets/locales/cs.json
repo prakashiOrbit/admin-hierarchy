@@ -246,7 +246,11 @@
     "no_email": "Žádný e-mail",
     "no_users_hint": "Zkuste jiný filtr nebo hledaný výraz.",
     "preferred_locale": "Preferovaný jazyk",
-    "select_locale": "Vybrat jazyk"
+    "select_locale": "Vybrat jazyk",
+    "reset_pin_confirm": "PIN pro obnovení hesla bude odeslán na registrovaný e-mail uživatele {{userName}}. Pomocí něj může nastavit nové heslo.",
+    "send_reset_pin": "Odeslat PIN",
+    "reset_pin_sent": "PIN pro obnovení byl odeslán na registrovaný e-mail uživatele.",
+    "reset_pin_failed": "Odeslání PINu se nezdařilo. Zkuste to prosím znovu."
   },
   "roles_screen": {
     "role_name": "Název role",
@@ -547,11 +551,12 @@
     "preferences": "Předvolby",
     "profile": "Profil",
     "security": "Zabezpečení",
-    "api_keys": "API klíče",
     "language": "Jazyk",
     "select_language": "Vybrat jazyk",
     "security_2fa_active": "2FA aktivní",
-    "manage_integrations": "Spravovat integrace"
+    "username": "Uživatelské jméno",
+    "organisation": "Organizace",
+    "hospital_code": "Kód nemocnice"
   },
   "languages": {
     "en": "English (US)",
@@ -995,7 +1000,26 @@
     "assign_ward": "Přiřadit oddělení",
     "unassign_ward": "Odebrat přiřazení",
     "confirm_unassign": "Odebrat oddělení {{wardCode}} ze stanice {{stationNumber}}?",
+    "assign_success": "Ward {{wardCode}} assigned successfully.",
     "assign_failed": "Přiřazení oddělení selhalo.",
+    "unassign_success": "Přiřazení oddělení ke stanici {{stationNumber}} odebráno.",
     "unassign_failed": "Odebrání přiřazení selhalo."
+  },
+  "permissions": {
+    "section": "Oprávnění",
+    "full_access": "Plný přístup",
+    "full_access_hint": "Správce získá všechna výchozí oprávnění role",
+    "custom": "Vlastní",
+    "custom_hint": "Přiřadit specifické schopnosti tomuto správci",
+    "group_admin": "Administrace",
+    "group_create": "Vytváření zdrojů",
+    "group_assign": "Přiřazení a alokace",
+    "group_data": "Data a nahrávání",
+    "group_app": "Aplikace a systém",
+    "select_all": "Vybrat vše",
+    "selected_count": "{{count}} z {{total}} vybráno",
+    "none_selected": "Žádná oprávnění — správce bude zablokován",
+    "pick_template": "Šablona role",
+    "no_templates": "Žádné šablony nenalezeny. Vytvořte jednu v části Role a oprávnění."
   }
 }
