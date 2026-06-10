@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { View, StatusBar } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, StatusBar, BackHandler, Alert } from 'react-native';
+import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
@@ -21,9 +21,41 @@ GoogleSignin.configure({
 
 const Stack = createNativeStackNavigator();
 
-function AppContent() {
+function AppContent({ navigationRef }) {
   const { theme } = useTheme();
   const { isRestoringSession, restoredNav } = useAuth();
+  const exitAlertShown = useRef(false);
+
+  useEffect(() => {
+    const onBackPress = () => {
+      if (navigationRef.current?.canGoBack()) {
+        return false; // let React Navigation handle normal back navigation
+      }
+      if (exitAlertShown.current) return true;
+      exitAlertShown.current = true;
+      Alert.alert(
+        'Exit App',
+        'Are you sure you want to exit?',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+            onPress: () => { exitAlertShown.current = false; },
+          },
+          {
+            text: 'Exit',
+            style: 'destructive',
+            onPress: () => BackHandler.exitApp(),
+          },
+        ],
+        { cancelable: false }
+      );
+      return true;
+    };
+
+    const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => subscription.remove();
+  }, [navigationRef]);
 
   // Show blank screen while restoring session to avoid login flash
   if (isRestoringSession) {
@@ -65,6 +97,7 @@ function AppContent() {
 
 function App() {
   const [langReady, setLangReady] = useState(false);
+  const navigationRef = useNavigationContainerRef();
 
   useEffect(() => {
     restoreLanguage().finally(() => setLangReady(true));
@@ -76,8 +109,8 @@ function App() {
     <SafeAreaProvider>
       <AuthProvider>
         <ThemeProvider>
-          <NavigationContainer>
-            <AppContent />
+          <NavigationContainer ref={navigationRef}>
+            <AppContent navigationRef={navigationRef} />
           </NavigationContainer>
         </ThemeProvider>
       </AuthProvider>

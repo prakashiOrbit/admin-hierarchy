@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Platform, Alert, Modal, TouchableOp
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { userApi } from '../../services/api';
+import { userApi, getApiErrorMessage } from '../../services/api';
 import { Card, Field, TextInput, Btn } from '../../components/Shared';
 import { PermissionPicker } from '../../components/PermissionPicker';
 import { IconUser, IconMail, IconBuilding, IconShield, IconChevron } from '../../icons';
@@ -19,6 +19,13 @@ const LOCALES = [
   { code: 'rm', label: 'Rumantsch' },
 ];
 
+const ORG_ADMIN_PERMITS = [
+  'permit.admin.users', 'permit.admin.roles', 'permit.admin.hospital', 'permit.admin.organisation',
+  'permit.create.user', 'permit.create.role', 'permit.create.hospital',
+  'permit.create.devicetype', 'permit.update.devicetype', 'permit.list.devicetype', 'permit.search.devicetype',
+  'permit.create.devconfigorg', 'permit.get', 'permit.set'
+];
+
 export const InviteOrgAdminScreen = ({ onCancel }) => {
   const { t, i18n } = useTranslation();
   const { theme: T } = useTheme();
@@ -28,7 +35,7 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
   const [showLocalePicker, setShowLocalePicker] = useState(false);
   const [permMode, setPermMode] = useState('full');
   const [assignedRole, setAssignedRole] = useState(null);
-  const [customPermissions, setCustomPermissions] = useState(null);
+  const [customPermissions, setCustomPermissions] = useState([...ORG_ADMIN_PERMITS]);
   const [form, setForm] = useState({
     userName: '',
     firstName: '',
@@ -45,11 +52,16 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
   };
 
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.contactEmail);
-  const isFormValid = form.userName && form.firstName && form.lastName && isEmailValid;
+  const isPermissionsValid = 
+    permMode === 'full' || 
+    (permMode === 'template' && assignedRole) || 
+    (permMode === 'custom' && customPermissions && customPermissions.length > 0);
+
+  const isFormValid = form.userName && form.firstName && form.lastName && isEmailValid && isPermissionsValid;
 
   const handleCreate = async () => {
     if (!user?.orgName) {
-      Alert.alert(t('common.error'), t('common.error'));
+      Alert.alert(t('common.error'), t('messages.error_org_not_found'));
       return;
     }
 
@@ -58,14 +70,14 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
       const payload = {
         ...form,
         ...(permMode === 'template' && assignedRole ? { assignedRole } : {}),
-        ...(permMode === 'custom' && customPermissions ? { customPermissions } : {}),
+        ...((permMode === 'custom' || permMode === 'full') && customPermissions ? { customPermissions } : {}),
       };
       await userApi.createOrgAdmin(user.orgName, payload, token);
       Alert.alert(t('common.success'), t('orgs.invite_sent'), [
         { text: t('common.done'), onPress: onCancel }
       ]);
     } catch (err) {
-      Alert.alert(t('common.error'), err.message || t('common.error'));
+      Alert.alert(t('common.error'), getApiErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -156,7 +168,9 @@ export const InviteOrgAdminScreen = ({ onCancel }) => {
             mode={permMode}
             assignedRole={assignedRole}
             customPermissions={customPermissions}
+            availablePermits={ORG_ADMIN_PERMITS}
             onModeChange={setPermMode}
+
             onAssignedRoleChange={setAssignedRole}
             onCustomPermissionsChange={setCustomPermissions}
             orgName={user?.orgName}

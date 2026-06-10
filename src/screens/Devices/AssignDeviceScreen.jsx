@@ -5,7 +5,7 @@ import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SearchBar, Btn, Avatar } from '../../components/Shared';
 import { IconGateway, IconPatient, IconPulse, IconChevron } from '../../icons';
-import { deviceApi, bedApi, patientApi } from '../../services/api';
+import { deviceApi, bedApi, patientApi, getApiErrorMessage } from '../../services/api';
 
 const STEPS = ['device', 'bed', 'patient'];
 
@@ -64,7 +64,7 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
         const allPatients = Array.isArray(pRes) ? pRes : (Array.isArray(pRes?.data) ? pRes.data : []);
         setPatients(allPatients.filter(p => !assignedPatientCodes.has(p.patientCode)));
       })
-      .catch(err => { if (!cancelled) setError(err.message || t('common.load_failed')); })
+      .catch(err => { if (!cancelled) setError(getApiErrorMessage(err)); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [user?.orgName, user?.hospitalCode, token, refreshKey]);

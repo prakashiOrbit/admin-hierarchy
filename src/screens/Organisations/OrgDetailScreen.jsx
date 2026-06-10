@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator, Alert, TextInput as RNTextInput } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -20,6 +20,31 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
   const [loading, setLoading] = useState(true);
   const [hospError, setHospError] = useState(null);
   const [ownersError, setOwnersError] = useState(null);
+
+  const [currentOrg, setCurrentOrg] = useState(org);
+  const [editingPolicy, setEditingPolicy] = useState(false);
+  const [policyLoading, setPolicyLoading] = useState(false);
+  const [ownerHours, setOwnerHours] = useState(
+    String(org.ownerJwtValiditySeconds ? Math.round(org.ownerJwtValiditySeconds / 3600) : 5)
+  );
+
+  const handleSavePolicy = async () => {
+    const ownerSeconds = parseInt(ownerHours, 10) * 3600;
+    if (isNaN(ownerSeconds) || ownerSeconds <= 0) {
+      Alert.alert('Invalid Input', 'Session duration must be a positive number.');
+      return;
+    }
+    setPolicyLoading(true);
+    try {
+      await organisationApi.updateJwtValidity(org.orgName, { ownerJwtValiditySeconds: ownerSeconds }, token);
+      setCurrentOrg(prev => ({ ...prev, ownerJwtValiditySeconds: ownerSeconds }));
+      setEditingPolicy(false);
+    } catch (err) {
+      Alert.alert('Error', err.message || 'Failed to update session policy.');
+    } finally {
+      setPolicyLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!org?.orgName) return;
@@ -89,6 +114,78 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
               <Text style={[styles.statValue, { color: stat.color }]}>{stat.value}</Text>
             </View>
           ))}
+        </View>
+
+        {/* Security Policy */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeaderRow}>
+            <SectionHeader title="Security Policy" />
+            {!editingPolicy && (
+              <Btn variant="ghost" size="sm" onPress={() => setEditingPolicy(true)}>Edit</Btn>
+            )}
+          </View>
+          <Card style={styles.policyCard}>
+            {/* Owner Session — editable by platform admin */}
+            {editingPolicy ? (
+              <View style={styles.policyRow}>
+                <Text style={styles.policyLabel}>Owner Session:</Text>
+                <View style={styles.policyInputRow}>
+                  <RNTextInput
+                    style={[styles.policyInput, { color: T.text, borderColor: T.border, backgroundColor: T.surface2 }]}
+                    value={ownerHours}
+                    onChangeText={setOwnerHours}
+                    keyboardType="numeric"
+                    selectTextOnFocus
+                  />
+                  <Text style={styles.policyUnit}>hrs</Text>
+                </View>
+              </View>
+            ) : (
+              <View style={styles.policyRow}>
+                <Text style={styles.policyLabel}>Owner Session:</Text>
+                <Text style={styles.policyValue}>
+                  {currentOrg.ownerJwtValiditySeconds ? `${Math.round(currentOrg.ownerJwtValiditySeconds / 3600)} hrs` : '5 hrs (Default)'}
+                </Text>
+              </View>
+            )}
+            {editingPolicy && (
+              <View style={styles.policyActions}>
+                <Btn variant="surface" size="sm" style={{ flex: 1 }} onPress={() => setEditingPolicy(false)} disabled={policyLoading}>Cancel</Btn>
+                <Btn variant="primary" size="sm" style={{ flex: 1 }} onPress={handleSavePolicy} disabled={policyLoading}>
+                  {policyLoading ? <ActivityIndicator color="#fff" size="small" /> : 'Save'}
+                </Btn>
+              </View>
+            )}
+            {/* Admin/Doctor/Nurse/Patient — read-only here, managed at Org/Hospital level */}
+            <View style={styles.policyDivider} />
+            <View style={styles.policyRow}>
+              <Text style={styles.policyLabel}>Admin Session:</Text>
+              <Text style={styles.policyValue}>
+                {currentOrg.adminJwtValiditySeconds ? `${Math.round(currentOrg.adminJwtValiditySeconds / 3600)} hrs` : '3 hrs (Default)'}
+              </Text>
+            </View>
+            <View style={styles.policyDivider} />
+            <View style={styles.policyRow}>
+              <Text style={styles.policyLabel}>Doctor Session:</Text>
+              <Text style={styles.policyValue}>
+                {currentOrg.doctorJwtValiditySeconds ? `${Math.round(currentOrg.doctorJwtValiditySeconds / 3600)} hrs` : '8 hrs (Default)'}
+              </Text>
+            </View>
+            <View style={styles.policyDivider} />
+            <View style={styles.policyRow}>
+              <Text style={styles.policyLabel}>Nurse Session:</Text>
+              <Text style={styles.policyValue}>
+                {currentOrg.nurseJwtValiditySeconds ? `${Math.round(currentOrg.nurseJwtValiditySeconds / 3600)} hrs` : '12 hrs (Default)'}
+              </Text>
+            </View>
+            <View style={styles.policyDivider} />
+            <View style={styles.policyRow}>
+              <Text style={styles.policyLabel}>Patient Session:</Text>
+              <Text style={styles.policyValue}>
+                {currentOrg.patientJwtValiditySeconds ? `${Math.round(currentOrg.patientJwtValiditySeconds / 3600)} hrs` : '1 hr (Default)'}
+              </Text>
+            </View>
+          </Card>
         </View>
 
         {/* Org Owners */}
@@ -282,5 +379,59 @@ const createStyles = (T) => StyleSheet.create({
     fontSize: 13,
     color: T.bad || '#ef4444',
     flex: 1,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+  },
+  policyCard: {
+    padding: 0,
+    backgroundColor: T.surface,
+  },
+  policyRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+  },
+  policyLabel: {
+    fontSize: 14,
+    color: T.textDim,
+  },
+  policyValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: T.text,
+  },
+  policyDivider: {
+    height: 1,
+    backgroundColor: T.borderSoft,
+  },
+  policyInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  policyInput: {
+    width: 60,
+    height: 36,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    textAlign: 'center',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  policyUnit: {
+    fontSize: 13,
+    color: T.textDim,
+  },
+  policyActions: {
+    flexDirection: 'row',
+    gap: 10,
+    padding: 12,
+    borderTopWidth: 1,
+    borderTopColor: T.borderSoft,
   },
 });

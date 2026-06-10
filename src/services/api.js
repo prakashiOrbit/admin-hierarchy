@@ -1,8 +1,17 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '../i18n';
 
 const BASE_URL = 'http://139.59.46.163/api';
+const SESSION_KEY = '@auth:session';
 const DEFAULT_TIMEOUT_MS = 15000;
 const inFlightGetRequests = new Map();
+
+let refreshPromise = null;
+let onTokenRefreshed = null;
+
+export const setTokenRefreshedCallback = (cb) => {
+  onTokenRefreshed = cb;
+};
 
 export class ApiError extends Error {
   constructor(message, { status, data, code, endpoint } = {}) {
@@ -22,6 +31,16 @@ export const getApiErrorMessage = (error) => {
   if (error?.status >= 500) {
     return 'Unable to load data. The server is currently unavailable.';
   }
+  if (error?.status === 401) {
+    return 'Session expired. Please log in again.';
+  }
+  if (error?.status === 403) {
+    const msg = error?.message || '';
+    if (msg.includes('You can only access your own organisation')) {
+      return 'Access error: your session organisation does not match. Please log out and log in again.';
+    }
+    return 'You do not have permission to perform this action.';
+  }
   if (error?.message) {
     return error.message;
   }
@@ -34,6 +53,48 @@ const createRequestKey = (url, config) => {
   const auth = config.headers?.Authorization || '';
   const locale = config.headers?.['X-Locale'] || '';
   return `${config.method}:${url}:${auth}:${locale}`;
+};
+
+const performTokenRefresh = async () => {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = (async () => {
+    try {
+      const raw = await AsyncStorage.getItem(SESSION_KEY);
+      if (!raw) throw new Error('No session found');
+      const session = JSON.parse(raw);
+      if (!session.refreshToken) throw new Error('No refresh token');
+
+      console.log('Refreshing token via API...');
+      const res = await fetch(`${BASE_URL}/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: session.refreshToken }),
+      });
+
+      if (!res.ok) throw new Error('Refresh API call failed');
+      const data = await res.json();
+      const newToken = data.token;
+      const newRefreshToken = data.refreshToken;
+
+      if (newToken) {
+        const updatedSession = { 
+          ...session, 
+          token: newToken, 
+          refreshToken: newRefreshToken || session.refreshToken 
+        };
+        await AsyncStorage.setItem(SESSION_KEY, JSON.stringify(updatedSession));
+        
+        if (onTokenRefreshed) onTokenRefreshed(newToken);
+        return newToken;
+      }
+      throw new Error('No token in refresh response');
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
 };
 
 export const apiRequest = async (endpoint, options = {}) => {
@@ -81,7 +142,18 @@ export const apiRequest = async (endpoint, options = {}) => {
   const requestPromise = (async () => {
     console.log(`API Request: ${config.method || 'GET'} ${url}`);
     try {
-      const response = await fetch(url, config);
+      let response = await fetch(url, config);
+
+      // --- AUTO-REFRESH INTERCEPTOR ---
+      if (response.status === 401 && endpoint !== '/refresh' && !options._isRetry) {
+        console.warn('401 detected, attempting auto-refresh...');
+        const newToken = await performTokenRefresh();
+        if (newToken) {
+          console.log('Refresh successful, retrying original request...');
+          config.headers['Authorization'] = `Bearer ${newToken}`;
+          response = await fetch(url, config);
+        }
+      }
 
       let data;
       const contentType = response.headers.get('content-type');
@@ -181,6 +253,12 @@ export const authApi = {
       method: 'POST',
       body: JSON.stringify({ userName }),
     }),
+
+  resetPasswordWithPin: (userName, pin, newPassword, confirmPassword) =>
+    apiRequest('/user/forgot-password/reset', {
+      method: 'POST',
+      body: JSON.stringify({ userName, pin, newPassword, confirmPassword }),
+    }),
 };
 
 export const organisationApi = {
@@ -230,6 +308,18 @@ export const organisationApi = {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(hospitalData),
+    }),
+  updateJwtValidity: (orgName, payload, token) =>
+    apiRequest(`/organisation/${orgName}/jwt-validity`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify(payload),
+    }),
+  updateHospitalJwtValidity: (orgName, hospCode, payload, token) =>
+    apiRequest(`/${orgName}/hospital/${hospCode}/jwt-validity`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify(payload),
     }),
 };
 
@@ -308,15 +398,6 @@ export const userApi = {
       headers: { 'Authorization': `Bearer ${token}` },
       params: { locale }, // Note: Back-end expects this as a @RequestParam
       signal: options.signal,
-    });
-  },
-
-  // --- Bootstrap User ---
-  createBootstrapUser: (orgName, userData, token) => {
-    return apiRequest(`/${orgName}/user/create`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify(userData),
     });
   },
 };

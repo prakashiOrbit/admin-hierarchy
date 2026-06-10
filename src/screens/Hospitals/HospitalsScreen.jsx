@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Activit
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { organisationApi } from '../../services/api';
+import { organisationApi, getApiErrorMessage } from '../../services/api';
 import { Card, SectionHeader, SearchBar, Chip, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
 import { IconHospital, IconFilter, IconPlus } from '../../icons';
@@ -31,7 +31,7 @@ export const HospitalsScreen = ({ onProvision, onSelect }) => {
     } catch (err) {
       if (err?.code === 'ABORTED') return;
       console.error('Fetch hospitals error:', err);
-      setError(err.message || t('messages.failed_load_hospitals'));
+      setError(getApiErrorMessage(err));
     } finally {
       if (!options.signal?.aborted) {
         setLoading(false);

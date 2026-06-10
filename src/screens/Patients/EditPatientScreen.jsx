@@ -6,8 +6,8 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { Card, Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
-import { IconUser, IconMail, IconPhone, IconLocation, IconHeart, IconBuilding, IconCheck, IconShield } from '../../icons';
+import { Card, Field, TextInput, PhoneInput, Btn, SectionHeader } from '../../components/Shared';
+import { IconUser, IconMail, IconLocation, IconHeart, IconBuilding, IconCheck, IconShield } from '../../icons';
 import { patientApi, consentApi } from '../../services/api';
 
 const CONSENTED_BY_TYPES = ['SELF', 'GUARDIAN', 'PHYSICIAN'];
@@ -321,13 +321,7 @@ export const EditPatientScreen = ({ patientDetail, onCancel, onSave }) => {
             />
           </Field>
           <Field label={t('entity.phone')}>
-            <TextInput
-              value={form.phone}
-              onChangeText={v => set('phone', v)}
-              placeholder={t('placeholders.phone_example')}
-              keyboardType="phone-pad"
-              leading={<IconPhone size={16} color={T.textFaint} />}
-            />
+            <PhoneInput value={form.phone} onChangeText={v => set('phone', v)} />
           </Field>
           <Field label={t('entity.street_address')}>
             <TextInput

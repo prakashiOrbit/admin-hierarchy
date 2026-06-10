@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, SearchBar, Avatar, RoleBadge, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
 import { IconPlus, IconChevron } from '../../icons';
-import { userApi } from '../../services/api';
+import { userApi, getApiErrorMessage } from '../../services/api';
 
 export const HospAdminsScreen = ({ onSelectUser, onInvite }) => {
   const { t } = useTranslation();
@@ -16,6 +16,7 @@ export const HospAdminsScreen = ({ onSelectUser, onInvite }) => {
 
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [query, setQuery] = useState('');
 
   useEffect(() => {
@@ -27,7 +28,7 @@ export const HospAdminsScreen = ({ onSelectUser, onInvite }) => {
         const list = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
         setAdmins(list);
       })
-      .catch(() => {})
+      .catch(e => { if (!cancelled) setError(getApiErrorMessage(e)); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [user?.orgName, user?.hospitalCode, token]);
@@ -39,6 +40,10 @@ export const HospAdminsScreen = ({ onSelectUser, onInvite }) => {
 
   if (loading) {
     return <View style={styles.center}><ActivityIndicator color={T.accent} /></View>;
+  }
+
+  if (error) {
+    return <View style={styles.center}><Text style={styles.emptyText}>{error}</Text></View>;
   }
 
   return (

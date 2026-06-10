@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { organisationApi } from '../../services/api';
-import { Card, Field, TextInput, Btn } from '../../components/Shared';
-import { IconBuilding, IconUser, IconMail, IconLocation, IconPhone, IconShield, IconChevron } from '../../icons';
+import { Card, Field, TextInput, PhoneInput, Btn } from '../../components/Shared';
+import { IconBuilding, IconUser, IconMail, IconLocation, IconShield, IconChevron } from '../../icons';
 
 const LOCALES = [
   { code: 'en', label: 'English' },
@@ -40,10 +40,15 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
       state: '',
       country: 'India',
       pincode: '',
-    }
+    },
+    ownerJwtValidityHours: 5,
+    adminJwtValidityHours: 3,
+    doctorJwtValidityHours: 8,
+    nurseJwtValidityHours: 12,
+    patientJwtValidityHours: 1,
   });
 
-  const orgTypes = ['HOSPITAL', 'CLINIC', 'LAB', 'PHARMACY', 'RESEARCH', 'OTHER'];
+  const orgTypes = ['HOSPITAL', 'CLINIC', 'LAB', 'PHARMACY', 'RESEARCH', 'OTHER', 'COMPANY'];
 
   const { token } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -66,12 +71,22 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
     }));
   };
 
-  const isFormValid = form.orgName && form.businessName && form.myContact.email;
+  const isFormValid = form.orgName && form.businessName && form.myContact.email && form.ownerJwtValidityHours && form.adminJwtValidityHours && form.doctorJwtValidityHours && form.nurseJwtValidityHours && form.patientJwtValidityHours;
 
   const handleCreate = async () => {
     setLoading(true);
     try {
-      await organisationApi.create(form, token);
+      // Trim orgName to prevent URL encoding issues with trailing spaces
+      const payload = {
+        ...form,
+        orgName: (form.orgName || '').trim(),
+        ownerJwtValiditySeconds: parseInt(form.ownerJwtValidityHours, 10) * 3600,
+        adminJwtValiditySeconds: parseInt(form.adminJwtValidityHours, 10) * 3600,
+        doctorJwtValiditySeconds: parseInt(form.doctorJwtValidityHours, 10) * 3600,
+        nurseJwtValiditySeconds: parseInt(form.nurseJwtValidityHours, 10) * 3600,
+        patientJwtValiditySeconds: parseInt(form.patientJwtValidityHours, 10) * 3600,
+      };
+      await organisationApi.create(payload, token);
       Alert.alert(t('alerts.success'), t('alerts.org_created'), [
         { text: t('actions.ok'), onPress: () => onSuccess ? onSuccess() : onCancel() }
       ]);
@@ -145,12 +160,7 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
           </Field>
 
           <Field label={t('orgs.contact_phone')}>
-            <TextInput
-              value={form.myContact.phone}
-              onChangeText={(v) => updateContact('phone', v)}
-              placeholder={t('placeholders.phone_eg')}
-              leading={<IconPhone size={18} color={T.textDim} />}
-            />
+            <PhoneInput value={form.myContact.phone} onChangeText={v => updateContact('phone', v)} />
           </Field>
 
           <Field label={t('users.preferred_locale')}>
@@ -216,6 +226,71 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
                 />
               </Field>
             </View>
+          </View>
+        </View>
+
+        {/* Security Policy Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Security Policy (Session Expiration)</Text>
+
+          <View style={styles.row}>
+            <View style={{ flex: 1 }}>
+              <Field label="Owner Session (hours)">
+                <TextInput
+                  value={String(form.ownerJwtValidityHours)}
+                  onChangeText={(v) => updateRoot('ownerJwtValidityHours', v)}
+                  placeholder="5"
+                  keyboardType="numeric"
+                />
+              </Field>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Field label="Admin Session (hours)">
+                <TextInput
+                  value={String(form.adminJwtValidityHours)}
+                  onChangeText={(v) => updateRoot('adminJwtValidityHours', v)}
+                  placeholder="3"
+                  keyboardType="numeric"
+                />
+              </Field>
+            </View>
+          </View>
+
+          <View style={styles.row}>
+            <View style={{ flex: 1 }}>
+              <Field label="Doctor Session (hours)">
+                <TextInput
+                  value={String(form.doctorJwtValidityHours)}
+                  onChangeText={(v) => updateRoot('doctorJwtValidityHours', v)}
+                  placeholder="8"
+                  keyboardType="numeric"
+                />
+              </Field>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Field label="Nurse Session (hours)">
+                <TextInput
+                  value={String(form.nurseJwtValidityHours)}
+                  onChangeText={(v) => updateRoot('nurseJwtValidityHours', v)}
+                  placeholder="12"
+                  keyboardType="numeric"
+                />
+              </Field>
+            </View>
+          </View>
+
+          <View style={styles.row}>
+            <View style={{ flex: 1 }}>
+              <Field label="Patient Session (hours)">
+                <TextInput
+                  value={String(form.patientJwtValidityHours)}
+                  onChangeText={(v) => updateRoot('patientJwtValidityHours', v)}
+                  placeholder="1"
+                  keyboardType="numeric"
+                />
+              </Field>
+            </View>
+            <View style={{ flex: 1 }} />
           </View>
         </View>
 

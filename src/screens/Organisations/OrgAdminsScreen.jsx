@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Activit
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { userApi } from '../../services/api';
+import { userApi, getApiErrorMessage } from '../../services/api';
 import { Card, SectionHeader, SearchBar, Avatar, RoleBadge, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
 import { IconPlus, IconChevron, IconUsers } from '../../icons';
@@ -31,7 +31,7 @@ export const OrgAdminsScreen = ({ onSelectUser, onInvite }) => {
     } catch (err) {
       if (err?.code === 'ABORTED') return;
       console.error('Fetch admins error:', err);
-      setError(err.message || t('admins.failed_load'));
+      setError(getApiErrorMessage(err));
     } finally {
       if (!options.signal?.aborted) {
         setLoading(false);

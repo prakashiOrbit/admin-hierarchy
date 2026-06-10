@@ -3,9 +3,9 @@ import { View, Text, StyleSheet, ScrollView, Alert, Modal, TouchableOpacity } fr
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { Card, Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
-import { IconUser, IconMail, IconPhone, IconChevron } from '../../icons';
-import { nurseApi } from '../../services/api';
+import { Card, Field, TextInput, PhoneInput, Btn, SectionHeader } from '../../components/Shared';
+import { IconUser, IconMail, IconChevron } from '../../icons';
+import { nurseApi, getApiErrorMessage } from '../../services/api';
 
 const LOCALES = [
   { code: 'en', label: 'English' },
@@ -58,7 +58,7 @@ export const CreateNurseScreen = ({ onCancel, onSuccess }) => {
         { text: t('actions.ok'), onPress: onSuccess || onCancel },
       ]);
     } catch (e) {
-      Alert.alert(t('messages.error'), e.message || t('messages.failed_create_nurse'));
+      Alert.alert(t('messages.error'), getApiErrorMessage(e));
     } finally {
       setSaving(false);
     }
@@ -113,7 +113,7 @@ export const CreateNurseScreen = ({ onCancel, onSuccess }) => {
             <TextInput value={form.myContact.email} onChangeText={v => updateContact('email', v.toLowerCase())} placeholder={t('placeholders.nurse_email_example')} leading={<IconMail size={16} color={T.textFaint} />} />
           </Field>
           <Field label={t('entity.phone_number')}>
-            <TextInput value={form.myContact.phone} onChangeText={v => updateContact('phone', v)} placeholder={t('placeholders.phone_intl_example')} leading={<IconPhone size={16} color={T.textFaint} />} />
+            <PhoneInput value={form.myContact.phone} onChangeText={v => updateContact('phone', v)} />
           </Field>
 
           <Field label={t('users.preferred_locale')}>

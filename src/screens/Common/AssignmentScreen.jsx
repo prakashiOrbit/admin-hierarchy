@@ -31,14 +31,23 @@ export const AssignmentScreen = ({
   const [query, setQuery] = useState('');
   const [saving, setSaving] = useState(false);
 
+  const hasDoctorPerm = user?.roles?.includes('permit.admin.doctor') || user?.roles?.includes('HOSP_OWNER');
+  const hasPatientPerm = user?.roles?.includes('permit.admin.patient') || user?.roles?.includes('HOSP_OWNER');
+
   useEffect(() => {
     if (!user?.orgName || !user?.hospitalCode) return;
     let cancelled = false;
     setLoading(true);
     setError(null);
     Promise.all([
-      doctorApi.listAll(user.orgName, user.hospitalCode, token),
-      patientApi.listAll(user.orgName, user.hospitalCode, token),
+      hasDoctorPerm ? doctorApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
+        if (e.status === 403) return [];
+        throw e;
+      }) : Promise.resolve([]),
+      hasPatientPerm ? patientApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
+        if (e.status === 403) return [];
+        throw e;
+      }) : Promise.resolve([]),
     ])
       .then(([docs, pats]) => {
         if (cancelled) return;
@@ -51,10 +60,10 @@ export const AssignmentScreen = ({
           if (found) setSelectedDoctor(found);
         }
       })
-      .catch(err => { if (!cancelled) setError(err.message || t('common.load_failed')); })
+      .catch(err => { if (!cancelled) setError(getApiErrorMessage(err)); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [user?.orgName, user?.hospitalCode, token]);
+  }, [user?.orgName, user?.hospitalCode, token, hasDoctorPerm, hasPatientPerm]);
 
   const filteredDoctors = doctors.filter(d =>
     (`${d.firstName} ${d.lastName}`).toLowerCase().includes(query.toLowerCase()) ||
@@ -142,7 +151,11 @@ export const AssignmentScreen = ({
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {step === 'doctor' ? (
           <View style={styles.list}>
-            {filteredDoctors.map(d => {
+            {!hasDoctorPerm ? (
+              <View style={styles.placeholder}>
+                <Text style={styles.placeholderText}>{t('messages.no_permission_view_doctors')}</Text>
+              </View>
+            ) : filteredDoctors.map(d => {
               const initials = `${d.firstName?.[0] ?? ''}${d.lastName?.[0] ?? ''}`.toUpperCase();
               const isActive = selectedDoctor?.doctorCode === d.doctorCode;
               return (
@@ -164,13 +177,17 @@ export const AssignmentScreen = ({
                 </Card>
               );
             })}
-            {filteredDoctors.length === 0 && (
+            {hasDoctorPerm && filteredDoctors.length === 0 && (
               <Text style={styles.emptyText}>{t('shifts.no_doctors')}</Text>
             )}
           </View>
         ) : (
           <View style={styles.list}>
-            {filteredPatients.map(p => {
+            {!hasPatientPerm ? (
+              <View style={styles.placeholder}>
+                <Text style={styles.placeholderText}>{t('messages.no_permission_view_patients')}</Text>
+              </View>
+            ) : filteredPatients.map(p => {
               const initials = `${p.firstName?.[0] ?? ''}${p.lastName?.[0] ?? ''}`.toUpperCase();
               const isSelected = selectedPatients.includes(p.patientCode);
               return (
@@ -192,7 +209,7 @@ export const AssignmentScreen = ({
                 </Card>
               );
             })}
-            {filteredPatients.length === 0 && (
+            {hasPatientPerm && filteredPatients.length === 0 && (
               <Text style={styles.emptyText}>{t('actions.no_patients')}</Text>
             )}
           </View>

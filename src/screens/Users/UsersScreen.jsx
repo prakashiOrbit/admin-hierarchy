@@ -3,12 +3,12 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Activit
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { userApi, doctorApi, nurseApi } from '../../services/api';
+import { userApi, doctorApi, nurseApi, getApiErrorMessage } from '../../services/api';
 import { Card, SectionHeader, SearchBar, Chip, Avatar, RoleBadge, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
-import { IconFilter, IconPlus, IconUsers, IconShield } from '../../icons';
+import { IconFilter, IconPlus, IconUsers } from '../../icons';
 
-export const UsersScreen = ({ onSelectUser, onSelectStaff, onCreateBootstrapUser }) => {
+export const UsersScreen = ({ onSelectUser, onSelectStaff }) => {
   const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
@@ -67,7 +67,7 @@ export const UsersScreen = ({ onSelectUser, onSelectStaff, onCreateBootstrapUser
     } catch (err) {
       if (err?.code === 'ABORTED') return;
       console.error('Fetch users error:', err);
-      setError(err.message || t('common.error'));
+      setError(getApiErrorMessage(err));
     } finally {
       if (!options.signal?.aborted) {
         setLoading(false);
@@ -151,12 +151,6 @@ export const UsersScreen = ({ onSelectUser, onSelectStaff, onCreateBootstrapUser
 
         <View style={styles.sectionRow}>
           <SectionHeader title={t('dashboard.users', 'System Users')} subtitle={`${filtered.length} ${t('dashboard.registered_users', 'members').replace(/\d+ /, '')}`} />
-          {onCreateBootstrapUser && (
-            <Btn variant="surface" size="sm" onPress={onCreateBootstrapUser} style={styles.bootstrapBtn}>
-              <IconShield size={14} color={T.accent} />
-              <Text style={{ fontSize: 12, fontWeight: '600', color: T.accent }}>{t('bootstrap_user.create_btn')}</Text>
-            </Btn>
-          )}
         </View>
 
         {/* List */}
@@ -232,7 +226,6 @@ const createStyles = (T) => StyleSheet.create({
     marginBottom: 20,
   },
   sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  bootstrapBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, height: 32 },
   list: {
     gap: 10,
   },

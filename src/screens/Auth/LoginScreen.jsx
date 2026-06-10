@@ -8,8 +8,8 @@ import { useTranslation } from 'react-i18next';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { authApi } from '../../services/api';
-import { Logo, Field, TextInput, Btn } from '../../components/Shared';
+import { authApi, getApiErrorMessage } from '../../services/api';
+import { Logo, Field, TextInput, PhoneInput, Btn } from '../../components/Shared';
 import { LanguageSheet } from '../../components/LanguageSheet';
 import {
   IconUser, IconLock, IconEye, IconEyeOff, IconShield, IconBack,
@@ -72,6 +72,14 @@ export const LoginScreen = ({ navigation }) => {
   const [error, setError]                     = useState(null);
   const [showLocalePicker, setShowLocalePicker] = useState(false);
   const [resendCooldown, setResendCooldown]   = useState(0);
+
+  // ── Forgot password flow ──────────────────────────────────────────────────
+  const [forgotPwdStep, setForgotPwdStep]     = useState(null); // null | 'enterPin'
+  const [forgotPwdPin, setForgotPwdPin]       = useState('');
+  const [forgotPwdNewPw, setForgotPwdNewPw]   = useState('');
+  const [forgotPwdConfirmPw, setForgotPwdConfirmPw] = useState('');
+  const [showForgotNewPw, setShowForgotNewPw] = useState(false);
+  const [forgotPwdLoading, setForgotPwdLoading] = useState(false);
 
   const currentLangCode  = (i18n.language || 'en').split('-')[0];
   const currentLangLabel = t(`languages.${currentLangCode}`)?.split(' ')[0] || 'English';
@@ -385,13 +393,7 @@ export const LoginScreen = ({ navigation }) => {
 
             <View style={styles.form}>
               <Field label={t('auth.phone_number')}>
-                <TextInput
-                  value={phone}
-                  onChangeText={setPhone}
-                  placeholder="+14155552671"
-                  keyboardType="phone-pad"
-                  leading={<IconPhone size={20} color={T.textFaint} />}
-                />
+                <PhoneInput value={phone} onChangeText={setPhone} />
               </Field>
 
               <Field label={t('auth.organisation')}>
@@ -432,6 +434,97 @@ export const LoginScreen = ({ navigation }) => {
           currentLanguage={currentLangCode}
           onSelect={(code) => { changeLanguage(code); setShowLocalePicker(false); }}
         />
+      </View>
+    );
+  }
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // FORGOT PASSWORD SCREEN
+  // ════════════════════════════════════════════════════════════════════════════
+
+  if (forgotPwdStep === 'enterPin') {
+    const handleResetSubmit = () => {
+      if (!forgotPwdPin.trim() || !forgotPwdNewPw || !forgotPwdConfirmPw) return;
+      if (forgotPwdNewPw !== forgotPwdConfirmPw) {
+        Alert.alert(t('common.error'), t('auth.reset_passwords_mismatch'));
+        return;
+      }
+      setForgotPwdLoading(true);
+      authApi.resetPasswordWithPin(username.trim(), forgotPwdPin.trim(), forgotPwdNewPw, forgotPwdConfirmPw)
+        .then(() => {
+          setForgotPwdStep(null);
+          setForgotPwdPin(''); setForgotPwdNewPw(''); setForgotPwdConfirmPw('');
+          Alert.alert(t('common.success'), t('auth.reset_success'));
+        })
+        .catch(e => Alert.alert(t('common.error'), getApiErrorMessage(e) || t('users.reset_pin_failed')))
+        .finally(() => setForgotPwdLoading(false));
+    };
+
+    const isResetValid = forgotPwdPin.trim().length >= 4 && forgotPwdNewPw.length >= 8 && forgotPwdConfirmPw.length >= 8;
+
+    return (
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+          <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+
+            <View style={styles.header}>
+              <Logo size={40} />
+              <View style={{ marginTop: 24 }}>
+                <Text style={styles.title}>{t('auth.reset_pin_title')}</Text>
+                <Text style={styles.subtitle}>{t('auth.reset_pin_hint')}</Text>
+              </View>
+            </View>
+
+            <View style={styles.form}>
+              <Field label={t('auth.reset_enter_pin')}>
+                <TextInput
+                  value={forgotPwdPin}
+                  onChangeText={setForgotPwdPin}
+                  placeholder={t('auth.reset_pin_placeholder')}
+                  keyboardType="number-pad"
+                  maxLength={10}
+                />
+              </Field>
+
+              <Field label={t('auth.reset_new_password')}>
+                <TextInput
+                  value={forgotPwdNewPw}
+                  onChangeText={setForgotPwdNewPw}
+                  placeholder={t('auth.password_placeholder')}
+                  secureTextEntry={!showForgotNewPw}
+                  trailing={
+                    <TouchableOpacity onPress={() => setShowForgotNewPw(v => !v)}>
+                      {showForgotNewPw ? <IconEyeOff size={18} color={T.textDim} /> : <IconEye size={18} color={T.textDim} />}
+                    </TouchableOpacity>
+                  }
+                />
+              </Field>
+
+              <Field label={t('auth.reset_confirm_password')}>
+                <TextInput
+                  value={forgotPwdConfirmPw}
+                  onChangeText={setForgotPwdConfirmPw}
+                  placeholder={t('auth.password_placeholder')}
+                  secureTextEntry={!showForgotNewPw}
+                />
+              </Field>
+
+              <Btn full size="lg" onPress={handleResetSubmit} disabled={!isResetValid || forgotPwdLoading} style={{ marginTop: 12 }}>
+                {forgotPwdLoading ? t('auth.reset_resetting') : t('auth.reset_submit')}
+              </Btn>
+
+              <TouchableOpacity style={[styles.backBtn, { marginTop: 16 }]} onPress={() => setForgotPwdStep(null)}>
+                <IconBack size={16} color={T.textDim} />
+                <Text style={styles.backText}>{t('auth.back_to_login')}</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.footer}>
+              <Text style={styles.poweredBy}>{t('common.powered_by')}</Text>
+              <Logo size={18} />
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       </View>
     );
   }
@@ -512,7 +605,19 @@ export const LoginScreen = ({ navigation }) => {
                 <Text style={styles.keepSignedInText}>{t('auth.keep_signed_in')}</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.forgotBtn}>
+              <TouchableOpacity
+                style={styles.forgotBtn}
+                onPress={() => {
+                  if (!username.trim()) {
+                    Alert.alert(t('common.error'), t('auth.reset_username_required'));
+                    return;
+                  }
+                  setState('loading');
+                  authApi.requestPasswordReset(username.trim())
+                    .then(() => { setState('idle'); setForgotPwdStep('enterPin'); })
+                    .catch(e => { setState('idle'); Alert.alert(t('common.error'), getApiErrorMessage(e) || t('users.reset_pin_failed')); });
+                }}
+              >
                 <Text style={styles.forgotText}>{t('auth.forgot_password')}</Text>
               </TouchableOpacity>
             </View>

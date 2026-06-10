@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, Activit
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { deviceTypeApi } from '../../services/api';
+import { deviceTypeApi, getApiErrorMessage } from '../../services/api';
 import { Card, SectionHeader, SearchBar, Btn } from '../../components/Shared';
 import { IconCpu, IconActivity, IconPlus, IconChevron } from '../../icons';
 
@@ -28,7 +28,7 @@ export const DeviceTypesScreen = ({ onCreate, onSelect = () => {} }) => {
       setTypes(Array.isArray(response) ? response : []);
     } catch (err) {
       console.error('Fetch device types error:', err);
-      setError(err.message || t('messages.error_load_device_types'));
+      setError(getApiErrorMessage(err));
     } finally {
       setLoading(false);
       setRefreshing(false);

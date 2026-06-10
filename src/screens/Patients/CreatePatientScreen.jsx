@@ -6,8 +6,8 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { Card, Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
-import { IconUser, IconMail, IconLocation, IconPhone, IconHeart, IconChevron, IconCheck, IconShield } from '../../icons';
+import { Card, Field, TextInput, PhoneInput, Btn, SectionHeader } from '../../components/Shared';
+import { IconUser, IconMail, IconLocation, IconHeart, IconChevron, IconCheck, IconShield } from '../../icons';
 import { patientApi, consentApi } from '../../services/api';
 
 const LOCALES = [
@@ -394,12 +394,7 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
             />
           </Field>
           <Field label={t('entity.phone_number')}>
-            <TextInput
-              value={form.patient.myContact.phone}
-              onChangeText={v => updateContact('phone', v)}
-              placeholder={t('placeholders.phone_example')}
-              leading={<IconPhone size={16} color={T.textFaint} />}
-            />
+            <PhoneInput value={form.patient.myContact.phone} onChangeText={v => updateContact('phone', v)} />
           </Field>
           <Field label={t('entity.street_address')}>
             <TextInput

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Platform, Alert, ActivityIndicator,
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { userApi } from '../../services/api';
+import { userApi, getApiErrorMessage } from '../../services/api';
 import { Card, Field, TextInput, Btn } from '../../components/Shared';
 import { PermissionPicker } from '../../components/PermissionPicker';
 import { IconUser, IconMail, IconBuilding, IconShield, IconChevron } from '../../icons';
@@ -19,6 +19,18 @@ const LOCALES = [
   { code: 'rm', label: 'Rumantsch' },
 ];
 
+const HOSP_ADMIN_PERMITS = [
+  'permit.admin.bed', 'permit.admin.device', 'permit.admin.doctor',
+  'permit.admin.gateway', 'permit.admin.nurse', 'permit.admin.nursingstation', 'permit.admin.patient',
+  'permit.admin.roles', 'permit.admin.shift', 'permit.admin.ward',
+  'permit.create.bed', 'permit.create.device', 'permit.create.doctor', 'permit.create.gateway',
+  'permit.create.nurse', 'permit.create.nursingstation', 'permit.create.patient', 
+  'permit.create.role', 'permit.create.shift', 'permit.create.ward',
+  'permit.assign.bed', 'permit.assign.device', 'permit.assign.gateway',
+  'permit.allocate.doctor.patient', 'permit.allocate.gateway.ward',
+  'permit.get', 'permit.set'
+];
+
 export const CreateHospAdminScreen = ({ onCancel, hospitalCode: propHospCode }) => {
   const { t, i18n } = useTranslation();
   const { theme: T } = useTheme();
@@ -30,7 +42,7 @@ export const CreateHospAdminScreen = ({ onCancel, hospitalCode: propHospCode }) 
   const [showLocalePicker, setShowLocalePicker] = useState(false);
   const [permMode, setPermMode] = useState('full');
   const [assignedRole, setAssignedRole] = useState(null);
-  const [customPermissions, setCustomPermissions] = useState(null);
+  const [customPermissions, setCustomPermissions] = useState([...HOSP_ADMIN_PERMITS]);
   const [form, setForm] = useState({
     userName: '',
     firstName: '',
@@ -45,7 +57,12 @@ export const CreateHospAdminScreen = ({ onCancel, hospitalCode: propHospCode }) 
   };
 
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.contactEmail);
-  const isFormValid = form.userName && form.firstName && form.lastName && isEmailValid;
+  const isPermissionsValid = 
+    permMode === 'full' || 
+    (permMode === 'template' && assignedRole) || 
+    (permMode === 'custom' && customPermissions && customPermissions.length > 0);
+    
+  const isFormValid = form.userName && form.firstName && form.lastName && isEmailValid && isPermissionsValid;
 
   const handleCreate = async () => {
     if (!user?.orgName) {
@@ -58,14 +75,14 @@ export const CreateHospAdminScreen = ({ onCancel, hospitalCode: propHospCode }) 
       const payload = {
         ...form,
         ...(permMode === 'template' && assignedRole ? { assignedRole } : {}),
-        ...(permMode === 'custom' && customPermissions ? { customPermissions } : {}),
+        ...((permMode === 'custom' || permMode === 'full') && customPermissions ? { customPermissions } : {}),
       };
       await userApi.createHospAdmin(user.orgName, effectiveHospCode, payload, token);
       Alert.alert(t('alerts.success'), t('alerts.hosp_admin_created'), [
         { text: t('actions.ok'), onPress: onCancel }
       ]);
     } catch (err) {
-      Alert.alert(t('alerts.error'), err.message || t('alerts.create_hosp_admin_failed'));
+      Alert.alert(t('alerts.error'), getApiErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -156,7 +173,9 @@ export const CreateHospAdminScreen = ({ onCancel, hospitalCode: propHospCode }) 
             mode={permMode}
             assignedRole={assignedRole}
             customPermissions={customPermissions}
+            availablePermits={HOSP_ADMIN_PERMITS}
             onModeChange={setPermMode}
+
             onAssignedRoleChange={setAssignedRole}
             onCustomPermissionsChange={setCustomPermissions}
             orgName={user?.orgName}

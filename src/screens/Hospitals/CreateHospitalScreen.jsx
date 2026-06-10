@@ -3,9 +3,9 @@ import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator, Alert,
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { organisationApi } from '../../services/api';
-import { Card, Field, TextInput, Btn } from '../../components/Shared';
-import { IconHospital, IconUser, IconMail, IconLocation, IconPhone, IconShield, IconChevron } from '../../icons';
+import { organisationApi, getApiErrorMessage } from '../../services/api';
+import { Card, Field, TextInput, PhoneInput, Btn } from '../../components/Shared';
+import { IconHospital, IconUser, IconMail, IconLocation, IconShield, IconChevron } from '../../icons';
 
 const LOCALES = [
   { code: 'en', label: 'English' },
@@ -42,7 +42,12 @@ export const CreateHospitalScreen = ({ onCancel }) => {
       name: '',
       email: '',
       phone: '',
-    }
+    },
+    ownerJwtValidityHours: 5,
+    adminJwtValidityHours: 3,
+    doctorJwtValidityHours: 8,
+    nurseJwtValidityHours: 12,
+    patientJwtValidityHours: 1,
   });
 
   const updateRoot = (key, value) => {
@@ -63,7 +68,7 @@ export const CreateHospitalScreen = ({ onCancel }) => {
     }));
   };
 
-  const isFormValid = form.hospitalName && form.hospitalCode && form.myContact.email;
+  const isFormValid = form.hospitalName && form.hospitalCode && form.myContact.email && form.ownerJwtValidityHours && form.adminJwtValidityHours && form.doctorJwtValidityHours && form.nurseJwtValidityHours && form.patientJwtValidityHours;
 
   const handleCreate = async () => {
     if (!user?.orgName) {
@@ -73,12 +78,20 @@ export const CreateHospitalScreen = ({ onCancel }) => {
 
     setLoading(true);
     try {
-      await organisationApi.createHospital(user.orgName, form, token);
+      const payload = {
+        ...form,
+        ownerJwtValiditySeconds: parseInt(form.ownerJwtValidityHours, 10) * 3600,
+        adminJwtValiditySeconds: parseInt(form.adminJwtValidityHours, 10) * 3600,
+        doctorJwtValiditySeconds: parseInt(form.doctorJwtValidityHours, 10) * 3600,
+        nurseJwtValiditySeconds: parseInt(form.nurseJwtValidityHours, 10) * 3600,
+        patientJwtValiditySeconds: parseInt(form.patientJwtValidityHours, 10) * 3600,
+      };
+      await organisationApi.createHospital(user.orgName, payload, token);
       Alert.alert(t('alerts.success'), t('alerts.hospital_created'), [
         { text: t('actions.ok'), onPress: onCancel }
       ]);
     } catch (error) {
-      Alert.alert(t('alerts.error'), error.message || t('alerts.create_failed'));
+      Alert.alert(t('alerts.error'), getApiErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -147,12 +160,7 @@ export const CreateHospitalScreen = ({ onCancel }) => {
           </Field>
 
           <Field label={t('hospital.contact_phone')}>
-            <TextInput
-              value={form.myContact.phone}
-              onChangeText={(v) => updateContact('phone', v)}
-              placeholder={t('placeholders.contact_phone')}
-              leading={<IconPhone size={18} color={T.textDim} />}
-            />
+            <PhoneInput value={form.myContact.phone} onChangeText={v => updateContact('phone', v)} />
           </Field>
 
           <Field label={t('users.preferred_locale')}>
@@ -218,6 +226,71 @@ export const CreateHospitalScreen = ({ onCancel }) => {
                 />
               </Field>
             </View>
+          </View>
+        </View>
+
+        {/* Security Policy Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Security Policy (Session Expiration)</Text>
+
+          <View style={styles.row}>
+            <View style={{ flex: 1 }}>
+              <Field label="Owner Session (hours)">
+                <TextInput
+                  value={String(form.ownerJwtValidityHours)}
+                  onChangeText={(v) => updateRoot('ownerJwtValidityHours', v)}
+                  placeholder="5"
+                  keyboardType="numeric"
+                />
+              </Field>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Field label="Admin Session (hours)">
+                <TextInput
+                  value={String(form.adminJwtValidityHours)}
+                  onChangeText={(v) => updateRoot('adminJwtValidityHours', v)}
+                  placeholder="3"
+                  keyboardType="numeric"
+                />
+              </Field>
+            </View>
+          </View>
+
+          <View style={styles.row}>
+            <View style={{ flex: 1 }}>
+              <Field label="Doctor Session (hours)">
+                <TextInput
+                  value={String(form.doctorJwtValidityHours)}
+                  onChangeText={(v) => updateRoot('doctorJwtValidityHours', v)}
+                  placeholder="8"
+                  keyboardType="numeric"
+                />
+              </Field>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Field label="Nurse Session (hours)">
+                <TextInput
+                  value={String(form.nurseJwtValidityHours)}
+                  onChangeText={(v) => updateRoot('nurseJwtValidityHours', v)}
+                  placeholder="12"
+                  keyboardType="numeric"
+                />
+              </Field>
+            </View>
+          </View>
+
+          <View style={styles.row}>
+            <View style={{ flex: 1 }}>
+              <Field label="Patient Session (hours)">
+                <TextInput
+                  value={String(form.patientJwtValidityHours)}
+                  onChangeText={(v) => updateRoot('patientJwtValidityHours', v)}
+                  placeholder="1"
+                  keyboardType="numeric"
+                />
+              </Field>
+            </View>
+            <View style={{ flex: 1 }} />
           </View>
         </View>
 

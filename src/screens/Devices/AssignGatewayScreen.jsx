@@ -5,7 +5,7 @@ import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SearchBar, Btn } from '../../components/Shared';
 import { IconGateway, IconChevron } from '../../icons';
-import { gatewayApi, bedApi } from '../../services/api';
+import { gatewayApi, bedApi, getApiErrorMessage } from '../../services/api';
 
 export const AssignGatewayScreen = ({ initialGatewayCode, onCancel, onSuccess }) => {
   const { t } = useTranslation();
@@ -52,7 +52,7 @@ export const AssignGatewayScreen = ({ initialGatewayCode, onCancel, onSuccess })
           if (found) setSelectedGateway(found);
         }
       })
-      .catch(err => { if (!cancelled) setError(err.message || t('common.load_failed')); })
+      .catch(err => { if (!cancelled) setError(getApiErrorMessage(err)); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [user?.orgName, user?.hospitalCode, token]);

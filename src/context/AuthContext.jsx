@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n, { LOCALE_STORAGE_KEY } from '../i18n';
-import { userApi, authApi } from '../services/api';
+import { userApi, authApi, setTokenRefreshedCallback } from '../services/api';
 
 const AuthContext = createContext(undefined);
 const SESSION_KEY = '@auth:session';
@@ -22,6 +22,13 @@ export const AuthProvider = ({ children }) => {
   const [isRestoringSession, setIsRestoringSession] = useState(true);
   const [restoredNav, setRestoredNav] = useState(null); // { screen, params }
   const localeUpdateRef = useRef({ timer: null, controller: null });
+
+  useEffect(() => {
+    // Listen for auto-refreshes triggered by api.js
+    setTokenRefreshedCallback((newToken) => {
+      setToken(newToken);
+    });
+  }, []);
 
   useEffect(() => () => {
     if (localeUpdateRef.current.timer) clearTimeout(localeUpdateRef.current.timer);
@@ -69,6 +76,7 @@ export const AuthProvider = ({ children }) => {
       orgName: userData.orgName,
       hospitalCode: userData.hospitalCode,
       userData: userData.userData,
+      roles: jwtPayload.roles || userData.userData?.userRoles || [],
       preferredLocale: userData.preferredLocale || userData.userData?.preferredLocale || jwtPayload.preferred_locale,
     };
 

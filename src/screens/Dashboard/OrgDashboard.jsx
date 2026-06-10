@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, Platform, BackHandler, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, Platform, BackHandler, ActivityIndicator, Alert, TextInput as RNTextInput } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
@@ -30,7 +30,6 @@ import { DeviceTypeDetailScreen } from '../Devices/DeviceTypeDetailScreen';
 import { EditDeviceTypeScreen } from '../Devices/EditDeviceTypeScreen';
 import { HospitalDetailScreen } from '../Hospitals/HospitalDetailScreen';
 import { EditHospitalScreen } from '../Hospitals/EditHospitalScreen';
-import { CreateBootstrapUserScreen } from '../Users/CreateBootstrapUserScreen';
 import { EditDoctorScreen } from '../Users/EditDoctorScreen';
 import { EditNurseScreen } from '../Users/EditNurseScreen';
 import { EditAdminScreen } from '../Users/EditAdminScreen';
@@ -74,6 +73,41 @@ const OrgHomeContent = ({ role }) => {
   const [error, setError] = useState(null);
   const [reloadKey, setReloadKey] = useState(0);
 
+  const [editingPolicy, setEditingPolicy] = useState(false);
+  const [policyLoading, setPolicyLoading] = useState(false);
+  const [policyFetching, setPolicyFetching] = useState(false);
+  const [adminHours, setAdminHours] = useState('');
+
+  const handleEditPolicy = async () => {
+    setPolicyFetching(true);
+    try {
+      const org = await organisationApi.getByName(user.orgName, token);
+      setAdminHours(String(org.adminJwtValiditySeconds ? Math.round(org.adminJwtValiditySeconds / 3600) : 3));
+      setEditingPolicy(true);
+    } catch (err) {
+      Alert.alert('Error', 'Failed to load current policy.');
+    } finally {
+      setPolicyFetching(false);
+    }
+  };
+
+  const handleSaveOrgPolicy = async () => {
+    const adminSeconds = parseInt(adminHours, 10) * 3600;
+    if (isNaN(adminSeconds) || adminSeconds <= 0) {
+      Alert.alert('Invalid Input', 'Session duration must be a positive number.');
+      return;
+    }
+    setPolicyLoading(true);
+    try {
+      await organisationApi.updateJwtValidity(user.orgName, { adminJwtValiditySeconds: adminSeconds }, token);
+      setEditingPolicy(false);
+    } catch (err) {
+      Alert.alert('Error', err.message || 'Failed to update session policy.');
+    } finally {
+      setPolicyLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!user?.orgName) return;
     const controller = new AbortController();
@@ -105,8 +139,11 @@ const OrgHomeContent = ({ role }) => {
       setHospitals(hospList);
       setAdmins(adminList.filter(u => u.userRoles?.includes('ORG_ADMIN')));
       setOrgSummary(summaryData);
-      if (firstError && hospList.length === 0 && adminList.length === 0 && !summaryData) {
-        setError(getApiErrorMessage(firstError));
+      if (firstError) {
+        const s = firstError?.status;
+        if (s === 401 || s === 403 || (s && s >= 500)) {
+          setError(getApiErrorMessage(firstError));
+        }
       }
     }).catch(err => {
       if (err?.code === 'ABORTED') return;
@@ -152,7 +189,16 @@ const OrgHomeContent = ({ role }) => {
             <IconAlert size={18} color={T.bad} />
             <Text style={styles.errorText}>{error}</Text>
           </View>
-          <Btn variant="tonal" size="sm" onPress={() => setReloadKey(key => key + 1)}>Retry</Btn>
+          <Btn variant="tonal" size="sm" onPress={() => setReloadKey(key => key + 1)}>{t('common.retry', 'Retry')}</Btn>
+        </Card>
+      )}
+
+      {!loading && !error && hospitals.length === 0 && admins.length === 0 && (
+        <Card style={[styles.errorCard, { borderColor: T.border, backgroundColor: T.surfaceAlt || T.surface }]}>
+          <View style={styles.errorRow}>
+            <IconShield size={18} color={T.accent} />
+            <Text style={[styles.errorText, { color: T.textDim }]}>{t('dashboard.onboarding_hint', 'Welcome! Start by adding an ORG Admin and a Hospital to get your organisation up and running.')}</Text>
+          </View>
         </Card>
       )}
 
@@ -200,6 +246,48 @@ const OrgHomeContent = ({ role }) => {
           </View>
         )}
       </Card>
+
+      {/* Security Policy — ORG_OWNER manages ORG_ADMIN session duration */}
+      <View style={styles.section}>
+        <View style={styles.policyHeaderRow}>
+          <SectionHeader title="Security Policy" />
+          {!editingPolicy && (
+            <Btn variant="ghost" size="sm" onPress={handleEditPolicy} disabled={policyFetching}>
+              {policyFetching ? <ActivityIndicator size="small" color={T.textDim} /> : 'Edit'}
+            </Btn>
+          )}
+        </View>
+        <Card style={styles.policyCard}>
+          {editingPolicy ? (
+            <>
+              <View style={styles.policyRow}>
+                <Text style={styles.policyLabel}>Admin Session:</Text>
+                <View style={styles.policyInputRow}>
+                  <RNTextInput
+                    style={[styles.policyInput, { color: T.text, borderColor: T.border, backgroundColor: T.surface2 }]}
+                    value={adminHours}
+                    onChangeText={setAdminHours}
+                    keyboardType="numeric"
+                    selectTextOnFocus
+                  />
+                  <Text style={styles.policyUnit}>hrs</Text>
+                </View>
+              </View>
+              <View style={styles.policyActions}>
+                <Btn variant="surface" size="sm" style={{ flex: 1 }} onPress={() => setEditingPolicy(false)} disabled={policyLoading}>Cancel</Btn>
+                <Btn variant="primary" size="sm" style={{ flex: 1 }} onPress={handleSaveOrgPolicy} disabled={policyLoading}>
+                  {policyLoading ? <ActivityIndicator color="#fff" size="small" /> : 'Save'}
+                </Btn>
+              </View>
+            </>
+          ) : (
+            <View style={styles.policyRow}>
+              <Text style={styles.policyLabel}>Admin Session:</Text>
+              <Text style={styles.policyValue}>Tap Edit to configure</Text>
+            </View>
+          )}
+        </Card>
+      </View>
     </ScrollView>
   );
 };
@@ -224,8 +312,7 @@ export const OrgDashboard = ({ navigation, route }) => {
   const [isCreatingRole, setIsCreatingRole] = useState(false);
   const [isEditingDeviceType, setIsEditingDeviceType] = useState(false);
   const [isEditingHospital, setIsEditingHospital] = useState(false);
-  const [isCreatingBootstrapUser, setIsCreatingBootstrapUser] = useState(false);
-  const [isCreatingHospAdmin, setIsCreatingHospAdmin] = useState(false);
+const [isCreatingHospAdmin, setIsCreatingHospAdmin] = useState(false);
   const [selectedStaffForEdit, setSelectedStaffForEdit] = useState(null);
   const [selectedUserForEdit, setSelectedUserForEdit] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -244,8 +331,7 @@ export const OrgDashboard = ({ navigation, route }) => {
     if (isInvitingAdmin) { setIsInvitingAdmin(false); return; }
     if (isProvisioningHospital) { setIsProvisioningHospital(false); return; }
     if (isCreatingRole) { setIsCreatingRole(false); return; }
-    if (isCreatingBootstrapUser) { setIsCreatingBootstrapUser(false); return; }
-    if (selectedStaffForEdit) { setSelectedStaffForEdit(null); return; }
+if (selectedStaffForEdit) { setSelectedStaffForEdit(null); return; }
     if (selectedUserId) { setSelectedUserId(null); return; }
     if (selectedRoleId) { setSelectedRoleId(null); return; }
     if (activeTab !== 'home') { handleTabChange('home'); }
@@ -253,7 +339,7 @@ export const OrgDashboard = ({ navigation, route }) => {
 
   const isSubScreen = !!(selectedUserId || isInvitingAdmin || selectedRoleId || isProvisioningHospital ||
     selectedHospital || isCreatingDeviceType || selectedDeviceType || isCreatingRole ||
-    isEditingDeviceType || isEditingHospital || isCreatingBootstrapUser || selectedStaffForEdit || selectedUserForEdit ||
+    isEditingDeviceType || isEditingHospital || selectedStaffForEdit || selectedUserForEdit ||
     isCreatingHospAdmin);
 
   useEffect(() => {
@@ -283,19 +369,22 @@ export const OrgDashboard = ({ navigation, route }) => {
     setSelectedDeviceType(null);
     setIsEditingHospital(false);
     setIsCreatingRole(false);
-    setIsCreatingBootstrapUser(false);
-    setSelectedStaffForEdit(null);
+setSelectedStaffForEdit(null);
     setSelectedUserForEdit(null);
     setActiveTab(tabId);
+  };
+
+  const hasPerm = (permit) => {
+    return isOwner || (user?.roles && user.roles.includes(permit));
   };
 
   const footerItems = [
     { id: 'home', label: t('dashboard.home'), icon: <IconDashboard /> },
     ...(isOwner ? [{ id: 'admins', label: t('dashboard.admins'), icon: <IconUsers /> }] : []),
-    { id: 'hospitals', label: t('dashboard.hospitals'), icon: <IconHospital /> },
-    { id: 'types', label: t('dashboard.device_type'), icon: <IconCpu /> },
-    { id: 'users', label: t('dashboard.users'), icon: <IconUser /> },
-    { id: 'roles', label: t('dashboard.roles_perms'), icon: <IconShield /> },
+    ...(hasPerm('permit.admin.hospital') ? [{ id: 'hospitals', label: t('dashboard.hospitals'), icon: <IconHospital /> }] : []),
+    ...(hasPerm('permit.admin.devicetype') ? [{ id: 'types', label: t('dashboard.device_type'), icon: <IconCpu /> }] : []),
+    ...(hasPerm('permit.admin.nurse') || hasPerm('permit.admin.doctor') || hasPerm('permit.admin.patient') ? [{ id: 'users', label: t('dashboard.users'), icon: <IconUser /> }] : []),
+    ...(hasPerm('permit.admin.roles') ? [{ id: 'roles', label: t('dashboard.roles_perms'), icon: <IconShield /> }] : []),
   ];
 
   const renderContent = () => {
@@ -306,10 +395,9 @@ export const OrgDashboard = ({ navigation, route }) => {
     if (isEditingDeviceType && selectedDeviceType) return <EditDeviceTypeScreen deviceType={selectedDeviceType} onCancel={() => setIsEditingDeviceType(false)} onSave={(updated) => { setSelectedDeviceType(updated); setIsEditingDeviceType(false); }} />;
     if (selectedDeviceType) return <DeviceTypeDetailScreen deviceType={selectedDeviceType} onBack={() => setSelectedDeviceType(null)} onEdit={() => setIsEditingDeviceType(true)} />;
     if (isEditingHospital && selectedHospital) return <EditHospitalScreen hospital={selectedHospital} onCancel={() => setIsEditingHospital(false)} onSave={(updated) => { setSelectedHospital(updated); setIsEditingHospital(false); }} />;
-    if (selectedHospital) return <HospitalDetailScreen hospital={selectedHospital} onBack={() => setSelectedHospital(null)} onEdit={() => setIsEditingHospital(true)} onAddAdmin={() => setIsCreatingHospAdmin(true)} />;
+    if (selectedHospital) return <HospitalDetailScreen hospital={selectedHospital} orgName={user?.orgName} viewerRole={role} onBack={() => setSelectedHospital(null)} onEdit={() => setIsEditingHospital(true)} onAddAdmin={() => setIsCreatingHospAdmin(true)} />;
     if (isCreatingRole) return <CreateRoleScreen onCancel={() => setIsCreatingRole(false)} />;
-    if (isCreatingBootstrapUser) return <CreateBootstrapUserScreen onCancel={() => setIsCreatingBootstrapUser(false)} onSuccess={() => { setIsCreatingBootstrapUser(false); }} />;
-    if (selectedStaffForEdit) {
+if (selectedStaffForEdit) {
       const isDoctor = !!selectedStaffForEdit.doctorCode;
       return isDoctor
         ? <EditDoctorScreen doctor={selectedStaffForEdit} onCancel={() => setSelectedStaffForEdit(null)} onSave={() => setSelectedStaffForEdit(null)} />
@@ -323,7 +411,7 @@ export const OrgDashboard = ({ navigation, route }) => {
       case 'admins': return <OrgAdminsScreen onInvite={() => setIsInvitingAdmin(true)} onSelectUser={setSelectedUserId} />;
       case 'hospitals': return <HospitalsScreen onProvision={() => setIsProvisioningHospital(true)} onSelect={setSelectedHospital} />;
       case 'types': return <DeviceTypesScreen onCreate={() => setIsCreatingDeviceType(true)} onSelect={setSelectedDeviceType} />;
-      case 'users': return <UsersScreen onSelectUser={setSelectedUserId} onSelectStaff={setSelectedStaffForEdit} onCreateBootstrapUser={isOwner ? () => setIsCreatingBootstrapUser(true) : undefined} />;
+      case 'users': return <UsersScreen onSelectUser={setSelectedUserId} onSelectStaff={setSelectedStaffForEdit} />;
       case 'roles': return <RolesScreen onSelectRole={setSelectedRoleId} onCreate={() => setIsCreatingRole(true)} />;
       case 'settings': return <SettingsScreen onLogout={() => { logout(); navigation.replace('Login'); }} />;
       default: return <OrgHomeContent role={role} />;
@@ -339,8 +427,7 @@ export const OrgDashboard = ({ navigation, route }) => {
     if (isEditingHospital) return t('dashboard.edit_hospital');
     if (selectedHospital) return t('dashboard.hospital_details');
     if (isCreatingRole) return t('dashboard.create_role');
-    if (isCreatingBootstrapUser) return t('bootstrap_user.screen_title');
-    if (selectedStaffForEdit) return selectedStaffForEdit.doctorCode ? t('dashboard.edit_doctor') : t('dashboard.edit_nurse');
+if (selectedStaffForEdit) return selectedStaffForEdit.doctorCode ? t('dashboard.edit_doctor') : t('dashboard.edit_nurse');
     if (selectedUserForEdit) return t('dashboard.edit_admin');
     if (selectedUserId) return t('dashboard.user_details');
     if (selectedRoleId) return t('dashboard.role_details');
@@ -433,4 +520,13 @@ const createStyles = (T) => StyleSheet.create({
   drawerItem: { flexDirection: 'row', alignItems: 'center', padding: 12, gap: 12, borderRadius: 12 },
   drawerItemText: { fontSize: 14, fontWeight: '600', color: T.text },
   drawerDivider: { height: 1, backgroundColor: T.borderSoft, marginVertical: 12, marginHorizontal: 12 },
+  policyHeaderRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
+  policyCard: { padding: 0, backgroundColor: T.surface },
+  policyRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16 },
+  policyLabel: { fontSize: 14, color: T.textDim },
+  policyValue: { fontSize: 14, fontWeight: '600', color: T.text },
+  policyInputRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  policyInput: { width: 60, height: 36, borderWidth: 1, borderRadius: 8, paddingHorizontal: 8, textAlign: 'center', fontSize: 14, fontWeight: '600' },
+  policyUnit: { fontSize: 13, color: T.textDim },
+  policyActions: { flexDirection: 'row', gap: 10, padding: 12, borderTopWidth: 1, borderTopColor: T.borderSoft },
 });

@@ -3,8 +3,8 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { Card, Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
-import { IconUser, IconMail, IconPhone, IconBuilding } from '../../icons';
+import { Card, Field, TextInput, PhoneInput, Btn, SectionHeader } from '../../components/Shared';
+import { IconUser, IconMail, IconBuilding } from '../../icons';
 import { nurseApi } from '../../services/api';
 
 const NURSE_TYPES = ['REGISTERED', 'LICENSED', 'PRACTITIONER', 'SPECIALIST'];
@@ -152,13 +152,7 @@ export const EditNurseScreen = ({ nurse, onCancel, onSave }) => {
             />
           </Field>
           <Field label={t('users.phone')}>
-            <TextInput
-              value={form.phone}
-              onChangeText={v => set('phone', v)}
-              placeholder="+91 00000 00000"
-              keyboardType="phone-pad"
-              leading={<IconPhone size={16} color={T.textFaint} />}
-            />
+            <PhoneInput value={form.phone} onChangeText={v => set('phone', v)} />
           </Field>
         </View>
 

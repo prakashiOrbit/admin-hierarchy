@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { organisationApi } from '../../services/api';
-import { Card, Field, TextInput, Btn } from '../../components/Shared';
-import { IconHospital, IconUser, IconMail, IconLocation, IconPhone, IconBuilding } from '../../icons';
+import { Card, Field, TextInput, PhoneInput, Btn } from '../../components/Shared';
+import { IconHospital, IconUser, IconMail, IconLocation, IconBuilding } from '../../icons';
 
 export const EditHospitalScreen = ({ hospital, onCancel, onSave }) => {
   const { t } = useTranslation();
@@ -119,12 +119,7 @@ export const EditHospitalScreen = ({ hospital, onCancel, onSave }) => {
           </Field>
 
           <Field label={t('hospital.contact_phone')}>
-            <TextInput
-              value={form.myContact.phone}
-              onChangeText={v => updateContact('phone', v)}
-              placeholder={t('placeholders.contact_phone')}
-              leading={<IconPhone size={18} color={T.textDim} />}
-            />
+            <PhoneInput value={form.myContact.phone} onChangeText={v => updateContact('phone', v)} />
           </Field>
         </View>
 

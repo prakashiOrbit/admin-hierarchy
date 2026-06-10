@@ -5,7 +5,7 @@ import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, Btn } from '../../components/Shared';
 import { IconShield, IconPlus, IconChevron, IconLock } from '../../icons';
-import { rolesApi } from '../../services/api';
+import { rolesApi, getApiErrorMessage } from '../../services/api';
 
 export const RolesScreen = ({ onSelectRole, onCreate }) => {
   const { t } = useTranslation();
@@ -25,7 +25,7 @@ export const RolesScreen = ({ onSelectRole, onCreate }) => {
       const data = await rolesApi.listAll(user.orgName, token);
       setRoles(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(err.message || t('common.error'));
+      setError(getApiErrorMessage(err));
     } finally {
       setLoading(false);
     }

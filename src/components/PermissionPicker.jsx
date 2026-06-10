@@ -7,7 +7,7 @@ import { IconCheck, IconChevron, IconShield, IconKey } from '../icons';
 
 const ALL_PERMITS = [
   'permit.admin.alarm', 'permit.admin.bed', 'permit.admin.device', 'permit.admin.devicetype',
-  'permit.admin.doctor', 'permit.admin.fetch', 'permit.admin.gateway', 'permit.admin.hospital',
+  'permit.admin.doctor', 'permit.admin.gateway', 'permit.admin.hospital',
   'permit.admin.image', 'permit.admin.nurse', 'permit.admin.nursingstation', 'permit.admin.patient',
   'permit.admin.roles', 'permit.admin.shift', 'permit.admin.users', 'permit.admin.ward',
   'permit.create.bed', 'permit.create.device', 'permit.create.doctor', 'permit.create.gateway',
@@ -17,7 +17,7 @@ const ALL_PERMITS = [
   'permit.allocate.doctor.patient', 'permit.allocate.gateway.ward',
   'permit.get', 'permit.set', 'permit.update.devicetype',
   'permit.upload.events', 'permit.upload.statedata', 'permit.upload.telemetry',
-  'permit.app.admin.patient', 'permit.start.bootstrap',
+  'permit.app.admin.patient',
 ];
 
 const GROUPS = [
@@ -28,15 +28,64 @@ const GROUPS = [
   { key: 'app', permits: ALL_PERMITS.filter(p => p.startsWith('permit.app.') || p.startsWith('permit.start.')) },
 ];
 
-function formatPermit(permit) {
-  const parts = permit.split('.');
-  return parts.length === 2 ? parts[1] : parts.slice(2).join('.');
+const PERMIT_KEYS = {
+  'permit.admin.alarm':             'permissions.perm_admin_alarm',
+  'permit.admin.bed':               'permissions.perm_admin_bed',
+  'permit.admin.device':            'permissions.perm_admin_device',
+  'permit.admin.devicetype':        'permissions.perm_admin_devicetype',
+  'permit.admin.doctor':            'permissions.perm_admin_doctor',
+  'permit.admin.gateway':           'permissions.perm_admin_gateway',
+  'permit.admin.hospital':          'permissions.perm_admin_hospital',
+  'permit.admin.image':             'permissions.perm_admin_image',
+  'permit.admin.nurse':             'permissions.perm_admin_nurse',
+  'permit.admin.nursingstation':    'permissions.perm_admin_nursingstation',
+  'permit.admin.organisation':      'permissions.perm_admin_organisation',
+  'permit.admin.patient':           'permissions.perm_admin_patient',
+  'permit.admin.roles':             'permissions.perm_admin_roles',
+  'permit.admin.shift':             'permissions.perm_admin_shift',
+  'permit.admin.users':             'permissions.perm_admin_users',
+  'permit.admin.ward':              'permissions.perm_admin_ward',
+  'permit.create.bed':              'permissions.perm_create_bed',
+  'permit.create.devconfigorg':     'permissions.perm_create_devconfigorg',
+  'permit.create.device':           'permissions.perm_create_device',
+  'permit.create.devicetype':       'permissions.perm_create_devicetype',
+  'permit.create.doctor':           'permissions.perm_create_doctor',
+  'permit.create.gateway':          'permissions.perm_create_gateway',
+  'permit.create.hospital':         'permissions.perm_create_hospital',
+  'permit.create.image':            'permissions.perm_create_image',
+  'permit.create.nurse':            'permissions.perm_create_nurse',
+  'permit.create.nursingstation':   'permissions.perm_create_nursingstation',
+  'permit.create.patient':          'permissions.perm_create_patient',
+  'permit.create.role':             'permissions.perm_create_role',
+  'permit.create.shift':            'permissions.perm_create_shift',
+  'permit.create.user':             'permissions.perm_create_user',
+  'permit.create.ward':             'permissions.perm_create_ward',
+  'permit.assign.bed':              'permissions.perm_assign_bed',
+  'permit.assign.device':           'permissions.perm_assign_device',
+  'permit.assign.gateway':          'permissions.perm_assign_gateway',
+  'permit.allocate.doctor.patient': 'permissions.perm_allocate_doctor_patient',
+  'permit.allocate.gateway.ward':   'permissions.perm_allocate_gateway_ward',
+  'permit.get':                     'permissions.perm_get',
+  'permit.set':                     'permissions.perm_set',
+  'permit.update.devicetype':       'permissions.perm_update_devicetype',
+  'permit.list.devicetype':         'permissions.perm_list_devicetype',
+  'permit.search.devicetype':       'permissions.perm_search_devicetype',
+  'permit.upload.events':           'permissions.perm_upload_events',
+  'permit.upload.statedata':        'permissions.perm_upload_statedata',
+  'permit.upload.telemetry':        'permissions.perm_upload_telemetry',
+  'permit.app.admin.patient':       'permissions.perm_app_admin_patient',
+};
+
+function formatPermit(permit, t) {
+  const key = PERMIT_KEYS[permit];
+  if (key) return t(key, { defaultValue: permit });
+  return permit.split('.').slice(2).join(' ') || permit.split('.')[1];
 }
 
 // mode: 'full' | 'template' | 'custom'
 // assignedRole: string | null
 // customPermissions: string[] | null
-export const PermissionPicker = ({ mode, assignedRole, customPermissions, onModeChange, onAssignedRoleChange, onCustomPermissionsChange, orgName, token }) => {
+export const PermissionPicker = ({ mode, assignedRole, customPermissions, onModeChange, onAssignedRoleChange, onCustomPermissionsChange, orgName, token, availablePermits }) => {
   const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
@@ -44,6 +93,16 @@ export const PermissionPicker = ({ mode, assignedRole, customPermissions, onMode
   const [expanded, setExpanded] = useState({});
   const [roleTemplates, setRoleTemplates] = useState([]);
   const [loadingTemplates, setLoadingTemplates] = useState(false);
+
+  const activePermits = availablePermits || ALL_PERMITS;
+
+  const GROUPS = [
+    { key: 'admin', permits: activePermits.filter(p => p.startsWith('permit.admin.')) },
+    { key: 'create', permits: activePermits.filter(p => p.startsWith('permit.create.')) },
+    { key: 'assign', permits: activePermits.filter(p => p.startsWith('permit.assign.') || p.startsWith('permit.allocate.')) },
+    { key: 'data', permits: activePermits.filter(p => p === 'permit.get' || p === 'permit.set' || p.startsWith('permit.update.') || p.startsWith('permit.upload.')) },
+    { key: 'app', permits: activePermits.filter(p => p.startsWith('permit.app.') || p.startsWith('permit.start.')) },
+  ].filter(g => g.permits.length > 0);
 
   useEffect(() => {
     if (mode === 'template' && orgName && token && roleTemplates.length === 0) {
@@ -63,30 +122,54 @@ export const PermissionPicker = ({ mode, assignedRole, customPermissions, onMode
     onModeChange(newMode);
     if (newMode === 'full') {
       onAssignedRoleChange(null);
-      onCustomPermissionsChange(null);
+      // For full access, explicitly populate all active permits
+      onCustomPermissionsChange([...activePermits]);
     } else if (newMode === 'template') {
       onCustomPermissionsChange(null);
     } else if (newMode === 'custom') {
       onAssignedRoleChange(null);
-      if (!customPermissions) onCustomPermissionsChange([...ALL_PERMITS]);
+      if (!customPermissions) onCustomPermissionsChange([...activePermits]);
     }
+  };
+
+  const getCompanions = (permit) => {
+    const parts = permit.split('.');
+    if (parts.length < 3) return [];
+    const [, action, resource] = parts;
+    if (action === 'create') {
+      return activePermits.filter(p => p === `permit.admin.${resource}` || p === `permit.admin.${resource}s`);
+    }
+    if (action === 'admin') {
+      return activePermits.filter(p => p === `permit.create.${resource}` || p === `permit.create.${resource.replace(/s$/, '')}`);
+    }
+    return [];
   };
 
   const togglePermit = (permit) => {
     if (!customPermissions) return;
-    const next = customPermissions.includes(permit)
-      ? customPermissions.filter(p => p !== permit)
-      : [...customPermissions, permit];
+    const companions = getCompanions(permit);
+    const turningOn = !customPermissions.includes(permit);
+    let next;
+    if (turningOn) {
+      const toAdd = [permit, ...companions].filter(p => !customPermissions.includes(p));
+      next = [...customPermissions, ...toAdd];
+    } else {
+      const toRemove = new Set([permit, ...companions]);
+      next = customPermissions.filter(p => !toRemove.has(p));
+    }
     onCustomPermissionsChange(next);
   };
 
   const toggleGroup = (group) => {
     if (!customPermissions) return;
     const allChecked = group.permits.every(p => customPermissions.includes(p));
-    const next = allChecked
-      ? customPermissions.filter(p => !group.permits.includes(p))
-      : [...customPermissions, ...group.permits.filter(p => !customPermissions.includes(p))];
-    onCustomPermissionsChange(next);
+    if (allChecked) {
+      const toRemove = new Set([...group.permits, ...group.permits.flatMap(getCompanions)]);
+      onCustomPermissionsChange(customPermissions.filter(p => !toRemove.has(p)));
+    } else {
+      const toAdd = [...group.permits, ...group.permits.flatMap(getCompanions)].filter(p => !customPermissions.includes(p));
+      onCustomPermissionsChange([...customPermissions, ...toAdd]);
+    }
   };
 
   const groupLabel = (key) => ({
@@ -151,7 +234,7 @@ export const PermissionPicker = ({ mode, assignedRole, customPermissions, onMode
                     <Text style={[styles.templateName, isSelected && { color: T.accent }]}>{role.roleName}</Text>
                     {role.rolePermissions?.length > 0 && (
                       <Text style={styles.templatePerms} numberOfLines={1}>
-                        {role.rolePermissions.slice(0, 3).map(p => formatPermit(p)).join(', ')}
+                        {role.rolePermissions.slice(0, 3).map(p => formatPermit(p, t)).join(', ')}
                         {role.rolePermissions.length > 3 ? ` +${role.rolePermissions.length - 3}` : ''}
                       </Text>
                     )}
@@ -197,7 +280,7 @@ export const PermissionPicker = ({ mode, assignedRole, customPermissions, onMode
                         <View style={[styles.checkbox, customPermissions.includes(permit) && styles.checkboxFull]}>
                           {customPermissions.includes(permit) && <IconCheck size={10} color="#fff" />}
                         </View>
-                        <Text style={styles.permitText}>{formatPermit(permit)}</Text>
+                        <Text style={styles.permitText}>{formatPermit(permit, t)}</Text>
                         <Text style={styles.permitGroup}>{permit.split('.')[1]}</Text>
                       </TouchableOpacity>
                     ))}
@@ -249,7 +332,7 @@ const createStyles = (T) => StyleSheet.create({
   },
   templateRowActive: { borderColor: T.accent, backgroundColor: T.accentSoft },
   templateName: { fontSize: 13, fontWeight: '600', color: T.text },
-  templatePerms: { fontSize: 11, color: T.textDim, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace', marginTop: 2 },
+  templatePerms: { fontSize: 11, color: T.textDim, marginTop: 2 },
   emptyTemplates: { fontSize: 12, color: T.textDim, textAlign: 'center', padding: 16, lineHeight: 18 },
   groups: { gap: 8 },
   groupCard: { borderRadius: 10, borderWidth: 1, borderColor: T.borderSoft, backgroundColor: T.surface, overflow: 'hidden' },
@@ -267,6 +350,6 @@ const createStyles = (T) => StyleSheet.create({
   checkboxPartial: { borderColor: T.accent, backgroundColor: T.accentSoft },
   checkboxFull: { borderColor: T.accent, backgroundColor: T.accent },
   partialDot: { width: 8, height: 8, borderRadius: 2, backgroundColor: T.accent },
-  permitText: { flex: 1, fontSize: 12, color: T.text, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
+  permitText: { flex: 1, fontSize: 12, color: T.text },
   permitGroup: { fontSize: 10, color: T.textFaint, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
 });

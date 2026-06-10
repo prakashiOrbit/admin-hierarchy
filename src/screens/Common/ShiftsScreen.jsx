@@ -23,22 +23,40 @@ export const ShiftsScreen = ({ onNewNurse, onNewShift, onSelectNurse, onSelectSh
   const [mode, setModeInternal] = useState(modeProp || 'shifts');
   const setMode = (m) => { setModeInternal(m); onModeChange?.(m); };
 
+  const hasShiftPerm = user?.roles?.includes('permit.admin.shift') || user?.roles?.includes('HOSP_OWNER');
+  const hasNursePerm = user?.roles?.includes('permit.admin.nurse') || user?.roles?.includes('HOSP_OWNER');
+
   useEffect(() => {
     if (!user?.orgName || !user?.hospitalCode) return;
     let cancelled = false;
+    setLoading(true);
+    
     Promise.all([
-      shiftApi.listAll(user.orgName, user.hospitalCode, token),
-      nurseApi.listAll(user.orgName, user.hospitalCode, token),
+      hasShiftPerm ? shiftApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
+        if (e.status === 403) return [];
+        throw e;
+      }) : Promise.resolve([]),
+      hasNursePerm ? nurseApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
+        if (e.status === 403) return [];
+        throw e;
+      }) : Promise.resolve([]),
     ])
       .then(([s, n]) => {
         if (cancelled) return;
         setShifts(Array.isArray(s) ? s : []);
         setNurses(Array.isArray(n) ? n : []);
+        
+        // Auto-switch mode if current one is not permitted
+        if (mode === 'shifts' && !hasShiftPerm && hasNursePerm) {
+          setMode('nurses');
+        } else if (mode === 'nurses' && !hasNursePerm && hasShiftPerm) {
+          setMode('shifts');
+        }
       })
       .catch(e => { if (!cancelled) setError(e.message || t('shifts.load_failed')); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [user?.orgName, user?.hospitalCode, token]);
+  }, [user?.orgName, user?.hospitalCode, token, hasShiftPerm, hasNursePerm]);
 
   const filteredShifts = shifts.filter(s =>
     s.wardCode?.toLowerCase().includes(query.toLowerCase()) ||
@@ -71,8 +89,8 @@ export const ShiftsScreen = ({ onNewNurse, onNewShift, onSelectNurse, onSelectSh
         </View>
 
         <View style={styles.modeRow}>
-          <Chip active={mode === 'shifts'} onPress={() => setMode('shifts')}>{t('shifts.active_shifts')}</Chip>
-          <Chip active={mode === 'nurses'} onPress={() => setMode('nurses')}>{t('shifts.nursing_staff')}</Chip>
+          {hasShiftPerm && <Chip active={mode === 'shifts'} onPress={() => setMode('shifts')}>{t('shifts.active_shifts')}</Chip>}
+          {hasNursePerm && <Chip active={mode === 'nurses'} onPress={() => setMode('nurses')}>{t('shifts.nursing_staff')}</Chip>}
         </View>
 
         <View style={styles.headerRow}>
@@ -80,9 +98,11 @@ export const ShiftsScreen = ({ onNewNurse, onNewShift, onSelectNurse, onSelectSh
             title={mode === 'shifts' ? t('shifts.current_shifts') : t('shifts.registered_nurses')}
             count={mode === 'shifts' ? filteredShifts.length : filteredNurses.length}
           />
-          <Btn variant="primary" size="sm" style={styles.newBtn} onPress={mode === 'shifts' ? onNewShift : onNewNurse}>
-            <IconPlus size={14} color="#fff" /> {mode === 'shifts' ? t('shifts.new_shift') : t('dashboard.onboard_nurse')}
-          </Btn>
+          {((mode === 'shifts' && hasShiftPerm) || (mode === 'nurses' && hasNursePerm)) && (
+            <Btn variant="primary" size="sm" style={styles.newBtn} onPress={mode === 'shifts' ? onNewShift : onNewNurse}>
+              <IconPlus size={14} color="#fff" /> {mode === 'shifts' ? t('shifts.new_shift') : t('dashboard.onboard_nurse')}
+            </Btn>
+          )}
         </View>
 
         <View style={styles.list}>

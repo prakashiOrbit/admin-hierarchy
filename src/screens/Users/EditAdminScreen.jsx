@@ -3,9 +3,9 @@ import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert } from 're
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { Card, Field, TextInput, Btn, SectionHeader } from '../../components/Shared';
-import { IconUser, IconMail, IconPhone, IconBuilding } from '../../icons';
-import { userApi } from '../../services/api';
+import { Card, Field, TextInput, PhoneInput, Btn, SectionHeader } from '../../components/Shared';
+import { IconUser, IconMail, IconBuilding } from '../../icons';
+import { userApi, getApiErrorMessage } from '../../services/api';
 
 export const EditAdminScreen = ({ user, onCancel, onSave }) => {
   const { t } = useTranslation();
@@ -42,7 +42,7 @@ export const EditAdminScreen = ({ user, onCancel, onSave }) => {
         { text: t('common.done'), onPress: () => onSave?.() },
       ]);
     } catch (e) {
-      Alert.alert(t('common.error'), e.message || t('users.update_failed'));
+      Alert.alert(t('common.error'), getApiErrorMessage(e));
     } finally {
       setSaving(false);
     }
@@ -109,13 +109,7 @@ export const EditAdminScreen = ({ user, onCancel, onSave }) => {
           </Field>
 
           <Field label={t('users.phone')}>
-            <TextInput
-              value={form.contactPhone}
-              onChangeText={v => set('contactPhone', v)}
-              placeholder="+91 00000 00000"
-              keyboardType="phone-pad"
-              leading={<IconPhone size={16} color={T.textFaint} />}
-            />
+            <PhoneInput value={form.contactPhone} onChangeText={v => set('contactPhone', v)} />
           </Field>
         </View>
 

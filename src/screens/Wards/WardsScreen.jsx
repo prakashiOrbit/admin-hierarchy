@@ -24,8 +24,16 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
   const [loadingBeds, setLoadingBeds] = useState({});
   const [selectedBed, setSelectedBed] = useState(null);
 
+  const hasWardPerm = user?.roles?.includes('permit.admin.ward') || user?.roles?.includes('HOSP_OWNER');
+  const hasBedPerm = user?.roles?.includes('permit.admin.bed') || user?.roles?.includes('HOSP_OWNER');
+
   useEffect(() => {
     if (!user?.orgName || !user?.hospitalCode) return;
+    if (!hasWardPerm) {
+      setWards([]);
+      setLoading(false);
+      return;
+    }
     let cancelled = false;
     setLoading(true);
     setError(null);
@@ -37,6 +45,7 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
       })
       .catch(e => {
         if (cancelled) return;
+        if (e.status === 403) { setWards([]); return; }
         const msg = (e.message || '').toLowerCase();
         if (msg.includes('no_wards') || msg.includes('notfound') || msg.includes('not found') || msg.includes('no wards')) {
           setWards([]);
@@ -46,13 +55,13 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
       })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [user?.orgName, user?.hospitalCode, token]);
+  }, [user?.orgName, user?.hospitalCode, token, hasWardPerm]);
 
   const handleExpand = (wardCode) => {
     const isExpanded = expandedWard === wardCode;
     setExpandedWard(isExpanded ? null : wardCode);
 
-    if (!isExpanded && !bedsByWard[wardCode]) {
+    if (!isExpanded && !bedsByWard[wardCode] && hasBedPerm) {
       setLoadingBeds(prev => ({ ...prev, [wardCode]: true }));
       bedApi.getAllBedsByWard(user.orgName, user.hospitalCode, wardCode, token)
         .then(res => {
@@ -93,9 +102,11 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
 
         <View style={styles.headerRow}>
           <SectionHeader title={t('ward.wards_title')} subtitle={t('ward.units_count', { count: filtered.length })} />
-          <Btn variant="primary" size="sm" style={styles.newBtn} onPress={onNewWard}>
-            <IconPlus size={14} color="#FFF" /> {t('actions.new_ward')}
-          </Btn>
+          {hasWardPerm && (
+            <Btn variant="primary" size="sm" style={styles.newBtn} onPress={onNewWard}>
+              <IconPlus size={14} color="#FFF" /> {t('actions.new_ward')}
+            </Btn>
+          )}
         </View>
 
         <View style={styles.list}>
@@ -137,13 +148,15 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
                   </View>
                 </Card>
 
-                {isExpanded && (
+                {isExpanded && hasBedPerm && (
                   <View style={styles.bedsContainer}>
                     <View style={styles.bedsHeader}>
                       <Text style={styles.bedsTitle}>{t('ward.monitored_beds')}</Text>
-                      <TouchableOpacity onPress={() => onNewBed(w.wardCode)}>
-                        <Text style={styles.addBedText}>+ {t('actions.add_bed')}</Text>
-                      </TouchableOpacity>
+                      {hasBedPerm && (
+                        <TouchableOpacity onPress={() => onNewBed(w.wardCode)}>
+                          <Text style={styles.addBedText}>+ {t('actions.add_bed')}</Text>
+                        </TouchableOpacity>
+                      )}
                     </View>
 
                     {loadingBeds[w.wardCode] ? (

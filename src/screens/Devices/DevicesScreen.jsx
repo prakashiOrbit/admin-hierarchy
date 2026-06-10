@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, SearchBar, Btn, Chip } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
 import { IconGateway, IconPulse, IconPlus, IconCpu, IconChevron } from '../../icons';
-import { gatewayApi, deviceApi } from '../../services/api';
+import { gatewayApi, deviceApi, getApiErrorMessage } from '../../services/api';
 
 export const DevicesScreen = ({ onNewGateway, onNewDevice, onGatewayPress, onDevicePress, onDeviceAssign, mode: modeProp, onModeChange }) => {
   const { t } = useTranslation();
@@ -23,33 +23,45 @@ export const DevicesScreen = ({ onNewGateway, onNewDevice, onGatewayPress, onDev
   const setMode = (m) => { setModeInternal(m); onModeChange?.(m); };
   const [endingDeviceCode, setEndingDeviceCode] = useState(null);
 
+  const hasGatewayPerm = user?.roles?.includes('permit.admin.gateway') || user?.roles?.includes('HOSP_OWNER');
+  const hasDevicePerm = user?.roles?.includes('permit.admin.device') || user?.roles?.includes('HOSP_OWNER');
+
   const fetchAll = useCallback(async () => {
     if (!user?.orgName || !user?.hospitalCode) return;
     setLoading(true);
     setError(null);
     try {
       const [gRes, dRes] = await Promise.all([
-        gatewayApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
+        hasGatewayPerm ? gatewayApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
+          if (e.status === 403) return [];
           const msg = (e.message || '').toLowerCase();
           if (msg.includes('no_gateways') || msg.includes('notfound') || msg.includes('not found') || msg.includes('no gateway')) return [];
           throw e;
-        }),
-        deviceApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
+        }) : Promise.resolve([]),
+        hasDevicePerm ? deviceApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
+          if (e.status === 403) return [];
           const msg = (e.message || '').toLowerCase();
           if (msg.includes('no_devices') || msg.includes('notfound') || msg.includes('not found') || msg.includes('no device')) return [];
           throw e;
-        }),
+        }) : Promise.resolve([]),
       ]);
       const gList = Array.isArray(gRes) ? gRes : (Array.isArray(gRes?.data) ? gRes.data : []);
       const dList = Array.isArray(dRes) ? dRes : (Array.isArray(dRes?.data) ? dRes.data : []);
       setGateways(gList);
       setDevices(dList);
+
+      // Adjust mode if the current mode is not permitted
+      if (mode === 'gateways' && !hasGatewayPerm && hasDevicePerm) {
+        setMode('devices');
+      } else if (mode === 'devices' && !hasDevicePerm && hasGatewayPerm) {
+        setMode('gateways');
+      }
     } catch (err) {
-      setError(err.message || t('messages.error_load_devices'));
+      setError(getApiErrorMessage(err));
     } finally {
       setLoading(false);
     }
-  }, [user?.orgName, user?.hospitalCode, token, t]);
+  }, [user?.orgName, user?.hospitalCode, token, hasGatewayPerm, hasDevicePerm, mode]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
@@ -113,12 +125,16 @@ export const DevicesScreen = ({ onNewGateway, onNewDevice, onGatewayPress, onDev
         </View>
 
         <View style={styles.modeRow}>
-          <Chip active={mode === 'gateways'} onPress={() => setMode('gateways')}>
-            {t('entity.gateways')} · {gateways.length}
-          </Chip>
-          <Chip active={mode === 'devices'} onPress={() => setMode('devices')}>
-            {t('entity.devices')} · {devices.length}
-          </Chip>
+          {hasGatewayPerm && (
+            <Chip active={mode === 'gateways'} onPress={() => setMode('gateways')}>
+              {t('entity.gateways')} · {gateways.length}
+            </Chip>
+          )}
+          {hasDevicePerm && (
+            <Chip active={mode === 'devices'} onPress={() => setMode('devices')}>
+              {t('entity.devices')} · {devices.length}
+            </Chip>
+          )}
         </View>
 
         <View style={styles.headerRow}>

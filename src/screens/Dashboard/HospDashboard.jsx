@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, Platform, BackHandler, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, Platform, BackHandler, ActivityIndicator, Alert, TextInput as RNTextInput } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { summaryApi, getApiErrorMessage } from '../../services/api';
+import { summaryApi, organisationApi, getApiErrorMessage } from '../../services/api';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -81,10 +81,60 @@ const HospHomeContent = ({ role, onNavigate }) => {
   const { t } = useTranslation();
   const { user, token } = useAuth();
   const styles = createStyles(T);
+  const isOwner = role === 'HOSP_OWNER';
+  const isAdmin = role === 'HOSP_ADMIN';
+  const canEditPolicy = isOwner || isAdmin;
+
   const [homeStats, setHomeStats] = useState({ wards: null, beds: null, devices: null, staffing: null, patients: null, dayShiftNurses: null, eveningShiftNurses: null, nightShiftNurses: null });
   const [homeLoading, setHomeLoading] = useState(true);
   const [homeError, setHomeError] = useState(null);
   const [reloadKey, setReloadKey] = useState(0);
+
+  const [editingPolicy, setEditingPolicy] = useState(false);
+  const [policyLoading, setPolicyLoading] = useState(false);
+  const [policyFetching, setPolicyFetching] = useState(false);
+  const [policyForm, setPolicyForm] = useState({ adminHours: '', doctorHours: '', nurseHours: '', patientHours: '' });
+
+  const handleEditPolicy = async () => {
+    setPolicyFetching(true);
+    try {
+      const hosp = await organisationApi.getHospitalByCode(user.orgName, user.hospitalCode, token);
+      setPolicyForm({
+        adminHours: String(hosp.adminJwtValiditySeconds ? Math.round(hosp.adminJwtValiditySeconds / 3600) : ''),
+        doctorHours: String(hosp.doctorJwtValiditySeconds ? Math.round(hosp.doctorJwtValiditySeconds / 3600) : ''),
+        nurseHours: String(hosp.nurseJwtValiditySeconds ? Math.round(hosp.nurseJwtValiditySeconds / 3600) : ''),
+        patientHours: String(hosp.patientJwtValiditySeconds ? Math.round(hosp.patientJwtValiditySeconds / 3600) : ''),
+      });
+      setEditingPolicy(true);
+    } catch (err) {
+      Alert.alert('Error', 'Failed to load current policy.');
+    } finally {
+      setPolicyFetching(false);
+    }
+  };
+
+  const handleSaveHospPolicy = async () => {
+    const toSeconds = (h) => h.trim() === '' ? null : parseInt(h, 10) * 3600;
+    const payload = {};
+    if (isOwner) payload.adminJwtValiditySeconds = toSeconds(policyForm.adminHours);
+    payload.doctorJwtValiditySeconds = toSeconds(policyForm.doctorHours);
+    payload.nurseJwtValiditySeconds = toSeconds(policyForm.nurseHours);
+    payload.patientJwtValiditySeconds = toSeconds(policyForm.patientHours);
+    const nonNull = Object.values(payload).filter(v => v !== null);
+    if (nonNull.some(v => isNaN(v) || v <= 0)) {
+      Alert.alert('Invalid Input', 'Session durations must be positive numbers (leave blank to inherit from Org).');
+      return;
+    }
+    setPolicyLoading(true);
+    try {
+      await organisationApi.updateHospitalJwtValidity(user.orgName, user.hospitalCode, payload, token);
+      setEditingPolicy(false);
+    } catch (err) {
+      Alert.alert('Error', err.message || 'Failed to update session policy.');
+    } finally {
+      setPolicyLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!user?.orgName || !user?.hospitalCode) { setHomeLoading(false); return; }
@@ -97,14 +147,14 @@ const HospHomeContent = ({ role, onNavigate }) => {
       .then(summary => {
         if (cancelled) return;
         setHomeStats({
-          wards:              summary?.stats?.wards              ?? null,
-          beds:               summary?.stats?.beds               ?? null,
-          devices:            summary?.stats?.totalDevices       ?? null,
-          staffing:           summary?.stats?.totalNurses        ?? null,
-          patients:           summary?.stats?.totalPatients      ?? null,
-          dayShiftNurses:     summary?.stats?.dayShiftNurses     ?? null,
-          eveningShiftNurses: summary?.stats?.eveningShiftNurses ?? null,
-          nightShiftNurses:   summary?.stats?.nightShiftNurses   ?? null,
+          wards:              summary?.stats?.wards              ?? 0,
+          beds:               summary?.stats?.beds               ?? 0,
+          devices:            summary?.stats?.totalDevices       ?? 0,
+          staffing:           summary?.stats?.totalNurses        ?? 0,
+          patients:           summary?.stats?.totalPatients      ?? 0,
+          dayShiftNurses:     summary?.stats?.dayShiftNurses     ?? 0,
+          eveningShiftNurses: summary?.stats?.eveningShiftNurses ?? 0,
+          nightShiftNurses:   summary?.stats?.nightShiftNurses   ?? 0,
         });
       })
       .catch(err => {
@@ -153,7 +203,16 @@ const HospHomeContent = ({ role, onNavigate }) => {
             <IconAlert size={18} color={T.bad} />
             <Text style={styles.errorText}>{homeError}</Text>
           </View>
-          <Btn variant="tonal" size="sm" onPress={() => setReloadKey(key => key + 1)}>Retry</Btn>
+          <Btn variant="tonal" size="sm" onPress={() => setReloadKey(key => key + 1)}>{t('common.retry', 'Retry')}</Btn>
+        </Card>
+      )}
+
+      {!homeLoading && !homeError && homeStats.wards === 0 && homeStats.beds === 0 && homeStats.devices === 0 && homeStats.patients === 0 && (
+        <Card style={[styles.errorCard, { borderColor: T.border, backgroundColor: T.surfaceAlt || T.surface }]}>
+          <View style={styles.errorRow}>
+            <IconShield size={18} color={T.accent} />
+            <Text style={[styles.errorText, { color: T.textDim }]}>{t('dashboard.hosp_onboarding_hint', 'Welcome! Start by adding wards, beds, and assigning staff to get your hospital operational.')}</Text>
+          </View>
         </Card>
       )}
 
@@ -187,6 +246,62 @@ const HospHomeContent = ({ role, onNavigate }) => {
           </View>
         </Card>
       </View>
+
+      {/* Security Policy — HOSP_OWNER manages admin+doctor+nurse+patient; HOSP_ADMIN manages doctor+nurse+patient */}
+      {canEditPolicy && (
+        <View style={styles.section}>
+          <View style={styles.policyHeaderRow}>
+            <SectionHeader title="Security Policy" />
+            {!editingPolicy && (
+              <Btn variant="ghost" size="sm" onPress={handleEditPolicy} disabled={policyFetching}>
+                {policyFetching ? <ActivityIndicator size="small" color={T.textDim} /> : 'Edit'}
+              </Btn>
+            )}
+          </View>
+          <Card style={styles.policyCard}>
+            {editingPolicy ? (
+              <>
+                {[
+                  ...(isOwner ? [{ label: 'Admin Session', key: 'adminHours', placeholder: 'Inherit from Org' }] : []),
+                  { label: 'Doctor Session', key: 'doctorHours', placeholder: 'Inherit from Org' },
+                  { label: 'Nurse Session', key: 'nurseHours', placeholder: 'Inherit from Org' },
+                  { label: 'Patient Session', key: 'patientHours', placeholder: 'Inherit from Org' },
+                ].map((field, i) => (
+                  <View key={field.key}>
+                    {i > 0 && <View style={styles.policyDivider} />}
+                    <View style={styles.policyRow}>
+                      <Text style={styles.policyLabel}>{field.label}:</Text>
+                      <View style={styles.policyInputRow}>
+                        <RNTextInput
+                          style={[styles.policyInput, { color: T.text, borderColor: T.border, backgroundColor: T.surface2 }]}
+                          value={policyForm[field.key]}
+                          onChangeText={v => setPolicyForm(prev => ({ ...prev, [field.key]: v }))}
+                          keyboardType="numeric"
+                          placeholder={field.placeholder}
+                          placeholderTextColor={T.textFaint}
+                          selectTextOnFocus
+                        />
+                        <Text style={styles.policyUnit}>hrs</Text>
+                      </View>
+                    </View>
+                  </View>
+                ))}
+                <View style={styles.policyActions}>
+                  <Btn variant="surface" size="sm" style={{ flex: 1 }} onPress={() => setEditingPolicy(false)} disabled={policyLoading}>Cancel</Btn>
+                  <Btn variant="primary" size="sm" style={{ flex: 1 }} onPress={handleSaveHospPolicy} disabled={policyLoading}>
+                    {policyLoading ? <ActivityIndicator color="#fff" size="small" /> : 'Save'}
+                  </Btn>
+                </View>
+              </>
+            ) : (
+              <View style={styles.policyRow}>
+                <Text style={styles.policyLabel}>{isOwner ? 'Admin / Doctor / Nurse / Patient' : 'Doctor / Nurse / Patient'}</Text>
+                <Text style={styles.policyValue}>Tap Edit to configure</Text>
+              </View>
+            )}
+          </Card>
+        </View>
+      )}
     </ScrollView>
   );
 };
@@ -291,6 +406,10 @@ export const HospDashboard = ({ navigation, route }) => {
     setActiveTab(tabId);
   };
 
+  const hasPerm = (permit) => {
+    return isOwner || (user?.roles && user.roles.includes(permit));
+  };
+
   const footerItems = isNurse ? [
     { id: 'home',     label: t('dashboard.home'),     icon: <IconDashboard /> },
     { id: 'devices',  label: t('dashboard.devices'),  icon: <IconPulse /> },
@@ -306,12 +425,12 @@ export const HospDashboard = ({ navigation, route }) => {
   ] : [
     { id: 'home', label: t('dashboard.home'), icon: <IconDashboard /> },
     ...(isOwner ? [{ id: 'admins', label: t('dashboard.admins'), icon: <IconUsers /> }] : []),
-    { id: 'wards', label: t('dashboard.wards'), icon: <IconDoor /> },
-    { id: 'devices', label: t('dashboard.devices'), icon: <IconPulse /> },
-    { id: 'patients', label: t('dashboard.patients'), icon: <IconPatient /> },
-    { id: 'doctors', label: t('dashboard.doctors'), icon: <IconStethoscope /> },
-    { id: 'shifts', label: t('dashboard.shifts'), icon: <IconClock /> },
-    { id: 'nursing', label: t('dashboard.nursing_stations'), icon: <IconBed /> },
+    ...(hasPerm('permit.admin.ward') || hasPerm('permit.admin.bed') ? [{ id: 'wards', label: t('dashboard.wards'), icon: <IconDoor /> }] : []),
+    ...(hasPerm('permit.admin.gateway') || hasPerm('permit.admin.device') ? [{ id: 'devices', label: t('dashboard.devices'), icon: <IconPulse /> }] : []),
+    ...(hasPerm('permit.admin.patient') ? [{ id: 'patients', label: t('dashboard.patients'), icon: <IconPatient /> }] : []),
+    ...(hasPerm('permit.admin.doctor') ? [{ id: 'doctors', label: t('dashboard.doctors'), icon: <IconStethoscope /> }] : []),
+    ...(hasPerm('permit.admin.shift') || hasPerm('permit.admin.nurse') ? [{ id: 'shifts', label: t('dashboard.shifts'), icon: <IconClock /> }] : []),
+    ...(hasPerm('permit.admin.nursingstation') ? [{ id: 'nursing', label: t('dashboard.nursing_stations'), icon: <IconBed /> }] : []),
   ];
 
   const renderContent = () => {
@@ -328,8 +447,8 @@ export const HospDashboard = ({ navigation, route }) => {
     if (selectedGatewayCode) return <GatewayDetailScreen gatewayCode={selectedGatewayCode} onBack={() => setSelectedGatewayCode(null)} onAssign={(code) => { setSelectedGatewayCode(null); setAssigningGatewayCode(code); }} />;
     if (selectedDeviceForConfig) return <AddDeviceConfigScreen device={selectedDeviceForConfig} onCancel={() => setSelectedDeviceForConfig(null)} onSuccess={() => setSelectedDeviceForConfig(null)} />;
     if (isRegisteringPatient) return <CreatePatientScreen onCancel={() => setIsRegisteringPatient(false)} />;
-    if (isCreatingDoctor) return <CreateDoctorScreen onCancel={() => setIsCreatingDoctor(false)} hospCode="CLV-MAIN" />;
-    if (isCreatingNurse) return <CreateNurseScreen onCancel={() => setIsCreatingNurse(false)} hospCode="CLV-MAIN" />;
+    if (isCreatingDoctor) return <CreateDoctorScreen onCancel={() => setIsCreatingDoctor(false)} hospCode={user?.hospitalCode} />;
+    if (isCreatingNurse) return <CreateNurseScreen onCancel={() => setIsCreatingNurse(false)} hospCode={user?.hospitalCode} />;
     if (isCreatingShift) return <CreateShiftScreen onCancel={() => setIsCreatingShift(false)} />;
     if (assignmentData) return <AssignmentScreen initialPatientId={assignmentData.patientId} initialDoctorId={assignmentData.doctorId} onCancel={() => setAssignmentData(null)} />;
     if (selectedWardForEdit) return <EditWardScreen ward={selectedWardForEdit} onCancel={() => setSelectedWardForEdit(null)} onSave={() => setSelectedWardForEdit(null)} onDelete={() => setSelectedWardForEdit(null)} />;
@@ -468,4 +587,14 @@ const createStyles = (T) => StyleSheet.create({
   drawerDivider: { height: 1, backgroundColor: T.borderSoft, marginVertical: 12, marginHorizontal: 12 },
   placeholder: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 20 },
   placeholderText: { color: T.textDim, fontSize: 14, textAlign: 'center' },
+  policyHeaderRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
+  policyCard: { padding: 0, backgroundColor: T.surface },
+  policyRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16 },
+  policyLabel: { fontSize: 14, color: T.textDim },
+  policyValue: { fontSize: 14, fontWeight: '600', color: T.text },
+  policyDivider: { height: 1, backgroundColor: T.borderSoft },
+  policyInputRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  policyInput: { width: 60, height: 36, borderWidth: 1, borderRadius: 8, paddingHorizontal: 8, textAlign: 'center', fontSize: 14, fontWeight: '600' },
+  policyUnit: { fontSize: 13, color: T.textDim },
+  policyActions: { flexDirection: 'row', gap: 10, padding: 12, borderTopWidth: 1, borderTopColor: T.borderSoft },
 });

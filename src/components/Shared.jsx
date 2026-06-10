@@ -1,8 +1,57 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, TextInput as RNTextInput, StyleSheet, Image, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, TextInput as RNTextInput, StyleSheet, Image, Platform, Modal, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeContext';
 import { IconSearch } from '../icons';
+
+const DEFAULT_DIAL = '+91';
+
+const DIAL_CODES = [
+  { code: '+91',  flag: '🇮🇳', label: 'India' },
+  { code: '+1',   flag: '🇺🇸', label: 'USA / Canada' },
+  { code: '+44',  flag: '🇬🇧', label: 'United Kingdom' },
+  { code: '+61',  flag: '🇦🇺', label: 'Australia' },
+  { code: '+64',  flag: '🇳🇿', label: 'New Zealand' },
+  { code: '+65',  flag: '🇸🇬', label: 'Singapore' },
+  { code: '+60',  flag: '🇲🇾', label: 'Malaysia' },
+  { code: '+971', flag: '🇦🇪', label: 'UAE' },
+  { code: '+966', flag: '🇸🇦', label: 'Saudi Arabia' },
+  { code: '+974', flag: '🇶🇦', label: 'Qatar' },
+  { code: '+968', flag: '🇴🇲', label: 'Oman' },
+  { code: '+973', flag: '🇧🇭', label: 'Bahrain' },
+  { code: '+965', flag: '🇰🇼', label: 'Kuwait' },
+  { code: '+49',  flag: '🇩🇪', label: 'Germany' },
+  { code: '+33',  flag: '🇫🇷', label: 'France' },
+  { code: '+39',  flag: '🇮🇹', label: 'Italy' },
+  { code: '+34',  flag: '🇪🇸', label: 'Spain' },
+  { code: '+31',  flag: '🇳🇱', label: 'Netherlands' },
+  { code: '+81',  flag: '🇯🇵', label: 'Japan' },
+  { code: '+82',  flag: '🇰🇷', label: 'South Korea' },
+  { code: '+86',  flag: '🇨🇳', label: 'China' },
+  { code: '+63',  flag: '🇵🇭', label: 'Philippines' },
+  { code: '+66',  flag: '🇹🇭', label: 'Thailand' },
+  { code: '+62',  flag: '🇮🇩', label: 'Indonesia' },
+  { code: '+92',  flag: '🇵🇰', label: 'Pakistan' },
+  { code: '+880', flag: '🇧🇩', label: 'Bangladesh' },
+  { code: '+94',  flag: '🇱🇰', label: 'Sri Lanka' },
+  { code: '+977', flag: '🇳🇵', label: 'Nepal' },
+  { code: '+27',  flag: '🇿🇦', label: 'South Africa' },
+  { code: '+234', flag: '🇳🇬', label: 'Nigeria' },
+  { code: '+254', flag: '🇰🇪', label: 'Kenya' },
+  { code: '+55',  flag: '🇧🇷', label: 'Brazil' },
+  { code: '+52',  flag: '🇲🇽', label: 'Mexico' },
+];
+
+const parsePhone = (value) => {
+  if (!value) return { dialCode: DEFAULT_DIAL, number: '' };
+  const sorted = [...DIAL_CODES].sort((a, b) => b.code.length - a.code.length);
+  for (const d of sorted) {
+    if (value.startsWith(d.code)) {
+      return { dialCode: d.code, number: value.slice(d.code.length).replace(/^\s+/, '') };
+    }
+  }
+  return { dialCode: DEFAULT_DIAL, number: value };
+};
 
 // --- Card ---
 export const Card = ({ children, style, onPress, padding = 14 }) => {
@@ -115,6 +164,138 @@ export const TextInput = ({ value, onChangeText, placeholder, secureTextEntry, l
       />
       {trailing && <View style={{ marginStart: 8 }}>{trailing}</View>}
     </View>
+  );
+};
+
+// --- PhoneInput ---
+export const PhoneInput = ({ value, onChangeText, error, containerStyle }) => {
+  const { theme: T } = useTheme();
+  const init = parsePhone(value);
+  const [dialCode, setDialCode] = useState(init.dialCode);
+  const [number, setNumber] = useState(init.number);
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    const { dialCode: d, number: n } = parsePhone(value);
+    if (d !== dialCode) setDialCode(d);
+    if (n !== number) setNumber(n);
+  }, [value]);
+
+  const emit = (dial, num) => onChangeText?.(num ? `${dial} ${num}` : '');
+
+  const handleDialSelect = (code) => {
+    setDialCode(code);
+    setOpen(false);
+    setSearch('');
+    emit(code, number);
+  };
+
+  const handleNumberChange = (text) => {
+    setNumber(text);
+    emit(dialCode, text);
+  };
+
+  const filtered = search
+    ? DIAL_CODES.filter(d =>
+        d.label.toLowerCase().includes(search.toLowerCase()) || d.code.includes(search)
+      )
+    : DIAL_CODES;
+
+  const selected = DIAL_CODES.find(d => d.code === dialCode) || DIAL_CODES[0];
+
+  return (
+    <>
+      <View style={[
+        {
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: T.surface,
+          borderWidth: 1,
+          borderColor: error ? T.bad : T.borderSoft,
+          borderRadius: 12,
+          height: 44,
+          overflow: 'hidden',
+        },
+        containerStyle,
+      ]}>
+        <TouchableOpacity
+          onPress={() => setOpen(true)}
+          activeOpacity={0.7}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 4,
+            paddingHorizontal: 10,
+            height: '100%',
+            borderRightWidth: 1,
+            borderRightColor: T.borderSoft,
+          }}
+        >
+          <Text style={{ fontSize: 16 }}>{selected.flag}</Text>
+          <Text style={{ fontSize: 13, fontWeight: '600', color: T.text }}>{dialCode}</Text>
+          <Text style={{ fontSize: 10, color: T.textFaint }}>▾</Text>
+        </TouchableOpacity>
+        <RNTextInput
+          value={number}
+          onChangeText={handleNumberChange}
+          placeholder="00000 00000"
+          placeholderTextColor={T.textFaint}
+          keyboardType="phone-pad"
+          style={{ flex: 1, color: T.text, fontSize: 14, paddingHorizontal: 10, padding: 0 }}
+        />
+      </View>
+
+      <Modal visible={open} transparent animationType="fade" onRequestClose={() => { setOpen(false); setSearch(''); }}>
+        <TouchableOpacity
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}
+          activeOpacity={1}
+          onPress={() => { setOpen(false); setSearch(''); }}
+        >
+          <TouchableOpacity activeOpacity={1} style={{ backgroundColor: T.surface, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '70%' }}>
+            <View style={{ padding: 16, borderBottomWidth: 1, borderBottomColor: T.borderSoft }}>
+              <Text style={{ fontSize: 15, fontWeight: '700', color: T.text, marginBottom: 12 }}>Select Country Code</Text>
+              <RNTextInput
+                value={search}
+                onChangeText={setSearch}
+                placeholder="Search country or code..."
+                placeholderTextColor={T.textFaint}
+                style={{
+                  backgroundColor: T.surface,
+                  borderWidth: 1,
+                  borderColor: T.borderSoft,
+                  borderRadius: 10,
+                  paddingHorizontal: 12,
+                  height: 40,
+                  color: T.text,
+                  fontSize: 14,
+                }}
+              />
+            </View>
+            <ScrollView keyboardShouldPersistTaps="handled">
+              {filtered.map(d => (
+                <TouchableOpacity
+                  key={d.code}
+                  onPress={() => handleDialSelect(d.code)}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingHorizontal: 16,
+                    paddingVertical: 12,
+                    backgroundColor: d.code === dialCode ? T.accentSoft : 'transparent',
+                    gap: 12,
+                  }}
+                >
+                  <Text style={{ fontSize: 22 }}>{d.flag}</Text>
+                  <Text style={{ flex: 1, fontSize: 14, color: T.text }}>{d.label}</Text>
+                  <Text style={{ fontSize: 13, fontWeight: '600', color: T.accent }}>{d.code}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+    </>
   );
 };
 

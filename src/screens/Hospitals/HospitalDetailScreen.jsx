@@ -1,16 +1,65 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Platform, Alert, TextInput as RNTextInput, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
 import { IconHospital, IconUser, IconMail, IconLocation, IconPhone, IconBed, IconDoor, IconPulse, IconBack } from '../../icons';
+import { organisationApi } from '../../services/api';
 
-export const HospitalDetailScreen = ({ hospital, onBack, onEdit, onAddAdmin }) => {
+export const HospitalDetailScreen = ({ hospital, orgName, viewerRole, onBack, onEdit, onAddAdmin }) => {
   const { t } = useTranslation();
   const { theme: T } = useTheme();
+  const { token } = useAuth();
   const styles = createStyles(T);
-  
+  const isOrgAdmin = viewerRole === 'ORG_ADMIN';
+
+  const [currentHospital, setCurrentHospital] = useState(hospital);
+  const [editingPolicy, setEditingPolicy] = useState(false);
+  const [policyLoading, setPolicyLoading] = useState(false);
+  const [ownerHours, setOwnerHours] = useState(
+    String(hospital.ownerJwtValiditySeconds ? Math.round(hospital.ownerJwtValiditySeconds / 3600) : '')
+  );
+  const [adminHours, setAdminHours] = useState(
+    String(hospital.adminJwtValiditySeconds ? Math.round(hospital.adminJwtValiditySeconds / 3600) : '')
+  );
+
+  const handleSavePolicy = async () => {
+    if (!ownerHours.trim()) {
+      Alert.alert('Invalid Input', 'Please enter an Owner session duration in hours.');
+      return;
+    }
+    const ownerSeconds = parseInt(ownerHours, 10) * 3600;
+    if (isNaN(ownerSeconds) || ownerSeconds <= 0) {
+      Alert.alert('Invalid Input', 'Session duration must be a positive number.');
+      return;
+    }
+    if (!orgName) {
+      Alert.alert('Error', 'Organisation context is missing. Please go back and try again.');
+      return;
+    }
+    const payload = { ownerJwtValiditySeconds: ownerSeconds };
+    if (isOrgAdmin) {
+      const adminSeconds = adminHours.trim() === '' ? null : parseInt(adminHours, 10) * 3600;
+      if (adminSeconds !== null && (isNaN(adminSeconds) || adminSeconds <= 0)) {
+        Alert.alert('Invalid Input', 'Admin session duration must be a positive number.');
+        return;
+      }
+      payload.adminJwtValiditySeconds = adminSeconds;
+    }
+    setPolicyLoading(true);
+    try {
+      await organisationApi.updateHospitalJwtValidity(orgName, hospital.hospitalCode, payload, token);
+      setCurrentHospital(prev => ({ ...prev, ...payload }));
+      setEditingPolicy(false);
+    } catch (err) {
+      Alert.alert('Error', err.message || 'Failed to update session policy.');
+    } finally {
+      setPolicyLoading(false);
+    }
+  };
+
   if (!hospital) return null;
 
   const stats = [
@@ -101,6 +150,98 @@ export const HospitalDetailScreen = ({ hospital, onBack, onEdit, onAddAdmin }) =
           </Card>
         </View>
 
+        {/* Security Policy */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeaderRow}>
+            <SectionHeader title="Security Policy" />
+            {!editingPolicy && (
+              <Btn variant="ghost" size="sm" onPress={() => setEditingPolicy(true)}>Edit</Btn>
+            )}
+          </View>
+          <Card style={styles.infoCard}>
+            {/* Owner Session — editable by both ORG_OWNER and ORG_ADMIN */}
+            {editingPolicy ? (
+              <View style={styles.policyRow}>
+                <Text style={styles.policyLabel}>Owner Session:</Text>
+                <View style={styles.policyInputRow}>
+                  <RNTextInput
+                    style={[styles.policyInput, { color: T.text, borderColor: T.border, backgroundColor: T.surface2 }]}
+                    value={ownerHours}
+                    onChangeText={setOwnerHours}
+                    keyboardType="numeric"
+                    placeholder="hrs"
+                    placeholderTextColor={T.textFaint}
+                    selectTextOnFocus
+                  />
+                  <Text style={styles.policyUnit}>hrs</Text>
+                </View>
+              </View>
+            ) : (
+              <View style={styles.policyRow}>
+                <Text style={styles.policyLabel}>Owner Session:</Text>
+                <Text style={styles.policyValue}>
+                  {currentHospital.ownerJwtValiditySeconds ? `${Math.round(currentHospital.ownerJwtValiditySeconds / 3600)} hrs` : 'Inherit from Org'}
+                </Text>
+              </View>
+            )}
+            {/* Admin Session — editable only by ORG_ADMIN */}
+            <View style={styles.policyDivider} />
+            {editingPolicy && isOrgAdmin ? (
+              <View style={styles.policyRow}>
+                <Text style={styles.policyLabel}>Admin Session:</Text>
+                <View style={styles.policyInputRow}>
+                  <RNTextInput
+                    style={[styles.policyInput, { color: T.text, borderColor: T.border, backgroundColor: T.surface2 }]}
+                    value={adminHours}
+                    onChangeText={setAdminHours}
+                    keyboardType="numeric"
+                    placeholder="Org default"
+                    placeholderTextColor={T.textFaint}
+                    selectTextOnFocus
+                  />
+                  <Text style={styles.policyUnit}>hrs</Text>
+                </View>
+              </View>
+            ) : (
+              <View style={styles.policyRow}>
+                <Text style={styles.policyLabel}>Admin Session:</Text>
+                <Text style={styles.policyValue}>
+                  {currentHospital.adminJwtValiditySeconds ? `${Math.round(currentHospital.adminJwtValiditySeconds / 3600)} hrs` : 'Inherit from Org'}
+                </Text>
+              </View>
+            )}
+            {editingPolicy && (
+              <View style={styles.policyActions}>
+                <Btn variant="surface" size="sm" style={{ flex: 1 }} onPress={() => setEditingPolicy(false)} disabled={policyLoading}>Cancel</Btn>
+                <Btn variant="primary" size="sm" style={{ flex: 1 }} onPress={handleSavePolicy} disabled={policyLoading}>
+                  {policyLoading ? <ActivityIndicator color="#fff" size="small" /> : 'Save'}
+                </Btn>
+              </View>
+            )}
+            <View style={styles.policyDivider} />
+            <View style={styles.policyRow}>
+              <Text style={styles.policyLabel}>Doctor Session:</Text>
+              <Text style={styles.policyValue}>
+                {currentHospital.doctorJwtValiditySeconds ? `${Math.round(currentHospital.doctorJwtValiditySeconds / 3600)} hrs` : 'Inherit from Org'}
+              </Text>
+            </View>
+            <View style={styles.policyDivider} />
+            <View style={styles.policyRow}>
+              <Text style={styles.policyLabel}>Nurse Session:</Text>
+              <Text style={styles.policyValue}>
+                {currentHospital.nurseJwtValiditySeconds ? `${Math.round(currentHospital.nurseJwtValiditySeconds / 3600)} hrs` : 'Inherit from Org'}
+              </Text>
+            </View>
+            <View style={styles.policyDivider} />
+            <View style={styles.policyRow}>
+              <Text style={styles.policyLabel}>Patient Session:</Text>
+              <Text style={styles.policyValue}>
+                {currentHospital.patientJwtValiditySeconds ? `${Math.round(currentHospital.patientJwtValiditySeconds / 3600)} hrs` : 'Inherit from Org'}
+              </Text>
+            </View>
+          </Card>
+        </View>
+
         {/* Actions */}
         <View style={styles.actionRow}>
           <Btn variant="surface" style={{ flex: 1 }} onPress={onBack}>
@@ -147,5 +288,14 @@ const createStyles = (T) => StyleSheet.create({
   infoLabel: { fontSize: 11, color: T.textDim, marginBottom: 2 },
   infoValue: { fontSize: 14, fontWeight: '600', color: T.text, lineHeight: 20 },
   divider: { height: 1, backgroundColor: T.borderSoft, marginLeft: 48 },
+  sectionHeaderRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
+  policyRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16 },
+  policyLabel: { fontSize: 14, color: T.textDim },
+  policyValue: { fontSize: 14, fontWeight: '600', color: T.text },
+  policyDivider: { height: 1, backgroundColor: T.borderSoft },
+  policyInputRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  policyInput: { width: 60, height: 36, borderWidth: 1, borderRadius: 8, paddingHorizontal: 8, textAlign: 'center', fontSize: 14, fontWeight: '600' },
+  policyUnit: { fontSize: 13, color: T.textDim },
+  policyActions: { flexDirection: 'row', gap: 10, padding: 12, borderTopWidth: 1, borderTopColor: T.borderSoft },
   actionRow: { flexDirection: 'row', gap: 12 },
 });
