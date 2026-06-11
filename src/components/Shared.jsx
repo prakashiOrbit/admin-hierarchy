@@ -320,6 +320,8 @@ export const TextInput = ({ value, onChangeText, placeholder, secureTextEntry, l
         placeholder={placeholder}
         placeholderTextColor={T.textFaint}
         secureTextEntry={secureTextEntry}
+        autoCapitalize="none"
+        autoCorrect={false}
         style={[styles.input, style]}
         {...props}
       />
