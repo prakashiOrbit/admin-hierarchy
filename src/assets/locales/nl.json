@@ -28,7 +28,13 @@
     "failed": "Mislukt",
     "go_back": "Terug",
     "load_failed": "Laden van gegevens mislukt.",
-    "dr_prefix": "Dr."
+    "dr_prefix": "Dr.",
+    "edit": "Bewerken",
+    "invalid_input": "Ongeldige invoer",
+    "confirm": "Bevestigen",
+    "or": "of",
+    "add": "Toevoegen",
+    "refresh": "↻ Vernieuwen"
   },
   "auth": {
     "login": "Inloggen",
@@ -451,7 +457,9 @@
     "princeton": "Princeton",
     "lena": "Lena",
     "kowalski": "Kowalski",
-    "search_stations": "Zoek verpleegposten..."
+    "search_stations": "Zoek verpleegposten...",
+    "first_name": "Voornaam",
+    "last_name": "Achternaam"
   },
   "actions": {
     "bed_actions": "Bed Acties",
@@ -857,7 +865,9 @@
     "witness_note": "Vastgelegd door {{name}} — dit item dient als digitaal getuigenverslag van persoonlijk verkregen toestemming.",
     "additional_title": "Aanvullende toestemming",
     "additional_hint": "Optioneel. Selecteer en vul hieronder alleen in als er tijdens dit bezoek nieuwe toestemming wordt verzameld.",
-    "view_manage": "Toestemmingen bekijken / beheren"
+    "view_manage": "Toestemmingen bekijken / beheren",
+    "recommended": "Aanbevolen",
+    "onboarding_notice_optional": "Toestemming is optioneel. U kunt hieronder een of meer toestemmingstypes selecteren of deze sectie overslaan."
   },
   "bootstrap_user": {
     "screen_title": "Bootstrap-gebruiker aanmaken",
@@ -952,23 +962,23 @@
     "failed_msg": "Toewijzing mislukt."
   },
   "shift": {
-    "identity": "DIENSTIDENTITEIT",
-    "ward_assignment": "AFDELINGSTOEWIJZING",
-    "details": "DIENSTDETAILS",
-    "name": "Dienstnaam",
-    "name_placeholder": "bijv. Ochtenddienst",
-    "code": "Dienstcode",
-    "code_placeholder": "bijv. SHIFT-DAY-01",
-    "start_time": "Begintijd",
-    "end_time": "Eindtijd",
-    "time_placeholder": "UU:MM",
-    "ward": "Afdeling",
-    "select_ward": "Selecteer afdeling",
-    "status": "Status",
-    "no_wards": "Geen afdelingen beschikbaar.",
-    "no_wards_available": "Geen afdelingen beschikbaar.",
-    "create_banner": "Nieuwe dienst aanmaken voor afdelingsbezetting.",
-    "edit_banner": "Dienstdetails bewerken."
+    "unassign_nurse": "Verpleegkundige verwijderen",
+    "unassign_doctor": "Arts verwijderen",
+    "remove_nurse_confirm": "{{firstName}} {{lastName}} uit deze dienst verwijderen?",
+    "remove_doctor_confirm": "Dr. {{firstName}} {{lastName}} uit deze dienst verwijderen?",
+    "unassign": "Verwijderen",
+    "removed_nurse": "{{firstName}} {{lastName}} verwijderd uit deze dienst.",
+    "removed_doctor": "Dr. {{firstName}} {{lastName}} verwijderd uit deze dienst.",
+    "edit": "Dienst bewerken",
+    "assigned_nurses": "TOEGEWEZEN VERPLEEGKUNDIGEN",
+    "assigned_doctors": "TOEGEWEZEN ARTSEN",
+    "no_nurses": "Geen verpleegkundigen toegewezen aan deze dienst.",
+    "no_doctors": "Geen artsen toegewezen aan deze dienst.",
+    "load_failed": "Dienst kon niet worden geladen.",
+    "not_found": "Dienst niet gevonden.",
+    "ward": "AFDELING",
+    "start": "START",
+    "end": "EINDE"
   },
   "shifts": {
     "no_shifts": "Geen diensten gevonden.",
@@ -1079,6 +1089,81 @@
     "perm_upload_events": "Gebeurtenissen uploaden",
     "perm_upload_statedata": "Statusgegevens uploaden",
     "perm_upload_telemetry": "Telemetrie uploaden",
-    "perm_app_admin_patient": "Patiënten-app-beheerder",
+    "perm_app_admin_patient": "Patiënten-app-beheerder"
+  },
+  "security_policy": {
+    "title": "Beveiligingsbeleid",
+    "owner_session": "Eigenaar sessie",
+    "admin_session": "Beheerder sessie",
+    "doctor_session": "Arts sessie",
+    "nurse_session": "Verpleegkundige sessie",
+    "patient_session": "Patiënt sessie",
+    "inherit_org": "Overnemen van org",
+    "hrs": "u",
+    "default": "Standaard",
+    "err_owner_required": "Voer een sessieduur in voor de eigenaar.",
+    "err_invalid_duration": "Sessieduur moet een positief getal zijn.",
+    "err_invalid_admin_duration": "Beheerder sessieduur moet een positief getal zijn.",
+    "err_missing_org": "Organisatiecontext ontbreekt. Ga terug en probeer het opnieuw.",
+    "err_save_failed": "Sessibeleid bijwerken mislukt.",
+    "err_load_failed": "Huidig beleid laden mislukt.",
+    "err_invalid_durations": "Sessieduren moeten positieve getallen zijn (leeg laten om over te nemen van org).",
+    "tap_edit_hint": "Tik op Bewerken om te configureren"
+  },
+  "phone": {
+    "select_country": "Landcode selecteren",
+    "search_placeholder": "Zoek land of code..."
+  },
+  "time_picker": {
+    "title": "Tijd selecteren",
+    "hour": "UUR",
+    "min": "MIN"
+  },
+  "date_picker": {
+    "day": "Dag",
+    "month": "Maand",
+    "year": "Jaar"
+  },
+  "assign_gateway": {
+    "select_gateway": "Gateway selecteren",
+    "select_bed": "Bed selecteren",
+    "choose_gateway": "Kies een gateway",
+    "search_gateways": "Gateways zoeken…",
+    "search_beds": "Bedden zoeken…",
+    "no_gateways": "Geen gateways gevonden.",
+    "no_beds": "Geen bedden gevonden.",
+    "back": "← Gateways",
+    "assign_to_bed": "Aan bed toewijzen",
+    "assigned_msg": "Gateway {{gatewayCode}} toegewezen aan bed {{bedCode}}.",
+    "failed": "Toewijzing mislukt.",
+    "bed_label": "→ Bed {{bedCode}}"
+  },
+  "assign_device": {
+    "select_device": "Apparaat selecteren",
+    "select_bed": "Bed selecteren",
+    "select_patient": "Patiënt selecteren",
+    "choose_hint": "Kies een apparaat, bed en patiënt",
+    "search_devices": "Apparaten zoeken…",
+    "search_beds": "Bedden zoeken…",
+    "search_patients": "Patiënten zoeken…",
+    "no_devices": "Geen apparaten gevonden.",
+    "no_beds": "Geen bedden gevonden.",
+    "no_patients": "Geen patiënten gevonden.",
+    "no_gateway": "Geen gateway",
+    "back": "← Terug",
+    "assign": "Toewijzen",
+    "assigned_msg": "Apparaat {{deviceCode}} toegewezen aan {{firstName}} {{lastName}} op bed {{bedCode}}.",
+    "failed": "Toewijzing mislukt.",
+    "bed_label": "Bed {{bedCode}}"
+  },
+  "status": {
+    "active": "ACTIEF",
+    "inactive": "INACTIEF",
+    "pending": "IN BEHANDELING"
+  },
+  "exit": {
+    "title": "App sluiten",
+    "message": "Weet u zeker dat u wilt afsluiten?",
+    "confirm": "Afsluiten"
   }
 }

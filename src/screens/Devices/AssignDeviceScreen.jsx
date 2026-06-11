@@ -103,23 +103,23 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
       }, token);
       Alert.alert(
         t('common.success'),
-        `Device ${selectedDevice.deviceCode} assigned to ${selectedPatient.firstName} ${selectedPatient.lastName} on bed ${selectedBed.bedCode}.`,
+        t('assign_device.assigned_msg', { deviceCode: selectedDevice.deviceCode, firstName: selectedPatient.firstName, lastName: selectedPatient.lastName, bedCode: selectedBed.bedCode }),
         [{ text: t('common.ok'), onPress: onSuccess || onCancel }]
       );
     } catch (e) {
-      Alert.alert(t('common.error'), e.message || 'Assignment failed.');
+      Alert.alert(t('common.error'), e.message || t('assign_device.failed'));
     } finally {
       setSaving(false);
     }
   };
 
   const stepIndex = STEPS.indexOf(step);
-  const stepTitles = { device: 'Select Device', bed: 'Select Bed', patient: 'Select Patient' };
+  const stepTitles = { device: t('assign_device.select_device'), bed: t('assign_device.select_bed'), patient: t('assign_device.select_patient') };
   const subtitle = [
     selectedDevice?.deviceCode,
-    selectedBed ? `Bed ${selectedBed.bedCode}` : null,
+    selectedBed ? t('assign_device.bed_label', { bedCode: selectedBed.bedCode }) : null,
     selectedPatient ? `${selectedPatient.firstName} ${selectedPatient.lastName}` : null,
-  ].filter(Boolean).join(' → ') || 'Choose a device, bed, and patient';
+  ].filter(Boolean).join(' → ') || t('assign_device.choose_hint');
 
   if (loading) {
     return <View style={styles.center}><ActivityIndicator color={T.accent} /></View>;
@@ -150,7 +150,7 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
 
       <View style={styles.searchWrap}>
         <SearchBar
-          placeholder={step === 'device' ? 'Search devices…' : step === 'bed' ? 'Search beds…' : 'Search patients…'}
+          placeholder={step === 'device' ? t('assign_device.search_devices') : step === 'bed' ? t('assign_device.search_beds') : t('assign_device.search_patients')}
           value={query}
           onChangeText={setQuery}
         />
@@ -189,7 +189,7 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
                 </View>
                 <View style={styles.info}>
                   <Text style={styles.name}>{b.bedCode}</Text>
-                  <Text style={styles.meta}>{b.wardCode} · {b.gatewayCode ? `GW: ${b.gatewayCode}` : 'No gateway'}</Text>
+                  <Text style={styles.meta}>{b.wardCode} · {b.gatewayCode ? `GW: ${b.gatewayCode}` : t('assign_device.no_gateway')}</Text>
                 </View>
                 <IconChevron size={20} color={T.textDim} />
               </View>
@@ -220,9 +220,9 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
 
           {filtered.length === 0 && (
             <View style={{ alignItems: 'center', marginTop: 24 }}>
-              <Text style={styles.emptyText}>No {step}s found.</Text>
+              <Text style={styles.emptyText}>{t(`assign_device.no_${step}s`)}</Text>
               <Btn variant="ghost" size="sm" style={{ marginTop: 12 }} onPress={refresh}>
-                ↻ Refresh
+                {t('common.refresh')}
               </Btn>
             </View>
           )}
@@ -232,7 +232,7 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
       <View style={styles.footer}>
         <View style={styles.actionRow}>
           <Btn style={{ flex: 1 }} variant="ghost" onPress={goBack}>
-            {step === 'device' ? t('common.cancel') : '← Back'}
+            {step === 'device' ? t('common.cancel') : t('assign_device.back')}
           </Btn>
           {step === 'patient' && (
             <Btn
@@ -240,7 +240,7 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
               onPress={handleFinish}
               disabled={!selectedPatient || saving}
             >
-              {saving ? t('common.saving') : 'Assign'}
+              {saving ? t('common.saving') : t('assign_device.assign')}
             </Btn>
           )}
         </View>

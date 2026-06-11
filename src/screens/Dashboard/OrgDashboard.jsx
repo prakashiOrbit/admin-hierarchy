@@ -85,7 +85,7 @@ const OrgHomeContent = ({ role }) => {
       setAdminHours(String(org.adminJwtValiditySeconds ? Math.round(org.adminJwtValiditySeconds / 3600) : 3));
       setEditingPolicy(true);
     } catch (err) {
-      Alert.alert('Error', 'Failed to load current policy.');
+      Alert.alert(t('common.error'), t('security_policy.err_load_failed'));
     } finally {
       setPolicyFetching(false);
     }
@@ -94,7 +94,7 @@ const OrgHomeContent = ({ role }) => {
   const handleSaveOrgPolicy = async () => {
     const adminSeconds = parseInt(adminHours, 10) * 3600;
     if (isNaN(adminSeconds) || adminSeconds <= 0) {
-      Alert.alert('Invalid Input', 'Session duration must be a positive number.');
+      Alert.alert(t('common.invalid_input'), t('security_policy.err_invalid_duration'));
       return;
     }
     setPolicyLoading(true);
@@ -102,7 +102,7 @@ const OrgHomeContent = ({ role }) => {
       await organisationApi.updateJwtValidity(user.orgName, { adminJwtValiditySeconds: adminSeconds }, token);
       setEditingPolicy(false);
     } catch (err) {
-      Alert.alert('Error', err.message || 'Failed to update session policy.');
+      Alert.alert(t('common.error'), err.message || t('security_policy.err_save_failed'));
     } finally {
       setPolicyLoading(false);
     }
@@ -250,10 +250,10 @@ const OrgHomeContent = ({ role }) => {
       {/* Security Policy — ORG_OWNER manages ORG_ADMIN session duration */}
       <View style={styles.section}>
         <View style={styles.policyHeaderRow}>
-          <SectionHeader title="Security Policy" />
+          <SectionHeader title={t('security_policy.title')} />
           {!editingPolicy && (
             <Btn variant="ghost" size="sm" onPress={handleEditPolicy} disabled={policyFetching}>
-              {policyFetching ? <ActivityIndicator size="small" color={T.textDim} /> : 'Edit'}
+              {policyFetching ? <ActivityIndicator size="small" color={T.textDim} /> : t('common.edit')}
             </Btn>
           )}
         </View>
@@ -261,7 +261,7 @@ const OrgHomeContent = ({ role }) => {
           {editingPolicy ? (
             <>
               <View style={styles.policyRow}>
-                <Text style={styles.policyLabel}>Admin Session:</Text>
+                <Text style={styles.policyLabel}>{t('security_policy.admin_session')}:</Text>
                 <View style={styles.policyInputRow}>
                   <RNTextInput
                     style={[styles.policyInput, { color: T.text, borderColor: T.border, backgroundColor: T.surface2 }]}
@@ -270,20 +270,20 @@ const OrgHomeContent = ({ role }) => {
                     keyboardType="numeric"
                     selectTextOnFocus
                   />
-                  <Text style={styles.policyUnit}>hrs</Text>
+                  <Text style={styles.policyUnit}>{t('security_policy.hrs')}</Text>
                 </View>
               </View>
               <View style={styles.policyActions}>
-                <Btn variant="surface" size="sm" style={{ flex: 1 }} onPress={() => setEditingPolicy(false)} disabled={policyLoading}>Cancel</Btn>
+                <Btn variant="surface" size="sm" style={{ flex: 1 }} onPress={() => setEditingPolicy(false)} disabled={policyLoading}>{t('common.cancel')}</Btn>
                 <Btn variant="primary" size="sm" style={{ flex: 1 }} onPress={handleSaveOrgPolicy} disabled={policyLoading}>
-                  {policyLoading ? <ActivityIndicator color="#fff" size="small" /> : 'Save'}
+                  {policyLoading ? <ActivityIndicator color="#fff" size="small" /> : t('common.save')}
                 </Btn>
               </View>
             </>
           ) : (
             <View style={styles.policyRow}>
-              <Text style={styles.policyLabel}>Admin Session:</Text>
-              <Text style={styles.policyValue}>Tap Edit to configure</Text>
+              <Text style={styles.policyLabel}>{t('security_policy.admin_session')}:</Text>
+              <Text style={styles.policyValue}>{t('security_policy.tap_edit_hint')}</Text>
             </View>
           )}
         </Card>
@@ -344,7 +344,13 @@ if (selectedStaffForEdit) { setSelectedStaffForEdit(null); return; }
 
   useEffect(() => {
     const backAction = () => {
-      if (!isSubScreen && activeTab === 'home') return false;
+      if (!isSubScreen && activeTab === 'home') {
+        Alert.alert(t('exit.title'), t('exit.message'), [
+          { text: t('common.cancel'), style: 'cancel' },
+          { text: t('exit.confirm'), style: 'destructive', onPress: () => BackHandler.exitApp() },
+        ]);
+        return true;
+      }
       handleBack();
       return true;
     };

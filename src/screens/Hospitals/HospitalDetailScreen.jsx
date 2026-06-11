@@ -27,23 +27,23 @@ export const HospitalDetailScreen = ({ hospital, orgName, viewerRole, onBack, on
 
   const handleSavePolicy = async () => {
     if (!ownerHours.trim()) {
-      Alert.alert('Invalid Input', 'Please enter an Owner session duration in hours.');
+      Alert.alert(t('common.invalid_input'), t('security_policy.err_owner_required'));
       return;
     }
     const ownerSeconds = parseInt(ownerHours, 10) * 3600;
     if (isNaN(ownerSeconds) || ownerSeconds <= 0) {
-      Alert.alert('Invalid Input', 'Session duration must be a positive number.');
+      Alert.alert(t('common.invalid_input'), t('security_policy.err_invalid_duration'));
       return;
     }
     if (!orgName) {
-      Alert.alert('Error', 'Organisation context is missing. Please go back and try again.');
+      Alert.alert(t('common.error'), t('security_policy.err_missing_org'));
       return;
     }
     const payload = { ownerJwtValiditySeconds: ownerSeconds };
     if (isOrgAdmin) {
       const adminSeconds = adminHours.trim() === '' ? null : parseInt(adminHours, 10) * 3600;
       if (adminSeconds !== null && (isNaN(adminSeconds) || adminSeconds <= 0)) {
-        Alert.alert('Invalid Input', 'Admin session duration must be a positive number.');
+        Alert.alert(t('common.invalid_input'), t('security_policy.err_invalid_admin_duration'));
         return;
       }
       payload.adminJwtValiditySeconds = adminSeconds;
@@ -54,7 +54,7 @@ export const HospitalDetailScreen = ({ hospital, orgName, viewerRole, onBack, on
       setCurrentHospital(prev => ({ ...prev, ...payload }));
       setEditingPolicy(false);
     } catch (err) {
-      Alert.alert('Error', err.message || 'Failed to update session policy.');
+      Alert.alert(t('common.error'), err.message || t('security_policy.err_save_failed'));
     } finally {
       setPolicyLoading(false);
     }
@@ -153,34 +153,34 @@ export const HospitalDetailScreen = ({ hospital, orgName, viewerRole, onBack, on
         {/* Security Policy */}
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
-            <SectionHeader title="Security Policy" />
+            <SectionHeader title={t('security_policy.title')} />
             {!editingPolicy && (
-              <Btn variant="ghost" size="sm" onPress={() => setEditingPolicy(true)}>Edit</Btn>
+              <Btn variant="ghost" size="sm" onPress={() => setEditingPolicy(true)}>{t('common.edit')}</Btn>
             )}
           </View>
           <Card style={styles.infoCard}>
             {/* Owner Session — editable by both ORG_OWNER and ORG_ADMIN */}
             {editingPolicy ? (
               <View style={styles.policyRow}>
-                <Text style={styles.policyLabel}>Owner Session:</Text>
+                <Text style={styles.policyLabel}>{t('security_policy.owner_session')}:</Text>
                 <View style={styles.policyInputRow}>
                   <RNTextInput
                     style={[styles.policyInput, { color: T.text, borderColor: T.border, backgroundColor: T.surface2 }]}
                     value={ownerHours}
                     onChangeText={setOwnerHours}
                     keyboardType="numeric"
-                    placeholder="hrs"
+                    placeholder={t('security_policy.hrs')}
                     placeholderTextColor={T.textFaint}
                     selectTextOnFocus
                   />
-                  <Text style={styles.policyUnit}>hrs</Text>
+                  <Text style={styles.policyUnit}>{t('security_policy.hrs')}</Text>
                 </View>
               </View>
             ) : (
               <View style={styles.policyRow}>
-                <Text style={styles.policyLabel}>Owner Session:</Text>
+                <Text style={styles.policyLabel}>{t('security_policy.owner_session')}:</Text>
                 <Text style={styles.policyValue}>
-                  {currentHospital.ownerJwtValiditySeconds ? `${Math.round(currentHospital.ownerJwtValiditySeconds / 3600)} hrs` : 'Inherit from Org'}
+                  {currentHospital.ownerJwtValiditySeconds ? `${Math.round(currentHospital.ownerJwtValiditySeconds / 3600)} ${t('security_policy.hrs')}` : t('security_policy.inherit_org')}
                 </Text>
               </View>
             )}
@@ -188,55 +188,55 @@ export const HospitalDetailScreen = ({ hospital, orgName, viewerRole, onBack, on
             <View style={styles.policyDivider} />
             {editingPolicy && isOrgAdmin ? (
               <View style={styles.policyRow}>
-                <Text style={styles.policyLabel}>Admin Session:</Text>
+                <Text style={styles.policyLabel}>{t('security_policy.admin_session')}:</Text>
                 <View style={styles.policyInputRow}>
                   <RNTextInput
                     style={[styles.policyInput, { color: T.text, borderColor: T.border, backgroundColor: T.surface2 }]}
                     value={adminHours}
                     onChangeText={setAdminHours}
                     keyboardType="numeric"
-                    placeholder="Org default"
+                    placeholder={t('security_policy.inherit_org')}
                     placeholderTextColor={T.textFaint}
                     selectTextOnFocus
                   />
-                  <Text style={styles.policyUnit}>hrs</Text>
+                  <Text style={styles.policyUnit}>{t('security_policy.hrs')}</Text>
                 </View>
               </View>
             ) : (
               <View style={styles.policyRow}>
-                <Text style={styles.policyLabel}>Admin Session:</Text>
+                <Text style={styles.policyLabel}>{t('security_policy.admin_session')}:</Text>
                 <Text style={styles.policyValue}>
-                  {currentHospital.adminJwtValiditySeconds ? `${Math.round(currentHospital.adminJwtValiditySeconds / 3600)} hrs` : 'Inherit from Org'}
+                  {currentHospital.adminJwtValiditySeconds ? `${Math.round(currentHospital.adminJwtValiditySeconds / 3600)} ${t('security_policy.hrs')}` : t('security_policy.inherit_org')}
                 </Text>
               </View>
             )}
             {editingPolicy && (
               <View style={styles.policyActions}>
-                <Btn variant="surface" size="sm" style={{ flex: 1 }} onPress={() => setEditingPolicy(false)} disabled={policyLoading}>Cancel</Btn>
+                <Btn variant="surface" size="sm" style={{ flex: 1 }} onPress={() => setEditingPolicy(false)} disabled={policyLoading}>{t('common.cancel')}</Btn>
                 <Btn variant="primary" size="sm" style={{ flex: 1 }} onPress={handleSavePolicy} disabled={policyLoading}>
-                  {policyLoading ? <ActivityIndicator color="#fff" size="small" /> : 'Save'}
+                  {policyLoading ? <ActivityIndicator color="#fff" size="small" /> : t('common.save')}
                 </Btn>
               </View>
             )}
             <View style={styles.policyDivider} />
             <View style={styles.policyRow}>
-              <Text style={styles.policyLabel}>Doctor Session:</Text>
+              <Text style={styles.policyLabel}>{t('security_policy.doctor_session')}:</Text>
               <Text style={styles.policyValue}>
-                {currentHospital.doctorJwtValiditySeconds ? `${Math.round(currentHospital.doctorJwtValiditySeconds / 3600)} hrs` : 'Inherit from Org'}
+                {currentHospital.doctorJwtValiditySeconds ? `${Math.round(currentHospital.doctorJwtValiditySeconds / 3600)} ${t('security_policy.hrs')}` : t('security_policy.inherit_org')}
               </Text>
             </View>
             <View style={styles.policyDivider} />
             <View style={styles.policyRow}>
-              <Text style={styles.policyLabel}>Nurse Session:</Text>
+              <Text style={styles.policyLabel}>{t('security_policy.nurse_session')}:</Text>
               <Text style={styles.policyValue}>
-                {currentHospital.nurseJwtValiditySeconds ? `${Math.round(currentHospital.nurseJwtValiditySeconds / 3600)} hrs` : 'Inherit from Org'}
+                {currentHospital.nurseJwtValiditySeconds ? `${Math.round(currentHospital.nurseJwtValiditySeconds / 3600)} ${t('security_policy.hrs')}` : t('security_policy.inherit_org')}
               </Text>
             </View>
             <View style={styles.policyDivider} />
             <View style={styles.policyRow}>
-              <Text style={styles.policyLabel}>Patient Session:</Text>
+              <Text style={styles.policyLabel}>{t('security_policy.patient_session')}:</Text>
               <Text style={styles.policyValue}>
-                {currentHospital.patientJwtValiditySeconds ? `${Math.round(currentHospital.patientJwtValiditySeconds / 3600)} hrs` : 'Inherit from Org'}
+                {currentHospital.patientJwtValiditySeconds ? `${Math.round(currentHospital.patientJwtValiditySeconds / 3600)} ${t('security_policy.hrs')}` : t('security_policy.inherit_org')}
               </Text>
             </View>
           </Card>

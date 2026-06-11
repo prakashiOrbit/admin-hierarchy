@@ -22,7 +22,7 @@ export const EditAdminScreen = ({ user, onCancel, onSave }) => {
   const [saving, setSaving] = useState(false);
 
   const set = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
-  const isValid = form.firstName.trim() || form.lastName.trim();
+  const isValid = form.firstName.trim() && form.lastName.trim();
 
   const handleSave = async () => {
     setSaving(true);
@@ -75,20 +75,20 @@ export const EditAdminScreen = ({ user, onCancel, onSave }) => {
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label={t('users.first_name')}>
+              <Field label={t('users.first_name')} required>
                 <TextInput
                   value={form.firstName}
                   onChangeText={v => set('firstName', v)}
-                  placeholder="First"
+                  placeholder={t('placeholders.first_name')}
                 />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label={t('users.last_name')}>
+              <Field label={t('users.last_name')} required>
                 <TextInput
                   value={form.lastName}
                   onChangeText={v => set('lastName', v)}
-                  placeholder="Last"
+                  placeholder={t('placeholders.last_name')}
                 />
               </Field>
             </View>
@@ -102,7 +102,7 @@ export const EditAdminScreen = ({ user, onCancel, onSave }) => {
             <TextInput
               value={form.contactEmail}
               onChangeText={v => set('contactEmail', v.toLowerCase())}
-              placeholder="admin@org.com"
+              placeholder={t('placeholders.email_eg')}
               keyboardType="email-address"
               leading={<IconMail size={16} color={T.textFaint} />}
             />

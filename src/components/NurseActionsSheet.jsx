@@ -97,7 +97,7 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
       );
       handleClose();
     } catch (e) {
-      Alert.alert(t('common.error'), e.message || 'Failed to assign bed.');
+      Alert.alert(t('common.error'), e.message || t('common.failed'));
     } finally { setSaving(null); }
   };
 
@@ -124,7 +124,7 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
       );
       handleClose();
     } catch (e) {
-      Alert.alert(t('common.error'), e.message || 'Failed to admit patient.');
+      Alert.alert(t('common.error'), e.message || t('common.failed'));
     } finally { setSaving(null); }
   };
 

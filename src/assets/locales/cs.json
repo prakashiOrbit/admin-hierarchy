@@ -28,7 +28,13 @@
     "failed": "Selhalo",
     "go_back": "Zpět",
     "load_failed": "Načítání dat selhalo.",
-    "dr_prefix": "Dr."
+    "dr_prefix": "Dr.",
+    "edit": "Upravit",
+    "invalid_input": "Neplatný vstup",
+    "confirm": "Potvrdit",
+    "or": "nebo",
+    "add": "Přidat",
+    "refresh": "↻ Obnovit"
   },
   "auth": {
     "login": "Přihlášení",
@@ -451,7 +457,9 @@
     "princeton": "Princeton",
     "lena": "Lenka",
     "kowalski": "Kowalski",
-    "search_stations": "Hledat stanice..."
+    "search_stations": "Hledat stanice...",
+    "first_name": "Jméno",
+    "last_name": "Příjmení"
   },
   "actions": {
     "bed_actions": "Akce lůžka",
@@ -857,7 +865,9 @@
     "witness_note": "Zaznamenal(a) {{name}} — tento záznam slouží jako digitální svědectví souhlasu získaného osobně.",
     "additional_title": "Dodatečný souhlas",
     "additional_hint": "Volitelné. Vyberte a vyplňte níže pouze pokud je při této návštěvě shromažďován nový souhlas.",
-    "view_manage": "Zobrazit / Spravovat souhlasy"
+    "view_manage": "Zobrazit / Spravovat souhlasy",
+    "recommended": "Doporučeno",
+    "onboarding_notice_optional": "Souhlas je nepovinný. Níže můžete vybrat jeden nebo více typů souhlasu, nebo tuto sekci přeskočit."
   },
   "bootstrap_user": {
     "screen_title": "Vytvořit bootstrap uživatele",
@@ -952,23 +962,23 @@
     "failed_msg": "Přiřazení selhalo."
   },
   "shift": {
-    "identity": "IDENTITA SMĚNY",
-    "ward_assignment": "PŘIŘAZENÍ ODDĚLENÍ",
-    "details": "DETAILY SMĚNY",
-    "name": "Název směny",
-    "name_placeholder": "např. Ranní směna",
-    "code": "Kód směny",
-    "code_placeholder": "např. SHIFT-DAY-01",
-    "start_time": "Čas začátku",
-    "end_time": "Čas konce",
-    "time_placeholder": "HH:MM",
-    "ward": "Oddělení",
-    "select_ward": "Vybrat oddělení",
-    "status": "Stav",
-    "no_wards": "Žádná oddělení nejsou k dispozici.",
-    "no_wards_available": "Žádná oddělení nejsou k dispozici.",
-    "create_banner": "Vytvořit novou směnu pro personální obsazení oddělení.",
-    "edit_banner": "Upravit detaily směny."
+    "unassign_nurse": "Odebrat sestru",
+    "unassign_doctor": "Odebrat lékaře",
+    "remove_nurse_confirm": "Odebrat {{firstName}} {{lastName}} z této směny?",
+    "remove_doctor_confirm": "Odebrat Dr. {{firstName}} {{lastName}} z této směny?",
+    "unassign": "Odebrat",
+    "removed_nurse": "{{firstName}} {{lastName}} odebrán/a z této směny.",
+    "removed_doctor": "Dr. {{firstName}} {{lastName}} odebrán/a z této směny.",
+    "edit": "Upravit směnu",
+    "assigned_nurses": "PŘIŘAZENÉ SESTRY",
+    "assigned_doctors": "PŘIŘAZENÍ LÉKAŘI",
+    "no_nurses": "Žádné sestry přiřazeny k této směně.",
+    "no_doctors": "Žádní lékaři přiřazeni k této směně.",
+    "load_failed": "Nepodařilo se načíst směnu.",
+    "not_found": "Směna nenalezena.",
+    "ward": "ODDĚLENÍ",
+    "start": "ZAČÁTEK",
+    "end": "KONEC"
   },
   "shifts": {
     "no_shifts": "Žádné směny nenalezeny.",
@@ -1079,6 +1089,81 @@
     "perm_upload_events": "Nahrát události",
     "perm_upload_statedata": "Nahrát stavová data",
     "perm_upload_telemetry": "Nahrát telemetrii",
-    "perm_app_admin_patient": "Správce aplikace pro pacienty",
+    "perm_app_admin_patient": "Správce aplikace pro pacienty"
+  },
+  "security_policy": {
+    "title": "Bezpečnostní politika",
+    "owner_session": "Relace vlastníka",
+    "admin_session": "Relace správce",
+    "doctor_session": "Relace lékaře",
+    "nurse_session": "Relace sestry",
+    "patient_session": "Relace pacienta",
+    "inherit_org": "Zdědit z org",
+    "hrs": "h",
+    "default": "Výchozí",
+    "err_owner_required": "Zadejte dobu trvání relace vlastníka.",
+    "err_invalid_duration": "Doba trvání relace musí být kladné číslo.",
+    "err_invalid_admin_duration": "Doba trvání relace správce musí být kladné číslo.",
+    "err_missing_org": "Kontext organizace chybí. Vraťte se zpět a zkuste to znovu.",
+    "err_save_failed": "Aktualizace zásad relace se nezdařila.",
+    "err_load_failed": "Načtení aktuálních zásad se nezdařilo.",
+    "err_invalid_durations": "Doby trvání relací musí být kladná čísla (ponechte prázdné pro dědění z org).",
+    "tap_edit_hint": "Klepnutím na Upravit nakonfigurujte"
+  },
+  "phone": {
+    "select_country": "Vybrat předvolbu země",
+    "search_placeholder": "Hledat zemi nebo kód..."
+  },
+  "time_picker": {
+    "title": "Vybrat čas",
+    "hour": "HOD",
+    "min": "MIN"
+  },
+  "date_picker": {
+    "day": "Den",
+    "month": "Měsíc",
+    "year": "Rok"
+  },
+  "assign_gateway": {
+    "select_gateway": "Vybrat bránu",
+    "select_bed": "Vybrat postel",
+    "choose_gateway": "Zvolte bránu",
+    "search_gateways": "Hledat brány…",
+    "search_beds": "Hledat postele…",
+    "no_gateways": "Žádné brány nenalezeny.",
+    "no_beds": "Žádné postele nenalezeny.",
+    "back": "← Brány",
+    "assign_to_bed": "Přiřadit k posteli",
+    "assigned_msg": "Brána {{gatewayCode}} přiřazena k posteli {{bedCode}}.",
+    "failed": "Přiřazení selhalo.",
+    "bed_label": "→ Postel {{bedCode}}"
+  },
+  "assign_device": {
+    "select_device": "Vybrat zařízení",
+    "select_bed": "Vybrat postel",
+    "select_patient": "Vybrat pacienta",
+    "choose_hint": "Vyberte zařízení, postel a pacienta",
+    "search_devices": "Hledat zařízení…",
+    "search_beds": "Hledat postele…",
+    "search_patients": "Hledat pacienty…",
+    "no_devices": "Žádná zařízení nenalezena.",
+    "no_beds": "Žádné postele nenalezeny.",
+    "no_patients": "Žádní pacienti nenalezeni.",
+    "no_gateway": "Žádná brána",
+    "back": "← Zpět",
+    "assign": "Přiřadit",
+    "assigned_msg": "Zařízení {{deviceCode}} přiřazeno {{firstName}} {{lastName}} na posteli {{bedCode}}.",
+    "failed": "Přiřazení selhalo.",
+    "bed_label": "Postel {{bedCode}}"
+  },
+  "status": {
+    "active": "AKTIVNÍ",
+    "inactive": "NEAKTIVNÍ",
+    "pending": "ČEKAJÍCÍ"
+  },
+  "exit": {
+    "title": "Ukončit aplikaci",
+    "message": "Opravdu chcete aplikaci ukončit?",
+    "confirm": "Ukončit"
   }
 }

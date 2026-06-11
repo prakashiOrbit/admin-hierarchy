@@ -43,9 +43,6 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
     },
     ownerJwtValidityHours: 5,
     adminJwtValidityHours: 3,
-    doctorJwtValidityHours: 8,
-    nurseJwtValidityHours: 12,
-    patientJwtValidityHours: 1,
   });
 
   const orgTypes = ['HOSPITAL', 'CLINIC', 'LAB', 'PHARMACY', 'RESEARCH', 'OTHER', 'COMPANY'];
@@ -71,7 +68,7 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
     }));
   };
 
-  const isFormValid = form.orgName && form.businessName && form.myContact.email && form.ownerJwtValidityHours && form.adminJwtValidityHours && form.doctorJwtValidityHours && form.nurseJwtValidityHours && form.patientJwtValidityHours;
+  const isFormValid = form.orgName && form.businessName && form.myContact.email && form.ownerJwtValidityHours && form.adminJwtValidityHours;
 
   const handleCreate = async () => {
     setLoading(true);
@@ -82,9 +79,6 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
         orgName: (form.orgName || '').trim(),
         ownerJwtValiditySeconds: parseInt(form.ownerJwtValidityHours, 10) * 3600,
         adminJwtValiditySeconds: parseInt(form.adminJwtValidityHours, 10) * 3600,
-        doctorJwtValiditySeconds: parseInt(form.doctorJwtValidityHours, 10) * 3600,
-        nurseJwtValiditySeconds: parseInt(form.nurseJwtValidityHours, 10) * 3600,
-        patientJwtValiditySeconds: parseInt(form.patientJwtValidityHours, 10) * 3600,
       };
       await organisationApi.create(payload, token);
       Alert.alert(t('alerts.success'), t('alerts.org_created'), [
@@ -112,7 +106,7 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('orgs.identity_section')}</Text>
           
-          <Field label={t('orgs.id')}>
+          <Field label={t('orgs.id')} required>
             <TextInput 
               value={form.orgName} 
               onChangeText={(v) => updateRoot('orgName', v)}
@@ -121,7 +115,7 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
             />
           </Field>
 
-          <Field label={t('orgs.business_name')}>
+          <Field label={t('orgs.business_name')} required>
             <TextInput 
               value={form.businessName} 
               onChangeText={(v) => updateRoot('businessName', v)}
@@ -150,7 +144,7 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
             />
           </Field>
 
-          <Field label={t('orgs.contact_email')}>
+          <Field label={t('orgs.contact_email')} required>
             <TextInput 
               value={form.myContact.email} 
               onChangeText={(v) => updateContact('email', v)}
@@ -166,7 +160,7 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
           <Field label={t('users.preferred_locale')}>
             <Card style={styles.selectCard} onPress={() => setShowLocalePicker(true)}>
               <Text style={styles.selectText}>
-                {LOCALES.find(l => l.code === form.preferredLocale)?.label || 'English'}
+                {LOCALES.find(l => l.code === form.preferredLocale)?.label || t('languages.en')}
               </Text>
               <IconChevron size={18} color={T.textDim} />
             </Card>
@@ -231,11 +225,11 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
 
         {/* Security Policy Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Security Policy (Session Expiration)</Text>
+          <Text style={styles.sectionTitle}>{t('security_policy.title')}</Text>
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label="Owner Session (hours)">
+              <Field label={`${t('security_policy.owner_session')} (${t('security_policy.hrs')})`} required>
                 <TextInput
                   value={String(form.ownerJwtValidityHours)}
                   onChangeText={(v) => updateRoot('ownerJwtValidityHours', v)}
@@ -245,7 +239,7 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Admin Session (hours)">
+              <Field label={`${t('security_policy.admin_session')} (${t('security_policy.hrs')})`} required>
                 <TextInput
                   value={String(form.adminJwtValidityHours)}
                   onChangeText={(v) => updateRoot('adminJwtValidityHours', v)}
@@ -256,42 +250,6 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
             </View>
           </View>
 
-          <View style={styles.row}>
-            <View style={{ flex: 1 }}>
-              <Field label="Doctor Session (hours)">
-                <TextInput
-                  value={String(form.doctorJwtValidityHours)}
-                  onChangeText={(v) => updateRoot('doctorJwtValidityHours', v)}
-                  placeholder="8"
-                  keyboardType="numeric"
-                />
-              </Field>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Field label="Nurse Session (hours)">
-                <TextInput
-                  value={String(form.nurseJwtValidityHours)}
-                  onChangeText={(v) => updateRoot('nurseJwtValidityHours', v)}
-                  placeholder="12"
-                  keyboardType="numeric"
-                />
-              </Field>
-            </View>
-          </View>
-
-          <View style={styles.row}>
-            <View style={{ flex: 1 }}>
-              <Field label="Patient Session (hours)">
-                <TextInput
-                  value={String(form.patientJwtValidityHours)}
-                  onChangeText={(v) => updateRoot('patientJwtValidityHours', v)}
-                  placeholder="1"
-                  keyboardType="numeric"
-                />
-              </Field>
-            </View>
-            <View style={{ flex: 1 }} />
-          </View>
         </View>
 
         {/* Actions */}

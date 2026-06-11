@@ -28,7 +28,13 @@
     "failed": "Fallito",
     "go_back": "Indietro",
     "load_failed": "Caricamento dati fallito.",
-    "dr_prefix": "Dr."
+    "dr_prefix": "Dr.",
+    "edit": "Modifica",
+    "invalid_input": "Input non valido",
+    "confirm": "Conferma",
+    "or": "o",
+    "add": "Aggiungi",
+    "refresh": "↻ Aggiorna"
   },
   "auth": {
     "login": "Login",
@@ -451,7 +457,9 @@
     "princeton": "Princeton",
     "lena": "Elena",
     "kowalski": "Kowalski",
-    "search_stations": "Cerca postazioni..."
+    "search_stations": "Cerca postazioni...",
+    "first_name": "Nome",
+    "last_name": "Cognome"
   },
   "actions": {
     "bed_actions": "Azioni Letto",
@@ -857,7 +865,9 @@
     "witness_note": "Registrato da {{name}} — questa voce funge da testimonianza digitale del consenso ottenuto di persona.",
     "additional_title": "Consenso aggiuntivo",
     "additional_hint": "Facoltativo. Selezionare e compilare di seguito solo se viene raccolta una nuova autorizzazione durante questa visita.",
-    "view_manage": "Visualizza / Gestisci consensi"
+    "view_manage": "Visualizza / Gestisci consensi",
+    "recommended": "Consigliato",
+    "onboarding_notice_optional": "Il consenso è facoltativo. Puoi selezionare uno o più tipi di consenso di seguito, oppure saltare questa sezione."
   },
   "bootstrap_user": {
     "screen_title": "Crea utente bootstrap",
@@ -952,23 +962,23 @@
     "failed_msg": "Assegnazione fallita."
   },
   "shift": {
-    "identity": "IDENTITÀ TURNO",
-    "ward_assignment": "ASSEGNAZIONE REPARTO",
-    "details": "DETTAGLI TURNO",
-    "name": "Nome turno",
-    "name_placeholder": "es. Turno mattutino",
-    "code": "Codice turno",
-    "code_placeholder": "es. SHIFT-DAY-01",
-    "start_time": "Ora inizio",
-    "end_time": "Ora fine",
-    "time_placeholder": "HH:MM",
-    "ward": "Reparto",
-    "select_ward": "Seleziona reparto",
-    "status": "Stato",
-    "no_wards": "Nessun reparto disponibile.",
-    "no_wards_available": "Nessun reparto disponibile.",
-    "create_banner": "Creare un nuovo turno per il personale del reparto.",
-    "edit_banner": "Modificare i dettagli del turno."
+    "unassign_nurse": "Rimuovi infermiera",
+    "unassign_doctor": "Rimuovi medico",
+    "remove_nurse_confirm": "Rimuovere {{firstName}} {{lastName}} da questo turno?",
+    "remove_doctor_confirm": "Rimuovere Dr. {{firstName}} {{lastName}} da questo turno?",
+    "unassign": "Rimuovi",
+    "removed_nurse": "{{firstName}} {{lastName}} rimosso/a da questo turno.",
+    "removed_doctor": "Dr. {{firstName}} {{lastName}} rimosso/a da questo turno.",
+    "edit": "Modifica turno",
+    "assigned_nurses": "INFERMIERE ASSEGNATE",
+    "assigned_doctors": "MEDICI ASSEGNATI",
+    "no_nurses": "Nessuna infermiera assegnata a questo turno.",
+    "no_doctors": "Nessun medico assegnato a questo turno.",
+    "load_failed": "Impossibile caricare il turno.",
+    "not_found": "Turno non trovato.",
+    "ward": "REPARTO",
+    "start": "INIZIO",
+    "end": "FINE"
   },
   "shifts": {
     "no_shifts": "Nessun turno trovato.",
@@ -1079,6 +1089,81 @@
     "perm_upload_events": "Carica eventi",
     "perm_upload_statedata": "Carica dati di stato",
     "perm_upload_telemetry": "Carica telemetria",
-    "perm_app_admin_patient": "Admin app paziente",
+    "perm_app_admin_patient": "Admin app paziente"
+  },
+  "security_policy": {
+    "title": "Politica di sicurezza",
+    "owner_session": "Sessione proprietario",
+    "admin_session": "Sessione amministratore",
+    "doctor_session": "Sessione medico",
+    "nurse_session": "Sessione infermiere",
+    "patient_session": "Sessione paziente",
+    "inherit_org": "Eredita dall'org",
+    "hrs": "h",
+    "default": "Predefinito",
+    "err_owner_required": "Inserire una durata di sessione per il proprietario.",
+    "err_invalid_duration": "La durata della sessione deve essere un numero positivo.",
+    "err_invalid_admin_duration": "La durata della sessione amministratore deve essere un numero positivo.",
+    "err_missing_org": "Contesto dell'organizzazione mancante. Torna indietro e riprova.",
+    "err_save_failed": "Aggiornamento della politica di sessione non riuscito.",
+    "err_load_failed": "Caricamento della politica corrente non riuscito.",
+    "err_invalid_durations": "Le durate delle sessioni devono essere numeri positivi (lascia vuoto per ereditare dall'org).",
+    "tap_edit_hint": "Tocca Modifica per configurare"
+  },
+  "phone": {
+    "select_country": "Seleziona prefisso paese",
+    "search_placeholder": "Cerca paese o prefisso..."
+  },
+  "time_picker": {
+    "title": "Seleziona orario",
+    "hour": "ORA",
+    "min": "MIN"
+  },
+  "date_picker": {
+    "day": "Giorno",
+    "month": "Mese",
+    "year": "Anno"
+  },
+  "assign_gateway": {
+    "select_gateway": "Seleziona gateway",
+    "select_bed": "Seleziona letto",
+    "choose_gateway": "Scegli un gateway",
+    "search_gateways": "Cerca gateway…",
+    "search_beds": "Cerca letti…",
+    "no_gateways": "Nessun gateway trovato.",
+    "no_beds": "Nessun letto trovato.",
+    "back": "← Gateway",
+    "assign_to_bed": "Assegna al letto",
+    "assigned_msg": "Gateway {{gatewayCode}} assegnato al letto {{bedCode}}.",
+    "failed": "Assegnazione fallita.",
+    "bed_label": "→ Letto {{bedCode}}"
+  },
+  "assign_device": {
+    "select_device": "Seleziona dispositivo",
+    "select_bed": "Seleziona letto",
+    "select_patient": "Seleziona paziente",
+    "choose_hint": "Scegli un dispositivo, un letto e un paziente",
+    "search_devices": "Cerca dispositivi…",
+    "search_beds": "Cerca letti…",
+    "search_patients": "Cerca pazienti…",
+    "no_devices": "Nessun dispositivo trovato.",
+    "no_beds": "Nessun letto trovato.",
+    "no_patients": "Nessun paziente trovato.",
+    "no_gateway": "Nessun gateway",
+    "back": "← Indietro",
+    "assign": "Assegna",
+    "assigned_msg": "Dispositivo {{deviceCode}} assegnato a {{firstName}} {{lastName}} sul letto {{bedCode}}.",
+    "failed": "Assegnazione fallita.",
+    "bed_label": "Letto {{bedCode}}"
+  },
+  "status": {
+    "active": "ATTIVO",
+    "inactive": "INATTIVO",
+    "pending": "IN ATTESA"
+  },
+  "exit": {
+    "title": "Esci dall'app",
+    "message": "Sei sicuro di voler uscire?",
+    "confirm": "Esci"
   }
 }

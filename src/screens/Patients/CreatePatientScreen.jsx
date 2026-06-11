@@ -8,7 +8,7 @@ import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Field, TextInput, PhoneInput, Btn, SectionHeader } from '../../components/Shared';
 import { IconUser, IconMail, IconLocation, IconHeart, IconChevron, IconCheck, IconShield } from '../../icons';
-import { patientApi, consentApi } from '../../services/api';
+import { patientApi, consentApi, organisationApi } from '../../services/api';
 
 const LOCALES = [
   { code: 'en', label: 'English' },
@@ -53,6 +53,7 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
     ],
   });
   const [saving, setSaving] = useState(false);
+  const [patientJwtHours, setPatientJwtHours] = useState('1');
 
   // Consent state
   const [consentTypes, setConsentTypes] = useState(null);
@@ -68,14 +69,11 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
         if (cancelled) return;
         const arr = Array.isArray(types) ? types : [];
         setConsentTypes(arr);
-        // Pre-select required types
-        setSelectedCodes(new Set(arr.filter(ct => ct.required).map(ct => ct.code)));
       })
       .catch(() => {
         if (cancelled) return;
-        const fallback = [{ code: 'DATA_COLLECTION', required: true, name: 'Data Collection Consent' }];
+        const fallback = [{ code: 'DATA_COLLECTION', required: false, name: 'Data Collection Consent' }];
         setConsentTypes(fallback);
-        setSelectedCodes(new Set(['DATA_COLLECTION']));
       });
     return () => { cancelled = true; };
   }, [user?.orgName, token]);
@@ -98,8 +96,7 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
     setSharedGrant(prev => ({ ...prev, [key]: value }));
   }, []);
 
-  const toggleCode = useCallback((code, required) => {
-    if (required) return; // required types cannot be deselected
+  const toggleCode = useCallback((code) => {
     setSelectedCodes(prev => {
       const next = new Set(prev);
       if (next.has(code)) next.delete(code); else next.add(code);
@@ -107,23 +104,20 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
     });
   }, []);
 
-  // Validation
-  const requiredTypes = (consentTypes || []).filter(ct => ct.required);
-  const allRequiredSelected = requiredTypes.every(ct => selectedCodes.has(ct.code));
-  const atLeastOne = selectedCodes.size > 0;
+  // Validation — consent is optional; if anything is selected, grant details must be filled
   const grantFormValid =
     sharedGrant.consentedByName.trim().length > 0 &&
     (sharedGrant.consentedByType !== 'PHYSICIAN' || sharedGrant.emergencyJustification.trim().length > 0) &&
     (sharedGrant.consentedByType !== 'GUARDIAN' || sharedGrant.relationshipToPatient.trim().length > 0);
 
-  const isConsentValid = atLeastOne && allRequiredSelected && grantFormValid;
+  const consentSectionValid = selectedCodes.size === 0 || grantFormValid;
 
   const isFormValid =
     form.patient.patientCode &&
     form.patient.firstName &&
     form.patient.lastName &&
     form.patient.myContact.email &&
-    isConsentValid;
+    consentSectionValid;
 
   // Build payload
   const buildConsentGrants = () =>
@@ -144,6 +138,11 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
 
   const handleCreate = async () => {
     if (!isFormValid || !user?.orgName || !user?.hospitalCode) return;
+    const patientSeconds = parseInt(patientJwtHours, 10) * 3600;
+    if (!patientJwtHours || isNaN(patientSeconds) || patientSeconds <= 0) {
+      Alert.alert(t('common.invalid_input'), t('security_policy.err_invalid_duration'));
+      return;
+    }
     setSaving(true);
     const payload = {
       patient: form.patient,
@@ -155,18 +154,20 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
     try {
       const result = await patientApi.create(user.orgName, user.hospitalCode, payload, token);
       const created = result?.data ?? result;
-      // Record consents via the dedicated consent endpoint so they appear in View/Manage Consents
       const grants = buildConsentGrants();
-      await Promise.all(
-        grants.map(grant =>
-          consentApi.record(
-            user.orgName,
-            created.patientCode || form.patient.patientCode,
-            { orgId: created.orgId, patientId: created.patientId, ...grant },
-            token,
+      if (grants.length > 0) {
+        await Promise.all(
+          grants.map(grant =>
+            consentApi.record(
+              user.orgName,
+              created.patientCode || form.patient.patientCode,
+              { orgId: created.orgId, patientId: created.patientId, ...grant },
+              token,
+            )
           )
-        )
-      );
+        );
+      }
+      await organisationApi.updateHospitalJwtValidity(user.orgName, user.hospitalCode, { patientJwtValiditySeconds: patientSeconds }, token);
       Alert.alert(
         t('messages.success'),
         t('messages.patient_registered', { code: form.patient.patientCode }),
@@ -213,8 +214,8 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
             <TouchableOpacity
               key={ct.code}
               style={styles.consentRow}
-              onPress={() => toggleCode(ct.code, ct.required)}
-              activeOpacity={ct.required ? 1 : 0.7}
+              onPress={() => toggleCode(ct.code)}
+              activeOpacity={0.7}
             >
               <View style={[
                 styles.consentCheck,
@@ -229,9 +230,9 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
                 <Text style={styles.consentRowCode}>{ct.code}</Text>
               </View>
               {ct.required && (
-                <View style={[styles.requiredBadge, { backgroundColor: T.accentSoft }]}>
-                  <Text style={[styles.requiredBadgeText, { color: T.accent }]}>
-                    {t('consent.required')}
+                <View style={[styles.requiredBadge, { backgroundColor: T.surface2 }]}>
+                  <Text style={[styles.requiredBadgeText, { color: T.textDim }]}>
+                    {t('consent.recommended')}
                   </Text>
                 </View>
               )}
@@ -427,7 +428,7 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
           <Field label={t('users.preferred_locale')}>
             <Card style={styles.selectCard} onPress={() => setShowLocalePicker(true)}>
               <Text style={styles.selectText}>
-                {LOCALES.find(l => l.code === form.patient.preferredLocale)?.label || 'English'}
+                {LOCALES.find(l => l.code === form.patient.preferredLocale)?.label || t('languages.en')}
               </Text>
               <IconChevron size={18} color={T.textDim} />
             </Card>
@@ -472,13 +473,35 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
         {/* Consent Section */}
         <View style={styles.section}>
           <SectionHeader title={t('consent.title')} />
-          <View style={[styles.consentNotice, { backgroundColor: T.accentSoft, borderColor: T.accent }]}>
-            <IconShield size={16} color={T.accent} />
-            <Text style={[styles.consentNoticeText, { color: T.text }]}>
-              {t('consent.onboarding_notice')}
+          <View style={[styles.consentNotice, { backgroundColor: T.surface, borderColor: T.borderSoft }]}>
+            <IconShield size={16} color={T.textDim} />
+            <Text style={[styles.consentNoticeText, { color: T.textDim }]}>
+              {t('consent.onboarding_notice_optional')}
             </Text>
           </View>
           {renderConsentSection()}
+        </View>
+
+        {/* Security Policy Section */}
+        <View style={styles.section}>
+          <SectionHeader title={t('security_policy.title')} />
+          <Card style={styles.policyCard}>
+            <View style={styles.policyRow}>
+              <Text style={styles.policyLabel}>{t('security_policy.patient_session')}</Text>
+              <View style={styles.policyInputRow}>
+                <RNTextInput
+                  style={[styles.policyInput, { color: T.text, borderColor: T.border, backgroundColor: T.surface2 }]}
+                  value={patientJwtHours}
+                  onChangeText={setPatientJwtHours}
+                  keyboardType="numeric"
+                  placeholder="1"
+                  placeholderTextColor={T.textFaint}
+                  selectTextOnFocus
+                />
+                <Text style={styles.policyUnit}>{t('security_policy.hrs')}</Text>
+              </View>
+            </View>
+          </Card>
         </View>
 
         {/* Action buttons */}
@@ -489,7 +512,7 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
           <Btn
             variant="primary"
             style={{ flex: 2 }}
-            disabled={!isFormValid || saving || consentTypes === null}
+            disabled={!isFormValid || saving}
             onPress={handleCreate}
           >
             {saving ? t('actions.registering') : t('actions.register_patient')}
@@ -612,4 +635,10 @@ const createStyles = (T) => StyleSheet.create({
     marginTop: 14, padding: 10, borderRadius: 8, borderWidth: 1,
   },
   witnessText: { flex: 1, fontSize: 11.5, lineHeight: 17 },
+  policyCard: { padding: 0, overflow: 'hidden' },
+  policyRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16 },
+  policyLabel: { fontSize: 14, color: T.textDim },
+  policyInputRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  policyInput: { width: 60, height: 36, borderWidth: 1, borderRadius: 8, paddingHorizontal: 8, textAlign: 'center', fontSize: 14, fontWeight: '600' },
+  policyUnit: { fontSize: 13, color: T.textDim },
 });

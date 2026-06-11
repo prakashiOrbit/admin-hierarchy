@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform, TouchableOpacity, Alert, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform, TouchableOpacity, Alert, Modal, TextInput as RNTextInput } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Field, TextInput, PhoneInput, Btn, SectionHeader } from '../../components/Shared';
 import { DatePickerModal } from '../../components/DatePickerModal';
 import { IconMail, IconStethoscope, IconCalendar, IconActivity, IconChevron } from '../../icons';
-import { doctorApi, getApiErrorMessage } from '../../services/api';
+import { doctorApi, organisationApi, getApiErrorMessage } from '../../services/api';
 
 const LOCALES = [
   { code: 'en', label: 'English' },
@@ -41,6 +41,7 @@ export const CreateDoctorScreen = ({ onCancel, onSuccess }) => {
     myAddress: { city: '', state: '' },
   });
   const [saving, setSaving] = useState(false);
+  const [doctorJwtHours, setDoctorJwtHours] = useState('8');
 
   const updateRoot = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
   const updateContact = (key, value) => setForm(prev => ({ ...prev, myContact: { ...prev.myContact, [key]: value } }));
@@ -50,6 +51,11 @@ export const CreateDoctorScreen = ({ onCancel, onSuccess }) => {
 
   const handleCreate = async () => {
     if (!isFormValid || !user?.orgName || !user?.hospitalCode) return;
+    const doctorSeconds = parseInt(doctorJwtHours, 10) * 3600;
+    if (!doctorJwtHours || isNaN(doctorSeconds) || doctorSeconds <= 0) {
+      Alert.alert(t('common.invalid_input'), t('security_policy.err_invalid_duration'));
+      return;
+    }
     setSaving(true);
     const payload = {
       ...form,
@@ -58,6 +64,7 @@ export const CreateDoctorScreen = ({ onCancel, onSuccess }) => {
     };
     try {
       await doctorApi.create(user.orgName, user.hospitalCode, payload, token);
+      await organisationApi.updateHospitalJwtValidity(user.orgName, user.hospitalCode, { doctorJwtValiditySeconds: doctorSeconds }, token);
       Alert.alert(t('messages.success'), t('messages.doctor_onboarded', { firstName: form.firstName, lastName: form.lastName }), [
         { text: t('actions.ok'), onPress: onSuccess || onCancel },
       ]);
@@ -166,11 +173,33 @@ export const CreateDoctorScreen = ({ onCancel, onSuccess }) => {
           <Field label={t('users.preferred_locale')}>
             <Card style={styles.selectCard} onPress={() => setShowLocalePicker(true)}>
               <Text style={styles.selectText}>
-                {LOCALES.find(l => l.code === form.preferredLocale)?.label || 'English'}
+                {LOCALES.find(l => l.code === form.preferredLocale)?.label || t('languages.en')}
               </Text>
               <IconChevron size={18} color={T.textDim} />
             </Card>
           </Field>
+        </View>
+
+        {/* Security Policy Section */}
+        <View style={styles.section}>
+          <SectionHeader title={t('security_policy.title')} />
+          <Card style={styles.policyCard}>
+            <View style={styles.policyRow}>
+              <Text style={styles.policyLabel}>{t('security_policy.doctor_session')}</Text>
+              <View style={styles.policyInputRow}>
+                <RNTextInput
+                  style={[styles.policyInput, { color: T.text, borderColor: T.border, backgroundColor: T.surface2 }]}
+                  value={doctorJwtHours}
+                  onChangeText={setDoctorJwtHours}
+                  keyboardType="numeric"
+                  placeholder="8"
+                  placeholderTextColor={T.textFaint}
+                  selectTextOnFocus
+                />
+                <Text style={styles.policyUnit}>{t('security_policy.hrs')}</Text>
+              </View>
+            </View>
+          </Card>
         </View>
 
         <View style={styles.actionRow}>
@@ -238,4 +267,10 @@ const createStyles = (T) => StyleSheet.create({
   modalTitle: { fontSize: 16, fontWeight: '700', color: T.text, marginBottom: 16, textAlign: 'center' },
   localeOption: { padding: 14, borderRadius: 8, marginBottom: 4 },
   localeOptionText: { fontSize: 14, color: T.text },
+  policyCard: { padding: 0, overflow: 'hidden' },
+  policyRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16 },
+  policyLabel: { fontSize: 14, color: T.textDim },
+  policyInputRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  policyInput: { width: 60, height: 36, borderWidth: 1, borderRadius: 8, paddingHorizontal: 8, textAlign: 'center', fontSize: 14, fontWeight: '600' },
+  policyUnit: { fontSize: 13, color: T.textDim },
 });

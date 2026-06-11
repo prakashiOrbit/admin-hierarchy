@@ -28,7 +28,13 @@
     "failed": "Fehlgeschlagen",
     "go_back": "Zurück",
     "load_failed": "Daten konnten nicht geladen werden.",
-    "dr_prefix": "Dr."
+    "dr_prefix": "Dr.",
+    "edit": "Bearbeiten",
+    "invalid_input": "Ungültige Eingabe",
+    "confirm": "Bestätigen",
+    "or": "oder",
+    "add": "Hinzufügen",
+    "refresh": "↻ Aktualisieren"
   },
   "auth": {
     "login": "Anmelden",
@@ -451,7 +457,9 @@
     "princeton": "Princeton",
     "lena": "Lena",
     "kowalski": "Kowalski",
-    "search_stations": "Stationen suchen..."
+    "search_stations": "Stationen suchen...",
+    "first_name": "Vorname",
+    "last_name": "Nachname"
   },
   "actions": {
     "bed_actions": "Bett-Aktionen",
@@ -857,7 +865,9 @@
     "witness_note": "Erfasst von {{name}} — dieser Eintrag dient als digitaler Nachweis der persönlich eingeholten Einwilligung.",
     "additional_title": "Zusätzliche Einwilligung",
     "additional_hint": "Optional. Nur ausfüllen, wenn bei diesem Besuch eine neue Einwilligung eingeholt wird.",
-    "view_manage": "Einwilligungen anzeigen / verwalten"
+    "view_manage": "Einwilligungen anzeigen / verwalten",
+    "recommended": "Empfohlen",
+    "onboarding_notice_optional": "Die Zustimmung ist optional. Sie können unten einen oder mehrere Einwilligungstypen auswählen oder diesen Abschnitt überspringen."
   },
   "bootstrap_user": {
     "screen_title": "Bootstrap-Benutzer erstellen",
@@ -952,23 +962,23 @@
     "failed_msg": "Zuweisung fehlgeschlagen."
   },
   "shift": {
-    "identity": "SCHICHTIDENTITÄT",
-    "ward_assignment": "STATIONSZUWEISUNG",
-    "details": "SCHICHTDETAILS",
-    "name": "Schichtname",
-    "name_placeholder": "z.B. Frühschicht",
-    "code": "Schicht-Code",
-    "code_placeholder": "z.B. SHIFT-DAY-01",
-    "start_time": "Startzeit",
-    "end_time": "Endzeit",
-    "time_placeholder": "HH:MM",
-    "ward": "Station",
-    "select_ward": "Station auswählen",
-    "status": "Status",
-    "no_wards": "Keine Stationen verfügbar.",
-    "no_wards_available": "Keine Stationen verfügbar.",
-    "create_banner": "Neue Schicht für Stationsbesetzung erstellen.",
-    "edit_banner": "Schichtdetails bearbeiten."
+    "unassign_nurse": "Krankenschwester entfernen",
+    "unassign_doctor": "Arzt entfernen",
+    "remove_nurse_confirm": "{{firstName}} {{lastName}} aus dieser Schicht entfernen?",
+    "remove_doctor_confirm": "Dr. {{firstName}} {{lastName}} aus dieser Schicht entfernen?",
+    "unassign": "Entfernen",
+    "removed_nurse": "{{firstName}} {{lastName}} aus dieser Schicht entfernt.",
+    "removed_doctor": "Dr. {{firstName}} {{lastName}} aus dieser Schicht entfernt.",
+    "edit": "Schicht bearbeiten",
+    "assigned_nurses": "ZUGEWIESENE KRANKENSCHWESTERN",
+    "assigned_doctors": "ZUGEWIESENE ÄRZTE",
+    "no_nurses": "Keine Krankenschwestern dieser Schicht zugewiesen.",
+    "no_doctors": "Keine Ärzte dieser Schicht zugewiesen.",
+    "load_failed": "Schicht konnte nicht geladen werden.",
+    "not_found": "Schicht nicht gefunden.",
+    "ward": "STATION",
+    "start": "START",
+    "end": "ENDE"
   },
   "shifts": {
     "no_shifts": "Keine Schichten gefunden.",
@@ -1079,6 +1089,81 @@
     "perm_upload_events": "Ereignisse hochladen",
     "perm_upload_statedata": "Zustandsdaten hochladen",
     "perm_upload_telemetry": "Telemetrie hochladen",
-    "perm_app_admin_patient": "Patienten-App-Admin",
+    "perm_app_admin_patient": "Patienten-App-Admin"
+  },
+  "security_policy": {
+    "title": "Sicherheitsrichtlinie",
+    "owner_session": "Inhaber-Sitzung",
+    "admin_session": "Admin-Sitzung",
+    "doctor_session": "Arzt-Sitzung",
+    "nurse_session": "Pflegepersonal-Sitzung",
+    "patient_session": "Patienten-Sitzung",
+    "inherit_org": "Von Organisation erben",
+    "hrs": "Std",
+    "default": "Standard",
+    "err_owner_required": "Bitte geben Sie eine Sitzungsdauer für den Inhaber ein.",
+    "err_invalid_duration": "Die Sitzungsdauer muss eine positive Zahl sein.",
+    "err_invalid_admin_duration": "Die Admin-Sitzungsdauer muss eine positive Zahl sein.",
+    "err_missing_org": "Organisationskontext fehlt. Bitte gehen Sie zurück und versuchen Sie es erneut.",
+    "err_save_failed": "Sitzungsrichtlinie konnte nicht aktualisiert werden.",
+    "err_load_failed": "Aktuelle Richtlinie konnte nicht geladen werden.",
+    "err_invalid_durations": "Sitzungsdauern müssen positive Zahlen sein (leer lassen, um von der Organisation zu erben).",
+    "tap_edit_hint": "Tippen Sie auf Bearbeiten, um zu konfigurieren"
+  },
+  "phone": {
+    "select_country": "Ländervorwahl auswählen",
+    "search_placeholder": "Land oder Vorwahl suchen..."
+  },
+  "time_picker": {
+    "title": "Uhrzeit auswählen",
+    "hour": "STD",
+    "min": "MIN"
+  },
+  "date_picker": {
+    "day": "Tag",
+    "month": "Monat",
+    "year": "Jahr"
+  },
+  "assign_gateway": {
+    "select_gateway": "Gateway auswählen",
+    "select_bed": "Bett auswählen",
+    "choose_gateway": "Gateway wählen",
+    "search_gateways": "Gateways suchen…",
+    "search_beds": "Betten suchen…",
+    "no_gateways": "Keine Gateways gefunden.",
+    "no_beds": "Keine Betten gefunden.",
+    "back": "← Gateways",
+    "assign_to_bed": "Bett zuweisen",
+    "assigned_msg": "Gateway {{gatewayCode}} Bett {{bedCode}} zugewiesen.",
+    "failed": "Zuweisung fehlgeschlagen.",
+    "bed_label": "→ Bett {{bedCode}}"
+  },
+  "assign_device": {
+    "select_device": "Gerät auswählen",
+    "select_bed": "Bett auswählen",
+    "select_patient": "Patient auswählen",
+    "choose_hint": "Gerät, Bett und Patient auswählen",
+    "search_devices": "Geräte suchen…",
+    "search_beds": "Betten suchen…",
+    "search_patients": "Patienten suchen…",
+    "no_devices": "Keine Geräte gefunden.",
+    "no_beds": "Keine Betten gefunden.",
+    "no_patients": "Keine Patienten gefunden.",
+    "no_gateway": "Kein Gateway",
+    "back": "← Zurück",
+    "assign": "Zuweisen",
+    "assigned_msg": "Gerät {{deviceCode}} {{firstName}} {{lastName}} auf Bett {{bedCode}} zugewiesen.",
+    "failed": "Zuweisung fehlgeschlagen.",
+    "bed_label": "Bett {{bedCode}}"
+  },
+  "status": {
+    "active": "AKTIV",
+    "inactive": "INAKTIV",
+    "pending": "AUSSTEHEND"
+  },
+  "exit": {
+    "title": "App beenden",
+    "message": "Möchten Sie die App wirklich beenden?",
+    "confirm": "Beenden"
   }
 }

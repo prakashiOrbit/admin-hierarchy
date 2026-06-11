@@ -28,7 +28,13 @@
     "failed": "فشل",
     "go_back": "رجوع",
     "load_failed": "فشل في تحميل البيانات.",
-    "dr_prefix": "د."
+    "dr_prefix": "د.",
+    "edit": "تعديل",
+    "invalid_input": "إدخال غير صالح",
+    "confirm": "تأكيد",
+    "or": "أو",
+    "add": "إضافة",
+    "refresh": "↻ تحديث"
   },
   "auth": {
     "login": "تسجيل الدخول",
@@ -451,7 +457,9 @@
     "princeton": "برينستون",
     "lena": "ليلى",
     "kowalski": "كوفالسكي",
-    "search_stations": "بحث عن محطات..."
+    "search_stations": "بحث عن محطات...",
+    "first_name": "الاسم الأول",
+    "last_name": "اسم العائلة"
   },
   "actions": {
     "bed_actions": "إجراءات السرير",
@@ -857,7 +865,9 @@
     "witness_note": "تم التسجيل بواسطة {{name}} — يُعدّ هذا الإدخال سجلاً رقمياً للموافقة التي تم الحصول عليها شخصياً.",
     "additional_title": "موافقة إضافية",
     "additional_hint": "اختياري. حدد وأكمل أدناه فقط إذا كان يتم جمع موافقة جديدة في هذه الزيارة.",
-    "view_manage": "عرض / إدارة الموافقات"
+    "view_manage": "عرض / إدارة الموافقات",
+    "recommended": "موصى به",
+    "onboarding_notice_optional": "الموافقة اختيارية. يمكنك تحديد نوع أو أكثر من أنواع الموافقة أدناه، أو تخطي هذا القسم بالكامل."
   },
   "bootstrap_user": {
     "screen_title": "إنشاء مستخدم أساسي",
@@ -952,23 +962,23 @@
     "failed_msg": "فشل التخصيص."
   },
   "shift": {
-    "identity": "هوية الوردية",
-    "ward_assignment": "تخصيص الجناح",
-    "details": "تفاصيل الوردية",
-    "name": "اسم الوردية",
-    "name_placeholder": "مثال: وردية الصباح",
-    "code": "رمز الوردية",
-    "code_placeholder": "مثال: SHIFT-DAY-01",
-    "start_time": "وقت البدء",
-    "end_time": "وقت الانتهاء",
-    "time_placeholder": "ساعة:دقيقة",
+    "unassign_nurse": "إلغاء تعيين الممرضة",
+    "unassign_doctor": "إلغاء تعيين الطبيب",
+    "remove_nurse_confirm": "هل تريد إزالة {{firstName}} {{lastName}} من هذه الوردية؟",
+    "remove_doctor_confirm": "هل تريد إزالة د. {{firstName}} {{lastName}} من هذه الوردية؟",
+    "unassign": "إلغاء التعيين",
+    "removed_nurse": "تم إزالة {{firstName}} {{lastName}} من هذه الوردية.",
+    "removed_doctor": "تم إزالة د. {{firstName}} {{lastName}} من هذه الوردية.",
+    "edit": "تعديل الوردية",
+    "assigned_nurses": "الممرضات المعينات",
+    "assigned_doctors": "الأطباء المعينون",
+    "no_nurses": "لا توجد ممرضات معينات لهذه الوردية.",
+    "no_doctors": "لا يوجد أطباء معينون لهذه الوردية.",
+    "load_failed": "فشل تحميل الوردية.",
+    "not_found": "الوردية غير موجودة.",
     "ward": "الجناح",
-    "select_ward": "اختر الجناح",
-    "status": "الحالة",
-    "no_wards": "لا توجد أجنحة متاحة.",
-    "no_wards_available": "لا توجد أجنحة متاحة.",
-    "create_banner": "إنشاء وردية جديدة لتوظيف الجناح.",
-    "edit_banner": "تعديل تفاصيل الوردية."
+    "start": "البداية",
+    "end": "النهاية"
   },
   "shifts": {
     "no_shifts": "لا توجد ورديات.",
@@ -1079,6 +1089,81 @@
     "perm_upload_events": "رفع الأحداث",
     "perm_upload_statedata": "رفع بيانات الحالة",
     "perm_upload_telemetry": "رفع بيانات القياس عن بُعد",
-    "perm_app_admin_patient": "مسؤول تطبيق المريض",
+    "perm_app_admin_patient": "مسؤول تطبيق المريض"
+  },
+  "security_policy": {
+    "title": "سياسة الأمان",
+    "owner_session": "جلسة المالك",
+    "admin_session": "جلسة المسؤول",
+    "doctor_session": "جلسة الطبيب",
+    "nurse_session": "جلسة الممرض",
+    "patient_session": "جلسة المريض",
+    "inherit_org": "موروث من المنظمة",
+    "hrs": "س",
+    "default": "افتراضي",
+    "err_owner_required": "يرجى إدخال مدة جلسة المالك بالساعات.",
+    "err_invalid_duration": "يجب أن تكون مدة الجلسة رقمًا موجبًا.",
+    "err_invalid_admin_duration": "يجب أن تكون مدة جلسة المسؤول رقمًا موجبًا.",
+    "err_missing_org": "سياق المنظمة مفقود. يرجى العودة والمحاولة مرة أخرى.",
+    "err_save_failed": "فشل تحديث سياسة الجلسة.",
+    "err_load_failed": "فشل تحميل السياسة الحالية.",
+    "err_invalid_durations": "يجب أن تكون مدد الجلسات أرقامًا موجبة (اتركها فارغة للاستمرار من المنظمة).",
+    "tap_edit_hint": "انقر على تعديل للتكوين"
+  },
+  "phone": {
+    "select_country": "اختر رمز الدولة",
+    "search_placeholder": "ابحث عن دولة أو رمز..."
+  },
+  "time_picker": {
+    "title": "اختر الوقت",
+    "hour": "ساعة",
+    "min": "دقيقة"
+  },
+  "date_picker": {
+    "day": "يوم",
+    "month": "شهر",
+    "year": "سنة"
+  },
+  "assign_gateway": {
+    "select_gateway": "اختر البوابة",
+    "select_bed": "اختر السرير",
+    "choose_gateway": "اختر بوابة",
+    "search_gateways": "ابحث عن البوابات…",
+    "search_beds": "ابحث عن الأسرة…",
+    "no_gateways": "لا توجد بوابات.",
+    "no_beds": "لا توجد أسرة.",
+    "back": "← البوابات",
+    "assign_to_bed": "تعيين للسرير",
+    "assigned_msg": "تم تعيين البوابة {{gatewayCode}} للسرير {{bedCode}}.",
+    "failed": "فشل التعيين.",
+    "bed_label": "→ سرير {{bedCode}}"
+  },
+  "assign_device": {
+    "select_device": "اختر الجهاز",
+    "select_bed": "اختر السرير",
+    "select_patient": "اختر المريض",
+    "choose_hint": "اختر جهازًا وسريرًا ومريضًا",
+    "search_devices": "ابحث عن الأجهزة…",
+    "search_beds": "ابحث عن الأسرة…",
+    "search_patients": "ابحث عن المرضى…",
+    "no_devices": "لا توجد أجهزة.",
+    "no_beds": "لا توجد أسرة.",
+    "no_patients": "لا يوجد مرضى.",
+    "no_gateway": "لا توجد بوابة",
+    "back": "← رجوع",
+    "assign": "تعيين",
+    "assigned_msg": "تم تعيين الجهاز {{deviceCode}} لـ {{firstName}} {{lastName}} على السرير {{bedCode}}.",
+    "failed": "فشل التعيين.",
+    "bed_label": "سرير {{bedCode}}"
+  },
+  "status": {
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "pending": "معلق"
+  },
+  "exit": {
+    "title": "الخروج من التطبيق",
+    "message": "هل أنت متأكد أنك تريد الخروج؟",
+    "confirm": "خروج"
   }
 }

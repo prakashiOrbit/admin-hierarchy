@@ -57,8 +57,8 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
             setSaving(true);
             try {
               await bedApi.unassignPatient(user.orgName, user.hospitalCode, bed.bedCode, token);
-              Alert.alert(t('common.done'), t('actions.patient_unassigned'), [{ text: 'OK', onPress: handleClose }]);
-            } catch (e) { Alert.alert(t('common.error'), e.message || 'Failed.'); }
+              Alert.alert(t('common.done'), t('actions.patient_unassigned'), [{ text: t('common.ok'), onPress: handleClose }]);
+            } catch (e) { Alert.alert(t('common.error'), e.message || t('common.failed')); }
             finally { setSaving(false); }
           },
         },
@@ -76,8 +76,8 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
               await bedApi.discharge(user.orgName, user.hospitalCode, bed.bedCode, token);
               await admissionApi.close(user.orgName, user.hospitalCode, bed.patientCode, token);
               assignmentApi.deactivateDevices(user.orgName, user.hospitalCode, bed.patientCode, token).catch(() => {});
-              Alert.alert(t('common.done'), t('actions.patient_discharged'), [{ text: 'OK', onPress: handleClose }]);
-            } catch (e) { Alert.alert(t('common.error'), e.message || 'Failed.'); }
+              Alert.alert(t('common.done'), t('actions.patient_discharged'), [{ text: t('common.ok'), onPress: handleClose }]);
+            } catch (e) { Alert.alert(t('common.error'), e.message || t('common.failed')); }
             finally { setSaving(false); }
           },
         },
@@ -104,9 +104,9 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
     try {
       await bedApi.transferWard(user.orgName, user.hospitalCode, bed.bedCode, { wardCode: ward.wardCode }, token);
       Alert.alert(t('common.done'), t('actions.bed_transferred', { code: bed.bedCode, ward: ward.wardName }), [
-        { text: 'OK', onPress: handleClose },
+        { text: t('common.ok'), onPress: handleClose },
       ]);
-    } catch (e) { Alert.alert(t('common.error'), e.message || 'Failed.'); }
+    } catch (e) { Alert.alert(t('common.error'), e.message || t('common.failed')); }
     finally { setSaving(false); }
   };
 
@@ -121,8 +121,8 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
     setSaving(true);
     try {
       await bedApi.updateAlarmConfig(user.orgName, user.hospitalCode, bed.bedCode, payload, token);
-      Alert.alert(t('common.done'), t('actions.alarm_thresholds_saved'), [{ text: 'OK', onPress: handleClose }]);
-    } catch (e) { Alert.alert(t('common.error'), e.message || 'Failed.'); }
+      Alert.alert(t('common.done'), t('actions.alarm_thresholds_saved'), [{ text: t('common.ok'), onPress: handleClose }]);
+    } catch (e) { Alert.alert(t('common.error'), e.message || t('common.failed')); }
     finally { setSaving(false); }
   };
 

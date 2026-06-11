@@ -73,7 +73,7 @@ export const CreateDeviceTypeScreen = ({ onCancel }) => {
             />
           </Field>
 
-          <Field label={t('entity.category')} required>
+          <Field label={t('entity.category')}>
             <TextInput
               value={form.category}
               onChangeText={v => updateForm('category', v)}

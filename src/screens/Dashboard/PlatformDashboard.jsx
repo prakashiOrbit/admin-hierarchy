@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, Platform, BackHandler } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, Platform, BackHandler, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
@@ -208,7 +208,7 @@ const HomeContent = ({ onNavigate }) => {
             <IconAlert size={18} color={T.bad} />
             <Text style={styles.errorText}>{error}</Text>
           </View>
-          <Btn variant="tonal" size="sm" onPress={() => setReloadKey(key => key + 1)}>Retry</Btn>
+          <Btn variant="tonal" size="sm" onPress={() => setReloadKey(key => key + 1)}>{t('common.retry')}</Btn>
         </Card>
       )}
 
@@ -278,7 +278,11 @@ export const PlatformDashboard = ({ navigation }) => {
       if (isInvitingOwner) { setIsInvitingOwner(false); return true; }
       if (selectedOrg) { setSelectedOrg(null); return true; }
       if (activeTab !== 'home') { setActiveTab('home'); return true; }
-      return false;
+      Alert.alert(t('exit.title'), t('exit.message'), [
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('exit.confirm'), style: 'destructive', onPress: () => BackHandler.exitApp() },
+      ]);
+      return true;
     };
     const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
     return () => backHandler.remove();

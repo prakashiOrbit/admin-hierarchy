@@ -1,13 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeContext';
 
 export const StatusPill = ({ status }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const map = {
-    ACTIVE:    { color: T.good, bg: T.goodSoft, label: 'ACTIVE' },
-    INACTIVE:  { color: T.bad,  bg: T.badSoft, label: 'INACTIVE' },
-    PENDING:   { color: T.warn, bg: 'rgba(245,158,11,.12)', label: 'PENDING' },
+    ACTIVE:    { color: T.good, bg: T.goodSoft, label: t('status.active') },
+    INACTIVE:  { color: T.bad,  bg: T.badSoft, label: t('status.inactive') },
+    PENDING:   { color: T.warn, bg: 'rgba(245,158,11,.12)', label: t('status.pending') },
   };
   const s = map[status] || { color: T.textDim, bg: 'rgba(138,149,165,.1)', label: status };
   

@@ -79,12 +79,12 @@ export const EditNurseScreen = ({ nurse, onCancel, onSave }) => {
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
               <Field label={t('users.first_name')} required>
-                <TextInput value={form.firstName} onChangeText={v => set('firstName', v)} placeholder="Lena" />
+                <TextInput value={form.firstName} onChangeText={v => set('firstName', v)} placeholder={t('placeholders.first_name')} />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
               <Field label={t('users.last_name')} required>
-                <TextInput value={form.lastName} onChangeText={v => set('lastName', v)} placeholder="Kowalski" />
+                <TextInput value={form.lastName} onChangeText={v => set('lastName', v)} placeholder={t('placeholders.last_name')} />
               </Field>
             </View>
           </View>
@@ -93,7 +93,7 @@ export const EditNurseScreen = ({ nurse, onCancel, onSave }) => {
             <TextInput
               value={form.nurseSpeciality}
               onChangeText={v => set('nurseSpeciality', v)}
-              placeholder="ICU, Paediatrics"
+              placeholder={t('placeholders.speciality_nurse_example')}
             />
           </Field>
 
@@ -103,7 +103,7 @@ export const EditNurseScreen = ({ nurse, onCancel, onSave }) => {
                 <TextInput
                   value={form.nurseExperience}
                   onChangeText={v => set('nurseExperience', v.replace(/[^0-9]/g, ''))}
-                  placeholder="5"
+                  placeholder={t('placeholders.experience_nurse_example')}
                   keyboardType="numeric"
                 />
               </Field>
@@ -146,7 +146,7 @@ export const EditNurseScreen = ({ nurse, onCancel, onSave }) => {
             <TextInput
               value={form.email}
               onChangeText={v => set('email', v.toLowerCase())}
-              placeholder="nurse@hospital.org"
+              placeholder={t('placeholders.nurse_email_example')}
               keyboardType="email-address"
               leading={<IconMail size={16} color={T.textFaint} />}
             />

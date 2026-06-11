@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform, Alert, ActivityIndicator, Modal, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform, Alert, ActivityIndicator, Modal, TouchableOpacity, TextInput as RNTextInput } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
-import { userApi, getApiErrorMessage } from '../../services/api';
-import { Card, Field, TextInput, Btn } from '../../components/Shared';
+import { userApi, organisationApi, getApiErrorMessage } from '../../services/api';
+import { Card, Field, TextInput, PhoneInput, Btn } from '../../components/Shared';
 import { PermissionPicker } from '../../components/PermissionPicker';
 import { IconUser, IconMail, IconBuilding, IconShield, IconChevron } from '../../icons';
 
@@ -40,6 +40,7 @@ export const CreateHospAdminScreen = ({ onCancel, hospitalCode: propHospCode }) 
 
   const [loading, setLoading] = useState(false);
   const [showLocalePicker, setShowLocalePicker] = useState(false);
+  const [adminJwtHours, setAdminJwtHours] = useState('3');
   const [permMode, setPermMode] = useState('full');
   const [assignedRole, setAssignedRole] = useState(null);
   const [customPermissions, setCustomPermissions] = useState([...HOSP_ADMIN_PERMITS]);
@@ -49,6 +50,7 @@ export const CreateHospAdminScreen = ({ onCancel, hospitalCode: propHospCode }) 
     lastName: '',
     orgName: user?.orgName || '',
     contactEmail: '',
+    contactPhone: '',
     preferredLocale: (i18n.language || 'en').split('-')[0],
   });
 
@@ -70,6 +72,12 @@ export const CreateHospAdminScreen = ({ onCancel, hospitalCode: propHospCode }) 
       return;
     }
 
+    const adminSeconds = parseInt(adminJwtHours, 10) * 3600;
+    if (!adminJwtHours || isNaN(adminSeconds) || adminSeconds <= 0) {
+      Alert.alert(t('common.invalid_input'), t('security_policy.err_invalid_admin_duration'));
+      return;
+    }
+
     setLoading(true);
     try {
       const payload = {
@@ -78,6 +86,7 @@ export const CreateHospAdminScreen = ({ onCancel, hospitalCode: propHospCode }) 
         ...((permMode === 'custom' || permMode === 'full') && customPermissions ? { customPermissions } : {}),
       };
       await userApi.createHospAdmin(user.orgName, effectiveHospCode, payload, token);
+      await organisationApi.updateHospitalJwtValidity(user.orgName, effectiveHospCode, { adminJwtValiditySeconds: adminSeconds }, token);
       Alert.alert(t('alerts.success'), t('alerts.hosp_admin_created'), [
         { text: t('actions.ok'), onPress: onCancel }
       ]);
@@ -103,7 +112,7 @@ export const CreateHospAdminScreen = ({ onCancel, hospitalCode: propHospCode }) 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('hosp_admin.identity_section')}</Text>
 
-          <Field label={t('hosp_admin.username')}>
+          <Field label={t('hosp_admin.username')} required>
             <TextInput
               value={form.userName}
               onChangeText={(v) => updateForm('userName', v.toLowerCase())}
@@ -114,20 +123,20 @@ export const CreateHospAdminScreen = ({ onCancel, hospitalCode: propHospCode }) 
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label={t('hosp_admin.first_name')}>
+              <Field label={t('hosp_admin.first_name')} required>
                 <TextInput
                   value={form.firstName}
                   onChangeText={(v) => updateForm('firstName', v)}
-                  placeholder="Apollo"
+                  placeholder={t('placeholders.first_name')}
                 />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label={t('hosp_admin.last_name')}>
+              <Field label={t('hosp_admin.last_name')} required>
                 <TextInput
                   value={form.lastName}
                   onChangeText={(v) => updateForm('lastName', v)}
-                  placeholder="Admin"
+                  placeholder={t('placeholders.last_name')}
                 />
               </Field>
             </View>
@@ -147,19 +156,23 @@ export const CreateHospAdminScreen = ({ onCancel, hospitalCode: propHospCode }) 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('hosp_admin.contact_section')}</Text>
 
-          <Field label={t('hosp_admin.contact_email')}>
+          <Field label={t('hosp_admin.contact_email')} required>
             <TextInput
               value={form.contactEmail}
               onChangeText={(v) => updateForm('contactEmail', v.toLowerCase())}
-              placeholder="e.g. apollo_admin121@mailinator.com"
+              placeholder={t('placeholders.email_eg')}
               leading={<IconMail size={18} color={T.textDim} />}
             />
+          </Field>
+
+          <Field label={t('users.phone')}>
+            <PhoneInput value={form.contactPhone} onChangeText={(v) => updateForm('contactPhone', v)} />
           </Field>
 
           <Field label={t('users.preferred_locale')}>
             <Card style={styles.selectCard} onPress={() => setShowLocalePicker(true)}>
               <Text style={styles.selectText}>
-                {LOCALES.find(l => l.code === form.preferredLocale)?.label || 'English'}
+                {LOCALES.find(l => l.code === form.preferredLocale)?.label || t('languages.en')}
               </Text>
               <IconChevron size={18} color={T.textDim} />
             </Card>
@@ -187,6 +200,28 @@ export const CreateHospAdminScreen = ({ onCancel, hospitalCode: propHospCode }) 
           <Text style={styles.infoText}>
             {t('hosp_admin.info_text', { hospitalCode: effectiveHospCode })}
           </Text>
+        </View>
+
+        {/* Security Policy Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('security_policy.title')}</Text>
+          <Card style={styles.policyCard}>
+            <View style={styles.policyRow}>
+              <Text style={styles.policyLabel}>{t('security_policy.admin_session')}</Text>
+              <View style={styles.policyInputRow}>
+                <RNTextInput
+                  style={[styles.policyInput, { color: T.text, borderColor: T.border, backgroundColor: T.surface2 }]}
+                  value={adminJwtHours}
+                  onChangeText={setAdminJwtHours}
+                  keyboardType="numeric"
+                  placeholder="3"
+                  placeholderTextColor={T.textFaint}
+                  selectTextOnFocus
+                />
+                <Text style={styles.policyUnit}>{t('security_policy.hrs')}</Text>
+              </View>
+            </View>
+          </Card>
         </View>
 
         {/* Actions */}
@@ -283,4 +318,10 @@ const createStyles = (T) => StyleSheet.create({
   modalTitle: { fontSize: 16, fontWeight: '700', color: T.text, marginBottom: 16, textAlign: 'center' },
   localeOption: { padding: 14, borderRadius: 8, marginBottom: 4 },
   localeOptionText: { fontSize: 14, color: T.text },
+  policyCard: { padding: 0, overflow: 'hidden' },
+  policyRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16 },
+  policyLabel: { fontSize: 14, color: T.textDim },
+  policyInputRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  policyInput: { width: 60, height: 36, borderWidth: 1, borderRadius: 8, paddingHorizontal: 8, textAlign: 'center', fontSize: 14, fontWeight: '600' },
+  policyUnit: { fontSize: 13, color: T.textDim },
 });

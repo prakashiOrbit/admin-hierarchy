@@ -72,7 +72,7 @@ export const CreateWardScreen = ({ onCancel, onSuccess }) => {
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label={t('ward.ward_type')} required>
+              <Field label={t('ward.ward_type')}>
                 <Card style={styles.selectCard} padding={12}>
                   <Text style={styles.selectText}>{form.wardType}</Text>
                 </Card>

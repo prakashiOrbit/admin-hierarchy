@@ -4,11 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeContext';
 import { Btn } from './Shared';
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const daysInMonth = (m, y) => new Date(y, m, 0).getDate();
 
 export const DatePickerModal = ({ visible, value, onConfirm, onCancel, title }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { theme: T } = useTheme();
   const s = makeStyles(T);
   const currentYear = new Date().getFullYear();
@@ -72,21 +71,21 @@ export const DatePickerModal = ({ visible, value, onConfirm, onCancel, title }) 
             <Text style={s.title}>{title || t('entity.dob')}</Text>
             <View style={s.spinners}>
               <Col
-                label="Day"
+                label={t('date_picker.day')}
                 display={String(day).padStart(2, '0')}
                 onUp={() => nudgeDay(1)}
                 onDown={() => nudgeDay(-1)}
               />
               <View style={s.sep} />
               <Col
-                label="Month"
-                display={MONTHS[month - 1]}
+                label={t('date_picker.month')}
+                display={new Intl.DateTimeFormat(i18n.language, { month: 'short' }).format(new Date(2000, month - 1, 1))}
                 onUp={() => nudgeMonth(1)}
                 onDown={() => nudgeMonth(-1)}
               />
               <View style={s.sep} />
               <Col
-                label="Year"
+                label={t('date_picker.year')}
                 display={String(year)}
                 onUp={() => nudgeYear(1)}
                 onDown={() => nudgeYear(-1)}

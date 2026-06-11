@@ -4,6 +4,7 @@ import {
   TouchableOpacity, TouchableWithoutFeedback, Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeContext';
 import { IconClock } from '../icons';
 
@@ -52,6 +53,7 @@ const DrumColumn = ({ items, initialIndex, onSettle, scrollRef }) => {
 };
 
 export const TimePicker = ({ value, onChange }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -104,18 +106,18 @@ export const TimePicker = ({ value, onChange }) => {
 
         <View style={[styles.sheet, { backgroundColor: T.bg, paddingBottom: Math.max(insets.bottom, 20) }]}>
           <View style={styles.handle} />
-          <Text style={[styles.title, { color: T.text }]}>Select Time</Text>
+          <Text style={[styles.title, { color: T.text }]}>{t('time_picker.title')}</Text>
 
           <View style={styles.cols}>
             <View style={styles.colWrap}>
-              <Text style={[styles.colLabel, { color: T.textFaint }]}>HOUR</Text>
+              <Text style={[styles.colLabel, { color: T.textFaint }]}>{t('time_picker.hour')}</Text>
               <DrumColumn items={HOURS} initialIndex={tempH} onSettle={setTempH} scrollRef={hRef} />
             </View>
 
             <Text style={[styles.colon, { color: T.text }]}>:</Text>
 
             <View style={styles.colWrap}>
-              <Text style={[styles.colLabel, { color: T.textFaint }]}>MIN</Text>
+              <Text style={[styles.colLabel, { color: T.textFaint }]}>{t('time_picker.min')}</Text>
               <DrumColumn items={MINUTES} initialIndex={tempM} onSettle={setTempM} scrollRef={mRef} />
             </View>
           </View>
@@ -125,13 +127,13 @@ export const TimePicker = ({ value, onChange }) => {
               onPress={cancel}
               style={[styles.btn, styles.btnCancel, { borderColor: T.borderSoft, backgroundColor: T.surface }]}
             >
-              <Text style={[styles.btnText, { color: T.textDim }]}>Cancel</Text>
+              <Text style={[styles.btnText, { color: T.textDim }]}>{t('common.cancel')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={confirm}
               style={[styles.btn, styles.btnConfirm, { backgroundColor: T.accent }]}
             >
-              <Text style={[styles.btnText, { color: '#fff' }]}>Confirm</Text>
+              <Text style={[styles.btnText, { color: '#fff' }]}>{t('common.confirm')}</Text>
             </TouchableOpacity>
           </View>
         </View>

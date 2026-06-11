@@ -28,7 +28,13 @@
     "load_failed": "Failed to load data.",
     "dr_prefix": "Dr.",
     "none": "None",
-    "no_data": "No items found"
+    "no_data": "No items found",
+    "edit": "Edit",
+    "invalid_input": "Invalid Input",
+    "confirm": "Confirm",
+    "or": "or",
+    "add": "Add",
+    "refresh": "↻ Refresh"
   },
   "auth": {
     "login": "Login",
@@ -451,7 +457,9 @@
     "select_profile": "Select a profile",
     "profile_code": "e.g. Comen",
     "profile_code_hint": "Enter the .xml profile filename (without extension)",
-    "search_stations": "Search stations..."
+    "search_stations": "Search stations...",
+    "first_name": "First name",
+    "last_name": "Last name"
   },
   "actions": {
     "bed_actions": "Bed Actions",
@@ -885,23 +893,23 @@
     "failed_msg": "Assignment failed."
   },
   "shift": {
-    "identity": "SHIFT IDENTITY",
-    "ward_assignment": "WARD ASSIGNMENT",
-    "details": "SHIFT DETAILS",
-    "name": "Shift Name",
-    "name_placeholder": "e.g. Morning Shift",
-    "code": "Shift Code",
-    "code_placeholder": "e.g. SHIFT-DAY-01",
-    "start_time": "Start Time",
-    "end_time": "End Time",
-    "time_placeholder": "HH:MM",
-    "ward": "Ward",
-    "select_ward": "Select Ward",
-    "status": "Status",
-    "no_wards": "No wards available.",
-    "no_wards_available": "No wards available.",
-    "create_banner": "Create a new shift for ward staffing.",
-    "edit_banner": "Edit shift details."
+    "unassign_nurse": "Unassign Nurse",
+    "unassign_doctor": "Unassign Doctor",
+    "remove_nurse_confirm": "Remove {{firstName}} {{lastName}} from this shift?",
+    "remove_doctor_confirm": "Remove Dr. {{firstName}} {{lastName}} from this shift?",
+    "unassign": "Unassign",
+    "removed_nurse": "{{firstName}} {{lastName}} removed from this shift.",
+    "removed_doctor": "Dr. {{firstName}} {{lastName}} removed from this shift.",
+    "edit": "Edit Shift",
+    "assigned_nurses": "ASSIGNED NURSES",
+    "assigned_doctors": "ASSIGNED DOCTORS",
+    "no_nurses": "No nurses assigned to this shift.",
+    "no_doctors": "No doctors assigned to this shift.",
+    "load_failed": "Failed to load shift.",
+    "not_found": "Shift not found.",
+    "ward": "WARD",
+    "start": "START",
+    "end": "END"
   },
   "shifts": {
     "no_shifts": "No shifts found.",
@@ -969,7 +977,9 @@
     "witness_note": "Recorded by {{name}} — this entry serves as the digital witness record of consent obtained in person.",
     "additional_title": "Additional Consent",
     "additional_hint": "Optional. Select and complete below only if new consent is being collected at this visit.",
-    "view_manage": "View / Manage Consents"
+    "view_manage": "View / Manage Consents",
+    "recommended": "Recommended",
+    "onboarding_notice_optional": "Consent is optional. You may select one or more consent types below, or skip this section entirely."
   },
   "bootstrap_user": {
     "screen_title": "Create Bootstrap User",
@@ -1079,6 +1089,81 @@
     "perm_upload_events": "Upload Events",
     "perm_upload_statedata": "Upload State Data",
     "perm_upload_telemetry": "Upload Telemetry",
-    "perm_app_admin_patient": "Patient App Admin",
+    "perm_app_admin_patient": "Patient App Admin"
+  },
+  "security_policy": {
+    "title": "Security Policy",
+    "owner_session": "Owner Session",
+    "admin_session": "Admin Session",
+    "doctor_session": "Doctor Session",
+    "nurse_session": "Nurse Session",
+    "patient_session": "Patient Session",
+    "inherit_org": "Inherit from Org",
+    "hrs": "hrs",
+    "default": "Default",
+    "err_owner_required": "Please enter an Owner session duration in hours.",
+    "err_invalid_duration": "Session duration must be a positive number.",
+    "err_invalid_admin_duration": "Admin session duration must be a positive number.",
+    "err_missing_org": "Organisation context is missing. Please go back and try again.",
+    "err_save_failed": "Failed to update session policy.",
+    "err_load_failed": "Failed to load current policy.",
+    "err_invalid_durations": "Session durations must be positive numbers (leave blank to inherit from Org).",
+    "tap_edit_hint": "Tap Edit to configure"
+  },
+  "phone": {
+    "select_country": "Select Country Code",
+    "search_placeholder": "Search country or code..."
+  },
+  "time_picker": {
+    "title": "Select Time",
+    "hour": "HOUR",
+    "min": "MIN"
+  },
+  "date_picker": {
+    "day": "Day",
+    "month": "Month",
+    "year": "Year"
+  },
+  "assign_gateway": {
+    "select_gateway": "Select Gateway",
+    "select_bed": "Select Bed",
+    "choose_gateway": "Choose a gateway",
+    "search_gateways": "Search gateways…",
+    "search_beds": "Search beds…",
+    "no_gateways": "No gateways found.",
+    "no_beds": "No beds found.",
+    "back": "← Gateways",
+    "assign_to_bed": "Assign to Bed",
+    "assigned_msg": "Gateway {{gatewayCode}} assigned to bed {{bedCode}}.",
+    "failed": "Assignment failed.",
+    "bed_label": "→ Bed {{bedCode}}"
+  },
+  "assign_device": {
+    "select_device": "Select Device",
+    "select_bed": "Select Bed",
+    "select_patient": "Select Patient",
+    "choose_hint": "Choose a device, bed, and patient",
+    "search_devices": "Search devices…",
+    "search_beds": "Search beds…",
+    "search_patients": "Search patients…",
+    "no_devices": "No devices found.",
+    "no_beds": "No beds found.",
+    "no_patients": "No patients found.",
+    "no_gateway": "No gateway",
+    "back": "← Back",
+    "assign": "Assign",
+    "assigned_msg": "Device {{deviceCode}} assigned to {{firstName}} {{lastName}} on bed {{bedCode}}.",
+    "failed": "Assignment failed.",
+    "bed_label": "Bed {{bedCode}}"
+  },
+  "status": {
+    "active": "ACTIVE",
+    "inactive": "INACTIVE",
+    "pending": "PENDING"
+  },
+  "exit": {
+    "title": "Exit App",
+    "message": "Are you sure you want to exit?",
+    "confirm": "Exit"
   }
 }

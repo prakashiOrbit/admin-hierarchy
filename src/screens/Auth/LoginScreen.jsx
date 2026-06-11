@@ -82,7 +82,7 @@ export const LoginScreen = ({ navigation }) => {
   const [forgotPwdLoading, setForgotPwdLoading] = useState(false);
 
   const currentLangCode  = (i18n.language || 'en').split('-')[0];
-  const currentLangLabel = t(`languages.${currentLangCode}`)?.split(' ')[0] || 'English';
+  const currentLangLabel = t(`languages.${currentLangCode}`)?.split(' ')[0] || t('languages.en').split(' ')[0];
 
   useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -211,7 +211,7 @@ export const LoginScreen = ({ navigation }) => {
     try {
       await authApi.verifyEmail(pendingOrg, pendingUserName, otpValue);
       Alert.alert(t('common.success'), t('auth.email_verified_msg'), [
-        { text: 'OK', onPress: () => { setState('idle'); setOtpValue(''); } },
+        { text: t('common.ok'), onPress: () => { setState('idle'); setOtpValue(''); } },
       ]);
     } catch (err) {
       Alert.alert(t('common.error'), err.message);
@@ -635,7 +635,7 @@ export const LoginScreen = ({ navigation }) => {
           {/* ── OR divider ── */}
           <View style={styles.divider}>
             <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or</Text>
+            <Text style={styles.dividerText}>{t('common.or')}</Text>
             <View style={styles.dividerLine} />
           </View>
 

@@ -22,13 +22,19 @@
     "retry": "Réessayer",
     "none": "Aucun",
     "no_data": "Aucun élément trouvé",
+    "edit": "Modifier",
+    "invalid_input": "Saisie invalide",
     "ok": "OK",
     "saved": "Enregistré",
     "saving": "Enregistrement...",
     "failed": "Échec",
     "go_back": "Retour",
     "load_failed": "Échec du chargement des données.",
-    "dr_prefix": "Dr"
+    "dr_prefix": "Dr",
+    "confirm": "Confirmer",
+    "or": "ou",
+    "add": "Ajouter",
+    "refresh": "↻ Actualiser"
   },
   "auth": {
     "login": "Connexion",
@@ -451,7 +457,9 @@
     "princeton": "Princeton",
     "lena": "Léna",
     "kowalski": "Kowalski",
-    "search_stations": "Rechercher des postes..."
+    "search_stations": "Rechercher des postes...",
+    "first_name": "Prénom",
+    "last_name": "Nom"
   },
   "actions": {
     "bed_actions": "Actions Lit",
@@ -857,7 +865,9 @@
     "witness_note": "Enregistré par {{name}} — cette entrée constitue le document témoin numérique du consentement obtenu en personne.",
     "additional_title": "Consentement supplémentaire",
     "additional_hint": "Optionnel. Sélectionnez et complétez ci-dessous uniquement si un nouveau consentement est recueilli lors de cette visite.",
-    "view_manage": "Voir / Gérer les consentements"
+    "view_manage": "Voir / Gérer les consentements",
+    "recommended": "Recommandé",
+    "onboarding_notice_optional": "Le consentement est facultatif. Vous pouvez sélectionner un ou plusieurs types de consentement ci-dessous, ou ignorer cette section."
   },
   "bootstrap_user": {
     "screen_title": "Créer un utilisateur bootstrap",
@@ -952,23 +962,23 @@
     "failed_msg": "Échec de l'assignation."
   },
   "shift": {
-    "identity": "IDENTITÉ DE L'ÉQUIPE",
-    "ward_assignment": "AFFECTATION DU SERVICE",
-    "details": "DÉTAILS DE L'ÉQUIPE",
-    "name": "Nom de l'équipe",
-    "name_placeholder": "ex. Équipe du matin",
-    "code": "Code de l'équipe",
-    "code_placeholder": "ex. SHIFT-DAY-01",
-    "start_time": "Heure de début",
-    "end_time": "Heure de fin",
-    "time_placeholder": "HH:MM",
-    "ward": "Service",
-    "select_ward": "Sélectionner le service",
-    "status": "Statut",
-    "no_wards": "Aucun service disponible.",
-    "no_wards_available": "Aucun service disponible.",
-    "create_banner": "Créer une nouvelle équipe pour le service.",
-    "edit_banner": "Modifier les détails de l'équipe."
+    "unassign_nurse": "Désassigner l'infirmière",
+    "unassign_doctor": "Désassigner le médecin",
+    "remove_nurse_confirm": "Retirer {{firstName}} {{lastName}} de ce quart ?",
+    "remove_doctor_confirm": "Retirer Dr. {{firstName}} {{lastName}} de ce quart ?",
+    "unassign": "Désassigner",
+    "removed_nurse": "{{firstName}} {{lastName}} retiré(e) de ce quart.",
+    "removed_doctor": "Dr. {{firstName}} {{lastName}} retiré(e) de ce quart.",
+    "edit": "Modifier le quart",
+    "assigned_nurses": "INFIRMIÈRES ASSIGNÉES",
+    "assigned_doctors": "MÉDECINS ASSIGNÉS",
+    "no_nurses": "Aucune infirmière assignée à ce quart.",
+    "no_doctors": "Aucun médecin assigné à ce quart.",
+    "load_failed": "Échec du chargement du quart.",
+    "not_found": "Quart introuvable.",
+    "ward": "SERVICE",
+    "start": "DÉBUT",
+    "end": "FIN"
   },
   "shifts": {
     "no_shifts": "Aucune équipe trouvée.",
@@ -1079,6 +1089,81 @@
     "perm_upload_events": "Télécharger les événements",
     "perm_upload_statedata": "Télécharger les données d'état",
     "perm_upload_telemetry": "Télécharger la télémétrie",
-    "perm_app_admin_patient": "Admin app patient",
+    "perm_app_admin_patient": "Admin app patient"
+  },
+  "security_policy": {
+    "title": "Politique de sécurité",
+    "owner_session": "Session propriétaire",
+    "admin_session": "Session administrateur",
+    "doctor_session": "Session médecin",
+    "nurse_session": "Session infirmier",
+    "patient_session": "Session patient",
+    "inherit_org": "Hériter de l'org",
+    "hrs": "h",
+    "default": "Défaut",
+    "err_owner_required": "Veuillez saisir une durée de session pour le propriétaire.",
+    "err_invalid_duration": "La durée de session doit être un nombre positif.",
+    "err_invalid_admin_duration": "La durée de session de l'administrateur doit être un nombre positif.",
+    "err_missing_org": "Le contexte de l'organisation est manquant. Veuillez revenir en arrière et réessayer.",
+    "err_save_failed": "Échec de la mise à jour de la politique de session.",
+    "err_load_failed": "Échec du chargement de la politique actuelle.",
+    "err_invalid_durations": "Les durées de session doivent être des nombres positifs (laissez vide pour hériter de l'org).",
+    "tap_edit_hint": "Appuyez sur Modifier pour configurer"
+  },
+  "phone": {
+    "select_country": "Sélectionner l'indicatif pays",
+    "search_placeholder": "Rechercher un pays ou un code..."
+  },
+  "time_picker": {
+    "title": "Sélectionner l'heure",
+    "hour": "HEURE",
+    "min": "MIN"
+  },
+  "date_picker": {
+    "day": "Jour",
+    "month": "Mois",
+    "year": "Année"
+  },
+  "assign_gateway": {
+    "select_gateway": "Sélectionner la passerelle",
+    "select_bed": "Sélectionner le lit",
+    "choose_gateway": "Choisir une passerelle",
+    "search_gateways": "Rechercher des passerelles…",
+    "search_beds": "Rechercher des lits…",
+    "no_gateways": "Aucune passerelle trouvée.",
+    "no_beds": "Aucun lit trouvé.",
+    "back": "← Passerelles",
+    "assign_to_bed": "Assigner au lit",
+    "assigned_msg": "Passerelle {{gatewayCode}} assignée au lit {{bedCode}}.",
+    "failed": "Échec de l'assignation.",
+    "bed_label": "→ Lit {{bedCode}}"
+  },
+  "assign_device": {
+    "select_device": "Sélectionner l'appareil",
+    "select_bed": "Sélectionner le lit",
+    "select_patient": "Sélectionner le patient",
+    "choose_hint": "Choisir un appareil, un lit et un patient",
+    "search_devices": "Rechercher des appareils…",
+    "search_beds": "Rechercher des lits…",
+    "search_patients": "Rechercher des patients…",
+    "no_devices": "Aucun appareil trouvé.",
+    "no_beds": "Aucun lit trouvé.",
+    "no_patients": "Aucun patient trouvé.",
+    "no_gateway": "Sans passerelle",
+    "back": "← Retour",
+    "assign": "Assigner",
+    "assigned_msg": "Appareil {{deviceCode}} assigné à {{firstName}} {{lastName}} sur le lit {{bedCode}}.",
+    "failed": "Échec de l'assignation.",
+    "bed_label": "Lit {{bedCode}}"
+  },
+  "status": {
+    "active": "ACTIF",
+    "inactive": "INACTIF",
+    "pending": "EN ATTENTE"
+  },
+  "exit": {
+    "title": "Quitter l'application",
+    "message": "Voulez-vous vraiment quitter ?",
+    "confirm": "Quitter"
   }
 }

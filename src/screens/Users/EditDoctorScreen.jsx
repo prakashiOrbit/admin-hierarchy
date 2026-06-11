@@ -83,12 +83,12 @@ export const EditDoctorScreen = ({ doctor, onCancel, onSave }) => {
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
               <Field label={t('users.first_name')} required>
-                <TextInput value={form.firstName} onChangeText={v => set('firstName', v)} placeholder="Gregory" />
+                <TextInput value={form.firstName} onChangeText={v => set('firstName', v)} placeholder={t('placeholders.first_name')} />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
               <Field label={t('users.last_name')} required>
-                <TextInput value={form.lastName} onChangeText={v => set('lastName', v)} placeholder="House" />
+                <TextInput value={form.lastName} onChangeText={v => set('lastName', v)} placeholder={t('placeholders.last_name')} />
               </Field>
             </View>
           </View>
@@ -97,7 +97,7 @@ export const EditDoctorScreen = ({ doctor, onCancel, onSave }) => {
             <TextInput
               value={form.doctorSpeciality}
               onChangeText={v => set('doctorSpeciality', v)}
-              placeholder="Diagnostics, Nephrology"
+              placeholder={t('placeholders.speciality_doctor_example')}
               leading={<IconActivity size={16} color={T.textFaint} />}
             />
           </Field>
@@ -108,7 +108,7 @@ export const EditDoctorScreen = ({ doctor, onCancel, onSave }) => {
                 <TextInput
                   value={form.doctorExperience}
                   onChangeText={v => set('doctorExperience', v.replace(/[^0-9.]/g, ''))}
-                  placeholder="5.0"
+                  placeholder={t('placeholders.experience_example')}
                   keyboardType="decimal-pad"
                 />
               </Field>
@@ -164,7 +164,7 @@ export const EditDoctorScreen = ({ doctor, onCancel, onSave }) => {
             <TextInput
               value={form.email}
               onChangeText={v => set('email', v.toLowerCase())}
-              placeholder="house@hospital.org"
+              placeholder={t('placeholders.doctor_email_example')}
               keyboardType="email-address"
               leading={<IconMail size={16} color={T.textFaint} />}
             />
@@ -175,12 +175,12 @@ export const EditDoctorScreen = ({ doctor, onCancel, onSave }) => {
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
               <Field label={t('users.city')}>
-                <TextInput value={form.city} onChangeText={v => set('city', v)} placeholder="Princeton" />
+                <TextInput value={form.city} onChangeText={v => set('city', v)} placeholder={t('placeholders.city_eg')} />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
               <Field label={t('users.state')}>
-                <TextInput value={form.state} onChangeText={v => set('state', v)} placeholder="NJ" />
+                <TextInput value={form.state} onChangeText={v => set('state', v)} placeholder={t('placeholders.state_eg')} />
               </Field>
             </View>
           </View>

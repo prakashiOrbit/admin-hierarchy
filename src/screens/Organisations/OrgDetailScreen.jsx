@@ -31,7 +31,7 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
   const handleSavePolicy = async () => {
     const ownerSeconds = parseInt(ownerHours, 10) * 3600;
     if (isNaN(ownerSeconds) || ownerSeconds <= 0) {
-      Alert.alert('Invalid Input', 'Session duration must be a positive number.');
+      Alert.alert(t('common.invalid_input'), t('security_policy.err_invalid_duration'));
       return;
     }
     setPolicyLoading(true);
@@ -40,7 +40,7 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
       setCurrentOrg(prev => ({ ...prev, ownerJwtValiditySeconds: ownerSeconds }));
       setEditingPolicy(false);
     } catch (err) {
-      Alert.alert('Error', err.message || 'Failed to update session policy.');
+      Alert.alert(t('common.error'), err.message || t('security_policy.err_save_failed'));
     } finally {
       setPolicyLoading(false);
     }
@@ -119,16 +119,16 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
         {/* Security Policy */}
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
-            <SectionHeader title="Security Policy" />
+            <SectionHeader title={t('security_policy.title')} />
             {!editingPolicy && (
-              <Btn variant="ghost" size="sm" onPress={() => setEditingPolicy(true)}>Edit</Btn>
+              <Btn variant="ghost" size="sm" onPress={() => setEditingPolicy(true)}>{t('common.edit')}</Btn>
             )}
           </View>
           <Card style={styles.policyCard}>
             {/* Owner Session — editable by platform admin */}
             {editingPolicy ? (
               <View style={styles.policyRow}>
-                <Text style={styles.policyLabel}>Owner Session:</Text>
+                <Text style={styles.policyLabel}>{t('security_policy.owner_session')}:</Text>
                 <View style={styles.policyInputRow}>
                   <RNTextInput
                     style={[styles.policyInput, { color: T.text, borderColor: T.border, backgroundColor: T.surface2 }]}
@@ -137,54 +137,27 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
                     keyboardType="numeric"
                     selectTextOnFocus
                   />
-                  <Text style={styles.policyUnit}>hrs</Text>
+                  <Text style={styles.policyUnit}>{t('security_policy.hrs')}</Text>
                 </View>
               </View>
             ) : (
               <View style={styles.policyRow}>
-                <Text style={styles.policyLabel}>Owner Session:</Text>
+                <Text style={styles.policyLabel}>{t('security_policy.owner_session')}:</Text>
                 <Text style={styles.policyValue}>
-                  {currentOrg.ownerJwtValiditySeconds ? `${Math.round(currentOrg.ownerJwtValiditySeconds / 3600)} hrs` : '5 hrs (Default)'}
+                  {currentOrg.ownerJwtValiditySeconds
+                    ? `${Math.round(currentOrg.ownerJwtValiditySeconds / 3600)} ${t('security_policy.hrs')}`
+                    : `5 ${t('security_policy.hrs')} (${t('security_policy.default')})`}
                 </Text>
               </View>
             )}
             {editingPolicy && (
               <View style={styles.policyActions}>
-                <Btn variant="surface" size="sm" style={{ flex: 1 }} onPress={() => setEditingPolicy(false)} disabled={policyLoading}>Cancel</Btn>
+                <Btn variant="surface" size="sm" style={{ flex: 1 }} onPress={() => setEditingPolicy(false)} disabled={policyLoading}>{t('common.cancel')}</Btn>
                 <Btn variant="primary" size="sm" style={{ flex: 1 }} onPress={handleSavePolicy} disabled={policyLoading}>
-                  {policyLoading ? <ActivityIndicator color="#fff" size="small" /> : 'Save'}
+                  {policyLoading ? <ActivityIndicator color="#fff" size="small" /> : t('common.save')}
                 </Btn>
               </View>
             )}
-            {/* Admin/Doctor/Nurse/Patient — read-only here, managed at Org/Hospital level */}
-            <View style={styles.policyDivider} />
-            <View style={styles.policyRow}>
-              <Text style={styles.policyLabel}>Admin Session:</Text>
-              <Text style={styles.policyValue}>
-                {currentOrg.adminJwtValiditySeconds ? `${Math.round(currentOrg.adminJwtValiditySeconds / 3600)} hrs` : '3 hrs (Default)'}
-              </Text>
-            </View>
-            <View style={styles.policyDivider} />
-            <View style={styles.policyRow}>
-              <Text style={styles.policyLabel}>Doctor Session:</Text>
-              <Text style={styles.policyValue}>
-                {currentOrg.doctorJwtValiditySeconds ? `${Math.round(currentOrg.doctorJwtValiditySeconds / 3600)} hrs` : '8 hrs (Default)'}
-              </Text>
-            </View>
-            <View style={styles.policyDivider} />
-            <View style={styles.policyRow}>
-              <Text style={styles.policyLabel}>Nurse Session:</Text>
-              <Text style={styles.policyValue}>
-                {currentOrg.nurseJwtValiditySeconds ? `${Math.round(currentOrg.nurseJwtValiditySeconds / 3600)} hrs` : '12 hrs (Default)'}
-              </Text>
-            </View>
-            <View style={styles.policyDivider} />
-            <View style={styles.policyRow}>
-              <Text style={styles.policyLabel}>Patient Session:</Text>
-              <Text style={styles.policyValue}>
-                {currentOrg.patientJwtValiditySeconds ? `${Math.round(currentOrg.patientJwtValiditySeconds / 3600)} hrs` : '1 hr (Default)'}
-              </Text>
-            </View>
           </Card>
         </View>
 

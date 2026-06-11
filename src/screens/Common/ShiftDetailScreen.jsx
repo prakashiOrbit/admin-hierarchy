@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, ActivityIndicator, Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, Avatar, Btn } from '../../components/Shared';
@@ -10,6 +11,7 @@ import { ShiftStaffSheet } from '../../components/ShiftStaffSheet';
 import { formatTime } from '../../utils/shiftTime';
 
 export const ShiftDetailScreen = ({ shiftId: shiftCode, onBack, onEdit }) => {
+  const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
   const { user, token } = useAuth();
@@ -27,7 +29,7 @@ export const ShiftDetailScreen = ({ shiftId: shiftCode, onBack, onEdit }) => {
       const data = await shiftApi.getDetail(user.orgName, user.hospitalCode, shiftCode, token);
       setShift(data);
     } catch (e) {
-      setError(e.message || 'Failed to load shift.');
+      setError(e.message || t('shift.load_failed'));
     } finally {
       setLoading(false);
     }
@@ -38,19 +40,19 @@ export const ShiftDetailScreen = ({ shiftId: shiftCode, onBack, onEdit }) => {
 
   const confirmUnassignNurse = (nurse) => {
     Alert.alert(
-      'Unassign Nurse',
-      `Remove ${nurse.firstName} ${nurse.lastName} from this shift?`,
+      t('shift.unassign_nurse'),
+      t('shift.remove_nurse_confirm', { firstName: nurse.firstName, lastName: nurse.lastName }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Unassign', style: 'destructive',
+          text: t('shift.unassign'), style: 'destructive',
           onPress: async () => {
             setUnassigning(nurse.nurseCode);
             try {
               await shiftApi.unassignNurse(user.orgName, user.hospitalCode, { nurseCode: nurse.nurseCode, shiftCode }, token);
-              Alert.alert('Done', `${nurse.firstName} ${nurse.lastName} removed from this shift.`);
+              Alert.alert(t('common.done'), t('shift.removed_nurse', { firstName: nurse.firstName, lastName: nurse.lastName }));
               fetchDetail();
-            } catch (e) { Alert.alert('Error', e.message || 'Failed.'); }
+            } catch (e) { Alert.alert(t('common.error'), e.message || t('common.failed')); }
             finally { setUnassigning(null); }
           },
         },
@@ -60,19 +62,19 @@ export const ShiftDetailScreen = ({ shiftId: shiftCode, onBack, onEdit }) => {
 
   const confirmUnassignDoctor = (doctor) => {
     Alert.alert(
-      'Unassign Doctor',
-      `Remove Dr. ${doctor.firstName} ${doctor.lastName} from this shift?`,
+      t('shift.unassign_doctor'),
+      t('shift.remove_doctor_confirm', { firstName: doctor.firstName, lastName: doctor.lastName }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Unassign', style: 'destructive',
+          text: t('shift.unassign'), style: 'destructive',
           onPress: async () => {
             setUnassigning(doctor.doctorCode);
             try {
               await shiftApi.unassignDoctor(user.orgName, user.hospitalCode, { doctorCode: doctor.doctorCode, shiftCode }, token);
-              Alert.alert('Done', `Dr. ${doctor.firstName} ${doctor.lastName} removed from this shift.`);
+              Alert.alert(t('common.done'), t('shift.removed_doctor', { firstName: doctor.firstName, lastName: doctor.lastName }));
               fetchDetail();
-            } catch (e) { Alert.alert('Error', e.message || 'Failed.'); }
+            } catch (e) { Alert.alert(t('common.error'), e.message || t('common.failed')); }
             finally { setUnassigning(null); }
           },
         },
@@ -87,8 +89,8 @@ export const ShiftDetailScreen = ({ shiftId: shiftCode, onBack, onEdit }) => {
   if (error || !shift) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorText}>{error || 'Shift not found.'}</Text>
-        <Btn variant="surface" style={{ marginTop: 16 }} onPress={onBack}>Go Back</Btn>
+        <Text style={styles.errorText}>{error || t('shift.not_found')}</Text>
+        <Btn variant="surface" style={{ marginTop: 16 }} onPress={onBack}>{t('common.go_back')}</Btn>
       </View>
     );
   }
@@ -115,9 +117,9 @@ export const ShiftDetailScreen = ({ shiftId: shiftCode, onBack, onEdit }) => {
 
           <View style={styles.metaGrid}>
             {[
-              { l: 'WARD', v: shift.wardCode || '—', icon: <IconDoor size={13} color={T.textDim} /> },
-              { l: 'START', v: formatTime(shift.startTime), icon: <IconClock size={13} color={T.textDim} /> },
-              { l: 'END', v: formatTime(shift.endTime), icon: <IconClock size={13} color={T.textDim} /> },
+              { l: t('shift.ward'), v: shift.wardCode || '—', icon: <IconDoor size={13} color={T.textDim} /> },
+              { l: t('shift.start'), v: formatTime(shift.startTime), icon: <IconClock size={13} color={T.textDim} /> },
+              { l: t('shift.end'), v: formatTime(shift.endTime), icon: <IconClock size={13} color={T.textDim} /> },
             ].map((m, i) => (
               <View key={i} style={styles.metaItem}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 4 }}>
@@ -132,15 +134,15 @@ export const ShiftDetailScreen = ({ shiftId: shiftCode, onBack, onEdit }) => {
 
         <Btn variant="surface" style={styles.editBtn} onPress={() => onEdit?.(shift)}>
           <IconEdit size={15} color={T.text} />
-          <Text style={styles.editBtnText}>Edit Shift</Text>
+          <Text style={styles.editBtnText}>{t('shift.edit')}</Text>
         </Btn>
 
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
-            <SectionHeader title="ASSIGNED NURSES" count={nurses.length} />
+            <SectionHeader title={t('shift.assigned_nurses')} count={nurses.length} />
             <TouchableOpacity style={styles.addBtn} onPress={() => setShowNurseSheet(true)}>
               <IconPlus size={13} color={T.accent} />
-              <Text style={styles.addBtnText}>Add</Text>
+              <Text style={styles.addBtnText}>{t('common.add')}</Text>
             </TouchableOpacity>
           </View>
           <Card style={styles.staffCard}>
@@ -166,17 +168,17 @@ export const ShiftDetailScreen = ({ shiftId: shiftCode, onBack, onEdit }) => {
                 </View>
               );
             }) : (
-              <Text style={styles.emptyStaff}>No nurses assigned to this shift.</Text>
+              <Text style={styles.emptyStaff}>{t('shift.no_nurses')}</Text>
             )}
           </Card>
         </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
-            <SectionHeader title="ASSIGNED DOCTORS" count={doctors.length} />
+            <SectionHeader title={t('shift.assigned_doctors')} count={doctors.length} />
             <TouchableOpacity style={styles.addBtn} onPress={() => setShowDoctorSheet(true)}>
               <IconPlus size={13} color={T.accent} />
-              <Text style={styles.addBtnText}>Add</Text>
+              <Text style={styles.addBtnText}>{t('common.add')}</Text>
             </TouchableOpacity>
           </View>
           <Card style={styles.staffCard}>
@@ -202,7 +204,7 @@ export const ShiftDetailScreen = ({ shiftId: shiftCode, onBack, onEdit }) => {
                 </View>
               );
             }) : (
-              <Text style={styles.emptyStaff}>No doctors assigned to this shift.</Text>
+              <Text style={styles.emptyStaff}>{t('shift.no_doctors')}</Text>
             )}
           </Card>
         </View>

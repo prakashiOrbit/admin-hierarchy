@@ -77,11 +77,11 @@ export const AssignGatewayScreen = ({ initialGatewayCode, onCancel, onSuccess })
       }, token);
       Alert.alert(
         t('common.success'),
-        `Gateway ${selectedGateway.gatewayCode} assigned to bed ${selectedBed.bedCode}.`,
+        t('assign_gateway.assigned_msg', { gatewayCode: selectedGateway.gatewayCode, bedCode: selectedBed.bedCode }),
         [{ text: t('common.ok'), onPress: onSuccess || onCancel }]
       );
     } catch (e) {
-      Alert.alert(t('common.error'), e.message || 'Assignment failed.');
+      Alert.alert(t('common.error'), e.message || t('assign_gateway.failed'));
     } finally {
       setSaving(false);
     }
@@ -105,11 +105,11 @@ export const AssignGatewayScreen = ({ initialGatewayCode, onCancel, onSuccess })
       <View style={styles.stepperHeader}>
         <View style={styles.stepInfo}>
           <Text style={styles.stepTitle}>
-            {step === 'gateway' ? 'Select Gateway' : 'Select Bed'}
+            {step === 'gateway' ? t('assign_gateway.select_gateway') : t('assign_gateway.select_bed')}
           </Text>
           <Text style={styles.stepSubtitle}>
-            {selectedGateway ? selectedGateway.gatewayCode : 'Choose a gateway'}
-            {selectedBed ? ` → Bed ${selectedBed.bedCode}` : ''}
+            {selectedGateway ? selectedGateway.gatewayCode : t('assign_gateway.choose_gateway')}
+            {selectedBed ? ` ${t('assign_gateway.bed_label', { bedCode: selectedBed.bedCode })}` : ''}
           </Text>
         </View>
         <View style={styles.progressContainer}>
@@ -120,7 +120,7 @@ export const AssignGatewayScreen = ({ initialGatewayCode, onCancel, onSuccess })
 
       <View style={styles.searchWrap}>
         <SearchBar
-          placeholder={step === 'gateway' ? 'Search gateways…' : 'Search beds…'}
+          placeholder={step === 'gateway' ? t('assign_gateway.search_gateways') : t('assign_gateway.search_beds')}
           value={query}
           onChangeText={setQuery}
         />
@@ -151,7 +151,7 @@ export const AssignGatewayScreen = ({ initialGatewayCode, onCancel, onSuccess })
               );
             })}
             {filteredGateways.length === 0 && (
-              <Text style={styles.emptyText}>No gateways found.</Text>
+              <Text style={styles.emptyText}>{t('assign_gateway.no_gateways')}</Text>
             )}
           </View>
         ) : (
@@ -180,7 +180,7 @@ export const AssignGatewayScreen = ({ initialGatewayCode, onCancel, onSuccess })
               );
             })}
             {filteredBeds.length === 0 && (
-              <Text style={styles.emptyText}>No beds found.</Text>
+              <Text style={styles.emptyText}>{t('assign_gateway.no_beds')}</Text>
             )}
           </View>
         )}
@@ -193,14 +193,14 @@ export const AssignGatewayScreen = ({ initialGatewayCode, onCancel, onSuccess })
             variant="ghost"
             onPress={step === 'bed' && !initialGatewayCode ? () => { setStep('gateway'); setQuery(''); } : onCancel}
           >
-            {step === 'bed' && !initialGatewayCode ? '← Gateways' : t('common.cancel')}
+            {step === 'bed' && !initialGatewayCode ? t('assign_gateway.back') : t('common.cancel')}
           </Btn>
           <Btn
             style={{ flex: 2 }}
             onPress={handleFinish}
             disabled={!selectedGateway || !selectedBed || saving}
           >
-            {saving ? t('common.saving') : 'Assign to Bed'}
+            {saving ? t('common.saving') : t('assign_gateway.assign_to_bed')}
           </Btn>
         </View>
       </View>

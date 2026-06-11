@@ -44,10 +44,6 @@ export const CreateHospitalScreen = ({ onCancel }) => {
       phone: '',
     },
     ownerJwtValidityHours: 5,
-    adminJwtValidityHours: 3,
-    doctorJwtValidityHours: 8,
-    nurseJwtValidityHours: 12,
-    patientJwtValidityHours: 1,
   });
 
   const updateRoot = (key, value) => {
@@ -68,7 +64,7 @@ export const CreateHospitalScreen = ({ onCancel }) => {
     }));
   };
 
-  const isFormValid = form.hospitalName && form.hospitalCode && form.myContact.email && form.ownerJwtValidityHours && form.adminJwtValidityHours && form.doctorJwtValidityHours && form.nurseJwtValidityHours && form.patientJwtValidityHours;
+  const isFormValid = form.hospitalName && form.hospitalCode && form.myContact.email && form.ownerJwtValidityHours;
 
   const handleCreate = async () => {
     if (!user?.orgName) {
@@ -81,10 +77,6 @@ export const CreateHospitalScreen = ({ onCancel }) => {
       const payload = {
         ...form,
         ownerJwtValiditySeconds: parseInt(form.ownerJwtValidityHours, 10) * 3600,
-        adminJwtValiditySeconds: parseInt(form.adminJwtValidityHours, 10) * 3600,
-        doctorJwtValiditySeconds: parseInt(form.doctorJwtValidityHours, 10) * 3600,
-        nurseJwtValiditySeconds: parseInt(form.nurseJwtValidityHours, 10) * 3600,
-        patientJwtValiditySeconds: parseInt(form.patientJwtValidityHours, 10) * 3600,
       };
       await organisationApi.createHospital(user.orgName, payload, token);
       Alert.alert(t('alerts.success'), t('alerts.hospital_created'), [
@@ -111,7 +103,7 @@ export const CreateHospitalScreen = ({ onCancel }) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('hospital.identity_section')}</Text>
 
-          <Field label={t('hospital.code')}>
+          <Field label={t('hospital.code')} required>
             <TextInput
               value={form.hospitalCode}
               onChangeText={(v) => updateRoot('hospitalCode', v)}
@@ -120,7 +112,7 @@ export const CreateHospitalScreen = ({ onCancel }) => {
             />
           </Field>
 
-          <Field label={t('hospital.name')}>
+          <Field label={t('hospital.name')} required>
             <TextInput
               value={form.hospitalName}
               onChangeText={(v) => updateRoot('hospitalName', v)}
@@ -150,7 +142,7 @@ export const CreateHospitalScreen = ({ onCancel }) => {
             />
           </Field>
 
-          <Field label={t('hospital.contact_email')}>
+          <Field label={t('hospital.contact_email')} required>
             <TextInput
               value={form.myContact.email}
               onChangeText={(v) => updateContact('email', v.toLowerCase())}
@@ -166,7 +158,7 @@ export const CreateHospitalScreen = ({ onCancel }) => {
           <Field label={t('users.preferred_locale')}>
             <Card style={styles.selectCard} onPress={() => setShowLocalePicker(true)}>
               <Text style={styles.selectText}>
-                {LOCALES.find(l => l.code === form.preferredLocale)?.label || 'English'}
+                {LOCALES.find(l => l.code === form.preferredLocale)?.label || t('languages.en')}
               </Text>
               <IconChevron size={18} color={T.textDim} />
             </Card>
@@ -231,67 +223,16 @@ export const CreateHospitalScreen = ({ onCancel }) => {
 
         {/* Security Policy Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Security Policy (Session Expiration)</Text>
+          <Text style={styles.sectionTitle}>{t('security_policy.title')}</Text>
 
-          <View style={styles.row}>
-            <View style={{ flex: 1 }}>
-              <Field label="Owner Session (hours)">
-                <TextInput
-                  value={String(form.ownerJwtValidityHours)}
-                  onChangeText={(v) => updateRoot('ownerJwtValidityHours', v)}
-                  placeholder="5"
-                  keyboardType="numeric"
-                />
-              </Field>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Field label="Admin Session (hours)">
-                <TextInput
-                  value={String(form.adminJwtValidityHours)}
-                  onChangeText={(v) => updateRoot('adminJwtValidityHours', v)}
-                  placeholder="3"
-                  keyboardType="numeric"
-                />
-              </Field>
-            </View>
-          </View>
-
-          <View style={styles.row}>
-            <View style={{ flex: 1 }}>
-              <Field label="Doctor Session (hours)">
-                <TextInput
-                  value={String(form.doctorJwtValidityHours)}
-                  onChangeText={(v) => updateRoot('doctorJwtValidityHours', v)}
-                  placeholder="8"
-                  keyboardType="numeric"
-                />
-              </Field>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Field label="Nurse Session (hours)">
-                <TextInput
-                  value={String(form.nurseJwtValidityHours)}
-                  onChangeText={(v) => updateRoot('nurseJwtValidityHours', v)}
-                  placeholder="12"
-                  keyboardType="numeric"
-                />
-              </Field>
-            </View>
-          </View>
-
-          <View style={styles.row}>
-            <View style={{ flex: 1 }}>
-              <Field label="Patient Session (hours)">
-                <TextInput
-                  value={String(form.patientJwtValidityHours)}
-                  onChangeText={(v) => updateRoot('patientJwtValidityHours', v)}
-                  placeholder="1"
-                  keyboardType="numeric"
-                />
-              </Field>
-            </View>
-            <View style={{ flex: 1 }} />
-          </View>
+          <Field label={`${t('security_policy.owner_session')} (${t('security_policy.hrs')})`} required>
+            <TextInput
+              value={String(form.ownerJwtValidityHours)}
+              onChangeText={(v) => updateRoot('ownerJwtValidityHours', v)}
+              placeholder="5"
+              keyboardType="numeric"
+            />
+          </Field>
         </View>
 
         {/* Actions */}

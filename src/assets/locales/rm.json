@@ -28,7 +28,13 @@
     "failed": "Fallì",
     "go_back": "Enavos",
     "load_failed": "Chargiar datas ha fallì.",
-    "dr_prefix": "Dr."
+    "dr_prefix": "Dr.",
+    "edit": "Modifitgar",
+    "invalid_input": "Endataziun nunvalida",
+    "confirm": "Confermar",
+    "or": "u",
+    "add": "Agiuntar",
+    "refresh": "↻ Actualisar"
   },
   "auth": {
     "login": "Login",
@@ -451,7 +457,9 @@
     "princeton": "Princeton",
     "lena": "Lena",
     "kowalski": "Kowalski",
-    "search_stations": "Tschertgar staziuns..."
+    "search_stations": "Tschertgar staziuns...",
+    "first_name": "Emprim num",
+    "last_name": "Num da famiglia"
   },
   "actions": {
     "bed_actions": "Acziuns letg",
@@ -857,7 +865,9 @@
     "witness_note": "Registrà da {{name}} — questa entrada serva sco documentaziun digitala dal consentiment obtegnì persunalamain.",
     "additional_title": "Consentiment supplementar",
     "additional_hint": "Opziunal. Tscherner ed emplenir qua sutvart mo sche in nov consentiment vegn collecà durant questa visita.",
-    "view_manage": "Visualisar / Administrar consentiments"
+    "view_manage": "Visualisar / Administrar consentiments",
+    "recommended": "Recumandà",
+    "onboarding_notice_optional": "Il consentiment è facultativ. Pudais tscherner in u plirs tips da consentiment, u sursiglir questa secziun."
   },
   "bootstrap_user": {
     "screen_title": "Crear utilisader bootstrap",
@@ -952,23 +962,23 @@
     "failed_msg": "Attribuir ha fallì."
   },
   "shift": {
-    "identity": "IDENTITAD DA TURA",
-    "ward_assignment": "ATTRIBUZIUN DA STAZIUN",
-    "details": "DETAGLS DA TURA",
-    "name": "Num da tura",
-    "name_placeholder": "p.ex. Tura da damaun",
-    "code": "Code da tura",
-    "code_placeholder": "p.ex. SHIFT-DAY-01",
-    "start_time": "Temp d'entschatta",
-    "end_time": "Temp da fin",
-    "time_placeholder": "HH:MM",
-    "ward": "Staziun",
-    "select_ward": "Tscherner staziun",
-    "status": "Status",
-    "no_wards": "Naginas staziuns disponiblas.",
-    "no_wards_available": "Naginas staziuns disponiblas.",
-    "create_banner": "Crear ina nova tura per la dotaziun da persunal.",
-    "edit_banner": "Modifitgar detagls da tura."
+    "unassign_nurse": "Desencargar l'infirmiera",
+    "unassign_doctor": "Desencargar il medi",
+    "remove_nurse_confirm": "Stritgar {{firstName}} {{lastName}} da questa turnada?",
+    "remove_doctor_confirm": "Stritgar Dr. {{firstName}} {{lastName}} da questa turnada?",
+    "unassign": "Desencargar",
+    "removed_nurse": "{{firstName}} {{lastName}} stritgà/ada da questa turnada.",
+    "removed_doctor": "Dr. {{firstName}} {{lastName}} stritgà/ada da questa turnada.",
+    "edit": "Modifitgar la turnada",
+    "assigned_nurses": "INFIRMIERAS ASSIGNADAS",
+    "assigned_doctors": "MEDIS ASSIGNADS",
+    "no_nurses": "Naginas infirmieras assignadas a questa turnada.",
+    "no_doctors": "Nagins medis assignads a questa turnada.",
+    "load_failed": "Betg pussibel da chargar la turnada.",
+    "not_found": "Turnada betg chattada.",
+    "ward": "STANZA",
+    "start": "ENTSCHATTA",
+    "end": "FIN"
   },
   "shifts": {
     "no_shifts": "Naginas turas chattadas.",
@@ -1079,6 +1089,81 @@
     "perm_upload_events": "Chargiar eveniments",
     "perm_upload_statedata": "Chargiar datas da stadi",
     "perm_upload_telemetry": "Chargiar telemetria",
-    "perm_app_admin_patient": "Admin app da pazient",
+    "perm_app_admin_patient": "Admin app da pazient"
+  },
+  "security_policy": {
+    "title": "Politica da segirtad",
+    "owner_session": "Sessiun dal possessur",
+    "admin_session": "Sessiun dal admin",
+    "doctor_session": "Sessiun dal medi",
+    "nurse_session": "Sessiun da la tgirunza",
+    "patient_session": "Sessiun dal pazient",
+    "inherit_org": "Hereditar da l'organisaziun",
+    "hrs": "h",
+    "default": "Standard",
+    "err_owner_required": "Endatai ina durada da sessiun per il possessur.",
+    "err_invalid_duration": "La durada da sessiun sto esser in numer positiv.",
+    "err_invalid_admin_duration": "La durada da sessiun dal admin sto esser in numer positiv.",
+    "err_missing_org": "Il context da l'organisaziun manca. Turnai enavos e emprovai danovamain.",
+    "err_save_failed": "L'actualisaziun da la politica da sessiun ha fallì.",
+    "err_load_failed": "Il chargiar da la politica actuala ha fallì.",
+    "err_invalid_durations": "Las duradas da sessiun ston esser numbers positifs (laschar vid per hereditar da l'org).",
+    "tap_edit_hint": "Tucchai sin Modifitgar per configurar"
+  },
+  "phone": {
+    "select_country": "Tscherner il codi dal pajais",
+    "search_placeholder": "Tschertgar pajais u codi..."
+  },
+  "time_picker": {
+    "title": "Tscherner il temp",
+    "hour": "ORA",
+    "min": "MIN"
+  },
+  "date_picker": {
+    "day": "Di",
+    "month": "Mais",
+    "year": "Onn"
+  },
+  "assign_gateway": {
+    "select_gateway": "Tscherner la gateway",
+    "select_bed": "Tscherner il letg",
+    "choose_gateway": "Tscherner ina gateway",
+    "search_gateways": "Tschertgar gateways…",
+    "search_beds": "Tschertgar letgs…",
+    "no_gateways": "Naginas gateways chattadas.",
+    "no_beds": "Nagins letgs chattads.",
+    "back": "← Gateways",
+    "assign_to_bed": "Assignar al letg",
+    "assigned_msg": "Gateway {{gatewayCode}} assignada al letg {{bedCode}}.",
+    "failed": "Assignaziun betg reussida.",
+    "bed_label": "→ Letg {{bedCode}}"
+  },
+  "assign_device": {
+    "select_device": "Tscherner l'apparat",
+    "select_bed": "Tscherner il letg",
+    "select_patient": "Tscherner il pazient",
+    "choose_hint": "Tscherner in apparat, in letg ed in pazient",
+    "search_devices": "Tschertgar apparats…",
+    "search_beds": "Tschertgar letgs…",
+    "search_patients": "Tschertgar pazients…",
+    "no_devices": "Nagins apparats chattads.",
+    "no_beds": "Nagins letgs chattads.",
+    "no_patients": "Nagins pazients chattads.",
+    "no_gateway": "Nagina gateway",
+    "back": "← Enavos",
+    "assign": "Assignar",
+    "assigned_msg": "Apparat {{deviceCode}} assignà a {{firstName}} {{lastName}} sin letg {{bedCode}}.",
+    "failed": "Assignaziun betg reussida.",
+    "bed_label": "Letg {{bedCode}}"
+  },
+  "status": {
+    "active": "ACTIV",
+    "inactive": "INACTIV",
+    "pending": "EN TSCHERTGA"
+  },
+  "exit": {
+    "title": "Serrar l'app",
+    "message": "Essas segir che vuls serrar l'app?",
+    "confirm": "Serrar"
   }
 }

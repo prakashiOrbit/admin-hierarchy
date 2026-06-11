@@ -145,7 +145,7 @@ export const apiRequest = async (endpoint, options = {}) => {
       let response = await fetch(url, config);
 
       // --- AUTO-REFRESH INTERCEPTOR ---
-      if (response.status === 401 && endpoint !== '/refresh' && !options._isRetry) {
+      if (response.status === 401 && !endpoint.startsWith('/login') && endpoint !== '/refresh' && !options._isRetry) {
         console.warn('401 detected, attempting auto-refresh...');
         const newToken = await performTokenRefresh();
         if (newToken) {
