@@ -135,12 +135,10 @@ export const HospitalsScreen = ({ onProvision, onSelect }) => {
             <Text style={[styles.emptyText, { color: T.textDim }]}>
               {query ? t('messages.no_matching_hospitals') : t('messages.no_hospitals_provisioned')}
             </Text>
-            {!query && (
-              {onProvision && (
-                <Btn variant="tonal" size="sm" onPress={onProvision} style={{ marginTop: 16 }}>
-                  {t('actions.provision_first_hospital')}
-                </Btn>
-              )}
+            {!query && onProvision && (
+              <Btn variant="tonal" size="sm" onPress={onProvision} style={{ marginTop: 16 }}>
+                {t('actions.provision_first_hospital')}
+              </Btn>
             )}
           </View>
         ) : (

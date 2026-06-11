@@ -98,12 +98,10 @@ export const DeviceTypesScreen = ({ onCreate, onSelect = () => {} }) => {
             <Text style={[styles.emptyText, { color: T.textDim }]}>
               {query ? t('messages.no_matching_device_types') : t('messages.no_hardware_profiles')}
             </Text>
-            {!query && (
-              {onCreate && (
-                <Btn variant="tonal" size="sm" onPress={onCreate} style={{ marginTop: 16 }}>
-                  {t('actions.create_first_profile')}
-                </Btn>
-              )}
+            {!query && onCreate && (
+              <Btn variant="tonal" size="sm" onPress={onCreate} style={{ marginTop: 16 }}>
+                {t('actions.create_first_profile')}
+              </Btn>
             )}
           </View>
         ) : (
