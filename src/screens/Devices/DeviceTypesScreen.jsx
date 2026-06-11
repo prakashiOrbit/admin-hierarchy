@@ -68,15 +68,17 @@ export const DeviceTypesScreen = ({ onCreate, onSelect = () => {} }) => {
       >
         <View style={styles.headerRow}>
           <SectionHeader title={t('entity.hardware_profiles')} subtitle={t('entity.hardware_profiles_subtitle')} />
-          <Btn 
-            variant="primary" 
-            size="sm" 
-            style={styles.newBtn}
-            onPress={onCreate}
-          >
-            <IconPlus size={14} color="#FFF" />
-             {t('actions.new_device_type')}
-          </Btn>
+          {onCreate && (
+            <Btn
+              variant="primary"
+              size="sm"
+              style={styles.newBtn}
+              onPress={onCreate}
+            >
+              <IconPlus size={14} color="#FFF" />
+               {t('actions.new_device_type')}
+            </Btn>
+          )}
         </View>
 
         {loading && !refreshing ? (
@@ -97,9 +99,11 @@ export const DeviceTypesScreen = ({ onCreate, onSelect = () => {} }) => {
               {query ? t('messages.no_matching_device_types') : t('messages.no_hardware_profiles')}
             </Text>
             {!query && (
-              <Btn variant="tonal" size="sm" onPress={onCreate} style={{ marginTop: 16 }}>
-                {t('actions.create_first_profile')}
-              </Btn>
+              {onCreate && (
+                <Btn variant="tonal" size="sm" onPress={onCreate} style={{ marginTop: 16 }}>
+                  {t('actions.create_first_profile')}
+                </Btn>
+              )}
             )}
           </View>
         ) : (

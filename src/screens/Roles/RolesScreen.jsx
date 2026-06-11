@@ -64,15 +64,17 @@ export const RolesScreen = ({ onSelectRole, onCreate }) => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.headerRow}>
           <SectionHeader title={t('dashboard.roles_perms')} subtitle={t('roles_screen.description')} />
-          <Btn
-            variant="primary"
-            size="sm"
-            style={styles.newBtn}
-            onPress={onCreate}
-          >
-            <IconPlus size={14} color="#FFF" />
-             {t('roles_screen.create_role')}
-          </Btn>
+          {onCreate && (
+            <Btn
+              variant="primary"
+              size="sm"
+              style={styles.newBtn}
+              onPress={onCreate}
+            >
+              <IconPlus size={14} color="#FFF" />
+               {t('roles_screen.create_role')}
+            </Btn>
+          )}
         </View>
 
         <View style={styles.list}>

@@ -105,14 +105,16 @@ export const HospitalsScreen = ({ onProvision, onSelect }) => {
         <View style={styles.headerRow}>
           <SectionHeader title={t('hospital.hospitals_title')} count={filtered.length} />
           
-          <Btn 
-            variant="primary" 
-            size="sm"
-            style={styles.newBtn} 
-            onPress={onProvision}
-          >
-            <IconPlus size={14} color="#fff" /> {t('actions.new_hospital')}
-          </Btn>
+          {onProvision && (
+            <Btn
+              variant="primary"
+              size="sm"
+              style={styles.newBtn}
+              onPress={onProvision}
+            >
+              <IconPlus size={14} color="#fff" /> {t('actions.new_hospital')}
+            </Btn>
+          )}
         </View>
 
         {/* List */}
@@ -134,9 +136,11 @@ export const HospitalsScreen = ({ onProvision, onSelect }) => {
               {query ? t('messages.no_matching_hospitals') : t('messages.no_hospitals_provisioned')}
             </Text>
             {!query && (
-              <Btn variant="tonal" size="sm" onPress={onProvision} style={{ marginTop: 16 }}>
-                {t('actions.provision_first_hospital')}
-              </Btn>
+              {onProvision && (
+                <Btn variant="tonal" size="sm" onPress={onProvision} style={{ marginTop: 16 }}>
+                  {t('actions.provision_first_hospital')}
+                </Btn>
+              )}
             )}
           </View>
         ) : (

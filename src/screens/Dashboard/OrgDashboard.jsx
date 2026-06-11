@@ -388,7 +388,7 @@ setSelectedStaffForEdit(null);
     if (isEditingDeviceType && selectedDeviceType) return <EditDeviceTypeScreen deviceType={selectedDeviceType} onCancel={() => setIsEditingDeviceType(false)} onSave={(updated) => { setSelectedDeviceType(updated); setIsEditingDeviceType(false); }} />;
     if (selectedDeviceType) return <DeviceTypeDetailScreen deviceType={selectedDeviceType} onBack={() => setSelectedDeviceType(null)} onEdit={() => setIsEditingDeviceType(true)} />;
     if (isEditingHospital && selectedHospital) return <EditHospitalScreen hospital={selectedHospital} onCancel={() => setIsEditingHospital(false)} onSave={(updated) => { setSelectedHospital(updated); setIsEditingHospital(false); }} />;
-    if (selectedHospital) return <HospitalDetailScreen hospital={selectedHospital} orgName={user?.orgName} viewerRole={role} onBack={() => setSelectedHospital(null)} onEdit={() => setIsEditingHospital(true)} onAddAdmin={() => setIsCreatingHospAdmin(true)} />;
+    if (selectedHospital) return <HospitalDetailScreen hospital={selectedHospital} orgName={user?.orgName} viewerRole={role} onBack={() => setSelectedHospital(null)} onEdit={() => setIsEditingHospital(true)} onAddAdmin={(isOwner || hasPerm('permit.create.user') || hasPerm('permit.admin.users')) ? () => setIsCreatingHospAdmin(true) : undefined} />;
     if (isCreatingRole) return <CreateRoleScreen onCancel={() => setIsCreatingRole(false)} />;
 if (selectedStaffForEdit) {
       const isDoctor = !!selectedStaffForEdit.doctorCode;
@@ -402,10 +402,10 @@ if (selectedStaffForEdit) {
     switch (activeTab) {
       case 'home': return <OrgHomeContent role={role} />;
       case 'admins': return <OrgAdminsScreen onInvite={() => setIsInvitingAdmin(true)} onSelectUser={setSelectedUserId} />;
-      case 'hospitals': return <HospitalsScreen onProvision={() => setIsProvisioningHospital(true)} onSelect={setSelectedHospital} />;
-      case 'types': return <DeviceTypesScreen onCreate={() => setIsCreatingDeviceType(true)} onSelect={setSelectedDeviceType} />;
+      case 'hospitals': return <HospitalsScreen onProvision={(isOwner || hasPerm('permit.create.hospital')) ? () => setIsProvisioningHospital(true) : undefined} onSelect={setSelectedHospital} />;
+      case 'types': return <DeviceTypesScreen onCreate={(isOwner || hasPerm('permit.create.devicetype') || hasPerm('permit.admin.devicetype')) ? () => setIsCreatingDeviceType(true) : undefined} onSelect={setSelectedDeviceType} />;
       case 'users': return <UsersScreen onSelectUser={setSelectedUserId} onSelectStaff={setSelectedStaffForEdit} />;
-      case 'roles': return <RolesScreen onSelectRole={setSelectedRoleId} onCreate={() => setIsCreatingRole(true)} />;
+      case 'roles': return <RolesScreen onSelectRole={setSelectedRoleId} onCreate={(isOwner || hasPerm('permit.create.role')) ? () => setIsCreatingRole(true) : undefined} />;
       case 'settings': return <SettingsScreen onLogout={() => { logout(); navigation.replace('Login'); }} />;
       default: return <OrgHomeContent role={role} />;
     }

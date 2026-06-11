@@ -429,12 +429,12 @@ export const HospDashboard = ({ navigation, route }) => {
   ] : [
     { id: 'home', label: t('dashboard.home'), icon: <IconDashboard /> },
     ...(isOwner ? [{ id: 'admins', label: t('dashboard.admins'), icon: <IconUsers /> }] : []),
-    ...(hasPerm('permit.admin.ward') || hasPerm('permit.admin.bed') ? [{ id: 'wards', label: t('dashboard.wards'), icon: <IconDoor /> }] : []),
-    ...(hasPerm('permit.admin.gateway') || hasPerm('permit.admin.device') ? [{ id: 'devices', label: t('dashboard.devices'), icon: <IconPulse /> }] : []),
-    ...(hasPerm('permit.admin.patient') ? [{ id: 'patients', label: t('dashboard.patients'), icon: <IconPatient /> }] : []),
-    ...(hasPerm('permit.admin.doctor') ? [{ id: 'doctors', label: t('dashboard.doctors'), icon: <IconStethoscope /> }] : []),
-    ...(hasPerm('permit.admin.shift') || hasPerm('permit.admin.nurse') ? [{ id: 'shifts', label: t('dashboard.shifts'), icon: <IconClock /> }] : []),
-    ...(hasPerm('permit.admin.nursingstation') ? [{ id: 'nursing', label: t('dashboard.nursing_stations'), icon: <IconBed /> }] : []),
+    ...(hasPerm('permit.admin.ward') || hasPerm('permit.admin.bed') || hasPerm('permit.create.ward') || hasPerm('permit.create.bed') ? [{ id: 'wards', label: t('dashboard.wards'), icon: <IconDoor /> }] : []),
+    ...(hasPerm('permit.admin.gateway') || hasPerm('permit.admin.device') || hasPerm('permit.create.gateway') || hasPerm('permit.create.device') ? [{ id: 'devices', label: t('dashboard.devices'), icon: <IconPulse /> }] : []),
+    ...(hasPerm('permit.admin.patient') || hasPerm('permit.create.patient') ? [{ id: 'patients', label: t('dashboard.patients'), icon: <IconPatient /> }] : []),
+    ...(hasPerm('permit.admin.doctor') || hasPerm('permit.create.doctor') ? [{ id: 'doctors', label: t('dashboard.doctors'), icon: <IconStethoscope /> }] : []),
+    ...(hasPerm('permit.admin.shift') || hasPerm('permit.admin.nurse') || hasPerm('permit.create.shift') || hasPerm('permit.create.nurse') ? [{ id: 'shifts', label: t('dashboard.shifts'), icon: <IconClock /> }] : []),
+    ...(hasPerm('permit.admin.nursingstation') || hasPerm('permit.create.nursingstation') ? [{ id: 'nursing', label: t('dashboard.nursing_stations'), icon: <IconBed /> }] : []),
   ];
 
   const renderContent = () => {

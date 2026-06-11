@@ -10,12 +10,15 @@ const ALL_PERMITS = [
   'permit.admin.doctor', 'permit.admin.gateway', 'permit.admin.hospital',
   'permit.admin.image', 'permit.admin.nurse', 'permit.admin.nursingstation', 'permit.admin.patient',
   'permit.admin.roles', 'permit.admin.shift', 'permit.admin.users', 'permit.admin.ward',
-  'permit.create.bed', 'permit.create.device', 'permit.create.doctor', 'permit.create.gateway',
-  'permit.create.hospital', 'permit.create.image', 'permit.create.nurse', 'permit.create.nursingstation',
-  'permit.create.patient', 'permit.create.role', 'permit.create.shift', 'permit.create.ward',
+  'permit.create.bed', 'permit.create.device', 'permit.create.devicetype', 'permit.create.doctor',
+  'permit.create.gateway', 'permit.create.hospital', 'permit.create.image', 'permit.create.nurse',
+  'permit.create.nursingstation', 'permit.create.patient', 'permit.create.role', 'permit.create.shift',
+  'permit.create.ward',
   'permit.assign.bed', 'permit.assign.device', 'permit.assign.gateway',
   'permit.allocate.doctor.patient', 'permit.allocate.gateway.ward',
-  'permit.get', 'permit.set', 'permit.update.devicetype',
+  'permit.get', 'permit.set',
+  'permit.update.devicetype',
+  'permit.list.devicetype', 'permit.search.devicetype',
   'permit.upload.events', 'permit.upload.statedata', 'permit.upload.telemetry',
   'permit.app.admin.patient',
 ];
@@ -100,7 +103,7 @@ export const PermissionPicker = ({ mode, assignedRole, customPermissions, onMode
     { key: 'admin', permits: activePermits.filter(p => p.startsWith('permit.admin.')) },
     { key: 'create', permits: activePermits.filter(p => p.startsWith('permit.create.')) },
     { key: 'assign', permits: activePermits.filter(p => p.startsWith('permit.assign.') || p.startsWith('permit.allocate.')) },
-    { key: 'data', permits: activePermits.filter(p => p === 'permit.get' || p === 'permit.set' || p.startsWith('permit.update.') || p.startsWith('permit.upload.')) },
+    { key: 'data', permits: activePermits.filter(p => p === 'permit.get' || p === 'permit.set' || p.startsWith('permit.update.') || p.startsWith('permit.upload.') || p.startsWith('permit.list.') || p.startsWith('permit.search.')) },
     { key: 'app', permits: activePermits.filter(p => p.startsWith('permit.app.') || p.startsWith('permit.start.')) },
   ].filter(g => g.permits.length > 0);
 
