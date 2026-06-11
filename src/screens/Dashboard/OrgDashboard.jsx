@@ -233,19 +233,6 @@ const OrgHomeContent = ({ role }) => {
         </View>
       </View>
 
-      <Card style={{ marginBottom: 24 }}>
-        <SectionHeader title={t('dashboard.device_capacity')} />
-        {loading ? (
-          <ActivityIndicator color={T.accent} style={{ padding: 12 }} />
-        ) : totalDevices === 0 ? (
-          <Text style={{ color: T.textFaint, fontSize: 13, textAlign: 'center', paddingVertical: 12 }}>{t('dashboard.no_devices')}</Text>
-        ) : (
-          <View style={styles.capacityHeader}>
-            <Text style={styles.capacityValue}>{totalDevices.toLocaleString()}</Text>
-            <Text style={styles.capacityTotal}> {t('dashboard.devices').toLowerCase()} · {totalGateways.toLocaleString()} {t('dashboard.gateways').toLowerCase()}</Text>
-          </View>
-        )}
-      </Card>
 
       {/* Security Policy — ORG_OWNER manages ORG_ADMIN session duration */}
       <View style={styles.section}>
@@ -388,7 +375,7 @@ setSelectedStaffForEdit(null);
     { id: 'home', label: t('dashboard.home'), icon: <IconDashboard /> },
     ...(isOwner ? [{ id: 'admins', label: t('dashboard.admins'), icon: <IconUsers /> }] : []),
     ...(hasPerm('permit.admin.hospital') ? [{ id: 'hospitals', label: t('dashboard.hospitals'), icon: <IconHospital /> }] : []),
-    ...(hasPerm('permit.admin.devicetype') ? [{ id: 'types', label: t('dashboard.device_type'), icon: <IconCpu /> }] : []),
+    ...(hasPerm('permit.admin.devicetype') || hasPerm('permit.create.devicetype') || hasPerm('permit.list.devicetype') ? [{ id: 'types', label: t('dashboard.device_type'), icon: <IconCpu /> }] : []),
     ...(hasPerm('permit.admin.nurse') || hasPerm('permit.admin.doctor') || hasPerm('permit.admin.patient') ? [{ id: 'users', label: t('dashboard.users'), icon: <IconUser /> }] : []),
     ...(hasPerm('permit.admin.roles') ? [{ id: 'roles', label: t('dashboard.roles_perms'), icon: <IconShield /> }] : []),
   ];
@@ -507,9 +494,7 @@ const createStyles = (T) => StyleSheet.create({
   hospName: { fontSize: 13.5, fontWeight: '600', color: T.text, flex: 1 },
   hospMetaRow: { flexDirection: 'row', gap: 10, marginTop: 3 },
   hospMetaText: { fontSize: 11, color: T.textFaint, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
-  capacityHeader: { flexDirection: 'row', alignItems: 'baseline', gap: 6, marginBottom: 10 },
-  capacityValue: { fontSize: 22, fontWeight: '700', color: T.text, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
-  capacityTotal: { fontSize: 12, color: T.textDim },
+
   errorCard: { borderColor: T.bad, marginBottom: 16, gap: 12 },
   errorRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   errorText: { flex: 1, color: T.text, fontSize: 12.5, lineHeight: 18 },
