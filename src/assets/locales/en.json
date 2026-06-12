@@ -655,7 +655,16 @@
     "provision_ward_banner": "Provision a new ward for {{hospitalCode}}.",
     "provision_bed_banner": "Provision a new bed in this ward.",
     "editing_banner": "Editing ward {{code}}.",
-    "code_immutable": "Ward code cannot be changed."
+    "code_immutable": "Ward code cannot be changed.",
+    "floor_plan_section": "FLOOR PLAN",
+    "floor_plan_uploaded": "Floor plan uploaded",
+    "floor_plan_none": "No floor plan yet",
+    "upload_floor_plan": "Upload Floor Plan",
+    "replace_floor_plan": "Replace Floor Plan",
+    "floor_plan_upload_success": "Floor plan uploaded successfully.",
+    "floor_plan_replace_success": "Floor plan updated successfully.",
+    "floor_plan_upload_failed": "Failed to upload floor plan.",
+    "floor_plan_file_invalid": "Please select a valid .svg or .txt file."
   },
   "device": {
     "specifications": "DEVICE SPECIFICATIONS",

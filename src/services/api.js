@@ -899,3 +899,61 @@ export const rolesApi = {
       body: JSON.stringify(roleData),
     }),
 };
+
+// Multipart upload helper — does NOT set Content-Type so React Native can
+// attach the correct multipart/form-data boundary automatically.
+export const apiUpload = async (endpoint, formData, token, method = 'POST') => {
+  const url = `${BASE_URL}${endpoint}`;
+  const headers = {
+    'Authorization': `Bearer ${token}`,
+    'X-Locale': (i18n.language || 'en').split('-')[0],
+  };
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
+
+  try {
+    let response = await fetch(url, { method, headers, body: formData, signal: controller.signal });
+
+    if (response.status === 401 && endpoint !== '/refresh') {
+      const newToken = await performTokenRefresh();
+      if (newToken) {
+        headers['Authorization'] = `Bearer ${newToken}`;
+        response = await fetch(url, { method, headers, body: formData });
+      }
+    }
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => '');
+      throw new ApiError(text || `HTTP ${response.status}`, { status: response.status, endpoint });
+    }
+
+    const ct = response.headers.get('content-type');
+    return ct && ct.includes('application/json') ? response.json() : response.text();
+  } catch (e) {
+    if (e.name === 'AbortError') throw new ApiError('Request timed out', { code: 'TIMEOUT', endpoint });
+    throw e;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+};
+
+export const svgApi = {
+  get: (orgName, hospCode, wardCode, token) =>
+    apiRequest(`/${orgName}/svg/${hospCode}/${wardCode}`, {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${token}` },
+    }),
+
+  upload: (orgName, hospCode, wardCode, fileUri, fileName, token) => {
+    const fd = new FormData();
+    fd.append('file', { uri: fileUri, type: 'text/plain', name: fileName || 'floor_plan.svg' });
+    return apiUpload(`/${orgName}/svg/${hospCode}/upload/${wardCode}`, fd, token, 'POST');
+  },
+
+  replace: (orgName, hospCode, wardCode, fileUri, fileName, token) => {
+    const fd = new FormData();
+    fd.append('file', { uri: fileUri, type: 'text/plain', name: fileName || 'floor_plan.svg' });
+    return apiUpload(`/${orgName}/svg/${hospCode}/upload/${wardCode}`, fd, token, 'PUT');
+  },
+};

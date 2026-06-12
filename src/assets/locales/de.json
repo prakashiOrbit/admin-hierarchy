@@ -948,7 +948,16 @@
     "provision_ward_banner": "Neue Station für {{hospitalCode}} einrichten.",
     "provision_bed_banner": "Neues Bett in dieser Station einrichten.",
     "editing_banner": "Station {{code}} bearbeiten.",
-    "code_immutable": "Stations-Code kann nicht geändert werden."
+    "code_immutable": "Stations-Code kann nicht geändert werden.",
+    "floor_plan_section": "GRUNDRISS",
+    "floor_plan_uploaded": "Grundriss hochgeladen",
+    "floor_plan_none": "Noch kein Grundriss vorhanden",
+    "upload_floor_plan": "Grundriss hochladen",
+    "replace_floor_plan": "Grundriss ersetzen",
+    "floor_plan_upload_success": "Grundriss erfolgreich hochgeladen.",
+    "floor_plan_replace_success": "Grundriss erfolgreich aktualisiert.",
+    "floor_plan_upload_failed": "Grundriss konnte nicht hochgeladen werden.",
+    "floor_plan_file_invalid": "Bitte wählen Sie eine gültige .svg- oder .txt-Datei."
   },
   "assignments": {
     "step1_title": "Arzt auswählen",

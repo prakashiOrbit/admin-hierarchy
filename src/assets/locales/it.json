@@ -948,7 +948,16 @@
     "provision_ward_banner": "Predisporre un nuovo reparto per {{hospitalCode}}.",
     "provision_bed_banner": "Predisporre un nuovo letto in questo reparto.",
     "editing_banner": "Modifica reparto {{code}}.",
-    "code_immutable": "Il codice reparto non può essere modificato."
+    "code_immutable": "Il codice reparto non può essere modificato.",
+    "floor_plan_section": "PLANIMETRIA",
+    "floor_plan_uploaded": "Planimetria caricata",
+    "floor_plan_none": "Nessuna planimetria",
+    "upload_floor_plan": "Carica planimetria",
+    "replace_floor_plan": "Sostituisci planimetria",
+    "floor_plan_upload_success": "Planimetria caricata con successo.",
+    "floor_plan_replace_success": "Planimetria aggiornata con successo.",
+    "floor_plan_upload_failed": "Caricamento della planimetria non riuscito.",
+    "floor_plan_file_invalid": "Selezionare un file .svg o .txt valido."
   },
   "assignments": {
     "step1_title": "Seleziona medico",

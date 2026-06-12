@@ -948,7 +948,16 @@
     "provision_ward_banner": "تجهيز جناح جديد لـ {{hospitalCode}}.",
     "provision_bed_banner": "تجهيز سرير جديد في هذا الجناح.",
     "editing_banner": "تعديل الجناح {{code}}.",
-    "code_immutable": "لا يمكن تغيير رمز الجناح."
+    "code_immutable": "لا يمكن تغيير رمز الجناح.",
+    "floor_plan_section": "المخطط الهندسي",
+    "floor_plan_uploaded": "تم رفع المخطط",
+    "floor_plan_none": "لا يوجد مخطط بعد",
+    "upload_floor_plan": "رفع المخطط",
+    "replace_floor_plan": "استبدال المخطط",
+    "floor_plan_upload_success": "تم رفع المخطط بنجاح.",
+    "floor_plan_replace_success": "تم تحديث المخطط بنجاح.",
+    "floor_plan_upload_failed": "فشل رفع المخطط.",
+    "floor_plan_file_invalid": "يرجى اختيار ملف .svg أو .txt صالح."
   },
   "assignments": {
     "step1_title": "اختر طبيباً",

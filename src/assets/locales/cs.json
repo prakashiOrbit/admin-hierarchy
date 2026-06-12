@@ -948,7 +948,16 @@
     "provision_ward_banner": "Zřídit nové oddělení pro {{hospitalCode}}.",
     "provision_bed_banner": "Zřídit nové lůžko v tomto oddělení.",
     "editing_banner": "Úprava oddělení {{code}}.",
-    "code_immutable": "Kód oddělení nelze změnit."
+    "code_immutable": "Kód oddělení nelze změnit.",
+    "floor_plan_section": "PŮDORYS",
+    "floor_plan_uploaded": "Půdorys nahrán",
+    "floor_plan_none": "Zatím žádný půdorys",
+    "upload_floor_plan": "Nahrát půdorys",
+    "replace_floor_plan": "Nahradit půdorys",
+    "floor_plan_upload_success": "Půdorys byl úspěšně nahrán.",
+    "floor_plan_replace_success": "Půdorys byl úspěšně aktualizován.",
+    "floor_plan_upload_failed": "Nahrání půdorysu se nezdařilo.",
+    "floor_plan_file_invalid": "Vyberte prosím platný soubor .svg nebo .txt."
   },
   "assignments": {
     "step1_title": "Vybrat lékaře",

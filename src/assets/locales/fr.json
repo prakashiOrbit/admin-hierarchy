@@ -948,7 +948,16 @@
     "provision_ward_banner": "Déployer un nouveau service pour {{hospitalCode}}.",
     "provision_bed_banner": "Déployer un nouveau lit dans ce service.",
     "editing_banner": "Modification du service {{code}}.",
-    "code_immutable": "Le code du service ne peut pas être modifié."
+    "code_immutable": "Le code du service ne peut pas être modifié.",
+    "floor_plan_section": "PLAN D'ÉTAGE",
+    "floor_plan_uploaded": "Plan d'étage téléchargé",
+    "floor_plan_none": "Pas encore de plan d'étage",
+    "upload_floor_plan": "Télécharger le plan",
+    "replace_floor_plan": "Remplacer le plan",
+    "floor_plan_upload_success": "Plan d'étage téléchargé avec succès.",
+    "floor_plan_replace_success": "Plan d'étage mis à jour avec succès.",
+    "floor_plan_upload_failed": "Échec du téléchargement du plan d'étage.",
+    "floor_plan_file_invalid": "Veuillez sélectionner un fichier .svg ou .txt valide."
   },
   "assignments": {
     "step1_title": "Sélectionner un médecin",

@@ -948,7 +948,16 @@
     "provision_ward_banner": "Preparar ina nova staziun per {{hospitalCode}}.",
     "provision_bed_banner": "Preparar in nov letg en questa staziun.",
     "editing_banner": "Modifitgar staziun {{code}}.",
-    "code_immutable": "Il code da staziun na po betg vegnir midà."
+    "code_immutable": "Il code da staziun na po betg vegnir midà.",
+    "floor_plan_section": "PLAN DA STANZA",
+    "floor_plan_uploaded": "Plan da stanza chargià",
+    "floor_plan_none": "Nagin plan da stanza",
+    "upload_floor_plan": "Chargar plan da stanza",
+    "replace_floor_plan": "Rimplaçar plan da stanza",
+    "floor_plan_upload_success": "Plan da stanza chargià cun success.",
+    "floor_plan_replace_success": "Plan da stanza actualisà cun success.",
+    "floor_plan_upload_failed": "Chargiar il plan da stanza ha fallì.",
+    "floor_plan_file_invalid": "Tscherna in datoteca .svg u .txt valida."
   },
   "assignments": {
     "step1_title": "Tscherner miedi",

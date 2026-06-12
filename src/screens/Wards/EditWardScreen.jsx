@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Field, TextInput, Btn } from '../../components/Shared';
-import { IconDoor, IconBuilding, IconTrash } from '../../icons';
-import { wardApi } from '../../services/api';
+import { IconDoor, IconBuilding, IconTrash, IconCheck, IconUpload } from '../../icons';
+import { wardApi, svgApi } from '../../services/api';
+import DocumentPicker from 'react-native-document-picker';
 
 const WARD_TYPES = ['ICU', 'GENERAL', 'EMERGENCY', 'PEDIATRICS', 'MATERNITY', 'SURGICAL'];
 
@@ -22,6 +23,49 @@ export const EditWardScreen = ({ ward, onCancel, onSave, onDelete }) => {
   });
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [svgStatus, setSvgStatus] = useState('loading'); // 'loading' | 'found' | 'not_found'
+  const [uploading, setUploading] = useState(false);
+
+  const hasWardPerm = user?.roles?.includes('permit.admin.ward') || user?.roles?.includes('HOSP_OWNER');
+
+  useEffect(() => {
+    if (!hasWardPerm) { setSvgStatus('not_found'); return; }
+    svgApi.get(user.orgName, user.hospitalCode, ward.wardCode, token)
+      .then(res => setSvgStatus(res?.svgFile ? 'found' : 'not_found'))
+      .catch(() => setSvgStatus('not_found'));
+  }, []);
+
+  const handlePickAndUpload = async () => {
+    let file;
+    try {
+      file = await DocumentPicker.pickSingle({
+        type: [DocumentPicker.types.plainText, 'image/svg+xml'],
+      });
+    } catch (e) {
+      if (DocumentPicker.isCancel(e)) return;
+      Alert.alert(t('alerts.error'), t('ward.floor_plan_file_invalid'));
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const isReplace = svgStatus === 'found';
+      if (isReplace) {
+        await svgApi.replace(user.orgName, user.hospitalCode, ward.wardCode, file.uri, file.name, token);
+      } else {
+        await svgApi.upload(user.orgName, user.hospitalCode, ward.wardCode, file.uri, file.name, token);
+      }
+      setSvgStatus('found');
+      Alert.alert(
+        t('alerts.success'),
+        isReplace ? t('ward.floor_plan_replace_success') : t('ward.floor_plan_upload_success'),
+      );
+    } catch (e) {
+      Alert.alert(t('alerts.error'), t('ward.floor_plan_upload_failed'));
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const updateForm = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
@@ -121,6 +165,47 @@ export const EditWardScreen = ({ ward, onCancel, onSave, onDelete }) => {
           </Field>
         </View>
 
+        {hasWardPerm && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('ward.floor_plan_section')}</Text>
+            <Card style={styles.floorPlanCard}>
+              <View style={styles.floorPlanRow}>
+                <View style={[
+                  styles.floorPlanBadge,
+                  { backgroundColor: svgStatus === 'found' ? T.goodSoft : T.surface2 },
+                ]}>
+                  {svgStatus === 'found'
+                    ? <IconCheck size={16} color={T.good} />
+                    : <IconUpload size={16} color={T.textFaint} />}
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.floorPlanLabel}>
+                    {svgStatus === 'loading'
+                      ? t('common.loading')
+                      : svgStatus === 'found'
+                        ? t('ward.floor_plan_uploaded')
+                        : t('ward.floor_plan_none')}
+                  </Text>
+                  <Text style={styles.floorPlanHint}>{ward.wardCode}</Text>
+                </View>
+                <Btn
+                  variant={svgStatus === 'found' ? 'surface' : 'primary'}
+                  size="sm"
+                  onPress={handlePickAndUpload}
+                  disabled={uploading || svgStatus === 'loading'}
+                  style={styles.floorPlanBtn}
+                >
+                  {uploading
+                    ? <ActivityIndicator size="small" color={svgStatus === 'found' ? T.textDim : '#fff'} />
+                    : svgStatus === 'found'
+                      ? t('ward.replace_floor_plan')
+                      : t('ward.upload_floor_plan')}
+                </Btn>
+              </View>
+            </Card>
+          </View>
+        )}
+
         <View style={styles.actionRow}>
           <Btn variant="ghost" style={{ flex: 1 }} onPress={onCancel} disabled={saving || deleting}>
             {t('actions.cancel')}
@@ -170,6 +255,15 @@ const createStyles = (T) => StyleSheet.create({
   typeBtnActive: { backgroundColor: T.accent, borderColor: T.accent },
   typeText: { fontSize: 12, color: T.text, fontWeight: '600' },
   typeTextActive: { color: '#fff' },
+  floorPlanCard: { paddingVertical: 12 },
+  floorPlanRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  floorPlanBadge: {
+    width: 36, height: 36, borderRadius: 10,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  floorPlanLabel: { fontSize: 13, fontWeight: '600', color: T.text },
+  floorPlanHint: { fontSize: 11, color: T.textFaint, marginTop: 2, fontFamily: 'monospace' },
+  floorPlanBtn: { paddingHorizontal: 10 },
   actionRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
   deleteBtn: {
     marginTop: 16, flexDirection: 'row', gap: 8,

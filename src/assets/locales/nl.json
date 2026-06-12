@@ -948,7 +948,16 @@
     "provision_ward_banner": "Nieuwe afdeling inrichten voor {{hospitalCode}}.",
     "provision_bed_banner": "Nieuw bed inrichten in deze afdeling.",
     "editing_banner": "Afdeling {{code}} bewerken.",
-    "code_immutable": "Afdelingscode kan niet worden gewijzigd."
+    "code_immutable": "Afdelingscode kan niet worden gewijzigd.",
+    "floor_plan_section": "PLATTEGROND",
+    "floor_plan_uploaded": "Plattegrond geüpload",
+    "floor_plan_none": "Nog geen plattegrond",
+    "upload_floor_plan": "Plattegrond uploaden",
+    "replace_floor_plan": "Plattegrond vervangen",
+    "floor_plan_upload_success": "Plattegrond succesvol geüpload.",
+    "floor_plan_replace_success": "Plattegrond succesvol bijgewerkt.",
+    "floor_plan_upload_failed": "Uploaden van plattegrond mislukt.",
+    "floor_plan_file_invalid": "Selecteer een geldig .svg- of .txt-bestand."
   },
   "assignments": {
     "step1_title": "Selecteer arts",
