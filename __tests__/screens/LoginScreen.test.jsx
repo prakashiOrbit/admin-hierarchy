@@ -157,7 +157,7 @@ describe('LoginScreen — keep me signed in toggle', () => {
 describe('LoginScreen — form submission', () => {
   it('calls authApi.login with the entered credentials', async () => {
     authApi.login.mockResolvedValueOnce({
-      code: '200', token: 'jwt', orgName: 'APOAP1', hospitalCode: 'CLV', refreshToken: 'rt',
+      code: '200', token: 'jwt', orgName: 'APOAP1', careSiteCode: 'CLV', refreshToken: 'rt',
     });
 
     renderLogin();

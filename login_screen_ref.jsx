@@ -78,7 +78,7 @@ function LoginScreen({ onLogin }) {
         }}>
           <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '.08em', color: T.textDim, marginBottom: 8 }}>DEMO · CONTINUE AS</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
-            {['PLATFORM_ADMIN','ORG_OWNER','ORG_ADMIN','HOSP_OWNER','HOSP_ADMIN'].map(r => (
+            {['PLATFORM_ADMIN','ORG_OWNER','ORG_ADMIN','CARESITE_OWNER','CARESITE_ADMIN'].map(r => (
               <button key={r} onClick={() => setDemoRole(r)} style={{
                 background: demoRole === r ? T.accentSoft : 'transparent',
                 border: `1px solid ${demoRole === r ? T.accent : T.borderSoft}`,

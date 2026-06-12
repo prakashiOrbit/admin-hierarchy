@@ -46,7 +46,7 @@ export const CreateNurseScreen = ({ onCancel, onSuccess }) => {
   const isFormValid = form.nurseCode && form.firstName && form.lastName && form.myContact.email;
 
   const handleCreate = async () => {
-    if (!isFormValid || !user?.orgName || !user?.hospitalCode) return;
+    if (!isFormValid || !user?.orgName || !user?.careSiteCode) return;
     const nurseSeconds = parseInt(nurseJwtHours, 10) * 3600;
     if (!nurseJwtHours || isNaN(nurseSeconds) || nurseSeconds <= 0) {
       Alert.alert(t('common.invalid_input'), t('security_policy.err_invalid_duration'));
@@ -59,8 +59,8 @@ export const CreateNurseScreen = ({ onCancel, onSuccess }) => {
       nurseExperience: parseInt(form.nurseExperience, 10) || 0,
     };
     try {
-      await nurseApi.create(user.orgName, user.hospitalCode, payload, token);
-      await organisationApi.updateHospitalJwtValidity(user.orgName, user.hospitalCode, { nurseJwtValiditySeconds: nurseSeconds }, token);
+      await nurseApi.create(user.orgName, user.careSiteCode, payload, token);
+      await organisationApi.updateCareSiteJwtValidity(user.orgName, user.careSiteCode, { nurseJwtValiditySeconds: nurseSeconds }, token);
       Alert.alert(t('messages.success'), t('messages.nurse_onboarded', { firstName: form.firstName, lastName: form.lastName }), [
         { text: t('actions.ok'), onPress: onSuccess || onCancel },
       ]);
@@ -77,7 +77,7 @@ export const CreateNurseScreen = ({ onCancel, onSuccess }) => {
         <View style={styles.banner}>
           <IconUser size={24} color={T.accent} />
           <Text style={styles.bannerText}>
-            {t('messages.onboard_nurse_banner', { hospitalCode: user?.hospitalCode })}
+            {t('messages.onboard_nurse_banner', { careSiteCode: user?.careSiteCode })}
           </Text>
         </View>
 

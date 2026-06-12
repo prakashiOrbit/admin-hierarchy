@@ -25,17 +25,17 @@ export const AssignGatewayScreen = ({ initialGatewayCode, onCancel, onSuccess })
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!user?.orgName || !user?.hospitalCode) return;
+    if (!user?.orgName || !user?.careSiteCode) return;
     let cancelled = false;
     setLoading(true);
     setError(null);
     Promise.all([
-      gatewayApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
+      gatewayApi.listAll(user.orgName, user.careSiteCode, token).catch(e => {
         const msg = (e.message || '').toLowerCase();
         if (msg.includes('not found') || msg.includes('no gateway')) return [];
         throw e;
       }),
-      bedApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
+      bedApi.listAll(user.orgName, user.careSiteCode, token).catch(e => {
         const msg = (e.message || '').toLowerCase();
         if (msg.includes('not found') || msg.includes('no bed')) return [];
         throw e;
@@ -55,7 +55,7 @@ export const AssignGatewayScreen = ({ initialGatewayCode, onCancel, onSuccess })
       .catch(err => { if (!cancelled) setError(getApiErrorMessage(err)); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [user?.orgName, user?.hospitalCode, token]);
+  }, [user?.orgName, user?.careSiteCode, token]);
 
   const filteredGateways = gateways.filter(g =>
     g.gatewayCode?.toLowerCase().includes(query.toLowerCase()) ||
@@ -71,7 +71,7 @@ export const AssignGatewayScreen = ({ initialGatewayCode, onCancel, onSuccess })
     if (!selectedGateway || !selectedBed) return;
     setSaving(true);
     try {
-      await gatewayApi.assignToBed(user.orgName, user.hospitalCode, {
+      await gatewayApi.assignToBed(user.orgName, user.careSiteCode, {
         gatewayCode: selectedGateway.gatewayCode,
         bedCode: selectedBed.bedCode,
       }, token);

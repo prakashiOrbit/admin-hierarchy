@@ -43,10 +43,10 @@ export const CreateDeviceScreen = ({ onCancel, onSuccess }) => {
   const isFormValid = form.deviceCode && form.deviceType && form.protocol;
 
   const handleCreate = async () => {
-    if (!isFormValid || !user?.orgName || !user?.hospitalCode) return;
+    if (!isFormValid || !user?.orgName || !user?.careSiteCode) return;
     setSaving(true);
     try {
-      await deviceApi.create(user.orgName, user.hospitalCode, form, token);
+      await deviceApi.create(user.orgName, user.careSiteCode, form, token);
       Alert.alert(t('common.success'), t('alerts.device_registered', { code: form.deviceCode }), [
         { text: t('common.done'), onPress: onSuccess || onCancel },
       ]);
@@ -67,7 +67,7 @@ export const CreateDeviceScreen = ({ onCancel, onSuccess }) => {
         <View style={styles.banner}>
           <IconCpu size={24} color={T.accent} />
           <Text style={styles.bannerText}>
-            {t('device.create_banner', { hospital: user?.hospitalCode })}
+            {t('device.create_banner', { careSite: user?.careSiteCode })}
           </Text>
         </View>
 

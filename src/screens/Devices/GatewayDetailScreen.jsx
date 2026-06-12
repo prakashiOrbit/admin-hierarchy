@@ -19,16 +19,16 @@ export const GatewayDetailScreen = ({ gatewayCode, onBack, onAssign }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!gatewayCode || !user?.orgName || !user?.hospitalCode) return;
+    if (!gatewayCode || !user?.orgName || !user?.careSiteCode) return;
     let cancelled = false;
     setLoading(true);
     setError(null);
-    gatewayApi.getDetail(user.orgName, user.hospitalCode, gatewayCode, token)
+    gatewayApi.getDetail(user.orgName, user.careSiteCode, gatewayCode, token)
       .then(data => { if (!cancelled) setGateway(data); })
       .catch(e => { if (!cancelled) setError(e.message || t('common.load_failed')); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [gatewayCode, user?.orgName, user?.hospitalCode, token]);
+  }, [gatewayCode, user?.orgName, user?.careSiteCode, token]);
 
   if (loading) {
     return <View style={styles.center}><ActivityIndicator color={T.accent} /></View>;
@@ -50,7 +50,7 @@ export const GatewayDetailScreen = ({ gatewayCode, onBack, onAssign }) => {
     { label: t('gateway.type'),   value: gateway.gatewayType },
     { label: t('gateway.os'),     value: gateway.os },
     { label: t('gateway.comm'),   value: gateway.communicationConfig },
-    { label: t('gateway.hospital'), value: gateway.hospitalCode },
+    { label: t('gateway.caresite'), value: gateway.careSiteCode },
     { label: t('gateway.org'),    value: gateway.orgName },
   ];
 

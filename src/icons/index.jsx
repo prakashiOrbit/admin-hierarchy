@@ -26,7 +26,7 @@ export const IconDashboard = (p) => (
   </I>
 );
 
-export const IconHospital = (p) => (
+export const IconCareSite = (p) => (
   <I {...p}>
     <Path d="M4 21V8l8-4 8 4v13" />
     <Path d="M9 21v-5h6v5" />

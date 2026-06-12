@@ -26,7 +26,7 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
   const [showLocalePicker, setShowLocalePicker] = useState(false);
   const [form, setForm] = useState({
     orgName: '',
-    orgType: 'HOSPITAL',
+    orgType: 'CARESITE',
     businessName: '',
     preferredLocale: (i18n.language || 'en').split('-')[0],
     myContact: {
@@ -45,7 +45,7 @@ export const NewOrganisationScreen = ({ onCancel, onSuccess }) => {
     adminJwtValidityHours: 3,
   });
 
-  const orgTypes = ['HOSPITAL', 'CLINIC', 'LAB', 'PHARMACY', 'RESEARCH', 'OTHER', 'COMPANY'];
+  const orgTypes = ['CARESITE', 'CLINIC', 'LAB', 'PHARMACY', 'RESEARCH', 'OTHER', 'COMPANY'];
 
   const { token } = useAuth();
   const [loading, setLoading] = useState(false);

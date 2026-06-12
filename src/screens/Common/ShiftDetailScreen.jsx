@@ -24,16 +24,16 @@ export const ShiftDetailScreen = ({ shiftId: shiftCode, onBack, onEdit }) => {
   const [unassigning, setUnassigning] = useState(null);
 
   const fetchDetail = useCallback(async () => {
-    if (!shiftCode || !user?.orgName || !user?.hospitalCode) return;
+    if (!shiftCode || !user?.orgName || !user?.careSiteCode) return;
     try {
-      const data = await shiftApi.getDetail(user.orgName, user.hospitalCode, shiftCode, token);
+      const data = await shiftApi.getDetail(user.orgName, user.careSiteCode, shiftCode, token);
       setShift(data);
     } catch (e) {
       setError(e.message || t('shift.load_failed'));
     } finally {
       setLoading(false);
     }
-  }, [shiftCode, user?.orgName, user?.hospitalCode, token]);
+  }, [shiftCode, user?.orgName, user?.careSiteCode, token]);
 
   useEffect(() => { fetchDetail(); }, [fetchDetail]);
 
@@ -49,7 +49,7 @@ export const ShiftDetailScreen = ({ shiftId: shiftCode, onBack, onEdit }) => {
           onPress: async () => {
             setUnassigning(nurse.nurseCode);
             try {
-              await shiftApi.unassignNurse(user.orgName, user.hospitalCode, { nurseCode: nurse.nurseCode, shiftCode }, token);
+              await shiftApi.unassignNurse(user.orgName, user.careSiteCode, { nurseCode: nurse.nurseCode, shiftCode }, token);
               Alert.alert(t('common.done'), t('shift.removed_nurse', { firstName: nurse.firstName, lastName: nurse.lastName }));
               fetchDetail();
             } catch (e) { Alert.alert(t('common.error'), e.message || t('common.failed')); }
@@ -71,7 +71,7 @@ export const ShiftDetailScreen = ({ shiftId: shiftCode, onBack, onEdit }) => {
           onPress: async () => {
             setUnassigning(doctor.doctorCode);
             try {
-              await shiftApi.unassignDoctor(user.orgName, user.hospitalCode, { doctorCode: doctor.doctorCode, shiftCode }, token);
+              await shiftApi.unassignDoctor(user.orgName, user.careSiteCode, { doctorCode: doctor.doctorCode, shiftCode }, token);
               Alert.alert(t('common.done'), t('shift.removed_doctor', { firstName: doctor.firstName, lastName: doctor.lastName }));
               fetchDetail();
             } catch (e) { Alert.alert(t('common.error'), e.message || t('common.failed')); }

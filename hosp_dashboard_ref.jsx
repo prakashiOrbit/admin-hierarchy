@@ -1,13 +1,13 @@
-// HOSP_OWNER / HOSP_ADMIN screens: Dashboard, Wards/Beds, Devices/Gateways, Shifts/Nurses.
+// CARESITE_OWNER / CARESITE_ADMIN screens: Dashboard, Wards/Beds, Devices/Gateways, Shifts/Nurses.
 // Plus shared Settings screen.
 
-function HospDashboard({ go, role }) {
+function CareSiteDashboard({ go, role }) {
   return (
     <div style={{ padding: '14px 14px 28px', display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div>
         <div style={{ fontSize: 11, color: T.textDim, letterSpacing: '.08em', fontWeight: 600 }}>FRI, 16 MAY · CLEVELAND MAIN</div>
         <div style={{ fontSize: 22, fontWeight: 700, color: T.text, letterSpacing: '-.01em', marginTop: 2 }}>
-          {role === 'HOSP_OWNER' ? 'Good morning, Dr. Bhatt' : 'Good morning, Tomás'}
+          {role === 'CARESITE_OWNER' ? 'Good morning, Dr. Bhatt' : 'Good morning, Tomás'}
         </div>
         <div style={{ fontSize: 12.5, color: T.textDim, marginTop: 4 }}>
           <span style={{ color: T.good, fontWeight: 600 }}>4 wards</span> at full staff · 1 device alert
@@ -664,6 +664,6 @@ function SettingsScreen({ role, onLogout, toast }) {
 }
 
 Object.assign(window, {
-  HospDashboard, PulseWave, WardsScreen, WardDetailScreen, CreateWardScreen,
+  CareSiteDashboard, PulseWave, WardsScreen, WardDetailScreen, CreateWardScreen,
   DevicesScreen, DeviceDetailScreen, CreateDeviceScreen, ShiftsScreen, SettingsScreen,
 });

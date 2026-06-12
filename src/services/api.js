@@ -282,32 +282,32 @@ export const organisationApi = {
       headers: { 'Authorization': `Bearer ${token}` },
     });
   },
-  // Creates Hospital and its Owner
-  createHospital: (orgName, hospitalData, token) => {
-    return apiRequest(`/${orgName}/hospital/create`, {
+  // Creates CareSite and its Owner
+  createCareSite: (orgName, careSiteData, token) => {
+    return apiRequest(`/${orgName}/caresite/create`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify(hospitalData),
+      body: JSON.stringify(careSiteData),
     });
   },
-  listHospitals: (orgName, token, options = {}) => {
-    return apiRequest(`/${orgName}/hospital/all`, {
+  listCareSites: (orgName, token, options = {}) => {
+    return apiRequest(`/${orgName}/caresite/all`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
       signal: options.signal,
     });
   },
-  getHospitalByCode: (orgName, hospCode, token) => {
-    return apiRequest(`/${orgName}/hospital/${hospCode}`, {
+  getCareSiteByCode: (orgName, careSiteCode, token) => {
+    return apiRequest(`/${orgName}/caresite/${careSiteCode}`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     });
   },
-  updateHospital: (orgName, hospitalData, token) =>
-    apiRequest(`/${orgName}/hospital/update`, {
+  updateCareSite: (orgName, careSiteData, token) =>
+    apiRequest(`/${orgName}/caresite/update`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify(hospitalData),
+      body: JSON.stringify(careSiteData),
     }),
   updateJwtValidity: (orgName, payload, token) =>
     apiRequest(`/organisation/${orgName}/jwt-validity`, {
@@ -315,8 +315,8 @@ export const organisationApi = {
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(payload),
     }),
-  updateHospitalJwtValidity: (orgName, hospCode, payload, token) =>
-    apiRequest(`/${orgName}/hospital/${hospCode}/jwt-validity`, {
+  updateCareSiteJwtValidity: (orgName, careSiteCode, payload, token) =>
+    apiRequest(`/${orgName}/caresite/${careSiteCode}/jwt-validity`, {
       method: 'PATCH',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(payload),
@@ -348,32 +348,32 @@ export const userApi = {
     });
   },
 
-  // --- Hospital Owner ---
-  listHospOwners: (orgName, token, options = {}) => {
-    return apiRequest(`/${orgName}/user/hospowners`, {
+  // --- CareSite Owner ---
+  listCareSiteOwners: (orgName, token, options = {}) => {
+    return apiRequest(`/${orgName}/user/caresiteowners`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
       signal: options.signal,
     });
   },
 
-  // --- Hospital Admin ---
-  createHospAdmin: (orgName, hospCode, userData, token) => {
-    return apiRequest(`/${orgName}/${hospCode}/user/createhospitaladmin`, {
+  // --- CareSite Admin ---
+  createCareSiteAdmin: (orgName, careSiteCode, userData, token) => {
+    return apiRequest(`/${orgName}/${careSiteCode}/user/createcareSiteadmin`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(userData),
     });
   },
-  listAllHospAdmins: (orgName, token, options = {}) => {
-    return apiRequest(`/${orgName}/user/hospadmins`, {
+  listAllCareSiteAdmins: (orgName, token, options = {}) => {
+    return apiRequest(`/${orgName}/user/caresiteadmins`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
       signal: options.signal,
     });
   },
-  listHospAdminsByHospital: (orgName, hospCode, token) => {
-    return apiRequest(`/${orgName}/${hospCode}/user/hospadmins`, {
+  listCareSiteAdminsByCareSite: (orgName, careSiteCode, token) => {
+    return apiRequest(`/${orgName}/${careSiteCode}/user/caresiteadmins`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     });
@@ -417,8 +417,8 @@ export const summaryApi = {
       signal: options.signal,
     });
   },
-  getHospitalSummary: (orgName, hospCode, token, options = {}) => {
-    return apiRequest(`/${orgName}/${hospCode}/summary`, {
+  getCareSiteSummary: (orgName, careSiteCode, token, options = {}) => {
+    return apiRequest(`/${orgName}/${careSiteCode}/summary`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
       signal: options.signal,
@@ -452,61 +452,61 @@ export const deviceTypeApi = {
 };
 
 export const wardApi = {
-  create: (orgName, hospCode, wardData, token) =>
-    apiRequest(`/${orgName}/ward/${hospCode}/create`, {
+  create: (orgName, careSiteCode, wardData, token) =>
+    apiRequest(`/${orgName}/ward/${careSiteCode}/create`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(wardData),
     }),
-  listAll: (orgName, hospCode, token) =>
-    apiRequest(`/${orgName}/ward/${hospCode}/all`, {
+  listAll: (orgName, careSiteCode, token) =>
+    apiRequest(`/${orgName}/ward/${careSiteCode}/all`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
-  getDetail: (orgName, hospCode, wardCode, token) =>
-    apiRequest(`/${orgName}/ward/${hospCode}/${wardCode}`, {
+  getDetail: (orgName, careSiteCode, wardCode, token) =>
+    apiRequest(`/${orgName}/ward/${careSiteCode}/${wardCode}`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
-  update: (orgName, hospCode, wardId, wardData, token) =>
-    apiRequest(`/${orgName}/ward/${hospCode}/update/${wardId}`, {
+  update: (orgName, careSiteCode, wardId, wardData, token) =>
+    apiRequest(`/${orgName}/ward/${careSiteCode}/update/${wardId}`, {
       method: 'PUT',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(wardData),
     }),
-  delete: (orgName, hospCode, wardId, token) =>
-    apiRequest(`/${orgName}/ward/${hospCode}/delete/${wardId}`, {
+  delete: (orgName, careSiteCode, wardId, token) =>
+    apiRequest(`/${orgName}/ward/${careSiteCode}/delete/${wardId}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
 };
 
 export const nursingStationApi = {
-  create: (orgName, hospCode, stationData, token) =>
-    apiRequest(`/${orgName}/nursingstation/${hospCode}/create`, {
+  create: (orgName, careSiteCode, stationData, token) =>
+    apiRequest(`/${orgName}/nursingstation/${careSiteCode}/create`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(stationData),
     }),
-  listAll: (orgName, hospCode, token) =>
-    apiRequest(`/${orgName}/nursingstation/${hospCode}/all`, {
+  listAll: (orgName, careSiteCode, token) =>
+    apiRequest(`/${orgName}/nursingstation/${careSiteCode}/all`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
-  searchByNumber: (orgName, hospCode, stationNumber, token) =>
-    apiRequest(`/${orgName}/nursingstation/${hospCode}/searchbyid`, {
+  searchByNumber: (orgName, careSiteCode, stationNumber, token) =>
+    apiRequest(`/${orgName}/nursingstation/${careSiteCode}/searchbyid`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ stationNumber }),
     }),
-  assignWard: (orgName, hospCode, wardCode, stationNumber, token) =>
-    apiRequest(`/${orgName}/nursingstation/${hospCode}/assign`, {
+  assignWard: (orgName, careSiteCode, wardCode, stationNumber, token) =>
+    apiRequest(`/${orgName}/nursingstation/${careSiteCode}/assign`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ wardCode, stationNumber }),
     }),
-  unassignWard: (orgName, hospCode, wardCode, stationNumber, token) =>
-    apiRequest(`/${orgName}/nursingstation/${hospCode}/unassign`, {
+  unassignWard: (orgName, careSiteCode, wardCode, stationNumber, token) =>
+    apiRequest(`/${orgName}/nursingstation/${careSiteCode}/unassign`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ wardCode, stationNumber }),
@@ -514,53 +514,53 @@ export const nursingStationApi = {
 };
 
 export const bedApi = {
-  create: (orgName, hospCode, bedData, token) =>
-    apiRequest(`/${orgName}/bed/${hospCode}/create`, {
+  create: (orgName, careSiteCode, bedData, token) =>
+    apiRequest(`/${orgName}/bed/${careSiteCode}/create`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(bedData),
     }),
-  listAll: (orgName, hospCode, token) =>
-    apiRequest(`/${orgName}/bed/${hospCode}/all`, {
+  listAll: (orgName, careSiteCode, token) =>
+    apiRequest(`/${orgName}/bed/${careSiteCode}/all`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
-  getAllBedsByWard: (orgName, hospCode, wardCode, token) =>
-    apiRequest(`/${orgName}/bed/${hospCode}/getAllBeds/${wardCode}`, {
+  getAllBedsByWard: (orgName, careSiteCode, wardCode, token) =>
+    apiRequest(`/${orgName}/bed/${careSiteCode}/getAllBeds/${wardCode}`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
-  getAssignedDevices: (orgName, hospCode, bedCode, token) =>
-    apiRequest(`/${orgName}/bed/${hospCode}/${bedCode}/devicesassigned`, {
+  getAssignedDevices: (orgName, careSiteCode, bedCode, token) =>
+    apiRequest(`/${orgName}/bed/${careSiteCode}/${bedCode}/devicesassigned`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
-  assignPatient: (orgName, hospCode, bedCode, payload, token) =>
-    apiRequest(`/${orgName}/bed/${hospCode}/assign/patient`, {
+  assignPatient: (orgName, careSiteCode, bedCode, payload, token) =>
+    apiRequest(`/${orgName}/bed/${careSiteCode}/assign/patient`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ bedCode, ...payload }),
     }),
-  unassignPatient: (orgName, hospCode, bedCode, token) =>
-    apiRequest(`/${orgName}/bed/${hospCode}/patient/unassign`, {
+  unassignPatient: (orgName, careSiteCode, bedCode, token) =>
+    apiRequest(`/${orgName}/bed/${careSiteCode}/patient/unassign`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ bedCode }),
     }),
-  discharge: (orgName, hospCode, bedCode, token) =>
-    apiRequest(`/${orgName}/bed/${hospCode}/patient/discharge`, {
+  discharge: (orgName, careSiteCode, bedCode, token) =>
+    apiRequest(`/${orgName}/bed/${careSiteCode}/patient/discharge`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ bedCode }),
     }),
-  transferWard: (orgName, hospCode, bedCode, payload, token) =>
-    apiRequest(`/${orgName}/bed/${hospCode}/patient/wardTransfer`, {
+  transferWard: (orgName, careSiteCode, bedCode, payload, token) =>
+    apiRequest(`/${orgName}/bed/${careSiteCode}/patient/wardTransfer`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ bedCode, ...payload }),
     }),
-  updateAlarmConfig: (orgName, hospCode, bedCode, alarmConfig, token) =>
-    apiRequest(`/${orgName}/bed/${hospCode}/${bedCode}/alarmconfig/save`, {
+  updateAlarmConfig: (orgName, careSiteCode, bedCode, alarmConfig, token) =>
+    apiRequest(`/${orgName}/bed/${careSiteCode}/${bedCode}/alarmconfig/save`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(alarmConfig),
@@ -568,14 +568,14 @@ export const bedApi = {
 };
 
 export const doctorApi = {
-  create: (orgName, hospCode, doctorData, token) =>
-    apiRequest(`/${orgName}/doctor/${hospCode}/create`, {
+  create: (orgName, careSiteCode, doctorData, token) =>
+    apiRequest(`/${orgName}/doctor/${careSiteCode}/create`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(doctorData),
     }),
-  listAll: (orgName, hospCode, token, options = {}) =>
-    apiRequest(`/${orgName}/doctor/${hospCode}/all`, {
+  listAll: (orgName, careSiteCode, token, options = {}) =>
+    apiRequest(`/${orgName}/doctor/${careSiteCode}/all`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
       signal: options.signal,
@@ -586,13 +586,13 @@ export const doctorApi = {
       headers: { 'Authorization': `Bearer ${token}` },
       signal: options.signal,
     }),
-  getDetail: (orgName, hospCode, doctorCode, token) =>
-    apiRequest(`/${orgName}/doctor/${hospCode}/${doctorCode}/doctordetail`, {
+  getDetail: (orgName, careSiteCode, doctorCode, token) =>
+    apiRequest(`/${orgName}/doctor/${careSiteCode}/${doctorCode}/doctordetail`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
-  update: (orgName, hospCode, doctorCode, doctorData, token) =>
-    apiRequest(`/${orgName}/doctor/${hospCode}/${doctorCode}/update`, {
+  update: (orgName, careSiteCode, doctorCode, doctorData, token) =>
+    apiRequest(`/${orgName}/doctor/${careSiteCode}/${doctorCode}/update`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(doctorData),
@@ -600,14 +600,14 @@ export const doctorApi = {
 };
 
 export const nurseApi = {
-  create: (orgName, hospCode, nurseData, token) =>
-    apiRequest(`/${orgName}/nurse/${hospCode}/create`, {
+  create: (orgName, careSiteCode, nurseData, token) =>
+    apiRequest(`/${orgName}/nurse/${careSiteCode}/create`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(nurseData),
     }),
-  listAll: (orgName, hospCode, token) =>
-    apiRequest(`/${orgName}/nurse/${hospCode}/all`, {
+  listAll: (orgName, careSiteCode, token) =>
+    apiRequest(`/${orgName}/nurse/${careSiteCode}/all`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
@@ -617,25 +617,25 @@ export const nurseApi = {
       headers: { 'Authorization': `Bearer ${token}` },
       signal: options.signal,
     }),
-  getDetail: (orgName, hospCode, nurseCode, token) =>
-    apiRequest(`/${orgName}/nurse/${hospCode}/${nurseCode}/nursedetail`, {
+  getDetail: (orgName, careSiteCode, nurseCode, token) =>
+    apiRequest(`/${orgName}/nurse/${careSiteCode}/${nurseCode}/nursedetail`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
-  update: (orgName, hospCode, nurseCode, nurseData, token) =>
-    apiRequest(`/${orgName}/nurse/${hospCode}/${nurseCode}/update`, {
+  update: (orgName, careSiteCode, nurseCode, nurseData, token) =>
+    apiRequest(`/${orgName}/nurse/${careSiteCode}/${nurseCode}/update`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(nurseData),
     }),
-  assignBed: (orgName, hospCode, payload, token) =>
-    apiRequest(`/${orgName}/nurse/${hospCode}/assigntobed`, {
+  assignBed: (orgName, careSiteCode, payload, token) =>
+    apiRequest(`/${orgName}/nurse/${careSiteCode}/assigntobed`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(payload),
     }),
-  admitPatient: (orgName, hospCode, payload, token) =>
-    apiRequest(`/${orgName}/nurse/${hospCode}/admit`, {
+  admitPatient: (orgName, careSiteCode, payload, token) =>
+    apiRequest(`/${orgName}/nurse/${careSiteCode}/admit`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(payload),
@@ -643,48 +643,48 @@ export const nurseApi = {
 };
 
 export const patientApi = {
-  create: (orgName, hospCode, patientData, token) =>
-    apiRequest(`/${orgName}/patient/${hospCode}/create`, {
+  create: (orgName, careSiteCode, patientData, token) =>
+    apiRequest(`/${orgName}/patient/${careSiteCode}/create`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(patientData),
     }),
-  listAll: (orgName, hospCode, token) =>
-    apiRequest(`/${orgName}/patient/${hospCode}/all`, {
+  listAll: (orgName, careSiteCode, token) =>
+    apiRequest(`/${orgName}/patient/${careSiteCode}/all`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
-  getDetail: (orgName, hospCode, patientCode, token) =>
-    apiRequest(`/${orgName}/patient/${hospCode}/${patientCode}/patientdetail`, {
+  getDetail: (orgName, careSiteCode, patientCode, token) =>
+    apiRequest(`/${orgName}/patient/${careSiteCode}/${patientCode}/patientdetail`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
-  update: (orgName, hospCode, patientCode, patientData, token) =>
-    apiRequest(`/${orgName}/patient/${hospCode}/update`, {
+  update: (orgName, careSiteCode, patientCode, patientData, token) =>
+    apiRequest(`/${orgName}/patient/${careSiteCode}/update`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(patientData),
     }),
-  discharge: (orgName, hospCode, patientCode, token) =>
-    apiRequest(`/${orgName}/patient/${hospCode}/initiateDischarge`, {
+  discharge: (orgName, careSiteCode, patientCode, token) =>
+    apiRequest(`/${orgName}/patient/${careSiteCode}/initiateDischarge`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ patientCode }),
     }),
-  transfer: (orgName, hospCode, patientCode, payload, token) =>
-    apiRequest(`/${orgName}/patient/${hospCode}/initiateTransfer`, {
+  transfer: (orgName, careSiteCode, patientCode, payload, token) =>
+    apiRequest(`/${orgName}/patient/${careSiteCode}/initiateTransfer`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ patientCode, ...payload }),
     }),
-  addInfo: (orgName, hospCode, patientCode, infoData, token) =>
-    apiRequest(`/${orgName}/patient/${hospCode}/${patientCode}/addinfo`, {
+  addInfo: (orgName, careSiteCode, patientCode, infoData, token) =>
+    apiRequest(`/${orgName}/patient/${careSiteCode}/${patientCode}/addinfo`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(infoData),
     }),
-  anonymize: (orgName, hospCode, patientCode, token, gdprRef) =>
-    apiRequest(`/${orgName}/patient/${hospCode}/${patientCode}/anonymize`, {
+  anonymize: (orgName, careSiteCode, patientCode, token, gdprRef) =>
+    apiRequest(`/${orgName}/patient/${careSiteCode}/${patientCode}/anonymize`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` },
       ...(gdprRef ? { params: { gdprRef } } : {}),
@@ -697,86 +697,86 @@ export const patientApi = {
 };
 
 export const admissionApi = {
-  close: (orgName, hospCode, patientCode, token) =>
-    apiRequest(`/${orgName}/admission/${hospCode}/${patientCode}/close`, {
+  close: (orgName, careSiteCode, patientCode, token) =>
+    apiRequest(`/${orgName}/admission/${careSiteCode}/${patientCode}/close`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
 };
 
 export const shiftApi = {
-  create: (orgName, hospCode, shiftData, token) =>
-    apiRequest(`/${orgName}/shift/${hospCode}/create`, {
+  create: (orgName, careSiteCode, shiftData, token) =>
+    apiRequest(`/${orgName}/shift/${careSiteCode}/create`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(shiftData),
     }),
-  listAll: (orgName, hospCode, token) =>
-    apiRequest(`/${orgName}/shift/${hospCode}/all`, {
+  listAll: (orgName, careSiteCode, token) =>
+    apiRequest(`/${orgName}/shift/${careSiteCode}/all`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
-  assignNurse: (orgName, hospCode, assignData, token) =>
-    apiRequest(`/${orgName}/shift/${hospCode}/nurse/assign`, {
+  assignNurse: (orgName, careSiteCode, assignData, token) =>
+    apiRequest(`/${orgName}/shift/${careSiteCode}/nurse/assign`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(assignData),
     }),
-  unassignNurse: (orgName, hospCode, assignData, token) =>
-    apiRequest(`/${orgName}/shift/${hospCode}/nurse/unassign`, {
+  unassignNurse: (orgName, careSiteCode, assignData, token) =>
+    apiRequest(`/${orgName}/shift/${careSiteCode}/nurse/unassign`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(assignData),
     }),
-  assignDoctor: (orgName, hospCode, assignData, token) =>
-    apiRequest(`/${orgName}/shift/${hospCode}/doctor/assign`, {
+  assignDoctor: (orgName, careSiteCode, assignData, token) =>
+    apiRequest(`/${orgName}/shift/${careSiteCode}/doctor/assign`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(assignData),
     }),
-  unassignDoctor: (orgName, hospCode, assignData, token) =>
-    apiRequest(`/${orgName}/shift/${hospCode}/doctor/unassign`, {
+  unassignDoctor: (orgName, careSiteCode, assignData, token) =>
+    apiRequest(`/${orgName}/shift/${careSiteCode}/doctor/unassign`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(assignData),
     }),
-  getDetail: (orgName, hospCode, shiftCode, token) =>
-    apiRequest(`/${orgName}/shift/${hospCode}/${shiftCode}`, {
+  getDetail: (orgName, careSiteCode, shiftCode, token) =>
+    apiRequest(`/${orgName}/shift/${careSiteCode}/${shiftCode}`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
-  update: (orgName, hospCode, shiftCode, shiftData, token) =>
-    apiRequest(`/${orgName}/shift/${hospCode}/${shiftCode}/update`, {
+  update: (orgName, careSiteCode, shiftCode, shiftData, token) =>
+    apiRequest(`/${orgName}/shift/${careSiteCode}/${shiftCode}/update`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(shiftData),
     }),
-  delete: (orgName, hospCode, shiftCode, token) =>
-    apiRequest(`/${orgName}/shift/${hospCode}/${shiftCode}/delete`, {
+  delete: (orgName, careSiteCode, shiftCode, token) =>
+    apiRequest(`/${orgName}/shift/${careSiteCode}/${shiftCode}/delete`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
 };
 
 export const gatewayApi = {
-  listAll: (orgName, hospCode, token) =>
-    apiRequest(`/${orgName}/gateway/${hospCode}/all`, {
+  listAll: (orgName, careSiteCode, token) =>
+    apiRequest(`/${orgName}/gateway/${careSiteCode}/all`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
-  create: (orgName, hospCode, gatewayData, token) =>
-    apiRequest(`/${orgName}/gateway/${hospCode}/create`, {
+  create: (orgName, careSiteCode, gatewayData, token) =>
+    apiRequest(`/${orgName}/gateway/${careSiteCode}/create`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(gatewayData),
     }),
-  getDetail: (orgName, hospCode, gatewayCode, token) =>
-    apiRequest(`/${orgName}/gateway/${hospCode}/${gatewayCode}`, {
+  getDetail: (orgName, careSiteCode, gatewayCode, token) =>
+    apiRequest(`/${orgName}/gateway/${careSiteCode}/${gatewayCode}`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
-  assignToBed: (orgName, hospCode, payload, token) =>
-    apiRequest(`/${orgName}/gateway/${hospCode}/assign/bed`, {
+  assignToBed: (orgName, careSiteCode, payload, token) =>
+    apiRequest(`/${orgName}/gateway/${careSiteCode}/assign/bed`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(payload),
@@ -784,13 +784,13 @@ export const gatewayApi = {
 };
 
 export const deviceApi = {
-  listAll: (orgName, hospCode, token) =>
-    apiRequest(`/${orgName}/device/${hospCode}/all`, {
+  listAll: (orgName, careSiteCode, token) =>
+    apiRequest(`/${orgName}/device/${careSiteCode}/all`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
-  create: (orgName, hospCode, deviceData, token) =>
-    apiRequest(`/${orgName}/device/${hospCode}/create`, {
+  create: (orgName, careSiteCode, deviceData, token) =>
+    apiRequest(`/${orgName}/device/${careSiteCode}/create`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(deviceData),
@@ -800,25 +800,25 @@ export const deviceApi = {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
-  listUnassigned: (orgName, hospCode, token) =>
-    apiRequest(`/${orgName}/device/${hospCode}/unassigneddevices`, {
+  listUnassigned: (orgName, careSiteCode, token) =>
+    apiRequest(`/${orgName}/device/${careSiteCode}/unassigneddevices`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
-  addConfig: (orgName, hospCode, deviceCode, configs, token) =>
-    apiRequest(`/${orgName}/device/${hospCode}/${deviceCode}/config`, {
+  addConfig: (orgName, careSiteCode, deviceCode, configs, token) =>
+    apiRequest(`/${orgName}/device/${careSiteCode}/${deviceCode}/config`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(configs),
     }),
-  assign: (orgName, hospCode, payload, token) =>
-    apiRequest(`/${orgName}/device/${hospCode}/assign`, {
+  assign: (orgName, careSiteCode, payload, token) =>
+    apiRequest(`/${orgName}/device/${careSiteCode}/assign`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(payload),
     }),
-  endAssignment: (orgName, hospCode, device, token) =>
-    apiRequest(`/${orgName}/device/${hospCode}/endAssignment`, {
+  endAssignment: (orgName, careSiteCode, device, token) =>
+    apiRequest(`/${orgName}/device/${careSiteCode}/endAssignment`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(device),
@@ -826,30 +826,30 @@ export const deviceApi = {
 };
 
 export const assignmentApi = {
-  assign: (orgName, hospCode, payload, token) =>
-    apiRequest(`/${orgName}/assignment/${hospCode}/assign`, {
+  assign: (orgName, careSiteCode, payload, token) =>
+    apiRequest(`/${orgName}/assignment/${careSiteCode}/assign`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(payload),
     }),
-  unassign: (orgName, hospCode, payload, token) =>
-    apiRequest(`/${orgName}/assignment/${hospCode}/unassign`, {
+  unassign: (orgName, careSiteCode, payload, token) =>
+    apiRequest(`/${orgName}/assignment/${careSiteCode}/unassign`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(payload),
     }),
-  getByPatient: (orgName, hospCode, patientCode, token) =>
-    apiRequest(`/${orgName}/assignment/${hospCode}/patient/${patientCode}`, {
+  getByPatient: (orgName, careSiteCode, patientCode, token) =>
+    apiRequest(`/${orgName}/assignment/${careSiteCode}/patient/${patientCode}`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
-  getByDoctor: (orgName, hospCode, doctorCode, token) =>
-    apiRequest(`/${orgName}/assignment/${hospCode}/doctor/${doctorCode}`, {
+  getByDoctor: (orgName, careSiteCode, doctorCode, token) =>
+    apiRequest(`/${orgName}/assignment/${careSiteCode}/doctor/${doctorCode}`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
-  deactivateDevices: (orgName, hospCode, patientCode, token) =>
-    apiRequest(`/${orgName}/assignment/${hospCode}/${patientCode}/devices`, {
+  deactivateDevices: (orgName, careSiteCode, patientCode, token) =>
+    apiRequest(`/${orgName}/assignment/${careSiteCode}/${patientCode}/devices`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
@@ -939,21 +939,21 @@ export const apiUpload = async (endpoint, formData, token, method = 'POST') => {
 };
 
 export const svgApi = {
-  get: (orgName, hospCode, wardCode, token) =>
-    apiRequest(`/${orgName}/svg/${hospCode}/${wardCode}`, {
+  get: (orgName, careSiteCode, wardCode, token) =>
+    apiRequest(`/${orgName}/svg/${careSiteCode}/${wardCode}`, {
       method: 'GET',
       headers: { 'Authorization': `Bearer ${token}` },
     }),
 
-  upload: (orgName, hospCode, wardCode, fileUri, fileName, token) => {
+  upload: (orgName, careSiteCode, wardCode, fileUri, fileName, token) => {
     const fd = new FormData();
     fd.append('file', { uri: fileUri, type: 'text/plain', name: fileName || 'floor_plan.svg' });
-    return apiUpload(`/${orgName}/svg/${hospCode}/upload/${wardCode}`, fd, token, 'POST');
+    return apiUpload(`/${orgName}/svg/${careSiteCode}/upload/${wardCode}`, fd, token, 'POST');
   },
 
-  replace: (orgName, hospCode, wardCode, fileUri, fileName, token) => {
+  replace: (orgName, careSiteCode, wardCode, fileUri, fileName, token) => {
     const fd = new FormData();
     fd.append('file', { uri: fileUri, type: 'text/plain', name: fileName || 'floor_plan.svg' });
-    return apiUpload(`/${orgName}/svg/${hospCode}/upload/${wardCode}`, fd, token, 'PUT');
+    return apiUpload(`/${orgName}/svg/${careSiteCode}/upload/${wardCode}`, fd, token, 'PUT');
   },
 };

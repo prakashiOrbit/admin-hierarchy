@@ -26,10 +26,10 @@ export const CreateWardScreen = ({ onCancel, onSuccess }) => {
   const isFormValid = form.wardCode && form.wardName && form.numberOfBeds;
 
   const handleCreate = async () => {
-    if (!isFormValid || !user?.orgName || !user?.hospitalCode) return;
+    if (!isFormValid || !user?.orgName || !user?.careSiteCode) return;
     setSaving(true);
     try {
-      await wardApi.create(user.orgName, user.hospitalCode, form, token);
+      await wardApi.create(user.orgName, user.careSiteCode, form, token);
       Alert.alert(t('alerts.success'), t('messages.ward_created', { wardCode: form.wardCode }), [
         { text: t('actions.ok'), onPress: onSuccess || onCancel },
       ]);
@@ -46,7 +46,7 @@ export const CreateWardScreen = ({ onCancel, onSuccess }) => {
         <View style={styles.banner}>
           <IconDoor size={24} color={T.accent} />
           <Text style={styles.bannerText}>
-            {t('ward.provision_ward_banner', { hospitalCode: user?.hospitalCode })}
+            {t('ward.provision_ward_banner', { careSiteCode: user?.careSiteCode })}
           </Text>
         </View>
 
@@ -90,11 +90,11 @@ export const CreateWardScreen = ({ onCancel, onSuccess }) => {
             </View>
           </View>
 
-          <Field label={t('ward.assigned_hospital')}>
+          <Field label={t('ward.assigned_caresite')}>
             <Card style={styles.disabledCard} padding={12}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <IconBuilding size={16} color={T.textFaint} />
-                <Text style={styles.disabledText}>{user?.hospitalCode}</Text>
+                <Text style={styles.disabledText}>{user?.careSiteCode}</Text>
               </View>
             </Card>
           </Field>

@@ -56,7 +56,7 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
           onPress: async () => {
             setSaving(true);
             try {
-              await bedApi.unassignPatient(user.orgName, user.hospitalCode, bed.bedCode, token);
+              await bedApi.unassignPatient(user.orgName, user.careSiteCode, bed.bedCode, token);
               Alert.alert(t('common.done'), t('actions.patient_unassigned'), [{ text: t('common.ok'), onPress: handleClose }]);
             } catch (e) { Alert.alert(t('common.error'), e.message || t('common.failed')); }
             finally { setSaving(false); }
@@ -73,9 +73,9 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
           onPress: async () => {
             setSaving(true);
             try {
-              await bedApi.discharge(user.orgName, user.hospitalCode, bed.bedCode, token);
-              await admissionApi.close(user.orgName, user.hospitalCode, bed.patientCode, token);
-              assignmentApi.deactivateDevices(user.orgName, user.hospitalCode, bed.patientCode, token).catch(() => {});
+              await bedApi.discharge(user.orgName, user.careSiteCode, bed.bedCode, token);
+              await admissionApi.close(user.orgName, user.careSiteCode, bed.patientCode, token);
+              assignmentApi.deactivateDevices(user.orgName, user.careSiteCode, bed.patientCode, token).catch(() => {});
               Alert.alert(t('common.done'), t('actions.patient_discharged'), [{ text: t('common.ok'), onPress: handleClose }]);
             } catch (e) { Alert.alert(t('common.error'), e.message || t('common.failed')); }
             finally { setSaving(false); }
@@ -88,7 +88,7 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
       setMode('transfer');
       setLoading(true);
       try {
-        const data = await wardApi.listAll(user.orgName, user.hospitalCode, token);
+        const data = await wardApi.listAll(user.orgName, user.careSiteCode, token);
         setItems(Array.isArray(data) ? data.filter(w => w.wardCode !== wardCode) : []);
       } catch { setItems([]); }
       finally { setLoading(false); }
@@ -102,7 +102,7 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
   const handleTransfer = async (ward) => {
     setSaving(true);
     try {
-      await bedApi.transferWard(user.orgName, user.hospitalCode, bed.bedCode, { wardCode: ward.wardCode }, token);
+      await bedApi.transferWard(user.orgName, user.careSiteCode, bed.bedCode, { wardCode: ward.wardCode }, token);
       Alert.alert(t('common.done'), t('actions.bed_transferred', { code: bed.bedCode, ward: ward.wardName }), [
         { text: t('common.ok'), onPress: handleClose },
       ]);
@@ -120,7 +120,7 @@ export const BedActionsSheet = ({ bed, wardCode, visible, onClose }) => {
     };
     setSaving(true);
     try {
-      await bedApi.updateAlarmConfig(user.orgName, user.hospitalCode, bed.bedCode, payload, token);
+      await bedApi.updateAlarmConfig(user.orgName, user.careSiteCode, bed.bedCode, payload, token);
       Alert.alert(t('common.done'), t('actions.alarm_thresholds_saved'), [{ text: t('common.ok'), onPress: handleClose }]);
     } catch (e) { Alert.alert(t('common.error'), e.message || t('common.failed')); }
     finally { setSaving(false); }

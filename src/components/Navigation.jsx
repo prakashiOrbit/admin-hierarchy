@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeContext';
-import { IconBack, IconDashboard, IconGlobe, IconPlus, IconSettings, IconUsers, IconShield, IconChart, IconHospital, IconBell, IconUser } from '../icons';
+import { IconBack, IconDashboard, IconGlobe, IconPlus, IconSettings, IconUsers, IconShield, IconChart, IconCareSite, IconBell, IconUser } from '../icons';
 
 // --- Top Bar ---
 export const TopBar = ({ title, subtitle, onLeadingPress, leading, onNotificationPress, onProfilePress }) => {

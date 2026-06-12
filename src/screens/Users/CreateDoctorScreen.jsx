@@ -50,7 +50,7 @@ export const CreateDoctorScreen = ({ onCancel, onSuccess }) => {
   const isFormValid = form.doctorCode && form.firstName && form.lastName && form.myContact.email;
 
   const handleCreate = async () => {
-    if (!isFormValid || !user?.orgName || !user?.hospitalCode) return;
+    if (!isFormValid || !user?.orgName || !user?.careSiteCode) return;
     const doctorSeconds = parseInt(doctorJwtHours, 10) * 3600;
     if (!doctorJwtHours || isNaN(doctorSeconds) || doctorSeconds <= 0) {
       Alert.alert(t('common.invalid_input'), t('security_policy.err_invalid_duration'));
@@ -63,8 +63,8 @@ export const CreateDoctorScreen = ({ onCancel, onSuccess }) => {
       doctorExperience: parseFloat(form.doctorExperience) || 0,
     };
     try {
-      await doctorApi.create(user.orgName, user.hospitalCode, payload, token);
-      await organisationApi.updateHospitalJwtValidity(user.orgName, user.hospitalCode, { doctorJwtValiditySeconds: doctorSeconds }, token);
+      await doctorApi.create(user.orgName, user.careSiteCode, payload, token);
+      await organisationApi.updateCareSiteJwtValidity(user.orgName, user.careSiteCode, { doctorJwtValiditySeconds: doctorSeconds }, token);
       Alert.alert(t('messages.success'), t('messages.doctor_onboarded', { firstName: form.firstName, lastName: form.lastName }), [
         { text: t('actions.ok'), onPress: onSuccess || onCancel },
       ]);
@@ -81,7 +81,7 @@ export const CreateDoctorScreen = ({ onCancel, onSuccess }) => {
         <View style={styles.banner}>
           <IconStethoscope size={24} color={T.accent} />
           <Text style={styles.bannerText}>
-            {t('messages.onboard_doctor_banner', { hospitalCode: user?.hospitalCode })}
+            {t('messages.onboard_doctor_banner', { careSiteCode: user?.careSiteCode })}
           </Text>
         </View>
 

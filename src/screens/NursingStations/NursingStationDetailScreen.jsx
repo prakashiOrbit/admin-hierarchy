@@ -28,20 +28,20 @@ export const NursingStationDetailScreen = ({ station: initialStation, onBack }) 
     setMode('assign');
     setLoadingWards(true);
     try {
-      const res = await wardApi.listAll(user.orgName, user.hospitalCode, token);
+      const res = await wardApi.listAll(user.orgName, user.careSiteCode, token);
       setWards(Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []));
     } catch {
       setWards([]);
     } finally {
       setLoadingWards(false);
     }
-  }, [user?.orgName, user?.hospitalCode, token]);
+  }, [user?.orgName, user?.careSiteCode, token]);
 
   const handleAssignWard = async (ward) => {
     setSaving(true);
     try {
       await nursingStationApi.assignWard(
-        user.orgName, user.hospitalCode, ward.wardCode, station.stationNumber, token,
+        user.orgName, user.careSiteCode, ward.wardCode, station.stationNumber, token,
       );
       setStation(prev => ({ ...prev, wardCode: ward.wardCode, stationStatus: 'ASSIGNED' }));
       setMode('detail');
@@ -66,7 +66,7 @@ export const NursingStationDetailScreen = ({ station: initialStation, onBack }) 
             setSaving(true);
             try {
               await nursingStationApi.unassignWard(
-                user.orgName, user.hospitalCode, station.wardCode, station.stationNumber, token,
+                user.orgName, user.careSiteCode, station.wardCode, station.stationNumber, token,
               );
               setStation(prev => ({ ...prev, wardCode: null, stationStatus: 'ACTIVE' }));
               Alert.alert(t('alerts.success'), t('nursingstation.unassign_success', { stationNumber: station.stationNumber }));
@@ -153,11 +153,11 @@ export const NursingStationDetailScreen = ({ station: initialStation, onBack }) 
             </Card>
           </Field>
 
-          <Field label={t('ward.assigned_hospital')}>
+          <Field label={t('ward.assigned_caresite')}>
             <Card style={styles.readOnlyCard} padding={12}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <IconBuilding size={16} color={T.textFaint} />
-                <Text style={styles.readOnlyText}>{station.hospitalCode || user?.hospitalCode}</Text>
+                <Text style={styles.readOnlyText}>{station.careSiteCode || user?.careSiteCode}</Text>
               </View>
             </Card>
           </Field>

@@ -3,7 +3,7 @@ import { View, Text, Modal, TouchableOpacity, TouchableWithoutFeedback, StyleShe
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme/ThemeContext';
-import { IconUser, IconBuilding, IconHospital } from '../icons';
+import { IconUser, IconBuilding, IconCareSite } from '../icons';
 
 export const ProfileSheet = ({ visible, onClose, user }) => {
   const { theme: T } = useTheme();
@@ -14,7 +14,7 @@ export const ProfileSheet = ({ visible, onClose, user }) => {
   const rows = [
     { icon: <IconUser size={16} color={T.textDim} />, label: t('settings.username'), value: user?.userName },
     { icon: <IconBuilding size={16} color={T.textDim} />, label: t('settings.organisation'), value: user?.orgName },
-    user?.hospitalCode && { icon: <IconHospital size={16} color={T.textDim} />, label: t('settings.hospital_code'), value: user.hospitalCode },
+    user?.careSiteCode && { icon: <IconCareSite size={16} color={T.textDim} />, label: t('settings.caresite_code'), value: user.careSiteCode },
   ].filter(Boolean);
 
   return (

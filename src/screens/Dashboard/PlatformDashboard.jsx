@@ -15,7 +15,7 @@ import { organisationApi, summaryApi, getApiErrorMessage } from '../../services/
 import { NotificationSheet } from '../../components/NotificationSheet';
 
 import { 
-  IconGlobe, IconHospital, IconUsers, IconPulse, IconPlus, 
+  IconGlobe, IconCareSite, IconUsers, IconPulse, IconPlus, 
   IconAlert, IconUser, IconMenu, IconSettings, IconDashboard, IconBack 
 } from '../../icons';
 
@@ -137,7 +137,7 @@ const HomeContent = ({ onNavigate }) => {
         } else if (orgList.length > 0) {
           setSummary({
             stats: {
-              totalHospitals: 0,
+              totalCareSites: 0,
               totalUsers: 0,
               totalOrganisations: orgList.length,
               totalDevices: 0
@@ -183,10 +183,10 @@ const HomeContent = ({ onNavigate }) => {
           icon={<IconGlobe />} color="#A78BFA" accent="rgba(167,139,250,.14)" 
         />
         <StatCard 
-          label="dashboard.hospitals" 
-          value={loading ? '...' : (summary?.stats?.totalHospitals ?? summary?.hospitals ?? summary?.hospCount ?? '0').toString()} 
+          label="dashboard.careSites" 
+          value={loading ? '...' : (summary?.stats?.totalCareSites ?? summary?.careSites ?? summary?.careSiteCount ?? '0').toString()} 
           delta={0} 
-          icon={<IconHospital />} color={T.accent} 
+          icon={<IconCareSite />} color={T.accent} 
         />
         <StatCard 
           label="dashboard.users" 

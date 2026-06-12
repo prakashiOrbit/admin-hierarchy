@@ -23,14 +23,14 @@ export const DoctorDetailScreen = ({ doctorId: doctorCode, onBack, onAssign, onE
   const [showBulkAssign, setShowBulkAssign] = useState(false);
 
   useEffect(() => {
-    if (!doctorCode || !user?.orgName || !user?.hospitalCode) return;
+    if (!doctorCode || !user?.orgName || !user?.careSiteCode) return;
     let cancelled = false;
-    doctorApi.getDetail(user.orgName, user.hospitalCode, doctorCode, token)
+    doctorApi.getDetail(user.orgName, user.careSiteCode, doctorCode, token)
       .then(data => { if (!cancelled) setDoctor(data); })
       .catch(e => { if (!cancelled) setError(e.message); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [doctorCode, user?.orgName, user?.hospitalCode, token]);
+  }, [doctorCode, user?.orgName, user?.careSiteCode, token]);
 
   if (loading) {
     return <View style={styles.center}><ActivityIndicator color={T.accent} /></View>;

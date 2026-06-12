@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }) => {
     const userProfile = {
       userName: userData.userName,
       orgName: userData.orgName,
-      hospitalCode: userData.hospitalCode,
+      careSiteCode: userData.careSiteCode,
       userData: userData.userData,
       roles: jwtPayload.roles || userData.userData?.userRoles || [],
       preferredLocale: userData.preferredLocale || userData.userData?.preferredLocale || jwtPayload.preferred_locale,

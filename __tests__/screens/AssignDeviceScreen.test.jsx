@@ -33,7 +33,7 @@ jest.mock('../../src/theme/ThemeContext', () => ({
 
 jest.mock('../../src/context/AuthContext', () => ({
   useAuth: () => ({
-    user: { userName: 'admin', orgName: 'APOAP1', hospitalCode: 'CLV' },
+    user: { userName: 'admin', orgName: 'APOAP1', careSiteCode: 'CLV' },
     token: 'test-token',
   }),
 }));

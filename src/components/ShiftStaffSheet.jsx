@@ -29,12 +29,12 @@ export const ShiftStaffSheet = ({ shiftCode, shiftName, staffType, visible, onCl
     setLoading(true);
     try {
       const data = isDoctor
-        ? await doctorApi.listAll(user.orgName, user.hospitalCode, token)
-        : await nurseApi.listAll(user.orgName, user.hospitalCode, token);
+        ? await doctorApi.listAll(user.orgName, user.careSiteCode, token)
+        : await nurseApi.listAll(user.orgName, user.careSiteCode, token);
       setStaff(Array.isArray(data) ? data : []);
     } catch { setStaff([]); }
     finally { setLoading(false); }
-  }, [user?.orgName, user?.hospitalCode, token, isDoctor]);
+  }, [user?.orgName, user?.careSiteCode, token, isDoctor]);
 
   const handleAssign = async (person) => {
     const code = isDoctor ? person.doctorCode : person.nurseCode;
@@ -44,9 +44,9 @@ export const ShiftStaffSheet = ({ shiftCode, shiftName, staffType, visible, onCl
       : { nurseCode: code, shiftCode };
     try {
       if (isDoctor) {
-        await shiftApi.assignDoctor(user.orgName, user.hospitalCode, payload, token);
+        await shiftApi.assignDoctor(user.orgName, user.careSiteCode, payload, token);
       } else {
-        await shiftApi.assignNurse(user.orgName, user.hospitalCode, payload, token);
+        await shiftApi.assignNurse(user.orgName, user.careSiteCode, payload, token);
       }
       Alert.alert(t('common.success'), t('shifts.staff_assigned', { name: `${person.firstName} ${person.lastName}`, shift: shiftName || shiftCode }));
       onAssigned?.();

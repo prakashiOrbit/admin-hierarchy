@@ -49,7 +49,7 @@ export const PatientInfoSheet = ({ patientCode, existingInfos, visible, onClose,
     setSaving(true);
     try {
       await patientApi.addInfo(
-        user.orgName, user.hospitalCode, patientCode,
+        user.orgName, user.careSiteCode, patientCode,
         { infoType: selectedType, infoData: JSON.stringify(fields) },
         token
       );

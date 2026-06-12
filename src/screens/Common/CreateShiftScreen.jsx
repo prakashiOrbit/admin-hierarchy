@@ -28,8 +28,8 @@ export const CreateShiftScreen = ({ onCancel, onSuccess }) => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!user?.orgName || !user?.hospitalCode) return;
-    wardApi.listAll(user.orgName, user.hospitalCode, token)
+    if (!user?.orgName || !user?.careSiteCode) return;
+    wardApi.listAll(user.orgName, user.careSiteCode, token)
       .then(setWards)
       .catch(() => {})
       .finally(() => setWardsLoading(false));
@@ -41,7 +41,7 @@ export const CreateShiftScreen = ({ onCancel, onSuccess }) => {
   const isFormValid = form.shiftCode && form.shiftName && form.wardCode;
 
   const handleCreate = async () => {
-    if (!isFormValid || !user?.orgName || !user?.hospitalCode) return;
+    if (!isFormValid || !user?.orgName || !user?.careSiteCode) return;
     setSaving(true);
     const payload = {
       shiftCode: form.shiftCode,
@@ -52,7 +52,7 @@ export const CreateShiftScreen = ({ onCancel, onSuccess }) => {
       status: form.status,
     };
     try {
-      await shiftApi.create(user.orgName, user.hospitalCode, payload, token);
+      await shiftApi.create(user.orgName, user.careSiteCode, payload, token);
       Alert.alert(t('common.success'), t('alerts.shift_created', { code: form.shiftCode }), [
         { text: t('common.done'), onPress: onSuccess || onCancel },
       ]);
@@ -69,7 +69,7 @@ export const CreateShiftScreen = ({ onCancel, onSuccess }) => {
         <View style={styles.banner}>
           <IconClock size={20} color={T.accent} />
           <Text style={styles.bannerText}>
-            {t('shift.create_banner', { hospital: user?.hospitalCode })}
+            {t('shift.create_banner', { careSite: user?.careSiteCode })}
           </Text>
         </View>
 

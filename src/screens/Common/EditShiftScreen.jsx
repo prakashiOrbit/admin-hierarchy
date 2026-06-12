@@ -31,12 +31,12 @@ export const EditShiftScreen = ({ shift, onCancel, onSave, onDelete }) => {
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    if (!user?.orgName || !user?.hospitalCode) return;
-    wardApi.listAll(user.orgName, user.hospitalCode, token)
+    if (!user?.orgName || !user?.careSiteCode) return;
+    wardApi.listAll(user.orgName, user.careSiteCode, token)
       .then(data => setWards(Array.isArray(data) ? data : []))
       .catch(() => {})
       .finally(() => setWardsLoading(false));
-  }, [user?.orgName, user?.hospitalCode, token]);
+  }, [user?.orgName, user?.careSiteCode, token]);
 
   const set = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
@@ -53,7 +53,7 @@ export const EditShiftScreen = ({ shift, onCancel, onSave, onDelete }) => {
       status: form.status,
     };
     try {
-      await shiftApi.update(user.orgName, user.hospitalCode, shift.shiftCode, payload, token);
+      await shiftApi.update(user.orgName, user.careSiteCode, shift.shiftCode, payload, token);
       Alert.alert(t('common.saved'), t('alerts.shift_updated'), [{ text: t('common.done'), onPress: () => onSave?.() }]);
     } catch (e) {
       Alert.alert(t('common.error'), e.message || t('alerts.shift_update_failed'));
@@ -73,7 +73,7 @@ export const EditShiftScreen = ({ shift, onCancel, onSave, onDelete }) => {
           onPress: async () => {
             setDeleting(true);
             try {
-              await shiftApi.delete(user.orgName, user.hospitalCode, shift.shiftCode, token);
+              await shiftApi.delete(user.orgName, user.careSiteCode, shift.shiftCode, token);
               onDelete?.();
             } catch (e) {
               Alert.alert(t('common.error'), e.message || t('alerts.shift_delete_failed'));

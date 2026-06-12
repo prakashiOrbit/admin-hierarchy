@@ -25,16 +25,16 @@ export const UsersScreen = ({ onSelectUser, onSelectStaff }) => {
     if (showLoading) setLoading(true);
     setError(null);
     try {
-      const [adminsRes, ownersRes, hospAdminsRes, doctorsRes, nursesRes] = await Promise.all([
+      const [adminsRes, ownersRes, careSiteAdminsRes, doctorsRes, nursesRes] = await Promise.all([
         userApi.listOrgAdmins(user.orgName, token, { signal: options.signal }).catch(err => {
           if (err?.code === 'ABORTED') throw err;
           return [];
         }),
-        userApi.listHospOwners(user.orgName, token, { signal: options.signal }).catch(err => {
+        userApi.listCareSiteOwners(user.orgName, token, { signal: options.signal }).catch(err => {
           if (err?.code === 'ABORTED') throw err;
           return [];
         }),
-        userApi.listAllHospAdmins(user.orgName, token, { signal: options.signal }).catch(err => {
+        userApi.listAllCareSiteAdmins(user.orgName, token, { signal: options.signal }).catch(err => {
           if (err?.code === 'ABORTED') throw err;
           return [];
         }),
@@ -51,14 +51,14 @@ export const UsersScreen = ({ onSelectUser, onSelectStaff }) => {
       const getList = (res) => Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
       const admins = getList(adminsRes);
       const owners = getList(ownersRes);
-      const hospAdmins = getList(hospAdminsRes);
+      const careSiteAdmins = getList(careSiteAdminsRes);
       const doctors = getList(doctorsRes);
       const nurses = getList(nursesRes);
 
       const allUsers = [
         ...admins.map(u => ({ ...u, role: 'ORG_ADMIN', email: u.contactEmail })),
-        ...owners.map(u => ({ ...u, role: 'HOSP_OWNER', email: u.contactEmail })),
-        ...hospAdmins.map(u => ({ ...u, role: 'HOSP_ADMIN', email: u.contactEmail })),
+        ...owners.map(u => ({ ...u, role: 'CARESITE_OWNER', email: u.contactEmail })),
+        ...careSiteAdmins.map(u => ({ ...u, role: 'CARESITE_ADMIN', email: u.contactEmail })),
         ...doctors.map(d => ({ ...d, role: 'DOCTOR', userName: `${d.firstName} ${d.lastName}`, email: d.myContact?.email })),
         ...nurses.map(n => ({ ...n, role: 'NURSE', userName: `${n.firstName} ${n.lastName}`, email: n.myContact?.email })),
       ];
@@ -110,8 +110,8 @@ export const UsersScreen = ({ onSelectUser, onSelectStaff }) => {
   const tabs = [
     { id: 'all', label: t('users.all_types', 'All'), count: users.length },
     { id: 'ORG_ADMIN', label: t('dashboard.org_admins', 'Org Admins'), count: users.filter(u => getRole(u) === 'ORG_ADMIN').length },
-    { id: 'HOSP_OWNER', label: t('dashboard.hosp_owner', 'Hosp Owners'), count: users.filter(u => getRole(u) === 'HOSP_OWNER').length },
-    { id: 'HOSP_ADMIN', label: t('dashboard.hosp_administrator', 'Hosp Admins'), count: users.filter(u => getRole(u) === 'HOSP_ADMIN').length },
+    { id: 'CARESITE_OWNER', label: t('dashboard.caresite_owner', 'CareSite Owners'), count: users.filter(u => getRole(u) === 'CARESITE_OWNER').length },
+    { id: 'CARESITE_ADMIN', label: t('dashboard.caresite_administrator', 'CareSite Admins'), count: users.filter(u => getRole(u) === 'CARESITE_ADMIN').length },
     { id: 'DOCTOR', label: t('dashboard.medical_staff', 'Clinical'), count: users.filter(u => ['DOCTOR', 'NURSE'].includes(getRole(u))).length },
   ];
 
@@ -188,8 +188,8 @@ export const UsersScreen = ({ onSelectUser, onSelectStaff }) => {
                       </Text>
                       <View style={styles.badgesRow}>
                         <RoleBadge role={role} />
-                        {u.hospitalCode && (
-                          <Text style={styles.hospitalText}>{u.hospitalCode}</Text>
+                        {u.careSiteCode && (
+                          <Text style={styles.careSiteText}>{u.careSiteCode}</Text>
                         )}
                       </View>
                     </View>
@@ -261,7 +261,7 @@ const createStyles = (T) => StyleSheet.create({
     gap: 8,
     marginTop: 6,
   },
-  hospitalText: {
+  careSiteText: {
     fontSize: 10.5,
     color: T.textDim,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',

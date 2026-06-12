@@ -19,7 +19,7 @@ const LOCALES = [
   { code: 'rm', label: 'Rumantsch' },
 ];
 
-const HOSP_ADMIN_PERMITS = [
+const CARESITE_ADMIN_PERMITS = [
   'permit.admin.bed', 'permit.admin.device', 'permit.admin.doctor',
   'permit.admin.gateway', 'permit.admin.nurse', 'permit.admin.nursingstation', 'permit.admin.patient',
   'permit.admin.roles', 'permit.admin.shift', 'permit.admin.ward',
@@ -31,19 +31,19 @@ const HOSP_ADMIN_PERMITS = [
   'permit.get', 'permit.set'
 ];
 
-export const CreateHospAdminScreen = ({ onCancel, hospitalCode: propHospCode }) => {
+export const CreateCareSiteAdminScreen = ({ onCancel, careSiteCode: propCareSiteCode }) => {
   const { t, i18n } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
   const styles = createStyles(T);
-  const effectiveHospCode = propHospCode || user?.hospitalCode;
+  const effectiveCareSiteCode = propCareSiteCode || user?.careSiteCode;
 
   const [loading, setLoading] = useState(false);
   const [showLocalePicker, setShowLocalePicker] = useState(false);
   const [adminJwtHours, setAdminJwtHours] = useState('3');
   const [permMode, setPermMode] = useState('full');
   const [assignedRole, setAssignedRole] = useState(null);
-  const [customPermissions, setCustomPermissions] = useState([...HOSP_ADMIN_PERMITS]);
+  const [customPermissions, setCustomPermissions] = useState([...CARESITE_ADMIN_PERMITS]);
   const [form, setForm] = useState({
     userName: '',
     firstName: '',
@@ -85,9 +85,9 @@ export const CreateHospAdminScreen = ({ onCancel, hospitalCode: propHospCode }) 
         ...(permMode === 'template' && assignedRole ? { assignedRole } : {}),
         ...((permMode === 'custom' || permMode === 'full') && customPermissions ? { customPermissions } : {}),
       };
-      await userApi.createHospAdmin(user.orgName, effectiveHospCode, payload, token);
-      await organisationApi.updateHospitalJwtValidity(user.orgName, effectiveHospCode, { adminJwtValiditySeconds: adminSeconds }, token);
-      Alert.alert(t('alerts.success'), t('alerts.hosp_admin_created'), [
+      await userApi.createCareSiteAdmin(user.orgName, effectiveCareSiteCode, payload, token);
+      await organisationApi.updateCareSiteJwtValidity(user.orgName, effectiveCareSiteCode, { adminJwtValiditySeconds: adminSeconds }, token);
+      Alert.alert(t('alerts.success'), t('alerts.caresite_admin_created'), [
         { text: t('actions.ok'), onPress: onCancel }
       ]);
     } catch (err) {
@@ -104,15 +104,15 @@ export const CreateHospAdminScreen = ({ onCancel, hospitalCode: propHospCode }) 
         <View style={styles.banner}>
           <IconShield color={T.accent} size={20} />
           <Text style={styles.bannerText}>
-            {t('hosp_admin.invite_banner', { hospitalCode: effectiveHospCode })}
+            {t('caresite_admin.invite_banner', { careSiteCode: effectiveCareSiteCode })}
           </Text>
         </View>
 
         {/* User Identity Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('hosp_admin.identity_section')}</Text>
+          <Text style={styles.sectionTitle}>{t('caresite_admin.identity_section')}</Text>
 
-          <Field label={t('hosp_admin.username')} required>
+          <Field label={t('caresite_admin.username')} required>
             <TextInput
               value={form.userName}
               onChangeText={(v) => updateForm('userName', v.toLowerCase())}
@@ -123,7 +123,7 @@ export const CreateHospAdminScreen = ({ onCancel, hospitalCode: propHospCode }) 
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label={t('hosp_admin.first_name')} required>
+              <Field label={t('caresite_admin.first_name')} required>
                 <TextInput
                   value={form.firstName}
                   onChangeText={(v) => updateForm('firstName', v)}
@@ -132,7 +132,7 @@ export const CreateHospAdminScreen = ({ onCancel, hospitalCode: propHospCode }) 
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label={t('hosp_admin.last_name')} required>
+              <Field label={t('caresite_admin.last_name')} required>
                 <TextInput
                   value={form.lastName}
                   onChangeText={(v) => updateForm('lastName', v)}
@@ -142,7 +142,7 @@ export const CreateHospAdminScreen = ({ onCancel, hospitalCode: propHospCode }) 
             </View>
           </View>
 
-          <Field label={t('hosp_admin.organization')}>
+          <Field label={t('caresite_admin.organization')}>
             <Card style={styles.disabledCard}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <IconBuilding size={16} color={T.textFaint} />
@@ -154,9 +154,9 @@ export const CreateHospAdminScreen = ({ onCancel, hospitalCode: propHospCode }) 
 
         {/* Contact Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('hosp_admin.contact_section')}</Text>
+          <Text style={styles.sectionTitle}>{t('caresite_admin.contact_section')}</Text>
 
-          <Field label={t('hosp_admin.contact_email')} required>
+          <Field label={t('caresite_admin.contact_email')} required>
             <TextInput
               value={form.contactEmail}
               onChangeText={(v) => updateForm('contactEmail', v.toLowerCase())}
@@ -186,7 +186,7 @@ export const CreateHospAdminScreen = ({ onCancel, hospitalCode: propHospCode }) 
             mode={permMode}
             assignedRole={assignedRole}
             customPermissions={customPermissions}
-            availablePermits={HOSP_ADMIN_PERMITS}
+            availablePermits={CARESITE_ADMIN_PERMITS}
             onModeChange={setPermMode}
 
             onAssignedRoleChange={setAssignedRole}
@@ -198,7 +198,7 @@ export const CreateHospAdminScreen = ({ onCancel, hospitalCode: propHospCode }) 
 
         <View style={styles.infoBox}>
           <Text style={styles.infoText}>
-            {t('hosp_admin.info_text', { hospitalCode: effectiveHospCode })}
+            {t('caresite_admin.info_text', { careSiteCode: effectiveCareSiteCode })}
           </Text>
         </View>
 

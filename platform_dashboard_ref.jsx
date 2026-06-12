@@ -17,7 +17,7 @@ function PlatformDashboard({ go }) {
       {/* Stat grid */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         }    label="Organisations" value="57"    delta={4}  spark={SPARKS.orgs}      sparkColor="#A78BFA" accent="rgba(167,139,250,.14)"/>
-        } label="Hospitals"     value="231"   delta={5}  spark={SPARKS.hospitals} sparkColor="#3B82F6"/>
+        } label="CareSites"     value="231"   delta={5}  spark={SPARKS.careSites} sparkColor="#3B82F6"/>
         }    label="Users"         value="4,118" delta={3}  spark={SPARKS.users}     sparkColor="#2DD4BF" accent="rgba(45,212,191,.14)"/>
         }    label="Active devices" value="5,031" delta={1}  spark={SPARKS.active}   sparkColor="#22D3EE" accent="rgba(34,211,238,.14)"/>
       </div>
@@ -57,7 +57,7 @@ function PlatformDashboard({ go }) {
         
           {[
             { icon: , color: T.good,   text: 'Cleveland Clinic onboarded',          time: '2h ago', meta: 'cleveland-clinic' },
-            { icon: , color: T.accent, text: 'Akron General hospital created',     time: '4h ago', meta: 'CLV-AKR' },
+            { icon: , color: T.accent, text: 'Akron General careSite created',     time: '4h ago', meta: 'CLV-AKR' },
             { icon: , color: T.warn,  text: 'Gateway GW-CLV-005 flagged offline', time: '8h ago', meta: '12d uptime lost' },
             { icon: ,  color: '#A78BFA', text: 'Org owner created for Aurora Health', time: '1d ago', meta: 'p.raghunathan' },
           ].map((a, i) => (
@@ -117,7 +117,7 @@ function OrganisationsScreen({ go }) {
                 <div style={{ fontSize: 11.5, color: T.textDim, fontFamily: 'JetBrains Mono, monospace' }}>{o.name}</div>
                 <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
                   {[
-                    { i: , v: o.hospitals, l: 'hosp' },
+                    { i: , v: o.careSites, l: 'careSite' },
                     { i: ,    v: o.users,     l: 'users' },
                     { i: ,    v: o.devices,   l: 'devices' },
                   ].map((m, k) => (
@@ -160,7 +160,7 @@ function OrgDetailScreen({ orgId, go }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
         {[
-          { l: 'Hospitals', v: org.hospitals, c: T.accent },
+          { l: 'CareSites', v: org.careSites, c: T.accent },
           { l: 'Users',     v: org.users.toLocaleString(), c: '#2DD4BF' },
           { l: 'Devices',   v: org.devices.toLocaleString(), c: '#22D3EE' },
         ].map((s, i) => (
@@ -196,7 +196,7 @@ function OrgDetailScreen({ orgId, go }) {
       <div>
         
         
-          {HOSPITALS.slice(0, 4).map((h, i) => (
+          {CARESITES.slice(0, 4).map((h, i) => (
             <div key={h.id} style={{
               display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px',
               borderTop: i ? `1px solid ${T.borderSoft}` : 'none',
@@ -254,7 +254,7 @@ function CreateOrgScreen({ go, toast }) {
          set('orgType', v)} placeholder="Select type…"
           options={[
             { value: 'health-system', label: 'Health System' },
-            { value: 'hospital-group', label: 'Hospital Group' },
+            { value: 'careSite-group', label: 'CareSite Group' },
             { value: 'regional', label: 'Regional Provider' },
             { value: 'research', label: 'Research / Academic' },
           ]}/>
@@ -265,7 +265,7 @@ function CreateOrgScreen({ go, toast }) {
          set('contact', v)} placeholder="Full name" leading={}/>
       </Field>
       
-         set('email', v)} placeholder="contact@hospital.org" leading={}/>
+         set('email', v)} placeholder="contact@careSite.org" leading={}/>
       </Field>
       
          set('address', v)} placeholder="Street, city, state" leading={}/>
@@ -323,7 +323,7 @@ function CreateOrgOwnerScreen({ go, toast, presetOrgId }) {
          set('username', v)} placeholder="a.bhatt" mono/>
       </Field>
       
-         set('email', v)} placeholder="a.bhatt@hospital.org" leading={}/>
+         set('email', v)} placeholder="a.bhatt@careSite.org" leading={}/>
       </Field>
       
          set('phone', v)} placeholder="+1 555 0100" leading={}/>

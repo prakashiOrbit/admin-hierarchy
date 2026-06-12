@@ -45,7 +45,7 @@ export const EditNurseScreen = ({ nurse, onCancel, onSave }) => {
       myAddress: { city: form.city, state: form.state },
     };
     try {
-      await nurseApi.update(user.orgName, nurse.hospitalCode || user.hospitalCode, nurse.nurseCode, payload, token);
+      await nurseApi.update(user.orgName, nurse.careSiteCode || user.careSiteCode, nurse.nurseCode, payload, token);
       Alert.alert(t('common.success'), t('users.nurse_updated'), [{ text: t('common.done'), onPress: () => onSave?.() }]);
     } catch (e) {
       Alert.alert(t('common.error'), e.message || t('users.update_failed_nurse'));

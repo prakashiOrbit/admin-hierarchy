@@ -8,7 +8,7 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { LoginScreen } from './src/screens/Auth/LoginScreen';
 import { PlatformDashboard } from './src/screens/Dashboard/PlatformDashboard';
 import { OrgDashboard } from './src/screens/Dashboard/OrgDashboard';
-import { HospDashboard } from './src/screens/Dashboard/HospDashboard';
+import { CareSiteDashboard } from './src/screens/Dashboard/CareSiteDashboard';
 
 import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
@@ -86,9 +86,9 @@ function AppContent({ navigationRef }) {
           initialParams={restoredNav?.screen === 'OrgDashboard' ? restoredNav.params : undefined}
         />
         <Stack.Screen
-          name="HospDashboard"
-          component={HospDashboard}
-          initialParams={restoredNav?.screen === 'HospDashboard' ? restoredNav.params : undefined}
+          name="CareSiteDashboard"
+          component={CareSiteDashboard}
+          initialParams={restoredNav?.screen === 'CareSiteDashboard' ? restoredNav.params : undefined}
         />
       </Stack.Navigator>
     </>

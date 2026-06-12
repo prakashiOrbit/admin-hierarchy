@@ -27,11 +27,11 @@ export const BulkAssignSheet = ({ doctorCode, doctorName, visible, onClose }) =>
     setLoading(true);
     setSelected(new Set());
     try {
-      const data = await patientApi.listAll(user.orgName, user.hospitalCode, token);
+      const data = await patientApi.listAll(user.orgName, user.careSiteCode, token);
       setPatients(Array.isArray(data) ? data : []);
     } catch { setPatients([]); }
     finally { setLoading(false); }
-  }, [user?.orgName, user?.hospitalCode, token]);
+  }, [user?.orgName, user?.careSiteCode, token]);
 
   const toggle = (code) => {
     setSelected(prev => {
@@ -47,7 +47,7 @@ export const BulkAssignSheet = ({ doctorCode, doctorName, visible, onClose }) =>
     let ok = 0, fail = 0;
     for (const patientCode of selected) {
       try {
-        await assignmentApi.assign(user.orgName, user.hospitalCode, [{ doctorCode, patientCode }], token);
+        await assignmentApi.assign(user.orgName, user.careSiteCode, [{ doctorCode, patientCode }], token);
         ok++;
       } catch { fail++; }
     }

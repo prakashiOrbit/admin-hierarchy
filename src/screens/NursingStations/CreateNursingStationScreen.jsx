@@ -19,13 +19,13 @@ export const CreateNursingStationScreen = ({ onCancel, onSuccess }) => {
   const isValid = stationNumber.trim().length > 0;
 
   const handleCreate = async () => {
-    if (!isValid || !user?.orgName || !user?.hospitalCode) return;
+    if (!isValid || !user?.orgName || !user?.careSiteCode) return;
     setSaving(true);
     try {
       await nursingStationApi.create(
         user.orgName,
-        user.hospitalCode,
-        { stationNumber: stationNumber.trim(), hospitalCode: user.hospitalCode },
+        user.careSiteCode,
+        { stationNumber: stationNumber.trim(), careSiteCode: user.careSiteCode },
         token,
       );
       Alert.alert(
@@ -46,7 +46,7 @@ export const CreateNursingStationScreen = ({ onCancel, onSuccess }) => {
         <View style={styles.banner}>
           <IconBed size={24} color={T.accent} />
           <Text style={styles.bannerText}>
-            {t('nursingstation.create_banner', { hospitalCode: user?.hospitalCode })}
+            {t('nursingstation.create_banner', { careSiteCode: user?.careSiteCode })}
           </Text>
         </View>
 
@@ -62,11 +62,11 @@ export const CreateNursingStationScreen = ({ onCancel, onSuccess }) => {
             />
           </Field>
 
-          <Field label={t('ward.assigned_hospital')}>
+          <Field label={t('ward.assigned_caresite')}>
             <Card style={styles.readOnlyCard} padding={12}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <IconBuilding size={16} color={T.textFaint} />
-                <Text style={styles.readOnlyText}>{user?.hospitalCode}</Text>
+                <Text style={styles.readOnlyText}>{user?.careSiteCode}</Text>
               </View>
             </Card>
           </Field>

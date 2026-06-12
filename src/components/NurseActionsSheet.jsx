@@ -35,38 +35,38 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
   const loadShifts = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await shiftApi.listAll(user.orgName, user.hospitalCode, token);
+      const data = await shiftApi.listAll(user.orgName, user.careSiteCode, token);
       setShifts(Array.isArray(data) ? data : []);
     } catch { setShifts([]); }
     finally { setLoading(false); }
-  }, [user?.orgName, user?.hospitalCode, token]);
+  }, [user?.orgName, user?.careSiteCode, token]);
 
   const loadWards = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await wardApi.listAll(user.orgName, user.hospitalCode, token);
+      const data = await wardApi.listAll(user.orgName, user.careSiteCode, token);
       setWards(Array.isArray(data) ? data : []);
     } catch { setWards([]); }
     finally { setLoading(false); }
-  }, [user?.orgName, user?.hospitalCode, token]);
+  }, [user?.orgName, user?.careSiteCode, token]);
 
   const loadBeds = useCallback(async (wardCode) => {
     setLoading(true);
     try {
-      const data = await bedApi.getAllBedsByWard(user.orgName, user.hospitalCode, wardCode, token);
+      const data = await bedApi.getAllBedsByWard(user.orgName, user.careSiteCode, wardCode, token);
       setBeds(Array.isArray(data) ? data : []);
     } catch { setBeds([]); }
     finally { setLoading(false); }
-  }, [user?.orgName, user?.hospitalCode, token]);
+  }, [user?.orgName, user?.careSiteCode, token]);
 
   const loadPatients = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await patientApi.listAll(user.orgName, user.hospitalCode, token);
+      const data = await patientApi.listAll(user.orgName, user.careSiteCode, token);
       setPatients(Array.isArray(data) ? data : []);
     } catch { setPatients([]); }
     finally { setLoading(false); }
-  }, [user?.orgName, user?.hospitalCode, token]);
+  }, [user?.orgName, user?.careSiteCode, token]);
 
   const handleClose = () => {
     setMode('main');
@@ -85,7 +85,7 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
   const handleAssignBed = async (bed) => {
     setSaving(bed.bedCode);
     try {
-      await nurseApi.assignBed(user.orgName, user.hospitalCode, {
+      await nurseApi.assignBed(user.orgName, user.careSiteCode, {
         nurseCode: nurse.nurseCode,
         shiftCode: selectedShift.shiftCode,
         wardCode: selectedWard.wardCode,
@@ -109,7 +109,7 @@ export const NurseActionsSheet = ({ nurse, visible, onClose }) => {
   const handleAdmitPatient = async (bed) => {
     setSaving(bed.bedCode);
     try {
-      await nurseApi.admitPatient(user.orgName, user.hospitalCode, {
+      await nurseApi.admitPatient(user.orgName, user.careSiteCode, {
         nurseCode: nurse.nurseCode,
         patientCode: selectedPatient.patientCode,
         wardCode: selectedWard.wardCode,

@@ -31,7 +31,7 @@ export const CreateOrgOwnerScreen = ({ onCancel, presetOrgName }) => {
       const payload = {
         orgName: presetOrgName,
         businessName: form.businessName.trim(),
-        orgType: 'HOSPITAL',
+        orgType: 'CARESITE',
         myContact: {
           name: form.contactName.trim(),
           email: form.contactEmail.trim().toLowerCase(),

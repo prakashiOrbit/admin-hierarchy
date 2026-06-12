@@ -22,14 +22,14 @@ export const NurseDetailScreen = ({ nurseId: nurseCode, onBack, onEdit }) => {
   const [showActions, setShowActions] = useState(false);
 
   useEffect(() => {
-    if (!nurseCode || !user?.orgName || !user?.hospitalCode) return;
+    if (!nurseCode || !user?.orgName || !user?.careSiteCode) return;
     let cancelled = false;
-    nurseApi.getDetail(user.orgName, user.hospitalCode, nurseCode, token)
+    nurseApi.getDetail(user.orgName, user.careSiteCode, nurseCode, token)
       .then(data => { if (!cancelled) setNurse(data); })
       .catch(e => { if (!cancelled) setError(e.message); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [nurseCode, user?.orgName, user?.hospitalCode, token]);
+  }, [nurseCode, user?.orgName, user?.careSiteCode, token]);
 
   if (loading) {
     return <View style={styles.center}><ActivityIndicator color={T.accent} /></View>;

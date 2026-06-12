@@ -20,8 +20,8 @@ const LOCALES = [
 ];
 
 const ORG_ADMIN_PERMITS = [
-  'permit.admin.users', 'permit.admin.roles', 'permit.admin.hospital', 'permit.admin.organisation',
-  'permit.create.user', 'permit.create.role', 'permit.create.hospital',
+  'permit.admin.users', 'permit.admin.roles', 'permit.admin.caresite', 'permit.admin.organisation',
+  'permit.create.user', 'permit.create.role', 'permit.create.caresite',
   'permit.create.devicetype', 'permit.update.devicetype', 'permit.list.devicetype', 'permit.search.devicetype',
   'permit.create.devconfigorg', 'permit.get', 'permit.set'
 ];

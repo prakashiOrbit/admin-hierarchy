@@ -72,13 +72,13 @@ const STORED_SESSION = {
   refreshToken: 'rt-stored',
   token: 'old-jwt',
   userProfile: {
-    userName: 'nurse@hosp.com',
+    userName: 'nurse@careSite.com',
     orgName: 'APOAP1',
-    hospitalCode: 'CLV',
+    careSiteCode: 'CLV',
     userData: null,
     preferredLocale: 'en',
   },
-  navTarget: 'HospDashboard',
+  navTarget: 'CareSiteDashboard',
   navParams: { role: 'NURSE' },
 };
 
@@ -154,7 +154,7 @@ describe('session restore on mount', () => {
     expect(result.current.user).toEqual(STORED_SESSION.userProfile);
     expect(result.current.token).toBe('fresh-jwt');
     expect(result.current.restoredNav).toEqual({
-      screen: 'HospDashboard',
+      screen: 'CareSiteDashboard',
       params: { role: 'NURSE' },
     });
     expect(result.current.isRestoringSession).toBe(false);
@@ -212,12 +212,12 @@ describe('session restore on mount', () => {
 
 describe('login()', () => {
   const LOGIN_RESPONSE = {
-    userName: 'admin@hosp.com',
+    userName: 'admin@careSite.com',
     orgName: 'APOAP1',
-    hospitalCode: 'CLV',
+    careSiteCode: 'CLV',
     token: 'new-access-jwt',
     refreshToken: 'new-refresh-token',
-    userData: { roles: ['HOSP_ADMIN'] },
+    userData: { roles: ['CARESITE_ADMIN'] },
   };
 
   beforeEach(() => {
@@ -234,9 +234,9 @@ describe('login()', () => {
 
     expect(result.current.token).toBe('new-access-jwt');
     expect(result.current.user).toMatchObject({
-      userName: 'admin@hosp.com',
+      userName: 'admin@careSite.com',
       orgName: 'APOAP1',
-      hospitalCode: 'CLV',
+      careSiteCode: 'CLV',
     });
   });
 
@@ -256,8 +256,8 @@ describe('login()', () => {
     act(() => {
       result.current.login(LOGIN_RESPONSE, {
         keepSignedIn: true,
-        navTarget: 'HospDashboard',
-        navParams: { role: 'HOSP_ADMIN' },
+        navTarget: 'CareSiteDashboard',
+        navParams: { role: 'CARESITE_ADMIN' },
       });
     });
 
@@ -271,9 +271,9 @@ describe('login()', () => {
     )[1]);
     expect(stored.token).toBe('new-access-jwt');
     expect(stored.refreshToken).toBe('new-refresh-token');
-    expect(stored.navTarget).toBe('HospDashboard');
-    expect(stored.navParams).toEqual({ role: 'HOSP_ADMIN' });
-    expect(stored.userProfile.userName).toBe('admin@hosp.com');
+    expect(stored.navTarget).toBe('CareSiteDashboard');
+    expect(stored.navParams).toEqual({ role: 'CARESITE_ADMIN' });
+    expect(stored.userProfile.userName).toBe('admin@careSite.com');
   });
 
   it('does NOT persist when keepSignedIn=false (default)', async () => {
@@ -295,7 +295,7 @@ describe('login()', () => {
     act(() => {
       result.current.login(
         { ...LOGIN_RESPONSE, refreshToken: undefined },
-        { keepSignedIn: true, navTarget: 'HospDashboard', navParams: {} },
+        { keepSignedIn: true, navTarget: 'CareSiteDashboard', navParams: {} },
       );
     });
 
@@ -310,7 +310,7 @@ describe('login()', () => {
 
 describe('logout()', () => {
   const LOGIN_RESPONSE = {
-    userName: 'admin@hosp.com',
+    userName: 'admin@careSite.com',
     orgName: 'APOAP1',
     token: 'jwt',
     refreshToken: 'rt',

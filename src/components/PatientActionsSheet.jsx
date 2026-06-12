@@ -51,9 +51,9 @@ export const PatientActionsSheet = ({ patient, visible, onClose }) => {
           onPress: async () => {
             setSaving(true);
             try {
-              await patientApi.discharge(user.orgName, user.hospitalCode, patient.patientCode, token);
-              await admissionApi.close(user.orgName, user.hospitalCode, patient.patientCode, token);
-              assignmentApi.deactivateDevices(user.orgName, user.hospitalCode, patient.patientCode, token).catch(() => {});
+              await patientApi.discharge(user.orgName, user.careSiteCode, patient.patientCode, token);
+              await admissionApi.close(user.orgName, user.careSiteCode, patient.patientCode, token);
+              assignmentApi.deactivateDevices(user.orgName, user.careSiteCode, patient.patientCode, token).catch(() => {});
               Alert.alert(t('common.done'), t('actions.patient_discharged'), [{ text: t('common.ok'), onPress: handleClose }]);
             } catch (e) { Alert.alert(t('common.error'), e.message || t('common.failed')); }
             finally { setSaving(false); }
@@ -67,7 +67,7 @@ export const PatientActionsSheet = ({ patient, visible, onClose }) => {
     setMode('transfer');
     setLoading(true);
     try {
-      const data = await wardApi.listAll(user.orgName, user.hospitalCode, token);
+      const data = await wardApi.listAll(user.orgName, user.careSiteCode, token);
       setWards(Array.isArray(data) ? data : []);
     } catch { setWards([]); }
     finally { setLoading(false); }
@@ -76,7 +76,7 @@ export const PatientActionsSheet = ({ patient, visible, onClose }) => {
   const handleTransfer = async (ward) => {
     setSaving(true);
     try {
-      await patientApi.transfer(user.orgName, user.hospitalCode, patient.patientCode, { wardCode: ward.wardCode }, token);
+      await patientApi.transfer(user.orgName, user.careSiteCode, patient.patientCode, { wardCode: ward.wardCode }, token);
       Alert.alert(t('common.done'), t('actions.patient_transferred_msg', { name: `${patient.firstName} ${patient.lastName}`, ward: ward.wardName }), [
         { text: t('common.ok'), onPress: handleClose },
       ]);
@@ -88,7 +88,7 @@ export const PatientActionsSheet = ({ patient, visible, onClose }) => {
     setSaving(true);
     try {
       const res = await patientApi.anonymize(
-        user.orgName, user.hospitalCode, patient.patientCode, token,
+        user.orgName, user.careSiteCode, patient.patientCode, token,
         gdprRef.trim() || undefined,
       );
       const requestId = res?.data?.requestId;

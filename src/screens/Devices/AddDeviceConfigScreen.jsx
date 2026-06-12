@@ -39,10 +39,10 @@ export const AddDeviceConfigScreen = ({ device, onCancel, onSuccess }) => {
   };
 
   const handleSubmit = async () => {
-    if (!isValid || !user?.orgName || !user?.hospitalCode) return;
+    if (!isValid || !user?.orgName || !user?.careSiteCode) return;
     setSaving(true);
     try {
-      await deviceApi.addConfig(user.orgName, user.hospitalCode, device.deviceCode, buildPayload(), token);
+      await deviceApi.addConfig(user.orgName, user.careSiteCode, device.deviceCode, buildPayload(), token);
       Alert.alert(
         t('common.success'),
         t('device.config_saved', { code: device.deviceCode }),

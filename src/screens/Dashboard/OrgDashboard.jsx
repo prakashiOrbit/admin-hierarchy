@@ -8,12 +8,12 @@ import { Card, SectionHeader, Btn, getGreeting } from '../../components/Shared';
 import { TopBar, BottomNav } from '../../components/Navigation';
 import { StatusPill } from '../../components/StatusPill';
 import { 
-  IconHospital, IconUsers, IconPulse, IconGateway, IconShield,
+  IconCareSite, IconUsers, IconPulse, IconGateway, IconShield,
   IconAlert, IconChevron, IconMenu, IconSettings, IconDashboard, IconBack, IconUser, IconLogout, IconCpu
 } from '../../icons';
 import { organisationApi, userApi, summaryApi, getApiErrorMessage } from '../../services/api';
 import { NotificationSheet } from '../../components/NotificationSheet';
-import { HospitalsScreen } from '../Hospitals/HospitalsScreen';
+import { CareSitesScreen } from '../CareSites/CareSitesScreen';
 import { UsersScreen } from '../Users/UsersScreen';
 import { RolesScreen } from '../Roles/RolesScreen';
 import { UserDetailScreen } from '../Users/UserDetailScreen';
@@ -21,15 +21,15 @@ import { InviteOrgAdminScreen } from '../Organisations/InviteOrgAdminScreen';
 import { OrgAdminsScreen } from '../Organisations/OrgAdminsScreen';
 import { RoleDetailScreen } from '../Roles/RoleDetailScreen';
 import { CreateRoleScreen } from '../Roles/CreateRoleScreen';
-import { CreateHospitalScreen } from '../Hospitals/CreateHospitalScreen';
-import { CreateHospAdminScreen } from '../Hospitals/CreateHospAdminScreen';
+import { CreateCareSiteScreen } from '../CareSites/CreateCareSiteScreen';
+import { CreateCareSiteAdminScreen } from '../CareSites/CreateCareSiteAdminScreen';
 import { SettingsScreen } from '../Settings/SettingsScreen';
 import { DeviceTypesScreen } from '../Devices/DeviceTypesScreen';
 import { CreateDeviceTypeScreen } from '../Devices/CreateDeviceTypeScreen';
 import { DeviceTypeDetailScreen } from '../Devices/DeviceTypeDetailScreen';
 import { EditDeviceTypeScreen } from '../Devices/EditDeviceTypeScreen';
-import { HospitalDetailScreen } from '../Hospitals/HospitalDetailScreen';
-import { EditHospitalScreen } from '../Hospitals/EditHospitalScreen';
+import { CareSiteDetailScreen } from '../CareSites/CareSiteDetailScreen';
+import { EditCareSiteScreen } from '../CareSites/EditCareSiteScreen';
 import { EditDoctorScreen } from '../Users/EditDoctorScreen';
 import { EditNurseScreen } from '../Users/EditNurseScreen';
 import { EditAdminScreen } from '../Users/EditAdminScreen';
@@ -66,7 +66,7 @@ const OrgHomeContent = ({ role }) => {
   const { user, token } = useAuth();
   const styles = createStyles(T);
 
-  const [hospitals, setHospitals] = useState([]);
+  const [careSites, setCareSites] = useState([]);
   const [admins, setAdmins] = useState([]);
   const [orgSummary, setOrgSummary] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -117,7 +117,7 @@ const OrgHomeContent = ({ role }) => {
     setError(null);
     let firstError = null;
     Promise.all([
-      organisationApi.listHospitals(user.orgName, token, { signal: controller.signal }).catch(err => {
+      organisationApi.listCareSites(user.orgName, token, { signal: controller.signal }).catch(err => {
         if (err?.code === 'ABORTED') throw err;
         firstError = firstError || err;
         return [];
@@ -132,11 +132,11 @@ const OrgHomeContent = ({ role }) => {
         firstError = firstError || err;
         return null;
       }),
-    ]).then(([hospData, adminData, summaryData]) => {
+    ]).then(([careSiteData, adminData, summaryData]) => {
       if (cancelled) return;
-      const hospList = Array.isArray(hospData) ? hospData : [];
+      const careSiteList = Array.isArray(careSiteData) ? careSiteData : [];
       const adminList = Array.isArray(adminData) ? adminData : [];
-      setHospitals(hospList);
+      setCareSites(careSiteList);
       setAdmins(adminList.filter(u => u.userRoles?.includes('ORG_ADMIN')));
       setOrgSummary(summaryData);
       if (firstError) {
@@ -162,7 +162,7 @@ const OrgHomeContent = ({ role }) => {
     };
   }, [user?.orgName, token, reloadKey]);
 
-  const activeHospitals = hospitals.filter(h => (h.status || 'ACTIVE') === 'ACTIVE').length;
+  const activeCareSites = careSites.filter(h => (h.status || 'ACTIVE') === 'ACTIVE').length;
   const totalDevices  = orgSummary?.stats?.totalDevices  ?? 0;
   const totalGateways = orgSummary?.stats?.totalGateways ?? 0;
 
@@ -172,12 +172,12 @@ const OrgHomeContent = ({ role }) => {
         <Text style={styles.date}>{new Date().toLocaleDateString(t('i18n_locale_tag', 'en-US'), { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()} · {user?.orgName || 'ORGANISATION'}</Text>
         <Text style={styles.greeting}>{getGreeting(t, user?.userName || 'User')}</Text>
         <Text style={styles.status}>
-          <Text style={{ color: T.good, fontWeight: '600' }}>{t('dashboard.provisioned', { count: hospitals.length })}</Text> · {t('dashboard.online_count', { count: activeHospitals })}
+          <Text style={{ color: T.good, fontWeight: '600' }}>{t('dashboard.provisioned', { count: careSites.length })}</Text> · {t('dashboard.online_count', { count: activeCareSites })}
         </Text>
       </View>
 
       <View style={styles.grid}>
-        <StatCard label="dashboard.hospitals" value={loading ? '...' : hospitals.length.toString()} icon={<IconHospital />} color={T.accent} />
+        <StatCard label="dashboard.careSites" value={loading ? '...' : careSites.length.toString()} icon={<IconCareSite />} color={T.accent} />
         <StatCard label="dashboard.admins" value={loading ? '...' : admins.length.toString()} icon={<IconUsers />} color="#2DD4BF" accent="rgba(45,212,191,.14)" />
         <StatCard label="dashboard.devices" value={loading ? '...' : totalDevices.toString()} icon={<IconPulse />} color="#22D3EE" accent="rgba(34,211,238,.14)" />
         <StatCard label="dashboard.gateways" value={loading ? '...' : totalGateways.toString()} icon={<IconGateway />} color="#A78BFA" accent="rgba(167,139,250,.14)" />
@@ -193,36 +193,36 @@ const OrgHomeContent = ({ role }) => {
         </Card>
       )}
 
-      {!loading && !error && hospitals.length === 0 && admins.length === 0 && (
+      {!loading && !error && careSites.length === 0 && admins.length === 0 && (
         <Card style={[styles.errorCard, { borderColor: T.border, backgroundColor: T.surfaceAlt || T.surface }]}>
           <View style={styles.errorRow}>
             <IconShield size={18} color={T.accent} />
-            <Text style={[styles.errorText, { color: T.textDim }]}>{t('dashboard.onboarding_hint', 'Welcome! Start by adding an ORG Admin and a Hospital to get your organisation up and running.')}</Text>
+            <Text style={[styles.errorText, { color: T.textDim }]}>{t('dashboard.onboarding_hint', 'Welcome! Start by adding an ORG Admin and a CareSite to get your organisation up and running.')}</Text>
           </View>
         </Card>
       )}
 
 
       <View style={styles.section}>
-        <SectionHeader title={t('dashboard.top_hospitals')} />
+        <SectionHeader title={t('dashboard.top_caresites')} />
         <View style={styles.list}>
           {loading ? (
             <ActivityIndicator color={T.accent} style={{ padding: 20 }} />
-          ) : hospitals.length === 0 ? (
-            <Text style={{ color: T.textDim, fontSize: 13, textAlign: 'center', padding: 20 }}>{t('dashboard.no_hospitals')}</Text>
+          ) : careSites.length === 0 ? (
+            <Text style={{ color: T.textDim, fontSize: 13, textAlign: 'center', padding: 20 }}>{t('dashboard.no_caresites')}</Text>
           ) : (
-            hospitals.slice(0, 3).map((h, i) => (
+            careSites.slice(0, 3).map((h, i) => (
               <Card key={h.id || i} style={{ backgroundColor: T.surface }}>
                 <View style={styles.listItem}>
-                  <View style={styles.hospIcon}><IconHospital size={20} color={T.accent} /></View>
+                  <View style={styles.careSiteIcon}><IconCareSite size={20} color={T.accent} /></View>
                   <View style={styles.listItemContent}>
                     <View style={styles.titleRow}>
-                      <Text style={styles.hospName}>{h.hospitalName}</Text>
+                      <Text style={styles.careSiteName}>{h.careSiteName}</Text>
                       <StatusPill status={h.status || 'ACTIVE'} />
                     </View>
-                    <View style={styles.hospMetaRow}>
-                      <Text style={styles.hospMetaText}>{h.hospitalCode}</Text>
-                      <Text style={styles.hospMetaText}>{h.beds || 0} {t('dashboard.beds').toLowerCase()}</Text>
+                    <View style={styles.careSiteMetaRow}>
+                      <Text style={styles.careSiteMetaText}>{h.careSiteCode}</Text>
+                      <Text style={styles.careSiteMetaText}>{h.beds || 0} {t('dashboard.beds').toLowerCase()}</Text>
                     </View>
                   </View>
                   <IconChevron size={16} color={T.textFaint} />
@@ -292,14 +292,14 @@ export const OrgDashboard = ({ navigation, route }) => {
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedRoleId, setSelectedRoleId] = useState(null);
   const [isInvitingAdmin, setIsInvitingAdmin] = useState(false);
-  const [isProvisioningHospital, setIsProvisioningHospital] = useState(false);
-  const [selectedHospital, setSelectedHospital] = useState(null);
+  const [isProvisioningCareSite, setIsProvisioningCareSite] = useState(false);
+  const [selectedCareSite, setSelectedCareSite] = useState(null);
   const [isCreatingDeviceType, setIsCreatingDeviceType] = useState(false);
   const [selectedDeviceType, setSelectedDeviceType] = useState(null);
   const [isCreatingRole, setIsCreatingRole] = useState(false);
   const [isEditingDeviceType, setIsEditingDeviceType] = useState(false);
-  const [isEditingHospital, setIsEditingHospital] = useState(false);
-const [isCreatingHospAdmin, setIsCreatingHospAdmin] = useState(false);
+  const [isEditingCareSite, setIsEditingCareSite] = useState(false);
+const [isCreatingCareSiteAdmin, setIsCreatingCareSiteAdmin] = useState(false);
   const [selectedStaffForEdit, setSelectedStaffForEdit] = useState(null);
   const [selectedUserForEdit, setSelectedUserForEdit] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -309,25 +309,25 @@ const [isCreatingHospAdmin, setIsCreatingHospAdmin] = useState(false);
   const handleBack = React.useCallback(() => {
     if (drawerOpen) { toggleDrawer(); return; }
     if (selectedUserForEdit) { setSelectedUserForEdit(null); return; }
-    if (isCreatingHospAdmin) { setIsCreatingHospAdmin(false); return; }
-    if (isEditingHospital) { setIsEditingHospital(false); return; }
-    if (selectedHospital) { setSelectedHospital(null); return; }
+    if (isCreatingCareSiteAdmin) { setIsCreatingCareSiteAdmin(false); return; }
+    if (isEditingCareSite) { setIsEditingCareSite(false); return; }
+    if (selectedCareSite) { setSelectedCareSite(null); return; }
     if (isCreatingDeviceType) { setIsCreatingDeviceType(false); return; }
     if (isEditingDeviceType) { setIsEditingDeviceType(false); return; }
     if (selectedDeviceType) { setSelectedDeviceType(null); return; }
     if (isInvitingAdmin) { setIsInvitingAdmin(false); return; }
-    if (isProvisioningHospital) { setIsProvisioningHospital(false); return; }
+    if (isProvisioningCareSite) { setIsProvisioningCareSite(false); return; }
     if (isCreatingRole) { setIsCreatingRole(false); return; }
 if (selectedStaffForEdit) { setSelectedStaffForEdit(null); return; }
     if (selectedUserId) { setSelectedUserId(null); return; }
     if (selectedRoleId) { setSelectedRoleId(null); return; }
     if (activeTab !== 'home') { handleTabChange('home'); }
-  }, [drawerOpen, activeTab, selectedUserId, isInvitingAdmin, selectedRoleId, isProvisioningHospital, selectedHospital, isCreatingDeviceType, selectedDeviceType, isCreatingRole, isEditingDeviceType, isEditingHospital, selectedStaffForEdit, selectedUserForEdit, toggleDrawer]);
+  }, [drawerOpen, activeTab, selectedUserId, isInvitingAdmin, selectedRoleId, isProvisioningCareSite, selectedCareSite, isCreatingDeviceType, selectedDeviceType, isCreatingRole, isEditingDeviceType, isEditingCareSite, selectedStaffForEdit, selectedUserForEdit, toggleDrawer]);
 
-  const isSubScreen = !!(selectedUserId || isInvitingAdmin || selectedRoleId || isProvisioningHospital ||
-    selectedHospital || isCreatingDeviceType || selectedDeviceType || isCreatingRole ||
-    isEditingDeviceType || isEditingHospital || selectedStaffForEdit || selectedUserForEdit ||
-    isCreatingHospAdmin);
+  const isSubScreen = !!(selectedUserId || isInvitingAdmin || selectedRoleId || isProvisioningCareSite ||
+    selectedCareSite || isCreatingDeviceType || selectedDeviceType || isCreatingRole ||
+    isEditingDeviceType || isEditingCareSite || selectedStaffForEdit || selectedUserForEdit ||
+    isCreatingCareSiteAdmin);
 
   useEffect(() => {
     const backAction = () => {
@@ -355,12 +355,12 @@ if (selectedStaffForEdit) { setSelectedStaffForEdit(null); return; }
     setSelectedUserId(null);
     setSelectedRoleId(null);
     setIsInvitingAdmin(false);
-    setIsProvisioningHospital(false);
-    setSelectedHospital(null);
+    setIsProvisioningCareSite(false);
+    setSelectedCareSite(null);
     setIsCreatingDeviceType(false);
     setIsEditingDeviceType(false);
     setSelectedDeviceType(null);
-    setIsEditingHospital(false);
+    setIsEditingCareSite(false);
     setIsCreatingRole(false);
 setSelectedStaffForEdit(null);
     setSelectedUserForEdit(null);
@@ -374,21 +374,21 @@ setSelectedStaffForEdit(null);
   const footerItems = [
     { id: 'home', label: t('dashboard.home'), icon: <IconDashboard /> },
     ...(isOwner ? [{ id: 'admins', label: t('dashboard.admins'), icon: <IconUsers /> }] : []),
-    ...(hasPerm('permit.admin.hospital') ? [{ id: 'hospitals', label: t('dashboard.hospitals'), icon: <IconHospital /> }] : []),
+    ...(hasPerm('permit.admin.caresite') ? [{ id: 'careSites', label: t('dashboard.caresites'), icon: <IconCareSite /> }] : []),
     ...(hasPerm('permit.admin.devicetype') || hasPerm('permit.create.devicetype') || hasPerm('permit.list.devicetype') ? [{ id: 'types', label: t('dashboard.device_type'), icon: <IconCpu /> }] : []),
     ...(hasPerm('permit.admin.nurse') || hasPerm('permit.admin.doctor') || hasPerm('permit.admin.patient') ? [{ id: 'users', label: t('dashboard.users'), icon: <IconUser /> }] : []),
     ...(hasPerm('permit.admin.roles') ? [{ id: 'roles', label: t('dashboard.roles_perms'), icon: <IconShield /> }] : []),
   ];
 
   const renderContent = () => {
-    if (isCreatingHospAdmin && selectedHospital) return <CreateHospAdminScreen hospitalCode={selectedHospital.hospitalCode} onCancel={() => setIsCreatingHospAdmin(false)} />;
+    if (isCreatingCareSiteAdmin && selectedCareSite) return <CreateCareSiteAdminScreen careSiteCode={selectedCareSite.careSiteCode} onCancel={() => setIsCreatingCareSiteAdmin(false)} />;
     if (isInvitingAdmin) return <InviteOrgAdminScreen onCancel={() => setIsInvitingAdmin(false)} />;
-    if (isProvisioningHospital) return <CreateHospitalScreen onCancel={() => setIsProvisioningHospital(false)} />;
+    if (isProvisioningCareSite) return <CreateCareSiteScreen onCancel={() => setIsProvisioningCareSite(false)} />;
     if (isCreatingDeviceType) return <CreateDeviceTypeScreen onCancel={() => setIsCreatingDeviceType(false)} />;
     if (isEditingDeviceType && selectedDeviceType) return <EditDeviceTypeScreen deviceType={selectedDeviceType} onCancel={() => setIsEditingDeviceType(false)} onSave={(updated) => { setSelectedDeviceType(updated); setIsEditingDeviceType(false); }} />;
     if (selectedDeviceType) return <DeviceTypeDetailScreen deviceType={selectedDeviceType} onBack={() => setSelectedDeviceType(null)} onEdit={() => setIsEditingDeviceType(true)} />;
-    if (isEditingHospital && selectedHospital) return <EditHospitalScreen hospital={selectedHospital} onCancel={() => setIsEditingHospital(false)} onSave={(updated) => { setSelectedHospital(updated); setIsEditingHospital(false); }} />;
-    if (selectedHospital) return <HospitalDetailScreen hospital={selectedHospital} orgName={user?.orgName} viewerRole={role} onBack={() => setSelectedHospital(null)} onEdit={() => setIsEditingHospital(true)} onAddAdmin={(isOwner || hasPerm('permit.create.user') || hasPerm('permit.admin.users')) ? () => setIsCreatingHospAdmin(true) : undefined} />;
+    if (isEditingCareSite && selectedCareSite) return <EditCareSiteScreen careSite={selectedCareSite} onCancel={() => setIsEditingCareSite(false)} onSave={(updated) => { setSelectedCareSite(updated); setIsEditingCareSite(false); }} />;
+    if (selectedCareSite) return <CareSiteDetailScreen careSite={selectedCareSite} orgName={user?.orgName} viewerRole={role} onBack={() => setSelectedCareSite(null)} onEdit={() => setIsEditingCareSite(true)} onAddAdmin={(isOwner || hasPerm('permit.create.user') || hasPerm('permit.admin.users')) ? () => setIsCreatingCareSiteAdmin(true) : undefined} />;
     if (isCreatingRole) return <CreateRoleScreen onCancel={() => setIsCreatingRole(false)} />;
 if (selectedStaffForEdit) {
       const isDoctor = !!selectedStaffForEdit.doctorCode;
@@ -402,7 +402,7 @@ if (selectedStaffForEdit) {
     switch (activeTab) {
       case 'home': return <OrgHomeContent role={role} />;
       case 'admins': return <OrgAdminsScreen onInvite={() => setIsInvitingAdmin(true)} onSelectUser={setSelectedUserId} />;
-      case 'hospitals': return <HospitalsScreen onProvision={(isOwner || hasPerm('permit.create.hospital')) ? () => setIsProvisioningHospital(true) : undefined} onSelect={setSelectedHospital} />;
+      case 'careSites': return <CareSitesScreen onProvision={(isOwner || hasPerm('permit.create.caresite')) ? () => setIsProvisioningCareSite(true) : undefined} onSelect={setSelectedCareSite} />;
       case 'types': return <DeviceTypesScreen onCreate={(isOwner || hasPerm('permit.create.devicetype') || hasPerm('permit.admin.devicetype')) ? () => setIsCreatingDeviceType(true) : undefined} onSelect={setSelectedDeviceType} />;
       case 'users': return <UsersScreen onSelectUser={setSelectedUserId} onSelectStaff={setSelectedStaffForEdit} />;
       case 'roles': return <RolesScreen onSelectRole={setSelectedRoleId} onCreate={(isOwner || hasPerm('permit.create.role')) ? () => setIsCreatingRole(true) : undefined} />;
@@ -413,12 +413,12 @@ if (selectedStaffForEdit) {
 
   const getTitle = () => {
     if (isInvitingAdmin) return t('dashboard.invite_org_admin');
-    if (isProvisioningHospital) return t('dashboard.create_hospital');
+    if (isProvisioningCareSite) return t('dashboard.create_caresite');
     if (isCreatingDeviceType) return t('dashboard.create_device_type');
     if (isEditingDeviceType) return t('dashboard.edit_device_type');
     if (selectedDeviceType) return t('dashboard.device_type_details');
-    if (isEditingHospital) return t('dashboard.edit_hospital');
-    if (selectedHospital) return t('dashboard.hospital_details');
+    if (isEditingCareSite) return t('dashboard.edit_caresite');
+    if (selectedCareSite) return t('dashboard.caresite_details');
     if (isCreatingRole) return t('dashboard.create_role');
 if (selectedStaffForEdit) return selectedStaffForEdit.doctorCode ? t('dashboard.edit_doctor') : t('dashboard.edit_nurse');
     if (selectedUserForEdit) return t('dashboard.edit_admin');
@@ -427,7 +427,7 @@ if (selectedStaffForEdit) return selectedStaffForEdit.doctorCode ? t('dashboard.
     switch (activeTab) {
       case 'home': return t('dashboard.org_console');
       case 'admins': return t('dashboard.org_admins');
-      case 'hospitals': return t('dashboard.hospitals');
+      case 'careSites': return t('dashboard.caresites');
       case 'types': return t('dashboard.device_types');
       case 'users': return t('dashboard.users');
       case 'roles': return t('dashboard.roles_perms');
@@ -488,12 +488,12 @@ const createStyles = (T) => StyleSheet.create({
   section: { marginBottom: 24 },
   list: { gap: 8 },
   listItem: { flexDirection: 'row', gap: 10, alignItems: 'center' },
-  hospIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: T.surface2, alignItems: 'center', justifyContent: 'center' },
+  careSiteIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: T.surface2, alignItems: 'center', justifyContent: 'center' },
   listItemContent: { flex: 1, minWidth: 0 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  hospName: { fontSize: 13.5, fontWeight: '600', color: T.text, flex: 1 },
-  hospMetaRow: { flexDirection: 'row', gap: 10, marginTop: 3 },
-  hospMetaText: { fontSize: 11, color: T.textFaint, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
+  careSiteName: { fontSize: 13.5, fontWeight: '600', color: T.text, flex: 1 },
+  careSiteMetaRow: { flexDirection: 'row', gap: 10, marginTop: 3 },
+  careSiteMetaText: { fontSize: 11, color: T.textFaint, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
 
   errorCard: { borderColor: T.bad, marginBottom: 16, gap: 12 },
   errorRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },

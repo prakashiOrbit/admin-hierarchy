@@ -545,8 +545,8 @@ export const RoleBadge = ({ role }) => {
     PLATFORM_ADMIN: { label: t('roles.PLATFORM_ADMIN'), color: '#A78BFA', bg: 'rgba(167,139,250,.14)' },
     ORG_OWNER:      { label: t('roles.ORG_OWNER'), color: '#818CF8', bg: 'rgba(129,140,248,.14)' },
     ORG_ADMIN:      { label: t('roles.ORG_ADMIN'), color: '#60A5FA', bg: 'rgba(96,165,250,.14)' },
-    HOSP_OWNER:     { label: t('roles.HOSP_OWNER'), color: '#2DD4BF', bg: 'rgba(45,212,191,.14)' },
-    HOSP_ADMIN:     { label: t('roles.HOSP_ADMIN'), color: '#22D3EE', bg: 'rgba(34,211,238,.14)' },
+    CARESITE_OWNER:     { label: t('roles.CARESITE_OWNER'), color: '#2DD4BF', bg: 'rgba(45,212,191,.14)' },
+    CARESITE_ADMIN:     { label: t('roles.CARESITE_ADMIN'), color: '#22D3EE', bg: 'rgba(34,211,238,.14)' },
   };
   const r = roleMap[role] || { label: role, color: T.textDim, bg: T.surface2 };
 

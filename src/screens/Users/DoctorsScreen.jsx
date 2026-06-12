@@ -19,13 +19,13 @@ export const DoctorsScreen = ({ onNewDoctor, onSelectDoctor }) => {
   const [query, setQuery] = useState('');
 
   useEffect(() => {
-    if (!user?.orgName || !user?.hospitalCode) return;
+    if (!user?.orgName || !user?.careSiteCode) return;
     const controller = new AbortController();
     let cancelled = false;
     const timer = setTimeout(() => {
     setLoading(true);
     setError(null);
-    doctorApi.listAll(user.orgName, user.hospitalCode, token, { signal: controller.signal })
+    doctorApi.listAll(user.orgName, user.careSiteCode, token, { signal: controller.signal })
       .then(data => { if (!cancelled) setDoctors(Array.isArray(data) ? data : []); })
       .catch(e => {
         if (e?.code === 'ABORTED') return;
@@ -38,7 +38,7 @@ export const DoctorsScreen = ({ onNewDoctor, onSelectDoctor }) => {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [user?.orgName, user?.hospitalCode, token]);
+  }, [user?.orgName, user?.careSiteCode, token]);
 
   const filtered = doctors.filter(d =>
     `${d.firstName} ${d.lastName}`.toLowerCase().includes(query.toLowerCase()) ||

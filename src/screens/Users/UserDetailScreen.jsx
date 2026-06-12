@@ -5,7 +5,7 @@ import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Avatar, RoleBadge, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
-import { IconHospital, IconUser, IconEdit, IconKey, IconPause, IconTrash } from '../../icons';
+import { IconCareSite, IconUser, IconEdit, IconKey, IconPause, IconTrash } from '../../icons';
 import { userApi, authApi } from '../../services/api';
 
 export const UserDetailScreen = ({ userId, onBack, onEdit }) => {
@@ -94,7 +94,7 @@ export const UserDetailScreen = ({ userId, onBack, onEdit }) => {
 
         <Card style={styles.detailsCard}>
           {[
-            { l: t('dashboard.hospitals'), v: u.hospitalCode ?? '—', i: <IconHospital size={16} color={T.textDim} /> },
+            { l: t('dashboard.caresites'), v: u.careSiteCode ?? '—', i: <IconCareSite size={16} color={T.textDim} /> },
             { l: t('auth.username'), v: u.userName ?? '—', i: <IconUser size={16} color={T.textDim} />, mono: true },
             { l: t('dashboard.organisations'), v: u.orgName ?? '—', i: <IconUser size={16} color={T.textDim} />, mono: true },
           ].map((row, i) => (

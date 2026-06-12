@@ -8,7 +8,7 @@ import { StatusPill } from '../../components/StatusPill';
 import { IconPlus, IconChevron } from '../../icons';
 import { userApi, getApiErrorMessage } from '../../services/api';
 
-export const HospAdminsScreen = ({ onSelectUser, onInvite }) => {
+export const CareSiteAdminsScreen = ({ onSelectUser, onInvite }) => {
   const { t } = useTranslation();
   const { theme: T } = useTheme();
   const styles = createStyles(T);
@@ -20,9 +20,9 @@ export const HospAdminsScreen = ({ onSelectUser, onInvite }) => {
   const [query, setQuery] = useState('');
 
   useEffect(() => {
-    if (!user?.orgName || !user?.hospitalCode) return;
+    if (!user?.orgName || !user?.careSiteCode) return;
     let cancelled = false;
-    userApi.listHospAdminsByHospital(user.orgName, user.hospitalCode, token)
+    userApi.listCareSiteAdminsByCareSite(user.orgName, user.careSiteCode, token)
       .then(res => {
         if (cancelled) return;
         const list = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
@@ -31,7 +31,7 @@ export const HospAdminsScreen = ({ onSelectUser, onInvite }) => {
       .catch(e => { if (!cancelled) setError(getApiErrorMessage(e)); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [user?.orgName, user?.hospitalCode, token]);
+  }, [user?.orgName, user?.careSiteCode, token]);
 
   const filtered = admins.filter(u =>
     (`${u.firstName} ${u.lastName}`).toLowerCase().includes(query.toLowerCase()) ||
@@ -58,21 +58,21 @@ export const HospAdminsScreen = ({ onSelectUser, onInvite }) => {
         </View>
 
         <View style={styles.headerRow}>
-          <SectionHeader title={t('hospital.admins_title')} count={filtered.length} />
+          <SectionHeader title={t('caresite.admins_title')} count={filtered.length} />
           <Btn
             variant="primary"
             size="sm"
             style={styles.newBtn}
             onPress={onInvite}
           >
-            <IconPlus size={14} color="#fff" /> {t('actions.create_hosp_admin')}
+            <IconPlus size={14} color="#fff" /> {t('actions.create_caresite_admin')}
           </Btn>
         </View>
 
         <View style={styles.list}>
           {filtered.map(u => {
             const initials = `${u.firstName?.[0] ?? ''}${u.lastName?.[0] ?? ''}`.toUpperCase();
-            const role = u.userRoles?.[0] ?? 'HOSP_ADMIN';
+            const role = u.userRoles?.[0] ?? 'CARESITE_ADMIN';
             return (
               <Card key={u.userName} onPress={() => onSelectUser(u.userName)}>
                 <View style={styles.userRow}>
@@ -85,8 +85,8 @@ export const HospAdminsScreen = ({ onSelectUser, onInvite }) => {
                     <Text style={styles.userEmail}>{u.userName}</Text>
                     <View style={styles.badgesRow}>
                       <StatusPill status={u.status ?? 'INACTIVE'} />
-                      {u.hospitalCode && (
-                        <Text style={styles.hospitalText}>{u.hospitalCode}</Text>
+                      {u.careSiteCode && (
+                        <Text style={styles.careSiteText}>{u.careSiteCode}</Text>
                       )}
                     </View>
                   </View>
@@ -97,7 +97,7 @@ export const HospAdminsScreen = ({ onSelectUser, onInvite }) => {
           })}
           {filtered.length === 0 && (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyText}>{t('messages.no_hosp_admins_found')}</Text>
+              <Text style={styles.emptyText}>{t('messages.no_caresite_admins_found')}</Text>
             </View>
           )}
         </View>
@@ -119,7 +119,7 @@ const createStyles = (T) => StyleSheet.create({
   userName: { fontSize: 14, fontWeight: '600', color: T.text },
   userEmail: { fontSize: 11, color: T.textFaint, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
   badgesRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 },
-  hospitalText: { fontSize: 10.5, color: T.textDim, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
+  careSiteText: { fontSize: 10.5, color: T.textDim, fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace' },
   emptyState: { padding: 40, alignItems: 'center' },
   emptyText: { color: T.textDim, fontSize: 14 },
 });

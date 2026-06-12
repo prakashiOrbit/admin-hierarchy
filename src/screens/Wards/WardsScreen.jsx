@@ -24,11 +24,11 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
   const [loadingBeds, setLoadingBeds] = useState({});
   const [selectedBed, setSelectedBed] = useState(null);
 
-  const hasWardPerm = user?.roles?.includes('permit.admin.ward') || user?.roles?.includes('HOSP_OWNER');
-  const hasBedPerm = user?.roles?.includes('permit.admin.bed') || user?.roles?.includes('HOSP_OWNER');
+  const hasWardPerm = user?.roles?.includes('permit.admin.ward') || user?.roles?.includes('CARESITE_OWNER');
+  const hasBedPerm = user?.roles?.includes('permit.admin.bed') || user?.roles?.includes('CARESITE_OWNER');
 
   useEffect(() => {
-    if (!user?.orgName || !user?.hospitalCode) return;
+    if (!user?.orgName || !user?.careSiteCode) return;
     if (!hasWardPerm) {
       setWards([]);
       setLoading(false);
@@ -37,7 +37,7 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    wardApi.listAll(user.orgName, user.hospitalCode, token)
+    wardApi.listAll(user.orgName, user.careSiteCode, token)
       .then(res => {
         if (cancelled) return;
         const list = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : (Array.isArray(res?.wards) ? res.wards : []));
@@ -55,7 +55,7 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
       })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [user?.orgName, user?.hospitalCode, token, hasWardPerm]);
+  }, [user?.orgName, user?.careSiteCode, token, hasWardPerm]);
 
   const handleExpand = (wardCode) => {
     const isExpanded = expandedWard === wardCode;
@@ -63,7 +63,7 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
 
     if (!isExpanded && !bedsByWard[wardCode] && hasBedPerm) {
       setLoadingBeds(prev => ({ ...prev, [wardCode]: true }));
-      bedApi.getAllBedsByWard(user.orgName, user.hospitalCode, wardCode, token)
+      bedApi.getAllBedsByWard(user.orgName, user.careSiteCode, wardCode, token)
         .then(res => {
           const list = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : (Array.isArray(res?.beds) ? res.beds : []));
           setBedsByWard(prev => ({ ...prev, [wardCode]: list }));
@@ -190,7 +190,7 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
               <IconDoor size={48} color={T.textFaint} />
               <Text style={styles.emptyTitle}>{t('messages.no_wards_found')}</Text>
               <Text style={styles.emptyHint}>
-                {t('messages.no_wards_hospital_hint', { hospitalCode: user?.hospitalCode })} 
+                {t('messages.no_wards_caresite_hint', { careSiteCode: user?.careSiteCode })} 
                 {t('messages.create_ward_hint')}
               </Text>
               <Btn variant="primary" size="md" style={{ marginTop: 24, paddingHorizontal: 32 }} onPress={onNewWard}>

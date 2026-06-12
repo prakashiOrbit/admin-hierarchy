@@ -21,7 +21,7 @@ const RESEND_COOLDOWN = 60;
 const resolveNavTarget = (res, fallbackUsername) => {
   const roles      = res.roles || res.userData?.roles || [];
   const isOrgOwner  = roles.includes('ORG_OWNER');
-  const isHospOwner = roles.includes('HOSP_OWNER');
+  const isCareSiteOwner = roles.includes('CARESITE_OWNER');
   const isNurse     = roles.includes('NURSE');
   const isDoctor    = roles.includes('DOCTOR');
   const isPatient   = roles.includes('PATIENT');
@@ -29,11 +29,11 @@ const resolveNavTarget = (res, fallbackUsername) => {
   if (res.orgName === 'SYSTEM' || fallbackUsername === 'iorbit') {
     return { navTarget: 'PlatformDashboard', navParams: { role: 'PLATFORM_ADMIN' } };
   }
-  if (res.hospitalCode) {
-    const hospRole = isHospOwner ? 'HOSP_OWNER'
+  if (res.careSiteCode) {
+    const careSiteRole = isCareSiteOwner ? 'CARESITE_OWNER'
       : isNurse ? 'NURSE' : isDoctor ? 'DOCTOR'
-      : isPatient ? 'PATIENT' : 'HOSP_ADMIN';
-    return { navTarget: 'HospDashboard', navParams: { role: hospRole } };
+      : isPatient ? 'PATIENT' : 'CARESITE_ADMIN';
+    return { navTarget: 'CareSiteDashboard', navParams: { role: careSiteRole } };
   }
   return { navTarget: 'OrgDashboard', navParams: { role: isOrgOwner ? 'ORG_OWNER' : 'ORG_ADMIN' } };
 };

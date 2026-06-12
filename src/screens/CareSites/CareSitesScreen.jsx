@@ -6,9 +6,9 @@ import { useAuth } from '../../context/AuthContext';
 import { organisationApi, getApiErrorMessage } from '../../services/api';
 import { Card, SectionHeader, SearchBar, Chip, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
-import { IconHospital, IconFilter, IconPlus } from '../../icons';
+import { IconCareSite, IconFilter, IconPlus } from '../../icons';
 
-export const HospitalsScreen = ({ onProvision, onSelect }) => {
+export const CareSitesScreen = ({ onProvision, onSelect }) => {
   const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
@@ -17,20 +17,20 @@ export const HospitalsScreen = ({ onProvision, onSelect }) => {
   const [filter, setFilter] = useState('All');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [hospitals, setHospitals] = useState([]);
+  const [careSites, setCareSites] = useState([]);
   const [error, setError] = useState(null);
 
-  const fetchHospitals = useCallback(async (showLoading = true, options = {}) => {
+  const fetchCareSites = useCallback(async (showLoading = true, options = {}) => {
     if (!user?.orgName) return;
     if (showLoading) setLoading(true);
     setError(null);
     try {
-      const response = await organisationApi.listHospitals(user.orgName, token, { signal: options.signal });
+      const response = await organisationApi.listCareSites(user.orgName, token, { signal: options.signal });
       const list = Array.isArray(response) ? response : (Array.isArray(response?.data) ? response.data : []);
-      setHospitals(list);
+      setCareSites(list);
     } catch (err) {
       if (err?.code === 'ABORTED') return;
-      console.error('Fetch hospitals error:', err);
+      console.error('Fetch careSites error:', err);
       setError(getApiErrorMessage(err));
     } finally {
       if (!options.signal?.aborted) {
@@ -42,37 +42,37 @@ export const HospitalsScreen = ({ onProvision, onSelect }) => {
 
   useEffect(() => {
     const controller = new AbortController();
-    const timer = setTimeout(() => fetchHospitals(true, { signal: controller.signal }), 200);
+    const timer = setTimeout(() => fetchCareSites(true, { signal: controller.signal }), 200);
     return () => {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [fetchHospitals]);
+  }, [fetchCareSites]);
 
   const onRefresh = () => {
     setRefreshing(true);
-    fetchHospitals(false);
+    fetchCareSites(false);
   };
 
   const getStatus = (h) => h.status || 'ACTIVE';
 
-  const filtered = hospitals.filter(h => 
-    (h.hospitalName?.toLowerCase().includes(query.toLowerCase()) || 
-     h.hospitalCode?.toLowerCase().includes(query.toLowerCase())) &&
+  const filtered = careSites.filter(h => 
+    (h.careSiteName?.toLowerCase().includes(query.toLowerCase()) || 
+     h.careSiteCode?.toLowerCase().includes(query.toLowerCase())) &&
     (filter === 'All' || getStatus(h) === filter.toUpperCase())
   );
 
   const filterOptions = [
-    { label: t('hospital.status_all'), value: 'All' },
-    { label: t('hospital.status_active'), value: 'Active' },
-    { label: t('hospital.status_inactive'), value: 'Inactive' },
+    { label: t('caresite.status_all'), value: 'All' },
+    { label: t('caresite.status_active'), value: 'Active' },
+    { label: t('caresite.status_inactive'), value: 'Inactive' },
   ];
 
   return (
     <View style={styles.container}>
       <View style={{ padding: 16, paddingBottom: 0 }}>
         <SearchBar 
-          placeholder={t('placeholders.search_hospitals')}
+          placeholder={t('placeholders.search_caresites')}
           value={query}
           onChangeText={setQuery}
           trailing={
@@ -97,13 +97,13 @@ export const HospitalsScreen = ({ onProvision, onSelect }) => {
               active={filter === f.value} 
               onPress={() => setFilter(f.value)}
             >
-              {f.label} · {f.value === 'All' ? hospitals.length : hospitals.filter(h => getStatus(h) === f.value.toUpperCase()).length}
+              {f.label} · {f.value === 'All' ? careSites.length : careSites.filter(h => getStatus(h) === f.value.toUpperCase()).length}
             </Chip>
           ))}
         </ScrollView>
 
         <View style={styles.headerRow}>
-          <SectionHeader title={t('hospital.hospitals_title')} count={filtered.length} />
+          <SectionHeader title={t('caresite.caresites_title')} count={filtered.length} />
           
           {onProvision && (
             <Btn
@@ -112,7 +112,7 @@ export const HospitalsScreen = ({ onProvision, onSelect }) => {
               style={styles.newBtn}
               onPress={onProvision}
             >
-              <IconPlus size={14} color="#fff" /> {t('actions.new_hospital')}
+              <IconPlus size={14} color="#fff" /> {t('actions.new_caresite')}
             </Btn>
           )}
         </View>
@@ -125,19 +125,19 @@ export const HospitalsScreen = ({ onProvision, onSelect }) => {
         ) : error ? (
           <View style={styles.center}>
             <Text style={[styles.errorText, { color: T.bad }]}>{error}</Text>
-            <Btn variant="surface" size="sm" onPress={() => fetchHospitals()} style={{ marginTop: 12 }}>
+            <Btn variant="surface" size="sm" onPress={() => fetchCareSites()} style={{ marginTop: 12 }}>
               {t('common.retry')}
             </Btn>
           </View>
         ) : filtered.length === 0 ? (
           <View style={styles.center}>
-            <IconHospital size={48} color={T.textFaint} />
+            <IconCareSite size={48} color={T.textFaint} />
             <Text style={[styles.emptyText, { color: T.textDim }]}>
-              {query ? t('messages.no_matching_hospitals') : t('messages.no_hospitals_provisioned')}
+              {query ? t('messages.no_matching_caresites') : t('messages.no_caresites_provisioned')}
             </Text>
             {!query && onProvision && (
               <Btn variant="tonal" size="sm" onPress={onProvision} style={{ marginTop: 16 }}>
-                {t('actions.provision_first_hospital')}
+                {t('actions.provision_first_caresite')}
               </Btn>
             )}
           </View>
@@ -147,14 +147,14 @@ export const HospitalsScreen = ({ onProvision, onSelect }) => {
               <Card key={h.id || idx} onPress={() => onSelect?.(h)}>
                 <View style={styles.orgHeader}>
                   <View style={styles.orgAvatar}>
-                    <IconHospital size={24} color="#fff" />
+                    <IconCareSite size={24} color="#fff" />
                   </View>
                   <View style={styles.orgInfo}>
                     <View style={styles.titleRow}>
-                      <Text style={styles.orgTitle}>{h.hospitalName}</Text>
+                      <Text style={styles.orgTitle}>{h.careSiteName}</Text>
                       <StatusPill status={h.status || 'ACTIVE'} />
                     </View>
-                    <Text style={styles.orgName}>{h.hospitalCode} · {h.myAddress?.city || '—'}</Text>
+                    <Text style={styles.orgName}>{h.careSiteCode} · {h.myAddress?.city || '—'}</Text>
                     {!!h.description && (
                       <Text style={styles.orgDesc} numberOfLines={1}>{h.description}</Text>
                     )}

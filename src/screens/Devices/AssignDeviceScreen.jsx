@@ -32,22 +32,22 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
   const refresh = () => { setQuery(''); setRefreshKey(k => k + 1); };
 
   useEffect(() => {
-    if (!user?.orgName || !user?.hospitalCode) return;
+    if (!user?.orgName || !user?.careSiteCode) return;
     let cancelled = false;
     setLoading(true);
     setError(null);
     Promise.all([
-      deviceApi.listUnassigned(user.orgName, user.hospitalCode, token).catch(e => {
+      deviceApi.listUnassigned(user.orgName, user.careSiteCode, token).catch(e => {
         const msg = (e.message || '').toLowerCase();
         if (msg.includes('not found') || msg.includes('no device')) return [];
         throw e;
       }),
-      bedApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
+      bedApi.listAll(user.orgName, user.careSiteCode, token).catch(e => {
         const msg = (e.message || '').toLowerCase();
         if (msg.includes('not found') || msg.includes('no bed')) return [];
         throw e;
       }),
-      patientApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
+      patientApi.listAll(user.orgName, user.careSiteCode, token).catch(e => {
         const msg = (e.message || '').toLowerCase();
         if (msg.includes('not found') || msg.includes('no patient')) return [];
         throw e;
@@ -67,7 +67,7 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
       .catch(err => { if (!cancelled) setError(getApiErrorMessage(err)); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [user?.orgName, user?.hospitalCode, token, refreshKey]);
+  }, [user?.orgName, user?.careSiteCode, token, refreshKey]);
 
   const filtered = (() => {
     const q = query.toLowerCase();
@@ -95,7 +95,7 @@ export const AssignDeviceScreen = ({ onCancel, onSuccess }) => {
     if (!selectedDevice || !selectedBed || !selectedPatient) return;
     setSaving(true);
     try {
-      await bedApi.assignPatient(user.orgName, user.hospitalCode, selectedBed.bedCode, {
+      await bedApi.assignPatient(user.orgName, user.careSiteCode, selectedBed.bedCode, {
         patientCode: selectedPatient.patientCode,
         wardCode: selectedBed.wardCode,
         gatewayCode: selectedBed.gatewayCode,

@@ -20,11 +20,11 @@ export const NursingStationsScreen = ({ onNewStation, onSelectStation }) => {
   const [query, setQuery] = useState('');
 
   const fetchAll = useCallback(async () => {
-    if (!user?.orgName || !user?.hospitalCode) return;
+    if (!user?.orgName || !user?.careSiteCode) return;
     setLoading(true);
     setError(null);
     try {
-      const res = await nursingStationApi.listAll(user.orgName, user.hospitalCode, token)
+      const res = await nursingStationApi.listAll(user.orgName, user.careSiteCode, token)
         .catch(e => {
           const msg = (e.message || '').toLowerCase();
           if (msg.includes('not found') || msg.includes('no station') || msg.includes('notfound')) return [];
@@ -36,7 +36,7 @@ export const NursingStationsScreen = ({ onNewStation, onSelectStation }) => {
     } finally {
       setLoading(false);
     }
-  }, [user?.orgName, user?.hospitalCode, token, t]);
+  }, [user?.orgName, user?.careSiteCode, token, t]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 

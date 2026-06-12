@@ -18,7 +18,7 @@ jest.mock('../../src/i18n', () => ({
 
 const BASE = 'http://139.59.46.163/api';
 const ORG = 'APOAP1';
-const HOSP = 'CLV';
+const CARESITE = 'CLV';
 const RAW_TOKEN = 'test-token';       // raw JWT — bedApi adds "Bearer " prefix internally
 const TOKEN = `Bearer ${RAW_TOKEN}`; // what actually appears in the Authorization header
 
@@ -52,17 +52,17 @@ describe('bedApi.assignPatient', () => {
     devices: [{ deviceCode: 'DEV001' }],
   };
 
-  it('sends POST to /{orgName}/bed/{hospCode}/assign/patient', async () => {
+  it('sends POST to /{orgName}/bed/{careSiteCode}/assign/patient', async () => {
     global.fetch.mockReturnValueOnce(ok({ message: 'Patient assigned' }));
-    await bedApi.assignPatient(ORG, HOSP, 'B-01', PAYLOAD, RAW_TOKEN);
+    await bedApi.assignPatient(ORG, CARESITE, 'B-01', PAYLOAD, RAW_TOKEN);
     const [url, opts] = global.fetch.mock.calls[0];
-    expect(url).toBe(`${BASE}/${ORG}/bed/${HOSP}/assign/patient`);
+    expect(url).toBe(`${BASE}/${ORG}/bed/${CARESITE}/assign/patient`);
     expect(opts.method).toBe('POST');
   });
 
   it('spreads bedCode into the body alongside the payload', async () => {
     global.fetch.mockReturnValueOnce(ok({ message: 'Patient assigned' }));
-    await bedApi.assignPatient(ORG, HOSP, 'B-01', PAYLOAD, RAW_TOKEN);
+    await bedApi.assignPatient(ORG, CARESITE, 'B-01', PAYLOAD, RAW_TOKEN);
     const body = JSON.parse(global.fetch.mock.calls[0][1].body);
     // bedCode must be present in the body
     expect(body.bedCode).toBe('B-01');
@@ -75,7 +75,7 @@ describe('bedApi.assignPatient', () => {
 
   it('sends the Authorization header', async () => {
     global.fetch.mockReturnValueOnce(ok());
-    await bedApi.assignPatient(ORG, HOSP, 'B-01', PAYLOAD, RAW_TOKEN);
+    await bedApi.assignPatient(ORG, CARESITE, 'B-01', PAYLOAD, RAW_TOKEN);
     const headers = global.fetch.mock.calls[0][1].headers;
     expect(headers['Authorization']).toBe(TOKEN);
   });
@@ -83,7 +83,7 @@ describe('bedApi.assignPatient', () => {
   it('does not duplicate bedCode when payload also contains it', async () => {
     global.fetch.mockReturnValueOnce(ok());
     // payload with bedCode already — spread should just override
-    await bedApi.assignPatient(ORG, HOSP, 'B-01', { ...PAYLOAD, bedCode: 'B-01' }, TOKEN);
+    await bedApi.assignPatient(ORG, CARESITE, 'B-01', { ...PAYLOAD, bedCode: 'B-01' }, TOKEN);
     const body = JSON.parse(global.fetch.mock.calls[0][1].body);
     expect(body.bedCode).toBe('B-01');
   });
@@ -96,15 +96,15 @@ describe('bedApi.updateAlarmConfig', () => {
 
   it('sends POST (not PUT) to .../alarmconfig/save', async () => {
     global.fetch.mockReturnValueOnce(ok({ message: 'Saved' }));
-    await bedApi.updateAlarmConfig(ORG, HOSP, 'B-01', ALARM, RAW_TOKEN);
+    await bedApi.updateAlarmConfig(ORG, CARESITE, 'B-01', ALARM, RAW_TOKEN);
     const [url, opts] = global.fetch.mock.calls[0];
     expect(opts.method).toBe('POST');
-    expect(url).toBe(`${BASE}/${ORG}/bed/${HOSP}/B-01/alarmconfig/save`);
+    expect(url).toBe(`${BASE}/${ORG}/bed/${CARESITE}/B-01/alarmconfig/save`);
   });
 
   it('URL must end with /alarmconfig/save not /alarmconfig', async () => {
     global.fetch.mockReturnValueOnce(ok());
-    await bedApi.updateAlarmConfig(ORG, HOSP, 'B-01', ALARM, RAW_TOKEN);
+    await bedApi.updateAlarmConfig(ORG, CARESITE, 'B-01', ALARM, RAW_TOKEN);
     const url = global.fetch.mock.calls[0][0];
     expect(url).not.toMatch(/\/alarmconfig$/);
     expect(url).toMatch(/\/alarmconfig\/save$/);
@@ -112,7 +112,7 @@ describe('bedApi.updateAlarmConfig', () => {
 
   it('sends the alarm config as the body', async () => {
     global.fetch.mockReturnValueOnce(ok());
-    await bedApi.updateAlarmConfig(ORG, HOSP, 'B-01', ALARM, RAW_TOKEN);
+    await bedApi.updateAlarmConfig(ORG, CARESITE, 'B-01', ALARM, RAW_TOKEN);
     const body = JSON.parse(global.fetch.mock.calls[0][1].body);
     expect(body).toEqual(ALARM);
   });
@@ -123,15 +123,15 @@ describe('bedApi.updateAlarmConfig', () => {
 describe('bedApi.unassignPatient', () => {
   it('sends POST to .../patient/unassign', async () => {
     global.fetch.mockReturnValueOnce(ok({ message: 'Unassigned' }));
-    await bedApi.unassignPatient(ORG, HOSP, 'B-01', RAW_TOKEN);
+    await bedApi.unassignPatient(ORG, CARESITE, 'B-01', RAW_TOKEN);
     const [url, opts] = global.fetch.mock.calls[0];
-    expect(url).toBe(`${BASE}/${ORG}/bed/${HOSP}/patient/unassign`);
+    expect(url).toBe(`${BASE}/${ORG}/bed/${CARESITE}/patient/unassign`);
     expect(opts.method).toBe('POST');
   });
 
   it('body contains only { bedCode }', async () => {
     global.fetch.mockReturnValueOnce(ok());
-    await bedApi.unassignPatient(ORG, HOSP, 'B-01', RAW_TOKEN);
+    await bedApi.unassignPatient(ORG, CARESITE, 'B-01', RAW_TOKEN);
     const body = JSON.parse(global.fetch.mock.calls[0][1].body);
     expect(body).toEqual({ bedCode: 'B-01' });
   });
@@ -140,17 +140,17 @@ describe('bedApi.unassignPatient', () => {
 // ─── bedApi.listAll ───────────────────────────────────────────────────────────
 
 describe('bedApi.listAll', () => {
-  it('sends GET to /{orgName}/bed/{hospCode}/all', async () => {
+  it('sends GET to /{orgName}/bed/{careSiteCode}/all', async () => {
     global.fetch.mockReturnValueOnce(ok([]));
-    await bedApi.listAll(ORG, HOSP, RAW_TOKEN);
+    await bedApi.listAll(ORG, CARESITE, RAW_TOKEN);
     const [url, opts] = global.fetch.mock.calls[0];
-    expect(url).toBe(`${BASE}/${ORG}/bed/${HOSP}/all`);
+    expect(url).toBe(`${BASE}/${ORG}/bed/${CARESITE}/all`);
     expect(opts.method).toBe('GET');
   });
 
   it('sends Authorization header', async () => {
     global.fetch.mockReturnValueOnce(ok([]));
-    await bedApi.listAll(ORG, HOSP, RAW_TOKEN);
+    await bedApi.listAll(ORG, CARESITE, RAW_TOKEN);
     const headers = global.fetch.mock.calls[0][1].headers;
     expect(headers['Authorization']).toBe(TOKEN);
   });

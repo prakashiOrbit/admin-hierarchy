@@ -137,7 +137,7 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
     }));
 
   const handleCreate = async () => {
-    if (!isFormValid || !user?.orgName || !user?.hospitalCode) return;
+    if (!isFormValid || !user?.orgName || !user?.careSiteCode) return;
     const patientSeconds = parseInt(patientJwtHours, 10) * 3600;
     if (!patientJwtHours || isNaN(patientSeconds) || patientSeconds <= 0) {
       Alert.alert(t('common.invalid_input'), t('security_policy.err_invalid_duration'));
@@ -152,7 +152,7 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
       })),
     };
     try {
-      const result = await patientApi.create(user.orgName, user.hospitalCode, payload, token);
+      const result = await patientApi.create(user.orgName, user.careSiteCode, payload, token);
       const created = result?.data ?? result;
       const grants = buildConsentGrants();
       if (grants.length > 0) {
@@ -167,7 +167,7 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
           )
         );
       }
-      await organisationApi.updateHospitalJwtValidity(user.orgName, user.hospitalCode, { patientJwtValiditySeconds: patientSeconds }, token);
+      await organisationApi.updateCareSiteJwtValidity(user.orgName, user.careSiteCode, { patientJwtValiditySeconds: patientSeconds }, token);
       Alert.alert(
         t('messages.success'),
         t('messages.patient_registered', { code: form.patient.patientCode }),
@@ -346,7 +346,7 @@ export const CreatePatientScreen = ({ onCancel, onSuccess }) => {
         <View style={styles.banner}>
           <IconUser size={24} color={T.accent} />
           <Text style={styles.bannerText}>
-            {t('messages.register_patient_banner', { hospitalCode: user?.hospitalCode })}
+            {t('messages.register_patient_banner', { careSiteCode: user?.careSiteCode })}
           </Text>
         </View>
 

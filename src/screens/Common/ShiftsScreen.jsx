@@ -23,20 +23,20 @@ export const ShiftsScreen = ({ onNewNurse, onNewShift, onSelectNurse, onSelectSh
   const [mode, setModeInternal] = useState(modeProp || 'shifts');
   const setMode = (m) => { setModeInternal(m); onModeChange?.(m); };
 
-  const hasShiftPerm = user?.roles?.includes('permit.admin.shift') || user?.roles?.includes('HOSP_OWNER');
-  const hasNursePerm = user?.roles?.includes('permit.admin.nurse') || user?.roles?.includes('HOSP_OWNER');
+  const hasShiftPerm = user?.roles?.includes('permit.admin.shift') || user?.roles?.includes('CARESITE_OWNER');
+  const hasNursePerm = user?.roles?.includes('permit.admin.nurse') || user?.roles?.includes('CARESITE_OWNER');
 
   useEffect(() => {
-    if (!user?.orgName || !user?.hospitalCode) return;
+    if (!user?.orgName || !user?.careSiteCode) return;
     let cancelled = false;
     setLoading(true);
     
     Promise.all([
-      hasShiftPerm ? shiftApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
+      hasShiftPerm ? shiftApi.listAll(user.orgName, user.careSiteCode, token).catch(e => {
         if (e.status === 403) return [];
         throw e;
       }) : Promise.resolve([]),
-      hasNursePerm ? nurseApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
+      hasNursePerm ? nurseApi.listAll(user.orgName, user.careSiteCode, token).catch(e => {
         if (e.status === 403) return [];
         throw e;
       }) : Promise.resolve([]),
@@ -56,7 +56,7 @@ export const ShiftsScreen = ({ onNewNurse, onNewShift, onSelectNurse, onSelectSh
       .catch(e => { if (!cancelled) setError(e.message || t('shifts.load_failed')); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [user?.orgName, user?.hospitalCode, token, hasShiftPerm, hasNursePerm]);
+  }, [user?.orgName, user?.careSiteCode, token, hasShiftPerm, hasNursePerm]);
 
   const filteredShifts = shifts.filter(s =>
     s.wardCode?.toLowerCase().includes(query.toLowerCase()) ||

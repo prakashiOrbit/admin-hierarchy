@@ -5,7 +5,7 @@ import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card, SectionHeader, Avatar, RoleBadge, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
-import { IconHospital, IconUsers, IconPulse, IconLock, IconUserPlus } from '../../icons';
+import { IconCareSite, IconUsers, IconPulse, IconLock, IconUserPlus } from '../../icons';
 import { organisationApi, userApi, summaryApi } from '../../services/api';
 
 export const OrgDetailScreen = ({ org, onInviteOwner }) => {
@@ -14,11 +14,11 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
   const { token } = useAuth();
   const styles = createStyles(T);
 
-  const [hospitals, setHospitals] = useState([]);
+  const [careSites, setCareSites] = useState([]);
   const [owners, setOwners] = useState([]);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [hospError, setHospError] = useState(null);
+  const [careSiteError, setCareSiteError] = useState(null);
   const [ownersError, setOwnersError] = useState(null);
 
   const [currentOrg, setCurrentOrg] = useState(org);
@@ -50,16 +50,16 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
     if (!org?.orgName) return;
     let cancelled = false;
     setLoading(true);
-    setHospError(null);
+    setCareSiteError(null);
     setOwnersError(null);
 
-    const fetchHospitals = organisationApi.listHospitals(org.orgName, token)
+    const fetchCareSites = organisationApi.listCareSites(org.orgName, token)
       .then(data => {
         if (cancelled) return;
         const list = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
-        setHospitals(list);
+        setCareSites(list);
       })
-      .catch(err => { if (!cancelled) setHospError(err.message || t('orgs.error_load_hospitals')); });
+      .catch(err => { if (!cancelled) setCareSiteError(err.message || t('orgs.error_load_caresites')); });
 
     const fetchOwners = userApi.listOrgOwners(org.orgName, token)
       .then(data => {
@@ -73,7 +73,7 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
       .then(data => { if (!cancelled) setSummary(data); })
       .catch(() => {});
 
-    Promise.all([fetchHospitals, fetchOwners, fetchSummary]).finally(() => {
+    Promise.all([fetchCareSites, fetchOwners, fetchSummary]).finally(() => {
       if (!cancelled) setLoading(false);
     });
 
@@ -105,7 +105,7 @@ export const OrgDetailScreen = ({ org, onInviteOwner }) => {
         {/* Stats Grid */}
         <View style={styles.statsGrid}>
           {[
-            { label: t('orgs.stats.hospitals'), value: summary?.stats?.totalHospitals ?? hospitals.length, color: T.accent },
+            { label: t('orgs.stats.caresites'), value: summary?.stats?.totalCareSites ?? careSites.length, color: T.accent },
             { label: t('orgs.stats.users'), value: summary?.stats?.totalUsers ?? owners.length, color: '#2DD4BF' },
             { label: t('orgs.stats.devices'), value: summary?.devices ?? summary?.totalDevices ?? '—', color: '#22D3EE' },
           ].map((stat, i) => (
@@ -309,7 +309,7 @@ const createStyles = (T) => StyleSheet.create({
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
     marginTop: 2,
   },
-  hospIcon: {
+  careSiteIcon: {
     width: 32,
     height: 32,
     borderRadius: 8,
@@ -317,12 +317,12 @@ const createStyles = (T) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  hospName: {
+  careSiteName: {
     fontSize: 14,
     fontWeight: '600',
     color: T.text,
   },
-  hospMeta: {
+  careSiteMeta: {
     fontSize: 11,
     color: T.textFaint,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',

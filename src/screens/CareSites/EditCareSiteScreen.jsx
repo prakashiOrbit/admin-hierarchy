@@ -1,33 +1,41 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform, ActivityIndicator, Alert, Modal, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { organisationApi } from '../../services/api';
 import { Card, Field, TextInput, PhoneInput, Btn } from '../../components/Shared';
-import { IconHospital, IconUser, IconMail, IconLocation, IconBuilding } from '../../icons';
+import { IconCareSite, IconUser, IconMail, IconLocation, IconBuilding, IconChevron } from '../../icons';
 
-export const EditHospitalScreen = ({ hospital, onCancel, onSave }) => {
+const CARE_SITE_TYPES = [
+  { value: 'HOSPITAL',   labelKey: 'caresite.type_hospital' },
+  { value: 'CARE_HOME',  labelKey: 'caresite.type_care_home' },
+  { value: 'RESIDENCE',  labelKey: 'caresite.type_residence' },
+];
+
+export const EditCareSiteScreen = ({ careSite, onCancel, onSave }) => {
   const { t } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
   const styles = createStyles(T);
 
   const [loading, setLoading] = useState(false);
+  const [showTypePicker, setShowTypePicker] = useState(false);
   const [form, setForm] = useState({
-    hospitalName: hospital.hospitalName || '',
-    description: hospital.description || '',
+    careSiteName: careSite.careSiteName || '',
+    careSiteType: careSite.careSiteType || 'HOSPITAL',
+    description: careSite.description || '',
     myContact: {
-      name: hospital.myContact?.name || '',
-      email: hospital.myContact?.email || '',
-      phone: hospital.myContact?.phone || '',
+      name: careSite.myContact?.name || '',
+      email: careSite.myContact?.email || '',
+      phone: careSite.myContact?.phone || '',
     },
     myAddress: {
-      street1: hospital.myAddress?.street1 || '',
-      city: hospital.myAddress?.city || '',
-      state: hospital.myAddress?.state || '',
-      pincode: hospital.myAddress?.pincode || '',
-      country: hospital.myAddress?.country || '',
+      street1: careSite.myAddress?.street1 || '',
+      city: careSite.myAddress?.city || '',
+      state: careSite.myAddress?.state || '',
+      pincode: careSite.myAddress?.pincode || '',
+      country: careSite.myAddress?.country || '',
     },
   });
 
@@ -35,18 +43,18 @@ export const EditHospitalScreen = ({ hospital, onCancel, onSave }) => {
   const updateContact = (key, value) => setForm(prev => ({ ...prev, myContact: { ...prev.myContact, [key]: value } }));
   const updateAddress = (key, value) => setForm(prev => ({ ...prev, myAddress: { ...prev.myAddress, [key]: value } }));
 
-  const isFormValid = form.hospitalName && form.myContact.email;
+  const isFormValid = form.careSiteName && form.myContact.email;
 
   const handleSave = async () => {
     setLoading(true);
     try {
-      await organisationApi.updateHospital(user.orgName, {
-        hospitalId: hospital.hospitalId,
-        hospitalCode: hospital.hospitalCode,
+      await organisationApi.updateCareSite(user.orgName, {
+        careSiteId: careSite.careSiteId,
+        careSiteCode: careSite.careSiteCode,
         ...form,
       }, token);
-      Alert.alert(t('alerts.success'), t('alerts.hospital_updated'), [
-        { text: t('actions.ok'), onPress: () => onSave({ ...hospital, ...form }) }
+      Alert.alert(t('alerts.success'), t('alerts.caresite_updated'), [
+        { text: t('actions.ok'), onPress: () => onSave({ ...careSite, ...form }) }
       ]);
     } catch (err) {
       Alert.alert(t('alerts.error'), err.message || t('alerts.update_failed'));
@@ -60,47 +68,56 @@ export const EditHospitalScreen = ({ hospital, onCancel, onSave }) => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Banner */}
         <View style={styles.banner}>
-          <IconHospital size={20} color={T.accent} />
+          <IconCareSite size={20} color={T.accent} />
           <Text style={styles.bannerText}>
-            {t('hospital.edit_banner', { code: hospital.hospitalCode })}
+            {t('caresite.edit_banner', { code: careSite.careSiteCode })}
           </Text>
         </View>
 
         {/* Identity Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('hospital.identity_section')}</Text>
+          <Text style={styles.sectionTitle}>{t('caresite.identity_section')}</Text>
 
-          <Field label={t('hospital.code')}>
+          <Field label={t('caresite.code')}>
             <Card style={styles.readOnlyCard}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <IconBuilding size={16} color={T.textFaint} />
-                <Text style={styles.readOnlyText}>{hospital.hospitalCode}</Text>
+                <Text style={styles.readOnlyText}>{careSite.careSiteCode}</Text>
               </View>
             </Card>
           </Field>
 
-          <Field label={t('hospital.name')} required>
+          <Field label={t('caresite.name')} required>
             <TextInput
-              value={form.hospitalName}
-              onChangeText={v => updateRoot('hospitalName', v)}
-              placeholder={t('placeholders.hospital_name')}
+              value={form.careSiteName}
+              onChangeText={v => updateRoot('careSiteName', v)}
+              placeholder={t('placeholders.caresite_name')}
             />
           </Field>
 
-          <Field label={t('hospital.description')}>
+          <Field label={t('caresite.description')}>
             <TextInput
               value={form.description}
               onChangeText={v => updateRoot('description', v)}
-              placeholder={t('placeholders.hospital_description')}
+              placeholder={t('placeholders.caresite_description')}
             />
+          </Field>
+
+          <Field label={t('caresite.site_type')}>
+            <Card style={styles.selectCard} onPress={() => setShowTypePicker(true)}>
+              <Text style={styles.selectText}>
+                {t(CARE_SITE_TYPES.find(x => x.value === form.careSiteType)?.labelKey)}
+              </Text>
+              <IconChevron size={18} color={T.textDim} />
+            </Card>
           </Field>
         </View>
 
         {/* Contact Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('hospital.contact_section')}</Text>
+          <Text style={styles.sectionTitle}>{t('caresite.contact_section')}</Text>
 
-          <Field label={t('hospital.contact_name')}>
+          <Field label={t('caresite.contact_name')}>
             <TextInput
               value={form.myContact.name}
               onChangeText={v => updateContact('name', v)}
@@ -109,7 +126,7 @@ export const EditHospitalScreen = ({ hospital, onCancel, onSave }) => {
             />
           </Field>
 
-          <Field label={t('hospital.contact_email')} required>
+          <Field label={t('caresite.contact_email')} required>
             <TextInput
               value={form.myContact.email}
               onChangeText={v => updateContact('email', v.toLowerCase())}
@@ -118,16 +135,16 @@ export const EditHospitalScreen = ({ hospital, onCancel, onSave }) => {
             />
           </Field>
 
-          <Field label={t('hospital.contact_phone')}>
+          <Field label={t('caresite.contact_phone')}>
             <PhoneInput value={form.myContact.phone} onChangeText={v => updateContact('phone', v)} />
           </Field>
         </View>
 
         {/* Address Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('hospital.address_section')}</Text>
+          <Text style={styles.sectionTitle}>{t('caresite.address_section')}</Text>
 
-          <Field label={t('hospital.address_street')}>
+          <Field label={t('caresite.address_street')}>
             <TextInput
               value={form.myAddress.street1}
               onChangeText={v => updateAddress('street1', v)}
@@ -138,7 +155,7 @@ export const EditHospitalScreen = ({ hospital, onCancel, onSave }) => {
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label={t('hospital.address_city')}>
+              <Field label={t('caresite.address_city')}>
                 <TextInput
                   value={form.myAddress.city}
                   onChangeText={v => updateAddress('city', v)}
@@ -147,7 +164,7 @@ export const EditHospitalScreen = ({ hospital, onCancel, onSave }) => {
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label={t('hospital.address_state')}>
+              <Field label={t('caresite.address_state')}>
                 <TextInput
                   value={form.myAddress.state}
                   onChangeText={v => updateAddress('state', v)}
@@ -159,7 +176,7 @@ export const EditHospitalScreen = ({ hospital, onCancel, onSave }) => {
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label={t('hospital.address_country')}>
+              <Field label={t('caresite.address_country')}>
                 <TextInput
                   value={form.myAddress.country}
                   onChangeText={v => updateAddress('country', v)}
@@ -168,7 +185,7 @@ export const EditHospitalScreen = ({ hospital, onCancel, onSave }) => {
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label={t('hospital.address_pincode')}>
+              <Field label={t('caresite.address_pincode')}>
                 <TextInput
                   value={form.myAddress.pincode}
                   onChangeText={v => updateAddress('pincode', v)}
@@ -194,6 +211,26 @@ export const EditHospitalScreen = ({ hospital, onCancel, onSave }) => {
           </Btn>
         </View>
       </ScrollView>
+
+      {/* Site Type Picker Modal */}
+      <Modal visible={showTypePicker} transparent animationType="fade">
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowTypePicker(false)}>
+          <Card style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{t('caresite.select_type')}</Text>
+            {CARE_SITE_TYPES.map((ct) => (
+              <TouchableOpacity
+                key={ct.value}
+                style={[styles.localeOption, form.careSiteType === ct.value && { backgroundColor: T.accentSoft }]}
+                onPress={() => { updateRoot('careSiteType', ct.value); setShowTypePicker(false); }}
+              >
+                <Text style={[styles.localeOptionText, form.careSiteType === ct.value && { color: T.accent, fontWeight: '700' }]}>
+                  {t(ct.labelKey)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </Card>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };
@@ -225,5 +262,30 @@ const createStyles = (T) => StyleSheet.create({
     fontSize: 14,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
+  selectCard: {
+    height: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: T.surface,
+    paddingHorizontal: 12,
+  },
+  selectText: { color: T.text, fontSize: 14, fontWeight: '500' },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  modalContent: { padding: 16 },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: T.text,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  localeOption: { padding: 14, borderRadius: 8, marginBottom: 4 },
+  localeOptionText: { fontSize: 14, color: T.text },
   actionRow: { flexDirection: 'row', gap: 10, marginTop: 8 },
 });

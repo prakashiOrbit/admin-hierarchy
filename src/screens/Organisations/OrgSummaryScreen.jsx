@@ -5,7 +5,7 @@ import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { organisationApi, userApi, summaryApi } from '../../services/api';
 import { Card, SectionHeader, Btn } from '../../components/Shared';
-import { IconHospital, IconUsers, IconPulse, IconHeart, IconShield, IconDownload } from '../../icons';
+import { IconCareSite, IconUsers, IconPulse, IconHeart, IconShield, IconDownload } from '../../icons';
 
 export const OrgSummaryScreen = () => {
   const { t } = useTranslation();
@@ -13,7 +13,7 @@ export const OrgSummaryScreen = () => {
   const { user, token } = useAuth();
   const styles = createStyles(T);
   const [summary, setSummary] = useState(null);
-  const [hospitals, setHospitals] = useState([]);
+  const [careSites, setCareSites] = useState([]);
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,14 +22,14 @@ export const OrgSummaryScreen = () => {
     setLoading(true);
     setError(null);
     try {
-      const [summaryData, hospData, adminData] = await Promise.all([
+      const [summaryData, careSiteData, adminData] = await Promise.all([
         summaryApi.getOrgSummary(user.orgName, token).catch(() => null),
-        organisationApi.listHospitals(user.orgName, token).catch(() => []),
+        organisationApi.listCareSites(user.orgName, token).catch(() => []),
         userApi.listOrgAdmins(user.orgName, token).catch(() => []),
       ]);
       
       setSummary(summaryData);
-      setHospitals(Array.isArray(hospData) ? hospData : (hospData?.data || []));
+      setCareSites(Array.isArray(careSiteData) ? careSiteData : (careSiteData?.data || []));
       setAdmins(Array.isArray(adminData) ? adminData : (adminData?.data || []));
     } catch (err) {
       setError(err.message || t('orgs.error_load_summary'));
@@ -46,10 +46,10 @@ export const OrgSummaryScreen = () => {
 
   const stats = [
     {
-      label: t('orgs.stats.hospitals'),
-      value: fmt(summary?.stats?.totalHospitals || summary?.hospitals || hospitals.length),
+      label: t('orgs.stats.caresites'),
+      value: fmt(summary?.stats?.totalCareSites || summary?.careSites || careSites.length),
       sub: '',
-      icon: <IconHospital />,
+      icon: <IconCareSite />,
       color: T.accent,
     },
     {

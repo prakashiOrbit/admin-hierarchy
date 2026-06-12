@@ -130,7 +130,7 @@ export const EditPatientScreen = ({ patientDetail, onCancel, onSave }) => {
       ...(grants.length > 0 && { consentGrants: grants }),
     };
     try {
-      await patientApi.update(user.orgName, user.hospitalCode, p.patientCode, payload, token);
+      await patientApi.update(user.orgName, user.careSiteCode, p.patientCode, payload, token);
       Alert.alert(t('messages.saved'), t('messages.patient_updated'), [{ text: t('actions.ok'), onPress: () => onSave?.() }]);
     } catch (e) {
       Alert.alert(t('messages.error'), e.message || t('messages.failed_update_patient'));

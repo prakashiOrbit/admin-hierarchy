@@ -9,11 +9,11 @@ import { Card, SectionHeader, Btn, getGreeting } from '../../components/Shared';
 import { TopBar, BottomNav } from '../../components/Navigation';
 import { StatusPill } from '../../components/StatusPill';
 import { 
-  IconHospital, IconUsers, IconPulse, IconGateway, IconShield,
+  IconCareSite, IconUsers, IconPulse, IconGateway, IconShield,
   IconAlert, IconChevron, IconMenu, IconSettings, IconDashboard, IconBack, IconUser, IconLogout, IconBed, IconStethoscope, IconDoor, IconPatient, IconPlus, IconClock
 } from '../../icons';
-import { CreateHospAdminScreen } from '../Hospitals/CreateHospAdminScreen';
-import { HospAdminsScreen } from '../Hospitals/HospAdminsScreen';
+import { CreateCareSiteAdminScreen } from '../CareSites/CreateCareSiteAdminScreen';
+import { CareSiteAdminsScreen } from '../CareSites/CareSiteAdminsScreen';
 import { UserDetailScreen } from '../Users/UserDetailScreen';
 import { WardsScreen } from '../Wards/WardsScreen';
 import { CreateWardScreen } from '../Wards/CreateWardScreen';
@@ -76,13 +76,13 @@ const StatCard = ({ label, value, delta, icon, color, accent }) => {
 };
 
 
-const HospHomeContent = ({ role, onNavigate }) => {
+const CareSiteHomeContent = ({ role, onNavigate }) => {
   const { theme: T } = useTheme();
   const { t } = useTranslation();
   const { user, token } = useAuth();
   const styles = createStyles(T);
-  const isOwner = role === 'HOSP_OWNER';
-  const isAdmin = role === 'HOSP_ADMIN';
+  const isOwner = role === 'CARESITE_OWNER';
+  const isAdmin = role === 'CARESITE_ADMIN';
   const canEditPolicy = isOwner || isAdmin;
 
   const [homeStats, setHomeStats] = useState({ wards: null, beds: null, devices: null, staffing: null, patients: null, dayShiftNurses: null, eveningShiftNurses: null, nightShiftNurses: null });
@@ -98,12 +98,12 @@ const HospHomeContent = ({ role, onNavigate }) => {
   const handleEditPolicy = async () => {
     setPolicyFetching(true);
     try {
-      const hosp = await organisationApi.getHospitalByCode(user.orgName, user.hospitalCode, token);
+      const careSite = await organisationApi.getCareSiteByCode(user.orgName, user.careSiteCode, token);
       setPolicyForm({
-        adminHours: String(hosp.adminJwtValiditySeconds ? Math.round(hosp.adminJwtValiditySeconds / 3600) : ''),
-        doctorHours: String(hosp.doctorJwtValiditySeconds ? Math.round(hosp.doctorJwtValiditySeconds / 3600) : ''),
-        nurseHours: String(hosp.nurseJwtValiditySeconds ? Math.round(hosp.nurseJwtValiditySeconds / 3600) : ''),
-        patientHours: String(hosp.patientJwtValiditySeconds ? Math.round(hosp.patientJwtValiditySeconds / 3600) : ''),
+        adminHours: String(careSite.adminJwtValiditySeconds ? Math.round(careSite.adminJwtValiditySeconds / 3600) : ''),
+        doctorHours: String(careSite.doctorJwtValiditySeconds ? Math.round(careSite.doctorJwtValiditySeconds / 3600) : ''),
+        nurseHours: String(careSite.nurseJwtValiditySeconds ? Math.round(careSite.nurseJwtValiditySeconds / 3600) : ''),
+        patientHours: String(careSite.patientJwtValiditySeconds ? Math.round(careSite.patientJwtValiditySeconds / 3600) : ''),
       });
       setEditingPolicy(true);
     } catch (err) {
@@ -113,7 +113,7 @@ const HospHomeContent = ({ role, onNavigate }) => {
     }
   };
 
-  const handleSaveHospPolicy = async () => {
+  const handleSaveCareSitePolicy = async () => {
     const toSeconds = (h) => h.trim() === '' ? null : parseInt(h, 10) * 3600;
     const payload = {};
     if (isOwner) payload.adminJwtValiditySeconds = toSeconds(policyForm.adminHours);
@@ -127,7 +127,7 @@ const HospHomeContent = ({ role, onNavigate }) => {
     }
     setPolicyLoading(true);
     try {
-      await organisationApi.updateHospitalJwtValidity(user.orgName, user.hospitalCode, payload, token);
+      await organisationApi.updateCareSiteJwtValidity(user.orgName, user.careSiteCode, payload, token);
       setEditingPolicy(false);
     } catch (err) {
       Alert.alert(t('common.error'), err.message || t('security_policy.err_save_failed'));
@@ -137,13 +137,13 @@ const HospHomeContent = ({ role, onNavigate }) => {
   };
 
   useEffect(() => {
-    if (!user?.orgName || !user?.hospitalCode) { setHomeLoading(false); return; }
+    if (!user?.orgName || !user?.careSiteCode) { setHomeLoading(false); return; }
     const controller = new AbortController();
     let cancelled = false;
     const timer = setTimeout(() => {
     setHomeLoading(true);
     setHomeError(null);
-    summaryApi.getHospitalSummary(user.orgName, user.hospitalCode, token, { signal: controller.signal })
+    summaryApi.getCareSiteSummary(user.orgName, user.careSiteCode, token, { signal: controller.signal })
       .then(summary => {
         if (cancelled) return;
         setHomeStats({
@@ -170,14 +170,14 @@ const HospHomeContent = ({ role, onNavigate }) => {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [user?.orgName, user?.hospitalCode, token, reloadKey]);
+  }, [user?.orgName, user?.careSiteCode, token, reloadKey]);
 
   const fmt = (v) => v == null ? '—' : String(v);
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>
       <View style={styles.greetingHeader}>
-        <Text style={styles.date}>{new Date().toLocaleDateString(t('i18n_locale_tag', 'en-US'), { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()} · {user?.hospitalCode || 'HOSPITAL'}</Text>
+        <Text style={styles.date}>{new Date().toLocaleDateString(t('i18n_locale_tag', 'en-US'), { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()} · {user?.careSiteCode || 'CARESITE'}</Text>
         <Text style={styles.greeting}>{getGreeting(t, user?.userName || 'User')}</Text>
         {homeLoading ? (
           <ActivityIndicator size="small" color={T.textDim} style={{ marginTop: 4 }} />
@@ -211,7 +211,7 @@ const HospHomeContent = ({ role, onNavigate }) => {
         <Card style={[styles.errorCard, { borderColor: T.border, backgroundColor: T.surfaceAlt || T.surface }]}>
           <View style={styles.errorRow}>
             <IconShield size={18} color={T.accent} />
-            <Text style={[styles.errorText, { color: T.textDim }]}>{t('dashboard.hosp_onboarding_hint', 'Welcome! Start by adding wards, beds, and assigning staff to get your hospital operational.')}</Text>
+            <Text style={[styles.errorText, { color: T.textDim }]}>{t('dashboard.caresite_onboarding_hint', 'Welcome! Start by adding wards, beds, and assigning staff to get your careSite operational.')}</Text>
           </View>
         </Card>
       )}
@@ -247,7 +247,7 @@ const HospHomeContent = ({ role, onNavigate }) => {
         </Card>
       </View>
 
-      {/* Security Policy — HOSP_OWNER manages admin+doctor+nurse+patient; HOSP_ADMIN manages doctor+nurse+patient */}
+      {/* Security Policy — CARESITE_OWNER manages admin+doctor+nurse+patient; CARESITE_ADMIN manages doctor+nurse+patient */}
       {canEditPolicy && (
         <View style={styles.section}>
           <View style={styles.policyHeaderRow}>
@@ -288,7 +288,7 @@ const HospHomeContent = ({ role, onNavigate }) => {
                 ))}
                 <View style={styles.policyActions}>
                   <Btn variant="surface" size="sm" style={{ flex: 1 }} onPress={() => setEditingPolicy(false)} disabled={policyLoading}>{t('common.cancel')}</Btn>
-                  <Btn variant="primary" size="sm" style={{ flex: 1 }} onPress={handleSaveHospPolicy} disabled={policyLoading}>
+                  <Btn variant="primary" size="sm" style={{ flex: 1 }} onPress={handleSaveCareSitePolicy} disabled={policyLoading}>
                     {policyLoading ? <ActivityIndicator color="#fff" size="small" /> : t('common.save')}
                   </Btn>
                 </View>
@@ -306,9 +306,9 @@ const HospHomeContent = ({ role, onNavigate }) => {
   );
 };
 
-export const HospDashboard = ({ navigation, route }) => {
-  const role = route.params?.role || 'HOSP_OWNER';
-  const isOwner = role === 'HOSP_OWNER';
+export const CareSiteDashboard = ({ navigation, route }) => {
+  const role = route.params?.role || 'CARESITE_OWNER';
+  const isOwner = role === 'CARESITE_OWNER';
   const isNurse = role === 'NURSE';
   const isDoctor = role === 'DOCTOR';
   const isPatient = role === 'PATIENT';
@@ -324,7 +324,7 @@ export const HospDashboard = ({ navigation, route }) => {
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedPatientId, setSelectedPatientId] = useState(null);
   const [selectedDoctorId, setSelectedDoctorId] = useState(null);
-  const [isInvitingHospAdmin, setIsInvitingHospAdmin] = useState(false);
+  const [isInvitingCareSiteAdmin, setIsInvitingCareSiteAdmin] = useState(false);
   const [isProvisioningWard, setIsProvisioningWard] = useState(false);
   const [selectedWardForBed, setSelectedWardForBed] = useState(null);
   const [isProvisioningGateway, setIsProvisioningGateway] = useState(false);
@@ -352,7 +352,7 @@ export const HospDashboard = ({ navigation, route }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const drawerAnim = React.useRef(new Animated.Value(-width)).current;
 
-  const isDeep = isInvitingHospAdmin || selectedUserId || isProvisioningWard || selectedWardForBed || isProvisioningGateway || isProvisioningDevice || !!selectedGatewayCode || !!selectedDeviceForConfig || isRegisteringPatient || selectedPatientId || isCreatingDoctor || selectedDoctorId || isCreatingNurse || isCreatingShift || !!assignmentData || !!selectedWardForEdit || !!selectedPatientForEdit || !!selectedDoctorForEdit || selectedNurseId || !!selectedNurseForEdit || selectedShiftId || !!selectedShiftForEdit || !!assigningGatewayCode || isAssigningDevice || !!selectedUserForEdit || isCreatingNursingStation || !!selectedNursingStation;
+  const isDeep = isInvitingCareSiteAdmin || selectedUserId || isProvisioningWard || selectedWardForBed || isProvisioningGateway || isProvisioningDevice || !!selectedGatewayCode || !!selectedDeviceForConfig || isRegisteringPatient || selectedPatientId || isCreatingDoctor || selectedDoctorId || isCreatingNurse || isCreatingShift || !!assignmentData || !!selectedWardForEdit || !!selectedPatientForEdit || !!selectedDoctorForEdit || selectedNurseId || !!selectedNurseForEdit || selectedShiftId || !!selectedShiftForEdit || !!assigningGatewayCode || isAssigningDevice || !!selectedUserForEdit || isCreatingNursingStation || !!selectedNursingStation;
 
   useEffect(() => {
     const backAction = () => {
@@ -370,7 +370,7 @@ export const HospDashboard = ({ navigation, route }) => {
   }, [drawerOpen, activeTab, isDeep]);
 
   const handleBackPress = () => {
-    setIsInvitingHospAdmin(false);
+    setIsInvitingCareSiteAdmin(false);
     setSelectedUserId(null);
     setSelectedPatientId(null);
     setSelectedDoctorId(null);
@@ -438,7 +438,7 @@ export const HospDashboard = ({ navigation, route }) => {
   ];
 
   const renderContent = () => {
-    if (isInvitingHospAdmin) return <CreateHospAdminScreen onCancel={() => setIsInvitingHospAdmin(false)} />;
+    if (isInvitingCareSiteAdmin) return <CreateCareSiteAdminScreen onCancel={() => setIsInvitingCareSiteAdmin(false)} />;
     if (isProvisioningWard) return <CreateWardScreen onCancel={() => setIsProvisioningWard(false)} />;
     if (selectedWardForBed) return <CreateBedScreen onCancel={() => setSelectedWardForBed(null)} wardCode={selectedWardForBed} />;
     if (isProvisioningGateway) return <CreateGatewayScreen onCancel={() => setIsProvisioningGateway(false)} />;
@@ -451,8 +451,8 @@ export const HospDashboard = ({ navigation, route }) => {
     if (selectedGatewayCode) return <GatewayDetailScreen gatewayCode={selectedGatewayCode} onBack={() => setSelectedGatewayCode(null)} onAssign={(code) => { setSelectedGatewayCode(null); setAssigningGatewayCode(code); }} />;
     if (selectedDeviceForConfig) return <AddDeviceConfigScreen device={selectedDeviceForConfig} onCancel={() => setSelectedDeviceForConfig(null)} onSuccess={() => setSelectedDeviceForConfig(null)} />;
     if (isRegisteringPatient) return <CreatePatientScreen onCancel={() => setIsRegisteringPatient(false)} />;
-    if (isCreatingDoctor) return <CreateDoctorScreen onCancel={() => setIsCreatingDoctor(false)} hospCode={user?.hospitalCode} />;
-    if (isCreatingNurse) return <CreateNurseScreen onCancel={() => setIsCreatingNurse(false)} hospCode={user?.hospitalCode} />;
+    if (isCreatingDoctor) return <CreateDoctorScreen onCancel={() => setIsCreatingDoctor(false)} careSiteCode={user?.careSiteCode} />;
+    if (isCreatingNurse) return <CreateNurseScreen onCancel={() => setIsCreatingNurse(false)} careSiteCode={user?.careSiteCode} />;
     if (isCreatingShift) return <CreateShiftScreen onCancel={() => setIsCreatingShift(false)} />;
     if (assignmentData) return <AssignmentScreen initialPatientId={assignmentData.patientId} initialDoctorId={assignmentData.doctorId} onCancel={() => setAssignmentData(null)} />;
     if (selectedWardForEdit) return <EditWardScreen ward={selectedWardForEdit} onCancel={() => setSelectedWardForEdit(null)} onSave={() => setSelectedWardForEdit(null)} onDelete={() => setSelectedWardForEdit(null)} />;
@@ -466,8 +466,8 @@ export const HospDashboard = ({ navigation, route }) => {
     if (selectedPatientId) return <PatientDetailScreen patientId={selectedPatientId} onBack={() => setSelectedPatientId(null)} onAssign={() => setAssignmentData({ patientId: selectedPatientId })} onEdit={(detail) => setSelectedPatientForEdit(detail)} />;
     if (selectedDoctorId) return <DoctorDetailScreen doctorId={selectedDoctorId} onBack={() => setSelectedDoctorId(null)} onAssign={() => setAssignmentData({ doctorId: selectedDoctorId })} onEdit={(d) => setSelectedDoctorForEdit(d)} />;
     switch (activeTab) {
-      case 'home': return <HospHomeContent role={role} onNavigate={handleTabChange} />;
-      case 'admins': return <HospAdminsScreen onInvite={() => setIsInvitingHospAdmin(true)} onSelectUser={setSelectedUserId} />;
+      case 'home': return <CareSiteHomeContent role={role} onNavigate={handleTabChange} />;
+      case 'admins': return <CareSiteAdminsScreen onInvite={() => setIsInvitingCareSiteAdmin(true)} onSelectUser={setSelectedUserId} />;
       case 'wards': return <WardsScreen onNewWard={() => setIsProvisioningWard(true)} onNewBed={setSelectedWardForBed} onEditWard={setSelectedWardForEdit} />;
       case 'devices': return <DevicesScreen onNewGateway={(isNurse || isDoctor || isPatient) ? undefined : () => setIsProvisioningGateway(true)} onNewDevice={(isNurse || isDoctor || isPatient) ? undefined : () => setIsProvisioningDevice(true)} onGatewayPress={setSelectedGatewayCode} onDevicePress={setSelectedDeviceForConfig} onDeviceAssign={(isNurse || isDoctor || isPatient) ? undefined : () => setIsAssigningDevice(true)} mode={devicesMode} onModeChange={setDevicesMode} />;
       case 'patients': return <PatientsScreen onNewPatient={() => setIsRegisteringPatient(true)} onSelectPatient={setSelectedPatientId} />;
@@ -475,12 +475,12 @@ export const HospDashboard = ({ navigation, route }) => {
       case 'shifts': return <ShiftsScreen onNewNurse={() => setIsCreatingNurse(true)} onNewShift={() => setIsCreatingShift(true)} onSelectNurse={setSelectedNurseId} onSelectShift={setSelectedShiftId} mode={shiftsMode} onModeChange={setShiftsMode} />;
       case 'nursing': return <NursingStationsScreen onNewStation={() => setIsCreatingNursingStation(true)} onSelectStation={setSelectedNursingStation} />;
       case 'settings': return <SettingsScreen onLogout={() => { logout(); navigation.replace('Login'); }} />;
-      default: return <HospHomeContent role={role} onNavigate={handleTabChange} />;
+      default: return <CareSiteHomeContent role={role} onNavigate={handleTabChange} />;
     }
   };
 
   const getTitle = () => {
-    if (isInvitingHospAdmin) return t('dashboard.invite_hosp_admin');
+    if (isInvitingCareSiteAdmin) return t('dashboard.invite_caresite_admin');
     if (isProvisioningWard) return t('dashboard.create_ward');
     if (selectedWardForBed) return t('dashboard.provision_bed');
     if (isProvisioningGateway) return t('dashboard.create_gateway');
@@ -508,8 +508,8 @@ export const HospDashboard = ({ navigation, route }) => {
     if (selectedPatientId) return t('dashboard.patient_details');
     if (selectedDoctorId) return t('dashboard.doctor_details');
     switch (activeTab) {
-      case 'home': return t('dashboard.hosp_console');
-      case 'admins': return t('dashboard.hosp_admins');
+      case 'home': return t('dashboard.caresite_console');
+      case 'admins': return t('dashboard.caresite_admins');
       case 'wards': return t('dashboard.wards_beds');
       case 'devices': return t('dashboard.gateways_devices');
       case 'patients': return t('dashboard.patient_registry');
@@ -517,7 +517,7 @@ export const HospDashboard = ({ navigation, route }) => {
       case 'shifts': return t('dashboard.nurses_shifts');
       case 'nursing': return t('dashboard.nursing_stations_title');
       case 'settings': return t('dashboard.system_settings');
-      default: return t('dashboard.hosp_console');
+      default: return t('dashboard.caresite_console');
     }
   };
 
@@ -528,7 +528,7 @@ export const HospDashboard = ({ navigation, route }) => {
         <View style={{ flex: 1, paddingTop: insets.top }}>
           <View style={styles.drawerHeader}>
             <Text style={styles.drawerName}>{user?.userName || 'User'}</Text>
-            <Text style={styles.drawerRole}>{isOwner ? t('dashboard.hosp_owner') : isNurse ? t('dashboard.nurse') : isDoctor ? t('dashboard.doctor') : isPatient ? t('dashboard.patient') : t('dashboard.hosp_administrator')}</Text>
+            <Text style={styles.drawerRole}>{isOwner ? t('dashboard.caresite_owner') : isNurse ? t('dashboard.nurse') : isDoctor ? t('dashboard.doctor') : isPatient ? t('dashboard.patient') : t('dashboard.caresite_administrator')}</Text>
           </View>
           <ScrollView style={styles.drawerMenu}>
             <TouchableOpacity style={styles.drawerItem} onPress={() => { handleTabChange('home'); toggleDrawer(); }}><IconDashboard size={20} color={T.textDim} /><Text style={styles.drawerItemText}>{t('dashboard.title')}</Text></TouchableOpacity>

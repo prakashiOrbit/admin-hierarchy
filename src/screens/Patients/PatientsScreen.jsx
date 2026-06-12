@@ -21,14 +21,14 @@ export const PatientsScreen = ({ onNewPatient, onSelectPatient }) => {
   const [filter, setFilter] = useState('ALL');
 
   useEffect(() => {
-    if (!user?.orgName || !user?.hospitalCode) return;
+    if (!user?.orgName || !user?.careSiteCode) return;
     let cancelled = false;
-    patientApi.listAll(user.orgName, user.hospitalCode, token)
+    patientApi.listAll(user.orgName, user.careSiteCode, token)
       .then(data => { if (!cancelled) setPatients(Array.isArray(data) ? data : []); })
       .catch(e => { if (!cancelled) setError(e.message); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [user?.orgName, user?.hospitalCode, token]);
+  }, [user?.orgName, user?.careSiteCode, token]);
 
   const filtered = patients.filter(p => {
     const fullName = `${p.firstName || ''} ${p.lastName || ''}`.trim();

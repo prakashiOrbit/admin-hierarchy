@@ -31,20 +31,20 @@ export const AssignmentScreen = ({
   const [query, setQuery] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const hasDoctorPerm = user?.roles?.includes('permit.admin.doctor') || user?.roles?.includes('HOSP_OWNER');
-  const hasPatientPerm = user?.roles?.includes('permit.admin.patient') || user?.roles?.includes('HOSP_OWNER');
+  const hasDoctorPerm = user?.roles?.includes('permit.admin.doctor') || user?.roles?.includes('CARESITE_OWNER');
+  const hasPatientPerm = user?.roles?.includes('permit.admin.patient') || user?.roles?.includes('CARESITE_OWNER');
 
   useEffect(() => {
-    if (!user?.orgName || !user?.hospitalCode) return;
+    if (!user?.orgName || !user?.careSiteCode) return;
     let cancelled = false;
     setLoading(true);
     setError(null);
     Promise.all([
-      hasDoctorPerm ? doctorApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
+      hasDoctorPerm ? doctorApi.listAll(user.orgName, user.careSiteCode, token).catch(e => {
         if (e.status === 403) return [];
         throw e;
       }) : Promise.resolve([]),
-      hasPatientPerm ? patientApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
+      hasPatientPerm ? patientApi.listAll(user.orgName, user.careSiteCode, token).catch(e => {
         if (e.status === 403) return [];
         throw e;
       }) : Promise.resolve([]),
@@ -63,7 +63,7 @@ export const AssignmentScreen = ({
       .catch(err => { if (!cancelled) setError(getApiErrorMessage(err)); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [user?.orgName, user?.hospitalCode, token, hasDoctorPerm, hasPatientPerm]);
+  }, [user?.orgName, user?.careSiteCode, token, hasDoctorPerm, hasPatientPerm]);
 
   const filteredDoctors = doctors.filter(d =>
     (`${d.firstName} ${d.lastName}`).toLowerCase().includes(query.toLowerCase()) ||
@@ -83,14 +83,14 @@ export const AssignmentScreen = ({
 
   const handleFinish = async () => {
     if (!selectedDoctor || selectedPatients.length === 0) return;
-    if (!user?.orgName || !user?.hospitalCode) return;
+    if (!user?.orgName || !user?.careSiteCode) return;
     setSaving(true);
     const payload = selectedPatients.map(patientCode => ({
       doctorCode: selectedDoctor.doctorCode,
       patientCode,
     }));
     try {
-      await assignmentApi.assign(user.orgName, user.hospitalCode, payload, token);
+      await assignmentApi.assign(user.orgName, user.careSiteCode, payload, token);
       Alert.alert(
         t('common.success'),
         t('assignments.assigned_success_msg', { name: selectedDoctor.lastName, count: selectedPatients.length }),

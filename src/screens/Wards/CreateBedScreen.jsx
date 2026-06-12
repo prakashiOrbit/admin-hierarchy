@@ -25,9 +25,9 @@ export const CreateBedScreen = ({ onCancel, onSuccess, wardCode }) => {
   const [showGatewayPicker, setShowGatewayPicker] = useState(false);
 
   useEffect(() => {
-    if (!user?.orgName || !user?.hospitalCode) return;
+    if (!user?.orgName || !user?.careSiteCode) return;
     setLoadingGateways(true);
-    gatewayApi.listAll(user.orgName, user.hospitalCode, token)
+    gatewayApi.listAll(user.orgName, user.careSiteCode, token)
       .then(data => setGateways(Array.isArray(data) ? data : []))
       .catch(() => setGateways([]))
       .finally(() => setLoadingGateways(false));
@@ -38,12 +38,12 @@ export const CreateBedScreen = ({ onCancel, onSuccess, wardCode }) => {
   const isFormValid = form.bedCode && form.wardCode;
 
   const handleCreate = async () => {
-    if (!isFormValid || !user?.orgName || !user?.hospitalCode) return;
+    if (!isFormValid || !user?.orgName || !user?.careSiteCode) return;
     setSaving(true);
     try {
-      await bedApi.create(user.orgName, user.hospitalCode, form, token);
+      await bedApi.create(user.orgName, user.careSiteCode, form, token);
       if (form.gatewayCode) {
-        await gatewayApi.assignToBed(user.orgName, user.hospitalCode, {
+        await gatewayApi.assignToBed(user.orgName, user.careSiteCode, {
           gatewayCode: form.gatewayCode,
           bedCode: form.bedCode,
         }, token);

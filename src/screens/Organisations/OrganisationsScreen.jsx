@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { organisationApi } from '../../services/api';
 import { Card, Btn } from '../../components/Shared';
 import { StatusPill } from '../../components/StatusPill';
-import { IconSearch, IconFilter, IconHospital, IconUsers, IconPulse } from '../../icons';
+import { IconSearch, IconFilter, IconCareSite, IconUsers, IconPulse } from '../../icons';
 
 export const OrganisationsScreen = ({ onSelectOrg }) => {
   const { t } = useTranslation();
@@ -89,11 +89,11 @@ export const OrganisationsScreen = ({ onSelectOrg }) => {
               {t('common.all')} · {orgs.length}
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setFilter('Hospital')}
-            style={[styles.chip, filter === 'Hospital' && styles.chipActive]}
+          <TouchableOpacity onPress={() => setFilter('CareSite')}
+            style={[styles.chip, filter === 'CareSite' && styles.chipActive]}
           >
-            <Text style={[styles.chipText, filter === 'Hospital' && styles.chipTextActive]}>
-              {t('dashboard.hospitals')} · {orgs.filter(o => o.orgType === 'HOSPITAL').length}
+            <Text style={[styles.chipText, filter === 'CareSite' && styles.chipTextActive]}>
+              {t('dashboard.caresites')} · {orgs.filter(o => o.orgType === 'CARESITE').length}
             </Text>
           </TouchableOpacity>
         </ScrollView>
@@ -131,7 +131,7 @@ export const OrganisationsScreen = ({ onSelectOrg }) => {
                   
                   <View style={styles.statsRow}>
                     <View style={styles.statItem}>
-                      <IconHospital size={14} color={T.textDim} />
+                      <IconCareSite size={14} color={T.textDim} />
                       <Text style={styles.statValue}>{org.orgType ? t(`orgs.types.${org.orgType}`) : t('common.na')}</Text>
                     </View>
                     <View style={styles.statItem}>

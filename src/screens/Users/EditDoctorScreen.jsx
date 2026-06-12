@@ -49,7 +49,7 @@ export const EditDoctorScreen = ({ doctor, onCancel, onSave }) => {
       myAddress: { city: form.city, state: form.state },
     };
     try {
-      await doctorApi.update(user.orgName, doctor.hospitalCode || user.hospitalCode, doctor.doctorCode, payload, token);
+      await doctorApi.update(user.orgName, doctor.careSiteCode || user.careSiteCode, doctor.doctorCode, payload, token);
       Alert.alert(t('common.success'), t('users.doctor_updated'), [{ text: t('common.done'), onPress: () => onSave?.() }]);
     } catch (e) {
       Alert.alert(t('common.error'), e.message || t('users.update_failed_doctor'));

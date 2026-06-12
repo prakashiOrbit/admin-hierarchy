@@ -5,7 +5,13 @@ import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { organisationApi, getApiErrorMessage } from '../../services/api';
 import { Card, Field, TextInput, PhoneInput, Btn } from '../../components/Shared';
-import { IconHospital, IconUser, IconMail, IconLocation, IconShield, IconChevron } from '../../icons';
+import { IconCareSite, IconUser, IconMail, IconLocation, IconShield, IconChevron } from '../../icons';
+
+const CARE_SITE_TYPES = [
+  { value: 'HOSPITAL',   labelKey: 'caresite.type_hospital' },
+  { value: 'CARE_HOME',  labelKey: 'caresite.type_care_home' },
+  { value: 'RESIDENCE',  labelKey: 'caresite.type_residence' },
+];
 
 const LOCALES = [
   { code: 'en', label: 'English' },
@@ -18,7 +24,7 @@ const LOCALES = [
   { code: 'rm', label: 'Rumantsch' },
 ];
 
-export const CreateHospitalScreen = ({ onCancel }) => {
+export const CreateCareSiteScreen = ({ onCancel }) => {
   const { t, i18n } = useTranslation();
   const { theme: T } = useTheme();
   const { user, token } = useAuth();
@@ -26,9 +32,11 @@ export const CreateHospitalScreen = ({ onCancel }) => {
 
   const [loading, setLoading] = useState(false);
   const [showLocalePicker, setShowLocalePicker] = useState(false);
+  const [showTypePicker, setShowTypePicker] = useState(false);
   const [form, setForm] = useState({
-    hospitalName: '',
-    hospitalCode: '',
+    careSiteName: '',
+    careSiteCode: '',
+    careSiteType: 'HOSPITAL',
     description: '',
     preferredLocale: (i18n.language || 'en').split('-')[0],
     myAddress: {
@@ -64,7 +72,7 @@ export const CreateHospitalScreen = ({ onCancel }) => {
     }));
   };
 
-  const isFormValid = form.hospitalName && form.hospitalCode && form.myContact.email && form.ownerJwtValidityHours;
+  const isFormValid = form.careSiteName && form.careSiteCode && form.myContact.email && form.ownerJwtValidityHours;
 
   const handleCreate = async () => {
     if (!user?.orgName) {
@@ -78,8 +86,8 @@ export const CreateHospitalScreen = ({ onCancel }) => {
         ...form,
         ownerJwtValiditySeconds: parseInt(form.ownerJwtValidityHours, 10) * 3600,
       };
-      await organisationApi.createHospital(user.orgName, payload, token);
-      Alert.alert(t('alerts.success'), t('alerts.hospital_created'), [
+      await organisationApi.createCareSite(user.orgName, payload, token);
+      Alert.alert(t('alerts.success'), t('alerts.caresite_created'), [
         { text: t('actions.ok'), onPress: onCancel }
       ]);
     } catch (error) {
@@ -95,45 +103,54 @@ export const CreateHospitalScreen = ({ onCancel }) => {
         <View style={styles.banner}>
           <IconShield color={T.accent} size={20} />
           <Text style={styles.bannerText}>
-            {t('hospital.provision_banner')}
+            {t('caresite.provision_banner')}
           </Text>
         </View>
 
         {/* Identity Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('hospital.identity_section')}</Text>
+          <Text style={styles.sectionTitle}>{t('caresite.identity_section')}</Text>
 
-          <Field label={t('hospital.code')} required>
+          <Field label={t('caresite.code')} required>
             <TextInput
-              value={form.hospitalCode}
-              onChangeText={(v) => updateRoot('hospitalCode', v)}
+              value={form.careSiteCode}
+              onChangeText={(v) => updateRoot('careSiteCode', v)}
               autoCapitalize="characters"
-              placeholder={t('placeholders.hospital_code')}
+              placeholder={t('placeholders.caresite_code')}
             />
           </Field>
 
-          <Field label={t('hospital.name')} required>
+          <Field label={t('caresite.name')} required>
             <TextInput
-              value={form.hospitalName}
-              onChangeText={(v) => updateRoot('hospitalName', v)}
-              placeholder={t('placeholders.hospital_name')}
+              value={form.careSiteName}
+              onChangeText={(v) => updateRoot('careSiteName', v)}
+              placeholder={t('placeholders.caresite_name')}
             />
           </Field>
 
-          <Field label={t('hospital.description')}>
+          <Field label={t('caresite.description')}>
             <TextInput
               value={form.description}
               onChangeText={(v) => updateRoot('description', v)}
-              placeholder={t('placeholders.hospital_description')}
+              placeholder={t('placeholders.caresite_description')}
             />
+          </Field>
+
+          <Field label={t('caresite.site_type')}>
+            <Card style={styles.selectCard} onPress={() => setShowTypePicker(true)}>
+              <Text style={styles.selectText}>
+                {t(CARE_SITE_TYPES.find(x => x.value === form.careSiteType)?.labelKey)}
+              </Text>
+              <IconChevron size={18} color={T.textDim} />
+            </Card>
           </Field>
         </View>
 
         {/* Contact Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('hospital.contact_section')}</Text>
+          <Text style={styles.sectionTitle}>{t('caresite.contact_section')}</Text>
 
-          <Field label={t('hospital.contact_name')}>
+          <Field label={t('caresite.contact_name')}>
             <TextInput
               value={form.myContact.name}
               onChangeText={(v) => updateContact('name', v)}
@@ -142,7 +159,7 @@ export const CreateHospitalScreen = ({ onCancel }) => {
             />
           </Field>
 
-          <Field label={t('hospital.contact_email')} required>
+          <Field label={t('caresite.contact_email')} required>
             <TextInput
               value={form.myContact.email}
               onChangeText={(v) => updateContact('email', v.toLowerCase())}
@@ -151,7 +168,7 @@ export const CreateHospitalScreen = ({ onCancel }) => {
             />
           </Field>
 
-          <Field label={t('hospital.contact_phone')}>
+          <Field label={t('caresite.contact_phone')}>
             <PhoneInput value={form.myContact.phone} onChangeText={v => updateContact('phone', v)} />
           </Field>
 
@@ -167,9 +184,9 @@ export const CreateHospitalScreen = ({ onCancel }) => {
 
         {/* Address Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('hospital.address_section')}</Text>
+          <Text style={styles.sectionTitle}>{t('caresite.address_section')}</Text>
 
-          <Field label={t('hospital.address_street')}>
+          <Field label={t('caresite.address_street')}>
             <TextInput
               value={form.myAddress.street1}
               onChangeText={(v) => updateAddress('street1', v)}
@@ -180,7 +197,7 @@ export const CreateHospitalScreen = ({ onCancel }) => {
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label={t('hospital.address_city')}>
+              <Field label={t('caresite.address_city')}>
                 <TextInput
                   value={form.myAddress.city}
                   onChangeText={(v) => updateAddress('city', v)}
@@ -189,7 +206,7 @@ export const CreateHospitalScreen = ({ onCancel }) => {
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label={t('hospital.address_state')}>
+              <Field label={t('caresite.address_state')}>
                 <TextInput
                   value={form.myAddress.state}
                   onChangeText={(v) => updateAddress('state', v)}
@@ -201,7 +218,7 @@ export const CreateHospitalScreen = ({ onCancel }) => {
 
           <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Field label={t('hospital.address_country')}>
+              <Field label={t('caresite.address_country')}>
                 <TextInput
                   value={form.myAddress.country}
                   onChangeText={(v) => updateAddress('country', v)}
@@ -210,7 +227,7 @@ export const CreateHospitalScreen = ({ onCancel }) => {
               </Field>
             </View>
             <View style={{ flex: 1 }}>
-              <Field label={t('hospital.address_pincode')}>
+              <Field label={t('caresite.address_pincode')}>
                 <TextInput
                   value={form.myAddress.pincode}
                   onChangeText={(v) => updateAddress('pincode', v)}
@@ -248,6 +265,26 @@ export const CreateHospitalScreen = ({ onCancel }) => {
           </Btn>
         </View>
       </ScrollView>
+
+      {/* Site Type Picker Modal */}
+      <Modal visible={showTypePicker} transparent animationType="fade">
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowTypePicker(false)}>
+          <Card style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{t('caresite.select_type')}</Text>
+            {CARE_SITE_TYPES.map((ct) => (
+              <TouchableOpacity
+                key={ct.value}
+                style={[styles.localeOption, form.careSiteType === ct.value && { backgroundColor: T.accentSoft }]}
+                onPress={() => { updateRoot('careSiteType', ct.value); setShowTypePicker(false); }}
+              >
+                <Text style={[styles.localeOptionText, form.careSiteType === ct.value && { color: T.accent, fontWeight: '700' }]}>
+                  {t(ct.labelKey)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </Card>
+        </TouchableOpacity>
+      </Modal>
 
       {/* Locale Picker Modal */}
       <Modal visible={showLocalePicker} transparent animationType="fade">

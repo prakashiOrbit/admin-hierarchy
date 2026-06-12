@@ -4,41 +4,41 @@ const ROLES = {
   PLATFORM_ADMIN: { label: 'Platform Admin', short: 'PLATFORM',  color: '#A78BFA', bg: 'rgba(167,139,250,.14)' },
   ORG_OWNER:      { label: 'Org Owner',      short: 'ORG OWNER', color: '#818CF8', bg: 'rgba(129,140,248,.14)' },
   ORG_ADMIN:      { label: 'Org Admin',      short: 'ORG ADMIN', color: '#60A5FA', bg: 'rgba(96,165,250,.14)'  },
-  HOSP_OWNER:     { label: 'Hosp Owner',     short: 'HOSP OWNER',color: '#2DD4BF', bg: 'rgba(45,212,191,.14)' },
-  HOSP_ADMIN:     { label: 'Hosp Admin',     short: 'HOSP ADMIN',color: '#22D3EE', bg: 'rgba(34,211,238,.14)' },
+  CARESITE_OWNER:     { label: 'CareSite Owner',     short: 'CARESITE OWNER',color: '#2DD4BF', bg: 'rgba(45,212,191,.14)' },
+  CARESITE_ADMIN:     { label: 'CareSite Admin',     short: 'CARESITE ADMIN',color: '#22D3EE', bg: 'rgba(34,211,238,.14)' },
   DOCTOR:         { label: 'Doctor',         short: 'DOCTOR',    color: '#34D399', bg: 'rgba(52,211,153,.14)' },
   NURSE:          { label: 'Nurse',          short: 'NURSE',     color: '#34D399', bg: 'rgba(52,211,153,.14)' },
 };
 
 const ORGS = [
-  { id: 'cleveland', name: 'cleveland-clinic', display: 'Cleveland Clinic',  type: 'Health System', hospitals: 14, users: 1284, devices: 4218, status: 'ACTIVE',  locale: 'en-US' },
-  { id: 'stmarys',   name: 'st-marys-network', display: "St. Mary's Network", type: 'Hospital Group', hospitals: 6,  users: 612,  devices: 1903, status: 'ACTIVE',  locale: 'en-US' },
-  { id: 'aurora',    name: 'aurora-health',    display: 'Aurora Health',     type: 'Health System', hospitals: 21, users: 2104, devices: 6772, status: 'ACTIVE',  locale: 'en-US' },
-  { id: 'northstar', name: 'northstar-medical',display: 'Northstar Medical', type: 'Regional',      hospitals: 3,  users: 198,  devices: 542,  status: 'ACTIVE',  locale: 'en-CA' },
-  { id: 'mercy',     name: 'mercy-care',       display: 'Mercy Care',        type: 'Faith-based',   hospitals: 9,  users: 802,  devices: 2415, status: 'PENDING', locale: 'en-US' },
-  { id: 'kaiseki',   name: 'kaiseki-medical',  display: 'Kaiseki Medical',   type: 'Hospital Group',hospitals: 4,  users: 311,  devices: 880,  status: 'ACTIVE',  locale: 'ja-JP' },
+  { id: 'cleveland', name: 'cleveland-clinic', display: 'Cleveland Clinic',  type: 'Health System', careSites: 14, users: 1284, devices: 4218, status: 'ACTIVE',  locale: 'en-US' },
+  { id: 'stmarys',   name: 'st-marys-network', display: "St. Mary's Network", type: 'CareSite Group', careSites: 6,  users: 612,  devices: 1903, status: 'ACTIVE',  locale: 'en-US' },
+  { id: 'aurora',    name: 'aurora-health',    display: 'Aurora Health',     type: 'Health System', careSites: 21, users: 2104, devices: 6772, status: 'ACTIVE',  locale: 'en-US' },
+  { id: 'northstar', name: 'northstar-medical',display: 'Northstar Medical', type: 'Regional',      careSites: 3,  users: 198,  devices: 542,  status: 'ACTIVE',  locale: 'en-CA' },
+  { id: 'mercy',     name: 'mercy-care',       display: 'Mercy Care',        type: 'Faith-based',   careSites: 9,  users: 802,  devices: 2415, status: 'PENDING', locale: 'en-US' },
+  { id: 'kaiseki',   name: 'kaiseki-medical',  display: 'Kaiseki Medical',   type: 'CareSite Group',careSites: 4,  users: 311,  devices: 880,  status: 'ACTIVE',  locale: 'ja-JP' },
 ];
 
-const HOSPITALS = [
+const CARESITES = [
   { id: 'CLV-MAIN', code: 'CLV-MAIN', name: 'Cleveland Main Campus',   city: 'Cleveland, OH',     status: 'ACTIVE',   beds: 1285, devices: 642, wards: 24 },
   { id: 'CLV-AKR',  code: 'CLV-AKR',  name: 'Akron General',            city: 'Akron, OH',         status: 'ACTIVE',   beds: 532,  devices: 318, wards: 12 },
-  { id: 'CLV-FAI',  code: 'CLV-FAI',  name: 'Fairview Hospital',        city: 'Cleveland, OH',     status: 'ACTIVE',   beds: 488,  devices: 274, wards: 11 },
-  { id: 'CLV-HIL',  code: 'CLV-HIL',  name: 'Hillcrest Hospital',       city: 'Mayfield Hts, OH',  status: 'ACTIVE',   beds: 496,  devices: 251, wards: 10 },
-  { id: 'CLV-MAR',  code: 'CLV-MAR',  name: 'Marymount Hospital',       city: 'Garfield Hts, OH',  status: 'INACTIVE', beds: 308,  devices: 142, wards: 8  },
-  { id: 'CLV-LUT',  code: 'CLV-LUT',  name: 'Lutheran Hospital',        city: 'Cleveland, OH',     status: 'ACTIVE',   beds: 222,  devices: 118, wards: 6  },
+  { id: 'CLV-FAI',  code: 'CLV-FAI',  name: 'Fairview CareSite',        city: 'Cleveland, OH',     status: 'ACTIVE',   beds: 488,  devices: 274, wards: 11 },
+  { id: 'CLV-HIL',  code: 'CLV-HIL',  name: 'Hillcrest CareSite',       city: 'Mayfield Hts, OH',  status: 'ACTIVE',   beds: 496,  devices: 251, wards: 10 },
+  { id: 'CLV-MAR',  code: 'CLV-MAR',  name: 'Marymount CareSite',       city: 'Garfield Hts, OH',  status: 'INACTIVE', beds: 308,  devices: 142, wards: 8  },
+  { id: 'CLV-LUT',  code: 'CLV-LUT',  name: 'Lutheran CareSite',        city: 'Cleveland, OH',     status: 'ACTIVE',   beds: 222,  devices: 118, wards: 6  },
 ];
 
 const USERS = [
-  { id: 'u01', name: 'Dr. Marcus Chen',     role: 'PLATFORM_ADMIN', hospital: '—',            status: 'ACTIVE',   email: 'm.chen@iorbit.health',  initials: 'MC' },
-  { id: 'u02', name: 'Priya Raghunathan',   role: 'ORG_OWNER',      hospital: '—',            status: 'ACTIVE',   email: 'priya.r@clev.health',   initials: 'PR' },
-  { id: 'u03', name: 'James O\u2019Sullivan', role: 'ORG_ADMIN',    hospital: '—',            status: 'ACTIVE',   email: 'j.osullivan@clev.health', initials: 'JO' },
-  { id: 'u04', name: 'Dr. Anika Bhatt',     role: 'HOSP_OWNER',     hospital: 'Cleveland Main',status: 'ACTIVE',   email: 'a.bhatt@clev.health',   initials: 'AB' },
-  { id: 'u05', name: 'Tomás Herrera',       role: 'HOSP_ADMIN',     hospital: 'Cleveland Main',status: 'ACTIVE',   email: 't.herrera@clev.health', initials: 'TH' },
-  { id: 'u06', name: 'Dr. Naomi Park',      role: 'DOCTOR',         hospital: 'Cleveland Main',status: 'ACTIVE',   email: 'n.park@clev.health',    initials: 'NP' },
-  { id: 'u07', name: 'Lena Kowalski, RN',   role: 'NURSE',          hospital: 'Cleveland Main',status: 'ACTIVE',   email: 'l.kowalski@clev.health',initials: 'LK' },
-  { id: 'u08', name: 'Dr. Yusuf El-Amin',   role: 'DOCTOR',         hospital: 'Akron General', status: 'ACTIVE',   email: 'y.elamin@clev.health',  initials: 'YE' },
-  { id: 'u09', name: 'Sarah Whitfield, RN', role: 'NURSE',          hospital: 'Cleveland Main',status: 'INACTIVE', email: 's.whitfield@clev.health',initials: 'SW' },
-  { id: 'u10', name: 'Devon Akpan',         role: 'HOSP_ADMIN',     hospital: 'Fairview',      status: 'ACTIVE',   email: 'd.akpan@clev.health',   initials: 'DA' },
+  { id: 'u01', name: 'Dr. Marcus Chen',     role: 'PLATFORM_ADMIN', careSite: '—',            status: 'ACTIVE',   email: 'm.chen@iorbit.health',  initials: 'MC' },
+  { id: 'u02', name: 'Priya Raghunathan',   role: 'ORG_OWNER',      careSite: '—',            status: 'ACTIVE',   email: 'priya.r@clev.health',   initials: 'PR' },
+  { id: 'u03', name: 'James O\u2019Sullivan', role: 'ORG_ADMIN',    careSite: '—',            status: 'ACTIVE',   email: 'j.osullivan@clev.health', initials: 'JO' },
+  { id: 'u04', name: 'Dr. Anika Bhatt',     role: 'CARESITE_OWNER',     careSite: 'Cleveland Main',status: 'ACTIVE',   email: 'a.bhatt@clev.health',   initials: 'AB' },
+  { id: 'u05', name: 'Tomás Herrera',       role: 'CARESITE_ADMIN',     careSite: 'Cleveland Main',status: 'ACTIVE',   email: 't.herrera@clev.health', initials: 'TH' },
+  { id: 'u06', name: 'Dr. Naomi Park',      role: 'DOCTOR',         careSite: 'Cleveland Main',status: 'ACTIVE',   email: 'n.park@clev.health',    initials: 'NP' },
+  { id: 'u07', name: 'Lena Kowalski, RN',   role: 'NURSE',          careSite: 'Cleveland Main',status: 'ACTIVE',   email: 'l.kowalski@clev.health',initials: 'LK' },
+  { id: 'u08', name: 'Dr. Yusuf El-Amin',   role: 'DOCTOR',         careSite: 'Akron General', status: 'ACTIVE',   email: 'y.elamin@clev.health',  initials: 'YE' },
+  { id: 'u09', name: 'Sarah Whitfield, RN', role: 'NURSE',          careSite: 'Cleveland Main',status: 'INACTIVE', email: 's.whitfield@clev.health',initials: 'SW' },
+  { id: 'u10', name: 'Devon Akpan',         role: 'CARESITE_ADMIN',     careSite: 'Fairview',      status: 'ACTIVE',   email: 'd.akpan@clev.health',   initials: 'DA' },
 ];
 
 const WARDS = [
@@ -91,8 +91,8 @@ const SHIFTS = [
 const ROLES_LIST = [
   { id: 'r-org-owner',  name: 'Org Owner',         system: true,  permissions: 24, members: 2,  color: '#818CF8' },
   { id: 'r-org-admin',  name: 'Org Admin',         system: true,  permissions: 19, members: 5,  color: '#60A5FA' },
-  { id: 'r-hosp-owner', name: 'Hospital Owner',    system: true,  permissions: 18, members: 14, color: '#2DD4BF' },
-  { id: 'r-hosp-admin', name: 'Hospital Admin',    system: true,  permissions: 13, members: 31, color: '#22D3EE' },
+  { id: 'r-careSite-owner', name: 'CareSite Owner',    system: true,  permissions: 18, members: 14, color: '#2DD4BF' },
+  { id: 'r-careSite-admin', name: 'CareSite Admin',    system: true,  permissions: 13, members: 31, color: '#22D3EE' },
   { id: 'r-billing',    name: 'Billing Coordinator',system: false, permissions: 6,  members: 4,  color: '#FBBF24' },
   { id: 'r-readonly',   name: 'Read-only Auditor', system: false, permissions: 8,  members: 2,  color: '#94A3B8' },
 ];
@@ -100,7 +100,7 @@ const ROLES_LIST = [
 const PERMISSION_GROUPS = [
   { name: 'Users',         perms: ['create.user', 'admin.user', 'delete.user', 'view.user'] },
   { name: 'Roles',         perms: ['create.role', 'admin.roles', 'view.role'] },
-  { name: 'Hospitals',     perms: ['create.hospital', 'update.hospital', 'view.hospital'] },
+  { name: 'CareSites',     perms: ['create.careSite', 'update.careSite', 'view.careSite'] },
   { name: 'Devices',       perms: ['create.device', 'assign.device', 'view.device'] },
   { name: 'Gateways',      perms: ['create.gateway', 'assign.gateway'] },
   { name: 'Wards / Beds',  perms: ['create.ward', 'create.bed', 'view.ward'] },
@@ -112,23 +112,23 @@ const PERMISSION_GROUPS = [
 
 // Permissions auto-granted for each role (used in role detail view).
 const ROLE_DEFAULT_PERMS = {
-  'r-org-owner':  ['create.user','admin.user','delete.user','view.user','create.role','admin.roles','view.role','create.hospital','update.hospital','view.hospital','create.device','assign.device','view.device','create.gateway','assign.gateway','create.ward','create.bed','view.ward','create.shift','admin.nurse','view.telemetry','export.telemetry','view.images','upload.images'],
-  'r-org-admin':  ['create.user','admin.user','view.user','view.role','create.hospital','update.hospital','view.hospital','create.device','assign.device','view.device','create.gateway','assign.gateway','create.ward','create.bed','view.ward','create.shift','view.telemetry','view.images'],
-  'r-hosp-owner': ['create.user','admin.user','delete.user','view.user','view.role','update.hospital','view.hospital','create.device','assign.device','view.device','assign.gateway','create.ward','create.bed','view.ward','create.shift','admin.nurse','view.telemetry'],
-  'r-hosp-admin': ['create.user','view.user','view.role','view.hospital','assign.device','view.device','create.ward','create.bed','view.ward','create.shift','view.telemetry'],
-  'r-billing':    ['view.user','view.hospital','view.device','view.telemetry','export.telemetry','view.images'],
-  'r-readonly':   ['view.user','view.role','view.hospital','view.device','view.ward','view.telemetry','view.images'],
+  'r-org-owner':  ['create.user','admin.user','delete.user','view.user','create.role','admin.roles','view.role','create.careSite','update.careSite','view.careSite','create.device','assign.device','view.device','create.gateway','assign.gateway','create.ward','create.bed','view.ward','create.shift','admin.nurse','view.telemetry','export.telemetry','view.images','upload.images'],
+  'r-org-admin':  ['create.user','admin.user','view.user','view.role','create.careSite','update.careSite','view.careSite','create.device','assign.device','view.device','create.gateway','assign.gateway','create.ward','create.bed','view.ward','create.shift','view.telemetry','view.images'],
+  'r-careSite-owner': ['create.user','admin.user','delete.user','view.user','view.role','update.careSite','view.careSite','create.device','assign.device','view.device','assign.gateway','create.ward','create.bed','view.ward','create.shift','admin.nurse','view.telemetry'],
+  'r-careSite-admin': ['create.user','view.user','view.role','view.careSite','assign.device','view.device','create.ward','create.bed','view.ward','create.shift','view.telemetry'],
+  'r-billing':    ['view.user','view.careSite','view.device','view.telemetry','export.telemetry','view.images'],
+  'r-readonly':   ['view.user','view.role','view.careSite','view.device','view.ward','view.telemetry','view.images'],
 };
 
 // Sparkline values 0-100, rough recent trend
 const SPARKS = {
   orgs:      [22, 28, 28, 31, 33, 35, 38, 40, 41, 43, 46, 51, 53, 57, 57],
-  hospitals: [180,182,184,184,186,190,193,196,201,209,213,218,220,224,231],
+  careSites: [180,182,184,184,186,190,193,196,201,209,213,218,220,224,231],
   users:     [3100,3120,3180,3240,3290,3380,3420,3520,3600,3680,3760,3870,3940,4020,4118],
   active:    [4400,4480,4520,4580,4612,4660,4700,4740,4780,4810,4860,4900,4940,4980,5031],
 };
 
 Object.assign(window, {
-  ROLES, ORGS, HOSPITALS, USERS, WARDS, BEDS_IN_WARD, DEVICES, GATEWAYS,
+  ROLES, ORGS, CARESITES, USERS, WARDS, BEDS_IN_WARD, DEVICES, GATEWAYS,
   SHIFTS, ROLES_LIST, PERMISSION_GROUPS, ROLE_DEFAULT_PERMS, SPARKS,
 });

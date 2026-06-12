@@ -23,22 +23,22 @@ export const DevicesScreen = ({ onNewGateway, onNewDevice, onGatewayPress, onDev
   const setMode = (m) => { setModeInternal(m); onModeChange?.(m); };
   const [endingDeviceCode, setEndingDeviceCode] = useState(null);
 
-  const hasGatewayPerm = user?.roles?.includes('permit.admin.gateway') || user?.roles?.includes('HOSP_OWNER');
-  const hasDevicePerm = user?.roles?.includes('permit.admin.device') || user?.roles?.includes('HOSP_OWNER');
+  const hasGatewayPerm = user?.roles?.includes('permit.admin.gateway') || user?.roles?.includes('CARESITE_OWNER');
+  const hasDevicePerm = user?.roles?.includes('permit.admin.device') || user?.roles?.includes('CARESITE_OWNER');
 
   const fetchAll = useCallback(async () => {
-    if (!user?.orgName || !user?.hospitalCode) return;
+    if (!user?.orgName || !user?.careSiteCode) return;
     setLoading(true);
     setError(null);
     try {
       const [gRes, dRes] = await Promise.all([
-        hasGatewayPerm ? gatewayApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
+        hasGatewayPerm ? gatewayApi.listAll(user.orgName, user.careSiteCode, token).catch(e => {
           if (e.status === 403) return [];
           const msg = (e.message || '').toLowerCase();
           if (msg.includes('no_gateways') || msg.includes('notfound') || msg.includes('not found') || msg.includes('no gateway')) return [];
           throw e;
         }) : Promise.resolve([]),
-        hasDevicePerm ? deviceApi.listAll(user.orgName, user.hospitalCode, token).catch(e => {
+        hasDevicePerm ? deviceApi.listAll(user.orgName, user.careSiteCode, token).catch(e => {
           if (e.status === 403) return [];
           const msg = (e.message || '').toLowerCase();
           if (msg.includes('no_devices') || msg.includes('notfound') || msg.includes('not found') || msg.includes('no device')) return [];
@@ -61,7 +61,7 @@ export const DevicesScreen = ({ onNewGateway, onNewDevice, onGatewayPress, onDev
     } finally {
       setLoading(false);
     }
-  }, [user?.orgName, user?.hospitalCode, token, hasGatewayPerm, hasDevicePerm, mode]);
+  }, [user?.orgName, user?.careSiteCode, token, hasGatewayPerm, hasDevicePerm, mode]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
@@ -77,7 +77,7 @@ export const DevicesScreen = ({ onNewGateway, onNewDevice, onGatewayPress, onDev
           onPress: async () => {
             setEndingDeviceCode(device.deviceCode);
             try {
-              await deviceApi.endAssignment(user.orgName, user.hospitalCode, device, token);
+              await deviceApi.endAssignment(user.orgName, user.careSiteCode, device, token);
               await fetchAll();
             } catch (e) {
               Alert.alert(t('messages.error'), e.message || t('messages.error_end_assignment'));

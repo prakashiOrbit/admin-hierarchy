@@ -26,11 +26,11 @@ export const EditWardScreen = ({ ward, onCancel, onSave, onDelete }) => {
   const [svgStatus, setSvgStatus] = useState('loading'); // 'loading' | 'found' | 'not_found'
   const [uploading, setUploading] = useState(false);
 
-  const hasWardPerm = user?.roles?.includes('permit.admin.ward') || user?.roles?.includes('HOSP_OWNER');
+  const hasWardPerm = user?.roles?.includes('permit.admin.ward') || user?.roles?.includes('CARESITE_OWNER');
 
   useEffect(() => {
     if (!hasWardPerm) { setSvgStatus('not_found'); return; }
-    svgApi.get(user.orgName, user.hospitalCode, ward.wardCode, token)
+    svgApi.get(user.orgName, user.careSiteCode, ward.wardCode, token)
       .then(res => setSvgStatus(res?.svgFile ? 'found' : 'not_found'))
       .catch(() => setSvgStatus('not_found'));
   }, []);
@@ -51,9 +51,9 @@ export const EditWardScreen = ({ ward, onCancel, onSave, onDelete }) => {
     try {
       const isReplace = svgStatus === 'found';
       if (isReplace) {
-        await svgApi.replace(user.orgName, user.hospitalCode, ward.wardCode, file.uri, file.name, token);
+        await svgApi.replace(user.orgName, user.careSiteCode, ward.wardCode, file.uri, file.name, token);
       } else {
-        await svgApi.upload(user.orgName, user.hospitalCode, ward.wardCode, file.uri, file.name, token);
+        await svgApi.upload(user.orgName, user.careSiteCode, ward.wardCode, file.uri, file.name, token);
       }
       setSvgStatus('found');
       Alert.alert(
@@ -74,7 +74,7 @@ export const EditWardScreen = ({ ward, onCancel, onSave, onDelete }) => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await wardApi.update(user.orgName, user.hospitalCode, ward.wardId, form, token);
+      await wardApi.update(user.orgName, user.careSiteCode, ward.wardId, form, token);
       Alert.alert(t('alerts.success'), t('alerts.ward_updated'), [
         { text: t('actions.ok'), onPress: () => onSave({ ...ward, ...form }) },
       ]);
@@ -96,7 +96,7 @@ export const EditWardScreen = ({ ward, onCancel, onSave, onDelete }) => {
           onPress: async () => {
             setDeleting(true);
             try {
-              await wardApi.delete(user.orgName, user.hospitalCode, ward.wardId, token);
+              await wardApi.delete(user.orgName, user.careSiteCode, ward.wardId, token);
               onDelete?.();
             } catch (e) {
               Alert.alert(t('alerts.error'), e.message || t('alerts.delete_failed'));

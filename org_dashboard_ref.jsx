@@ -1,4 +1,4 @@
-// ORG_OWNER / ORG_ADMIN screens: Dashboard, Hospitals, Users, Roles, Summary.
+// ORG_OWNER / ORG_ADMIN screens: Dashboard, CareSites, Users, Roles, Summary.
 
 function OrgDashboard({ go, role }) {
   const isOwner = role === 'ORG_OWNER';
@@ -11,13 +11,13 @@ function OrgDashboard({ go, role }) {
           {isOwner ? 'Good morning, Priya' : 'Good morning, James'}
         </div>
         <div style={{ fontSize: 12.5, color: T.textDim, marginTop: 4 }}>
-          <span style={{ color: T.good, fontWeight: 600 }}>14 hospitals</span> online · 2 alerts pending
+          <span style={{ color: T.good, fontWeight: 600 }}>14 careSites</span> online · 2 alerts pending
         </div>
       </div>
 
       {/* Stat cards */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-        } label="Hospitals" value="14"    delta={0}  spark={[12,12,13,13,14,14,14,14,14,14]} sparkColor={T.accent}/>
+        } label="CareSites" value="14"    delta={0}  spark={[12,12,13,13,14,14,14,14,14,14]} sparkColor={T.accent}/>
         }    label="Users"     value="1,284" delta={2}  spark={[1180,1200,1220,1240,1255,1268,1272,1278,1281,1284]} sparkColor="#2DD4BF" accent="rgba(45,212,191,.14)"/>
         }    label="Devices"   value="4,218" delta={1}  spark={[4080,4100,4120,4140,4160,4180,4195,4205,4210,4218]} sparkColor="#22D3EE" accent="rgba(34,211,238,.14)"/>
         }  label="Gateways"  value="78"    delta={-1} spark={[80,80,79,79,79,78,78,78,78,78]} sparkColor="#A78BFA" accent="rgba(167,139,250,.14)"/>
@@ -32,22 +32,22 @@ function OrgDashboard({ go, role }) {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}></div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>2 hospitals need attention</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: T.text }}>2 careSites need attention</div>
             <div style={{ fontSize: 11.5, color: T.textDim, marginTop: 3, lineHeight: 1.5 }}>
-              Marymount Hospital is inactive · Gateway GW-CLV-005 offline at PED 5W
+              Marymount CareSite is inactive · Gateway GW-CLV-005 offline at PED 5W
             </div>
             <button style={{ background:'transparent', border:'none', color:T.warn, fontSize:12, fontWeight:600, padding:0, marginTop: 6, cursor:'pointer' }}>Review →</button>
           </div>
         </div>
       </Card>
 
-      {/* Top hospitals */}
+      {/* Top careSites */}
       <div>
-         go('hospitals')} style={{ background:'transparent', border:'none', color:T.accent, fontSize:11.5, fontWeight:600, padding:0, cursor:'pointer' }}>View all →</button>
+         go('careSites')} style={{ background:'transparent', border:'none', color:T.accent, fontSize:11.5, fontWeight:600, padding:0, cursor:'pointer' }}>View all →</button>
         }/>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {HOSPITALS.slice(0, 3).map(h => (
-             go('hospital-detail', { hospId: h.id })}>
+          {CARESITES.slice(0, 3).map(h => (
+             go('careSite-detail', { careSiteId: h.id })}>
               <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                 <div style={{
                   width: 36, height: 36, borderRadius: 10,
@@ -95,17 +95,17 @@ function OrgDashboard({ go, role }) {
   );
 }
 
-function HospitalsScreen({ go, role, fab }) {
+function CareSitesScreen({ go, role, fab }) {
   const [q, setQ] = React.useState('');
-  const filtered = HOSPITALS.filter(h => h.name.toLowerCase().includes(q.toLowerCase()));
+  const filtered = CARESITES.filter(h => h.name.toLowerCase().includes(q.toLowerCase()));
   return (
     <div style={{ padding: '14px 14px 28px', display: 'flex', flexDirection: 'column', gap: 12 }}>
       } style={{ width: 28, height: 28, color: T.textDim }}/>}/>
 
       <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4 }}>
-        All · {HOSPITALS.length}</Chip>
-        Active · {HOSPITALS.filter(h=>h.status==='ACTIVE').length}</Chip>
-        Inactive · {HOSPITALS.filter(h=>h.status==='INACTIVE').length}</Chip>
+        All · {CARESITES.length}</Chip>
+        Active · {CARESITES.filter(h=>h.status==='ACTIVE').length}</Chip>
+        Inactive · {CARESITES.filter(h=>h.status==='INACTIVE').length}</Chip>
         Ohio</Chip>
       </div>
 
@@ -113,7 +113,7 @@ function HospitalsScreen({ go, role, fab }) {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {filtered.map(h => (
-           go('hospital-detail', { hospId: h.id })}>
+           go('careSite-detail', { careSiteId: h.id })}>
             <div style={{ display: 'flex', gap: 12 }}>
               <div style={{
                 width: 44, height: 44, borderRadius: 12,
@@ -141,8 +141,8 @@ function HospitalsScreen({ go, role, fab }) {
   );
 }
 
-function HospitalDetailScreen({ hospId, go, role, toast }) {
-  const h = HOSPITALS.find(x => x.id === hospId) || HOSPITALS[0];
+function CareSiteDetailScreen({ careSiteId, go, role, toast }) {
+  const h = CARESITES.find(x => x.id === careSiteId) || CARESITES[0];
   const [confirm, setConfirm] = React.useState(false);
   return (
     <div style={{ padding: '14px 14px 28px', display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -219,20 +219,20 @@ function HospitalDetailScreen({ hospId, go, role, toast }) {
 
       {role === 'ORG_OWNER' && (
         } onClick={() => setConfirm(true)}>
-          Deactivate hospital
+          Deactivate careSite
         </Btn>
       )}
 
        setConfirm(false)}
-        onConfirm={() => { setConfirm(false); toast('Hospital ' + h.code + ' deactivated', 'good'); go('hospitals'); }}
+        onConfirm={() => { setConfirm(false); toast('CareSite ' + h.code + ' deactivated', 'good'); go('careSites'); }}
         title={`Deactivate ${h.code}?`}
-        body={`All users and devices scoped to this hospital will lose access. This can be reversed by reactivating the hospital.`}
+        body={`All users and devices scoped to this careSite will lose access. This can be reversed by reactivating the careSite.`}
         confirmLabel="Deactivate" danger/>
     </div>
   );
 }
 
-function CreateHospitalScreen({ go, toast }) {
+function CreateCareSiteScreen({ go, toast }) {
   const [f, setF] = React.useState({ code: '', name: '', description: '', contact: '', address: '' });
   const set = (k, v) => setF({ ...f, [k]: v });
   const validCode = /^[a-zA-Z0-9-]{1,16}$/.test(f.code);
@@ -255,18 +255,18 @@ function CreateHospitalScreen({ go, toast }) {
          set('address', v)} leading={} placeholder="9500 Euclid Ave, Cleveland, OH"/>
       </Field>
       <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-         go('hospitals')} full>Cancel</Btn>
-         { toast('Hospital ' + f.code + ' created', 'good'); go('hospitals'); }} full>Create hospital</Btn>
+         go('careSites')} full>Cancel</Btn>
+         { toast('CareSite ' + f.code + ' created', 'good'); go('careSites'); }} full>Create careSite</Btn>
       </div>
     </div>
   );
 }
 
-function UsersScreen({ go, role, hospScoped }) {
+function UsersScreen({ go, role, careSiteScoped }) {
   const [q, setQ] = React.useState('');
   const [tab, setTab] = React.useState('all');
-  let filtered = hospScoped
-    ? USERS.filter(u => u.hospital !== '—')
+  let filtered = careSiteScoped
+    ? USERS.filter(u => u.careSite !== '—')
     : USERS;
   filtered = filtered.filter(u => u.name.toLowerCase().includes(q.toLowerCase()));
   if (tab !== 'all') filtered = filtered.filter(u => u.role === tab);
@@ -277,10 +277,10 @@ function UsersScreen({ go, role, hospScoped }) {
 
       <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4 }}>
          setTab('all')}>All · {USERS.length}</Chip>
-        {!hospScoped &&  setTab('ORG_OWNER')}>Org Owners</Chip>}
-        {!hospScoped &&  setTab('ORG_ADMIN')}>Org Admins</Chip>}
-         setTab('HOSP_OWNER')}>Hosp Owners</Chip>
-         setTab('HOSP_ADMIN')}>Hosp Admins</Chip>
+        {!careSiteScoped &&  setTab('ORG_OWNER')}>Org Owners</Chip>}
+        {!careSiteScoped &&  setTab('ORG_ADMIN')}>Org Admins</Chip>}
+         setTab('CARESITE_OWNER')}>CareSite Owners</Chip>
+         setTab('CARESITE_ADMIN')}>CareSite Admins</Chip>
          setTab('DOCTOR')}>Clinical</Chip>
       </div>
 
@@ -297,7 +297,7 @@ function UsersScreen({ go, role, hospScoped }) {
                 <div style={{ display: 'flex', gap: 6, marginTop: 6, alignItems: 'center' }}>
                   
                   
-                  {u.hospital !== '—' && <span style={{ fontSize: 10.5, color: T.textDim, fontFamily: 'JetBrains Mono, monospace' }}>{u.hospital}</span>}
+                  {u.careSite !== '—' && <span style={{ fontSize: 10.5, color: T.textDim, fontFamily: 'JetBrains Mono, monospace' }}>{u.careSite}</span>}
                 </div>
               </div>
             </div>
@@ -315,25 +315,25 @@ function UsersScreen({ go, role, hospScoped }) {
 
 function CreateUserScreen({ go, toast, defaultRole, scope, activeRole }) {
   // Filter role options by what `activeRole` is permitted to create.
-  // ORG_ADMIN cannot create ORG_ADMIN.  HOSP_ADMIN cannot create HOSP_ADMIN.
+  // ORG_ADMIN cannot create ORG_ADMIN.  CARESITE_ADMIN cannot create CARESITE_ADMIN.
   const orgRolesAll = [
     { value: 'ORG_ADMIN',  label: 'Org Admin',         hint: 'Administrative control of the org', ownerOnly: true },
-    { value: 'HOSP_OWNER', label: 'Hospital Owner',    hint: 'Full control of one hospital' },
-    { value: 'HOSP_ADMIN', label: 'Hospital Admin',    hint: 'Administrative control of one hospital' },
+    { value: 'CARESITE_OWNER', label: 'CareSite Owner',    hint: 'Full control of one careSite' },
+    { value: 'CARESITE_ADMIN', label: 'CareSite Admin',    hint: 'Administrative control of one careSite' },
   ];
-  const hospRolesAll = [
-    { value: 'HOSP_ADMIN', label: 'Hospital Admin', hint: 'Administrative control of this hospital', ownerOnly: true },
+  const careSiteRolesAll = [
+    { value: 'CARESITE_ADMIN', label: 'CareSite Admin', hint: 'Administrative control of this careSite', ownerOnly: true },
     { value: 'DOCTOR',     label: 'Doctor',         hint: 'Clinical · attending physician' },
     { value: 'NURSE',      label: 'Nurse',          hint: 'Clinical · bedside care' },
   ];
   const allow = (o) => !o.ownerOnly
     || activeRole === 'ORG_OWNER' || activeRole === 'PLATFORM_ADMIN'
-    || (scope === 'hosp' && activeRole === 'HOSP_OWNER');
-  const opts = (scope === 'org' ? orgRolesAll : hospRolesAll).filter(allow);
+    || (scope === 'careSite' && activeRole === 'CARESITE_OWNER');
+  const opts = (scope === 'org' ? orgRolesAll : careSiteRolesAll).filter(allow);
 
   const [f, setF] = React.useState({
     role: defaultRole || opts[0]?.value,
-    name: '', username: '', email: '', phone: '', hospital: scope === 'org' ? 'CLV-MAIN' : '',
+    name: '', username: '', email: '', phone: '', careSite: scope === 'org' ? 'CLV-MAIN' : '',
   });
   const set = (k, v) => setF({ ...f, [k]: v });
   const validUser = /^[a-zA-Z0-9]+$/.test(f.username);
@@ -374,10 +374,10 @@ function CreateUserScreen({ go, toast, defaultRole, scope, activeRole }) {
       
          set('phone', v)} placeholder="+1 555 0100" leading={}/>
       </Field>
-      {scope === 'org' && (f.role === 'HOSP_OWNER' || f.role === 'HOSP_ADMIN') && (
+      {scope === 'org' && (f.role === 'CARESITE_OWNER' || f.role === 'CARESITE_ADMIN') && (
         
-           set('hospital', v)}
-            options={HOSPITALS.map(h => ({ value: h.code, label: h.name + ' · ' + h.code }))}/>
+           set('careSite', v)}
+            options={CARESITES.map(h => ({ value: h.code, label: h.name + ' · ' + h.code }))}/>
         </Field>
       )}
 
@@ -419,7 +419,7 @@ function UserDetailScreen({ userId, go, role, toast }) {
 
       
         {[
-          { l: 'Hospital', v: u.hospital, i:  },
+          { l: 'CareSite', v: u.careSite, i:  },
           { l: 'Username', v: u.email.split('@')[0], i: , mono: true },
           { l: 'Last sign-in', v: '2h ago · Pixel 8 · Cleveland, OH', i:  },
           { l: 'Created', v: '14 Feb 2026 by p.raghunathan', i:  },
@@ -443,7 +443,7 @@ function UserDetailScreen({ userId, go, role, toast }) {
       }
       </Btn>
 
-      {(role === 'ORG_OWNER' || role === 'HOSP_OWNER' || role === 'PLATFORM_ADMIN') && (
+      {(role === 'ORG_OWNER' || role === 'CARESITE_OWNER' || role === 'PLATFORM_ADMIN') && (
         } onClick={() => setConfirm('delete')}>
           Delete user
         </Btn>
@@ -583,7 +583,7 @@ function OrgSummaryScreen() {
         
         
           {[
-            { l: 'New hospitals',    v: '+2',    sub: 'Akron General, Fairview',           i: , c: T.accent },
+            { l: 'New careSites',    v: '+2',    sub: 'Akron General, Fairview',           i: , c: T.accent },
             { l: 'New users',        v: '+47',   sub: '12 clinical, 35 admin',             i: ,    c: '#2DD4BF' },
             { l: 'Devices deployed', v: '+183',  sub: 'iT-V4 (114), iT-IP (52), other 17', i: ,    c: '#22D3EE' },
             { l: 'Vitals events',    v: '4.2B',  sub: '↑ 12% vs last month',               i: ,    c: '#F472B6' },
@@ -614,7 +614,7 @@ function OrgSummaryScreen() {
 }
 
 Object.assign(window, {
-  OrgDashboard, HospitalsScreen, HospitalDetailScreen, CreateHospitalScreen,
+  OrgDashboard, CareSitesScreen, CareSiteDetailScreen, CreateCareSiteScreen,
   UsersScreen, CreateUserScreen, UserDetailScreen,
   RolesScreen, RoleEditScreen, OrgSummaryScreen,
 });

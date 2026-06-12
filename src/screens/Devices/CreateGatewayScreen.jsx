@@ -29,10 +29,10 @@ export const CreateGatewayScreen = ({ onCancel, onSuccess }) => {
   const isFormValid = form.gatewayCode && form.gatewayType && form.os && form.communicationConfig;
 
   const handleCreate = async () => {
-    if (!isFormValid || !user?.orgName || !user?.hospitalCode) return;
+    if (!isFormValid || !user?.orgName || !user?.careSiteCode) return;
     setSaving(true);
     try {
-      await gatewayApi.create(user.orgName, user.hospitalCode, form, token);
+      await gatewayApi.create(user.orgName, user.careSiteCode, form, token);
       Alert.alert(t('messages.success'), t('messages.gateway_provisioned', { code: form.gatewayCode }), [
         { text: t('actions.ok'), onPress: onSuccess || onCancel },
       ]);
@@ -49,7 +49,7 @@ export const CreateGatewayScreen = ({ onCancel, onSuccess }) => {
         <View style={styles.banner}>
           <IconGateway size={24} color={T.accent} />
           <Text style={styles.bannerText}>
-            {t('messages.gateway_create_banner', { hospital: user?.hospitalCode })}
+            {t('messages.gateway_create_banner', { careSite: user?.careSiteCode })}
           </Text>
         </View>
 

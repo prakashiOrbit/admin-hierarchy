@@ -25,14 +25,14 @@ export const PatientDetailScreen = ({ patientId: patientCode, onBack, onAssign, 
   const [showConsent, setShowConsent] = useState(false);
 
   useEffect(() => {
-    if (!patientCode || !user?.orgName || !user?.hospitalCode) return;
+    if (!patientCode || !user?.orgName || !user?.careSiteCode) return;
     let cancelled = false;
-    patientApi.getDetail(user.orgName, user.hospitalCode, patientCode, token)
+    patientApi.getDetail(user.orgName, user.careSiteCode, patientCode, token)
       .then(data => { if (!cancelled) setDetail(data); })
       .catch(e => { if (!cancelled) setError(e.message); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [patientCode, user?.orgName, user?.hospitalCode, token]);
+  }, [patientCode, user?.orgName, user?.careSiteCode, token]);
 
   if (loading) {
     return <View style={styles.center}><ActivityIndicator color={T.accent} /></View>;
@@ -152,7 +152,7 @@ export const PatientDetailScreen = ({ patientId: patientCode, onBack, onAssign, 
         visible={showInfoSheet}
         onClose={() => setShowInfoSheet(false)}
         onAdded={() => {
-          patientApi.getDetail(user.orgName, user.hospitalCode, p.patientCode, token)
+          patientApi.getDetail(user.orgName, user.careSiteCode, p.patientCode, token)
             .then(setDetail)
             .catch(() => {});
         }}

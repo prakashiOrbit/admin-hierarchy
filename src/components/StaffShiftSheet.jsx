@@ -26,11 +26,11 @@ export const StaffShiftSheet = ({ staffCode, staffType, staffName, visible, onCl
   const loadShifts = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await shiftApi.listAll(user.orgName, user.hospitalCode, token);
+      const data = await shiftApi.listAll(user.orgName, user.careSiteCode, token);
       setShifts(Array.isArray(data) ? data : []);
     } catch { setShifts([]); }
     finally { setLoading(false); }
-  }, [user?.orgName, user?.hospitalCode, token]);
+  }, [user?.orgName, user?.careSiteCode, token]);
 
   const handleShow = () => { loadShifts(); };
 
@@ -41,9 +41,9 @@ export const StaffShiftSheet = ({ staffCode, staffType, staffName, visible, onCl
       : { nurseCode: staffCode, shiftCode: shift.shiftCode };
     try {
       if (staffType === 'doctor') {
-        await shiftApi.assignDoctor(user.orgName, user.hospitalCode, payload, token);
+        await shiftApi.assignDoctor(user.orgName, user.careSiteCode, payload, token);
       } else {
-        await shiftApi.assignNurse(user.orgName, user.hospitalCode, payload, token);
+        await shiftApi.assignNurse(user.orgName, user.careSiteCode, payload, token);
       }
       Alert.alert(t('common.success'), t('shifts.staff_assigned_msg', { name: staffName, shift: shift.shiftName || shift.shiftCode }));
     } catch (e) {

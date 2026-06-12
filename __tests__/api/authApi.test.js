@@ -99,15 +99,15 @@ describe('authApi.refresh', () => {
 describe('authApi.verify2fa', () => {
   it('sends POST to /{orgName}/user/{userName}/verify2fa', async () => {
     global.fetch.mockReturnValueOnce(ok({ code: '200', token: 'jwt' }));
-    await authApi.verify2fa('APOAP1', 'nurse@hosp.com', '123456');
+    await authApi.verify2fa('APOAP1', 'nurse@careSite.com', '123456');
     const [url, opts] = global.fetch.mock.calls[0];
-    expect(url).toBe(`${BASE}/APOAP1/user/nurse@hosp.com/verify2fa`);
+    expect(url).toBe(`${BASE}/APOAP1/user/nurse@careSite.com/verify2fa`);
     expect(opts.method).toBe('POST');
   });
 
   it('sends { otpCode } in the request body', async () => {
     global.fetch.mockReturnValueOnce(ok({ code: '200', token: 'jwt' }));
-    await authApi.verify2fa('APOAP1', 'nurse@hosp.com', '123456');
+    await authApi.verify2fa('APOAP1', 'nurse@careSite.com', '123456');
     const body = JSON.parse(global.fetch.mock.calls[0][1].body);
     expect(body).toEqual({ otpCode: '123456' });
   });
