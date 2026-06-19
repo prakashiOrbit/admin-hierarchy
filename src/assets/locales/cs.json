@@ -325,6 +325,7 @@
     "address_pincode": "PSČ",
     "select_type_title": "Vybrat typ organizace",
     "types": {
+      "ORGANISATION": "Organizace",
       "CARESITE": "Nemocnice",
       "CLINIC": "Klinika",
       "LAB": "Laboratoř",
@@ -1123,7 +1124,15 @@
     "err_save_failed": "Aktualizace zásad relace se nezdařila.",
     "err_load_failed": "Načtení aktuálních zásad se nezdařilo.",
     "err_invalid_durations": "Doby trvání relací musí být kladná čísla (ponechte prázdné pro dědění z org).",
-    "tap_edit_hint": "Klepnutím na Upravit nakonfigurujte"
+    "tap_edit_hint": "Klepnutím na Upravit nakonfigurujte",
+    "admins": "Správci",
+    "doctors": "Lékaři",
+    "nurses": "Zdravotní sestry",
+    "patients": "Pacienti",
+    "idle_hint": "Nastavte, jak dlouho zůstanou zaměstnanci a pacienti přihlášeni před vyžádáním opětovného přihlášení.",
+    "org_idle_hint": "Nastavte, jak dlouho zůstanou správci organizace přihlášeni před opětovným přihlášením.",
+    "default_hint": "Ponechte prázdné pro použití výchozích nastavení organizace.",
+    "platform_default_hint": "Ponechte prázdné pro použití výchozích nastavení platformy."
   },
   "phone": {
     "select_country": "Vybrat předvolbu země",

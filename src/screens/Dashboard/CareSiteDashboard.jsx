@@ -247,7 +247,6 @@ const CareSiteHomeContent = ({ role, onNavigate }) => {
         </Card>
       </View>
 
-      {/* Security Policy — CARESITE_OWNER manages admin+doctor+nurse+patient; CARESITE_ADMIN manages doctor+nurse+patient */}
       {canEditPolicy && (
         <View style={styles.section}>
           <View style={styles.policyHeaderRow}>
@@ -261,31 +260,31 @@ const CareSiteHomeContent = ({ role, onNavigate }) => {
           <Card style={styles.policyCard}>
             {editingPolicy ? (
               <>
-                {[
-                  ...(isOwner ? [{ label: t('security_policy.admin_session'), key: 'adminHours' }] : []),
-                  { label: t('security_policy.doctor_session'), key: 'doctorHours' },
-                  { label: t('security_policy.nurse_session'), key: 'nurseHours' },
-                  { label: t('security_policy.patient_session'), key: 'patientHours' },
-                ].map((field, i) => (
-                  <View key={field.key}>
-                    {i > 0 && <View style={styles.policyDivider} />}
-                    <View style={styles.policyRow}>
-                      <Text style={styles.policyLabel}>{field.label}:</Text>
+                <View style={styles.policyGrid}>
+                  {[
+                    ...(isOwner ? [{ label: t('security_policy.admins'), key: 'adminHours' }] : []),
+                    { label: t('security_policy.doctors'), key: 'doctorHours' },
+                    { label: t('security_policy.nurses'),  key: 'nurseHours' },
+                    { label: t('security_policy.patients'), key: 'patientHours' },
+                  ].map((field) => (
+                    <View key={field.key} style={styles.policyField}>
+                      <Text style={styles.policyFieldLabel}>{field.label}</Text>
                       <View style={styles.policyInputRow}>
                         <RNTextInput
                           style={[styles.policyInput, { color: T.text, borderColor: T.border, backgroundColor: T.surface2 }]}
                           value={policyForm[field.key]}
                           onChangeText={v => setPolicyForm(prev => ({ ...prev, [field.key]: v }))}
                           keyboardType="numeric"
-                          placeholder={t('security_policy.inherit_org')}
+                          placeholder="—"
                           placeholderTextColor={T.textFaint}
                           selectTextOnFocus
                         />
                         <Text style={styles.policyUnit}>{t('security_policy.hrs')}</Text>
                       </View>
                     </View>
-                  </View>
-                ))}
+                  ))}
+                </View>
+                <Text style={styles.policyHint}>{t('security_policy.default_hint')}</Text>
                 <View style={styles.policyActions}>
                   <Btn variant="surface" size="sm" style={{ flex: 1 }} onPress={() => setEditingPolicy(false)} disabled={policyLoading}>{t('common.cancel')}</Btn>
                   <Btn variant="primary" size="sm" style={{ flex: 1 }} onPress={handleSaveCareSitePolicy} disabled={policyLoading}>
@@ -294,9 +293,8 @@ const CareSiteHomeContent = ({ role, onNavigate }) => {
                 </View>
               </>
             ) : (
-              <View style={styles.policyRow}>
-                <Text style={styles.policyLabel}>{isOwner ? `${t('security_policy.admin_session')} / ${t('security_policy.doctor_session')} / ${t('security_policy.nurse_session')} / ${t('security_policy.patient_session')}` : `${t('security_policy.doctor_session')} / ${t('security_policy.nurse_session')} / ${t('security_policy.patient_session')}`}</Text>
-                <Text style={styles.policyValue}>{t('security_policy.tap_edit_hint')}</Text>
+              <View style={styles.policyIdle}>
+                <Text style={styles.policyIdleText}>{t('security_policy.idle_hint')}</Text>
               </View>
             )}
           </Card>
@@ -485,8 +483,8 @@ export const CareSiteDashboard = ({ navigation, route }) => {
     if (selectedWardForBed) return t('dashboard.provision_bed');
     if (isProvisioningGateway) return t('dashboard.create_gateway');
     if (isProvisioningDevice) return t('dashboard.create_device');
-    if (assigningGatewayCode) return 'Assign Gateway to Patient';
-    if (isAssigningDevice) return 'Assign Device';
+    if (assigningGatewayCode) return t('dashboard.assign_gateway_title');
+    if (isAssigningDevice) return t('dashboard.assign_device_title');
     if (selectedGatewayCode) return t('gateway.detail_title');
     if (selectedDeviceForConfig) return t('device.config_title');
     if (isRegisteringPatient) return t('dashboard.register_patient');
@@ -591,14 +589,16 @@ const createStyles = (T) => StyleSheet.create({
   drawerDivider: { height: 1, backgroundColor: T.borderSoft, marginVertical: 12, marginHorizontal: 12 },
   placeholder: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 20 },
   placeholderText: { color: T.textDim, fontSize: 14, textAlign: 'center' },
-  policyHeaderRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
+  policyHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
   policyCard: { padding: 0, backgroundColor: T.surface },
-  policyRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16 },
-  policyLabel: { fontSize: 14, color: T.textDim },
-  policyValue: { fontSize: 14, fontWeight: '600', color: T.text },
-  policyDivider: { height: 1, backgroundColor: T.borderSoft },
+  policyGrid: { flexDirection: 'row', flexWrap: 'wrap', padding: 16, gap: 16 },
+  policyField: { width: '45%', gap: 6 },
+  policyFieldLabel: { fontSize: 11, fontWeight: '700', color: T.textDim, letterSpacing: 0.5, textTransform: 'uppercase' },
   policyInputRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  policyInput: { width: 60, height: 36, borderWidth: 1, borderRadius: 8, paddingHorizontal: 8, textAlign: 'center', fontSize: 14, fontWeight: '600' },
-  policyUnit: { fontSize: 13, color: T.textDim },
+  policyInput: { width: 64, height: 38, borderWidth: 1, borderRadius: 8, paddingHorizontal: 8, textAlign: 'center', fontSize: 15, fontWeight: '700' },
+  policyUnit: { fontSize: 12, color: T.textDim },
+  policyHint: { fontSize: 11, color: T.textFaint, paddingHorizontal: 16, paddingBottom: 12, lineHeight: 16 },
   policyActions: { flexDirection: 'row', gap: 10, padding: 12, borderTopWidth: 1, borderTopColor: T.borderSoft },
+  policyIdle: { padding: 16 },
+  policyIdleText: { fontSize: 13, color: T.textDim, lineHeight: 20 },
 });

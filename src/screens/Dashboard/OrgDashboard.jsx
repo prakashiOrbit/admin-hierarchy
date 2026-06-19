@@ -177,7 +177,7 @@ const OrgHomeContent = ({ role }) => {
       </View>
 
       <View style={styles.grid}>
-        <StatCard label="dashboard.careSites" value={loading ? '...' : careSites.length.toString()} icon={<IconCareSite />} color={T.accent} />
+        <StatCard label="dashboard.caresites" value={loading ? '...' : careSites.length.toString()} icon={<IconCareSite />} color={T.accent} />
         <StatCard label="dashboard.admins" value={loading ? '...' : admins.length.toString()} icon={<IconUsers />} color="#2DD4BF" accent="rgba(45,212,191,.14)" />
         <StatCard label="dashboard.devices" value={loading ? '...' : totalDevices.toString()} icon={<IconPulse />} color="#22D3EE" accent="rgba(34,211,238,.14)" />
         <StatCard label="dashboard.gateways" value={loading ? '...' : totalGateways.toString()} icon={<IconGateway />} color="#A78BFA" accent="rgba(167,139,250,.14)" />
@@ -234,7 +234,6 @@ const OrgHomeContent = ({ role }) => {
       </View>
 
 
-      {/* Security Policy — ORG_OWNER manages ORG_ADMIN session duration */}
       <View style={styles.section}>
         <View style={styles.policyHeaderRow}>
           <SectionHeader title={t('security_policy.title')} />
@@ -247,18 +246,21 @@ const OrgHomeContent = ({ role }) => {
         <Card style={styles.policyCard}>
           {editingPolicy ? (
             <>
-              <View style={styles.policyRow}>
-                <Text style={styles.policyLabel}>{t('security_policy.admin_session')}:</Text>
+              <View style={styles.policyEditContent}>
+                <Text style={styles.policyFieldLabel}>{t('security_policy.admins')}</Text>
                 <View style={styles.policyInputRow}>
                   <RNTextInput
                     style={[styles.policyInput, { color: T.text, borderColor: T.border, backgroundColor: T.surface2 }]}
                     value={adminHours}
                     onChangeText={setAdminHours}
                     keyboardType="numeric"
+                    placeholder="—"
+                    placeholderTextColor={T.textFaint}
                     selectTextOnFocus
                   />
                   <Text style={styles.policyUnit}>{t('security_policy.hrs')}</Text>
                 </View>
+                <Text style={styles.policyHint}>{t('security_policy.platform_default_hint')}</Text>
               </View>
               <View style={styles.policyActions}>
                 <Btn variant="surface" size="sm" style={{ flex: 1 }} onPress={() => setEditingPolicy(false)} disabled={policyLoading}>{t('common.cancel')}</Btn>
@@ -268,9 +270,8 @@ const OrgHomeContent = ({ role }) => {
               </View>
             </>
           ) : (
-            <View style={styles.policyRow}>
-              <Text style={styles.policyLabel}>{t('security_policy.admin_session')}:</Text>
-              <Text style={styles.policyValue}>{t('security_policy.tap_edit_hint')}</Text>
+            <View style={styles.policyIdle}>
+              <Text style={styles.policyIdleText}>{t('security_policy.org_idle_hint')}</Text>
             </View>
           )}
         </Card>
@@ -511,13 +512,15 @@ const createStyles = (T) => StyleSheet.create({
   drawerItem: { flexDirection: 'row', alignItems: 'center', padding: 12, gap: 12, borderRadius: 12 },
   drawerItemText: { fontSize: 14, fontWeight: '600', color: T.text },
   drawerDivider: { height: 1, backgroundColor: T.borderSoft, marginVertical: 12, marginHorizontal: 12 },
-  policyHeaderRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
+  policyHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
   policyCard: { padding: 0, backgroundColor: T.surface },
-  policyRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16 },
-  policyLabel: { fontSize: 14, color: T.textDim },
-  policyValue: { fontSize: 14, fontWeight: '600', color: T.text },
+  policyEditContent: { padding: 16, paddingBottom: 4, gap: 8 },
+  policyFieldLabel: { fontSize: 11, fontWeight: '700', color: T.textDim, letterSpacing: 0.5, textTransform: 'uppercase' },
   policyInputRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  policyInput: { width: 60, height: 36, borderWidth: 1, borderRadius: 8, paddingHorizontal: 8, textAlign: 'center', fontSize: 14, fontWeight: '600' },
-  policyUnit: { fontSize: 13, color: T.textDim },
+  policyInput: { width: 64, height: 38, borderWidth: 1, borderRadius: 8, paddingHorizontal: 8, textAlign: 'center', fontSize: 15, fontWeight: '700' },
+  policyUnit: { fontSize: 12, color: T.textDim },
+  policyHint: { fontSize: 11, color: T.textFaint, lineHeight: 16, paddingTop: 2 },
   policyActions: { flexDirection: 'row', gap: 10, padding: 12, borderTopWidth: 1, borderTopColor: T.borderSoft },
+  policyIdle: { padding: 16 },
+  policyIdleText: { fontSize: 13, color: T.textDim, lineHeight: 20 },
 });

@@ -46,7 +46,7 @@ export const CreateNursingStationScreen = ({ onCancel, onSuccess }) => {
         <View style={styles.banner}>
           <IconBed size={24} color={T.accent} />
           <Text style={styles.bannerText}>
-            {t('nursingstation.create_banner', { careSiteCode: user?.careSiteCode })}
+            {t('nursingstation.create_banner', { caresiteCode: user?.careSiteCode })}
           </Text>
         </View>
 

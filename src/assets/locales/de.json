@@ -325,6 +325,7 @@
     "address_pincode": "Postleitzahl",
     "select_type_title": "Organisationstyp auswählen",
     "types": {
+      "ORGANISATION": "Organisation",
       "CARESITE": "Krankenhaus",
       "CLINIC": "Klinik",
       "LAB": "Labor",
@@ -1123,7 +1124,15 @@
     "err_save_failed": "Sitzungsrichtlinie konnte nicht aktualisiert werden.",
     "err_load_failed": "Aktuelle Richtlinie konnte nicht geladen werden.",
     "err_invalid_durations": "Sitzungsdauern müssen positive Zahlen sein (leer lassen, um von der Organisation zu erben).",
-    "tap_edit_hint": "Tippen Sie auf Bearbeiten, um zu konfigurieren"
+    "tap_edit_hint": "Tippen Sie auf Bearbeiten, um zu konfigurieren",
+    "admins": "Admins",
+    "doctors": "Ärzte",
+    "nurses": "Pflegepersonal",
+    "patients": "Patienten",
+    "idle_hint": "Legen Sie fest, wie lange Mitarbeiter und Patienten angemeldet bleiben, bevor eine erneute Anmeldung erforderlich ist.",
+    "org_idle_hint": "Legen Sie fest, wie lange Organisations-Admins angemeldet bleiben, bevor eine erneute Anmeldung erforderlich ist.",
+    "default_hint": "Leer lassen, um die Organisationsstandards zu verwenden.",
+    "platform_default_hint": "Leer lassen, um die Plattformstandards zu verwenden."
   },
   "phone": {
     "select_country": "Ländervorwahl auswählen",

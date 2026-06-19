@@ -89,11 +89,11 @@ export const OrganisationsScreen = ({ onSelectOrg }) => {
               {t('common.all')} · {orgs.length}
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setFilter('CareSite')}
-            style={[styles.chip, filter === 'CareSite' && styles.chipActive]}
+          <TouchableOpacity onPress={() => setFilter('ORGANISATION')}
+            style={[styles.chip, filter === 'ORGANISATION' && styles.chipActive]}
           >
-            <Text style={[styles.chipText, filter === 'CareSite' && styles.chipTextActive]}>
-              {t('dashboard.caresites')} · {orgs.filter(o => o.orgType === 'CARESITE').length}
+            <Text style={[styles.chipText, filter === 'ORGANISATION' && styles.chipTextActive]}>
+              {t('auth.organisation')} · {orgs.filter(o => o.orgType === 'ORGANISATION').length}
             </Text>
           </TouchableOpacity>
         </ScrollView>

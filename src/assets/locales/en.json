@@ -34,7 +34,8 @@
     "confirm": "Confirm",
     "or": "or",
     "add": "Add",
-    "refresh": "↻ Refresh"
+    "refresh": "↻ Refresh",
+    "status": "Status"
   },
   "auth": {
     "login": "Login",
@@ -214,7 +215,10 @@
     "doctor": "Doctor",
     "patient": "Patient",
     "nursing_stations": "Nursing Stations",
-    "nursing_stations_title": "Nursing Stations"
+    "nursing_stations_title": "Nursing Stations",
+    "assign_gateway_title": "Assign Gateway",
+    "assign_device_title": "Assign Device",
+    "onboarding_hint": "Welcome! Start by adding an Org Admin and a CareSite to get your organisation up and running."
   },
   "users": {
     "first_name": "First Name",
@@ -268,7 +272,8 @@
     "reset_pin_confirm": "A password reset PIN will be sent to {{userName}}'s registered email. They can use it to set a new password.",
     "send_reset_pin": "Send PIN",
     "reset_pin_sent": "A reset PIN has been sent to the user's registered email.",
-    "reset_pin_failed": "Failed to send reset PIN. Please try again."
+    "reset_pin_failed": "Failed to send reset PIN. Please try again.",
+    "contact_name": "Contact Name"
   },
   "roles_screen": {
     "role_name": "Role Name",
@@ -325,6 +330,7 @@
     "address_pincode": "Pincode",
     "select_type_title": "Select Organisation Type",
     "types": {
+      "ORGANISATION": "Organisation",
       "CARESITE": "CareSite",
       "CLINIC": "Clinic",
       "LAB": "Laboratory",
@@ -855,7 +861,9 @@
     "editing_device_type_hint": "Editing device type profile.",
     "gateway_create_banner": "Register a new IoT gateway for this caresite.",
     "nurse_not_found": "Nurse not found.",
-    "error_load_stations": "Failed to load nursing stations."
+    "error_load_stations": "Failed to load nursing stations.",
+    "no_permission_view_doctors": "You don't have permission to view doctors.",
+    "no_permission_view_patients": "You don't have permission to view patients."
   },
   "patients": {
     "health_records": "HEALTH RECORDS",
@@ -924,7 +932,25 @@
     "not_found": "Shift not found.",
     "ward": "WARD",
     "start": "START",
-    "end": "END"
+    "end": "END",
+    "create_banner": "Create a new shift for {{careSite}}.",
+    "edit_banner": "Editing shift {{code}}.",
+    "identity": "SHIFT IDENTITY",
+    "details": "SHIFT DETAILS",
+    "code": "Shift Code",
+    "code_placeholder": "e.g. SHF-001",
+    "name": "Shift Name",
+    "name_placeholder": "e.g. Morning Shift",
+    "start_time": "Start Time",
+    "end_time": "End Time",
+    "status": "Status",
+    "ward_assignment": "WARD ASSIGNMENT",
+    "select_ward": "Select Ward",
+    "no_wards": "No wards found.",
+    "no_wards_available": "No wards available.",
+    "status_active": "Active",
+    "status_inactive": "Inactive",
+    "status_completed": "Completed"
   },
   "shifts": {
     "no_shifts": "No shifts found.",
@@ -1116,13 +1142,21 @@
     "inherit_org": "Inherit from Org",
     "hrs": "hrs",
     "default": "Default",
+    "admins": "Admins",
+    "doctors": "Doctors",
+    "nurses": "Nurses",
+    "patients": "Patients",
+    "idle_hint": "Set how long staff and patients stay signed in before re-login is required.",
+    "org_idle_hint": "Set how long organisation admins stay signed in before re-login is required.",
+    "default_hint": "Leave blank to use organisation defaults.",
+    "platform_default_hint": "Leave blank to use platform defaults.",
     "err_owner_required": "Please enter an Owner session duration in hours.",
     "err_invalid_duration": "Session duration must be a positive number.",
     "err_invalid_admin_duration": "Admin session duration must be a positive number.",
     "err_missing_org": "Organisation context is missing. Please go back and try again.",
     "err_save_failed": "Failed to update session policy.",
     "err_load_failed": "Failed to load current policy.",
-    "err_invalid_durations": "Session durations must be positive numbers (leave blank to inherit from Org).",
+    "err_invalid_durations": "Session durations must be positive numbers. Leave blank to use organisation defaults.",
     "tap_edit_hint": "Tap Edit to configure"
   },
   "phone": {

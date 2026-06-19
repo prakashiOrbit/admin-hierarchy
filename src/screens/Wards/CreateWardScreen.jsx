@@ -46,7 +46,7 @@ export const CreateWardScreen = ({ onCancel, onSuccess }) => {
         <View style={styles.banner}>
           <IconDoor size={24} color={T.accent} />
           <Text style={styles.bannerText}>
-            {t('ward.provision_ward_banner', { careSiteCode: user?.careSiteCode })}
+            {t('ward.provision_ward_banner', { caresiteCode: user?.careSiteCode })}
           </Text>
         </View>
 

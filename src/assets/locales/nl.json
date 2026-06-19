@@ -325,6 +325,7 @@
     "address_pincode": "Postcode",
     "select_type_title": "Selecteer organisatietype",
     "types": {
+      "ORGANISATION": "Organisatie",
       "CARESITE": "Ziekenhuis",
       "CLINIC": "Kliniek",
       "LAB": "Laboratorium",
@@ -1123,7 +1124,15 @@
     "err_save_failed": "Sessibeleid bijwerken mislukt.",
     "err_load_failed": "Huidig beleid laden mislukt.",
     "err_invalid_durations": "Sessieduren moeten positieve getallen zijn (leeg laten om over te nemen van org).",
-    "tap_edit_hint": "Tik op Bewerken om te configureren"
+    "tap_edit_hint": "Tik op Bewerken om te configureren",
+    "admins": "Beheerders",
+    "doctors": "Artsen",
+    "nurses": "Verpleegkundigen",
+    "patients": "Patiënten",
+    "idle_hint": "Stel in hoe lang medewerkers en patiënten ingelogd blijven voordat opnieuw inloggen vereist is.",
+    "org_idle_hint": "Stel in hoe lang organisatiebeheerders ingelogd blijven voordat opnieuw inloggen vereist is.",
+    "default_hint": "Laat leeg om de standaardinstellingen van de organisatie te gebruiken.",
+    "platform_default_hint": "Laat leeg om de standaardinstellingen van het platform te gebruiken."
   },
   "phone": {
     "select_country": "Landcode selecteren",

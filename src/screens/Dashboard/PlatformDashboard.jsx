@@ -182,9 +182,9 @@ const HomeContent = ({ onNavigate }) => {
           delta={0} 
           icon={<IconGlobe />} color="#A78BFA" accent="rgba(167,139,250,.14)" 
         />
-        <StatCard 
-          label="dashboard.careSites" 
-          value={loading ? '...' : (summary?.stats?.totalCareSites ?? summary?.careSites ?? summary?.careSiteCount ?? '0').toString()} 
+        <StatCard
+          label="dashboard.caresites"
+          value={loading ? '...' : (summary?.stats?.totalCareSites ?? summary?.careSites ?? summary?.careSiteCount ?? '0').toString()}
           delta={0} 
           icon={<IconCareSite />} color={T.accent} 
         />

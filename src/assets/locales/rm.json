@@ -325,6 +325,7 @@
     "address_pincode": "Numer postal",
     "select_type_title": "Tschernir tip d'organisaziun",
     "types": {
+      "ORGANISATION": "Organisaziun",
       "CARESITE": "Spital",
       "CLINIC": "Clinica",
       "LAB": "Laboratori",
@@ -1123,7 +1124,15 @@
     "err_save_failed": "L'actualisaziun da la politica da sessiun ha fallì.",
     "err_load_failed": "Il chargiar da la politica actuala ha fallì.",
     "err_invalid_durations": "Las duradas da sessiun ston esser numbers positifs (laschar vid per hereditar da l'org).",
-    "tap_edit_hint": "Tucchai sin Modifitgar per configurar"
+    "tap_edit_hint": "Tucchai sin Modifitgar per configurar",
+    "admins": "Administraturs",
+    "doctors": "Medis",
+    "nurses": "Tgirunzas",
+    "patients": "Pazients",
+    "idle_hint": "Fixai per tgentan temp il persunal ed ils pazients restan connectads avant che sia necessaria ina nova s'annunzia.",
+    "org_idle_hint": "Fixai per tgentan temp ils administraturs da l'organisaziun restan connectads avant ina nova s'annunzia.",
+    "default_hint": "Laschair vit per utilisar ils valurs da l'organisaziun sco standard.",
+    "platform_default_hint": "Laschair vit per utilisar ils valurs da la plattafurma sco standard."
   },
   "phone": {
     "select_country": "Tscherner il codi dal pajais",

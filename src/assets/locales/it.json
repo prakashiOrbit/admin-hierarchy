@@ -325,6 +325,7 @@
     "address_pincode": "CAP",
     "select_type_title": "Seleziona tipo organizzazione",
     "types": {
+      "ORGANISATION": "Organizzazione",
       "CARESITE": "Ospedale",
       "CLINIC": "Clinica",
       "LAB": "Laboratorio",
@@ -1123,7 +1124,15 @@
     "err_save_failed": "Aggiornamento della politica di sessione non riuscito.",
     "err_load_failed": "Caricamento della politica corrente non riuscito.",
     "err_invalid_durations": "Le durate delle sessioni devono essere numeri positivi (lascia vuoto per ereditare dall'org).",
-    "tap_edit_hint": "Tocca Modifica per configurare"
+    "tap_edit_hint": "Tocca Modifica per configurare",
+    "admins": "Amministratori",
+    "doctors": "Medici",
+    "nurses": "Infermieri",
+    "patients": "Pazienti",
+    "idle_hint": "Imposta per quanto tempo il personale e i pazienti rimangono connessi prima di richiedere il riaccesso.",
+    "org_idle_hint": "Imposta per quanto tempo gli amministratori dell'organizzazione rimangono connessi prima del riaccesso.",
+    "default_hint": "Lascia vuoto per utilizzare i valori predefiniti dell'organizzazione.",
+    "platform_default_hint": "Lascia vuoto per utilizzare i valori predefiniti della piattaforma."
   },
   "phone": {
     "select_country": "Seleziona prefisso paese",

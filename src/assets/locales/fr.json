@@ -325,6 +325,7 @@
     "address_pincode": "Code postal",
     "select_type_title": "Sélectionner le type d'organisation",
     "types": {
+      "ORGANISATION": "Organisation",
       "CARESITE": "Hôpital",
       "CLINIC": "Clinique",
       "LAB": "Laboratoire",
@@ -1123,7 +1124,15 @@
     "err_save_failed": "Échec de la mise à jour de la politique de session.",
     "err_load_failed": "Échec du chargement de la politique actuelle.",
     "err_invalid_durations": "Les durées de session doivent être des nombres positifs (laissez vide pour hériter de l'org).",
-    "tap_edit_hint": "Appuyez sur Modifier pour configurer"
+    "tap_edit_hint": "Appuyez sur Modifier pour configurer",
+    "admins": "Administrateurs",
+    "doctors": "Médecins",
+    "nurses": "Infirmiers",
+    "patients": "Patients",
+    "idle_hint": "Définissez la durée de connexion du personnel et des patients avant de demander une reconnexion.",
+    "org_idle_hint": "Définissez la durée de connexion des administrateurs de l'organisation avant une reconnexion.",
+    "default_hint": "Laissez vide pour utiliser les valeurs par défaut de l'organisation.",
+    "platform_default_hint": "Laissez vide pour utiliser les valeurs par défaut de la plateforme."
   },
   "phone": {
     "select_country": "Sélectionner l'indicatif pays",

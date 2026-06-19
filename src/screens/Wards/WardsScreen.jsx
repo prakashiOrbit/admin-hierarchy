@@ -190,7 +190,7 @@ export const WardsScreen = ({ onNewWard, onNewBed, onEditWard }) => {
               <IconDoor size={48} color={T.textFaint} />
               <Text style={styles.emptyTitle}>{t('messages.no_wards_found')}</Text>
               <Text style={styles.emptyHint}>
-                {t('messages.no_wards_caresite_hint', { careSiteCode: user?.careSiteCode })} 
+                {t('messages.no_wards_caresite_hint', { caresiteCode: user?.careSiteCode })} 
                 {t('messages.create_ward_hint')}
               </Text>
               <Btn variant="primary" size="md" style={{ marginTop: 24, paddingHorizontal: 32 }} onPress={onNewWard}>
