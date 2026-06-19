@@ -1,7 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n from '../i18n';
 
-const BASE_URL = 'http://139.59.46.163/api';
+//const BASE_URL = 'http://139.59.46.163/api';
+const BASE_URL = 'https://itouch-plus.iorbit.health/api';
 const SESSION_KEY = '@auth:session';
 const DEFAULT_TIMEOUT_MS = 15000;
 const inFlightGetRequests = new Map();

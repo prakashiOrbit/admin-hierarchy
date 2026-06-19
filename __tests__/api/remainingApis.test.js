@@ -28,7 +28,8 @@ jest.mock('../../src/i18n', () => ({
   LOCALE_STORAGE_KEY: 'preferred_locale',
 }));
 
-const BASE = 'http://139.59.46.163/api';
+//const BASE = 'http://139.59.46.163/api';
+const BASE = 'https://itouch-plus.iorbit.health/api';
 const ORG  = 'APOAP1';
 const CARESITE = 'CLV';
 const RAW  = 'raw-token';
