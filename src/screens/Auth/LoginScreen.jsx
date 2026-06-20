@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, StyleSheet, KeyboardAvoidingView, Platform,
   ScrollView, TouchableOpacity, Alert, ActivityIndicator,
@@ -8,7 +8,16 @@ import { useTranslation } from 'react-i18next';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authApi, getApiErrorMessage } from '../../services/api';
+import {
+  authenticateWithBiometric,
+  enrollBiometric,
+  getBiometricCapability,
+  getBiometricProfile,
+  isBiometricEnrolled,
+  revokeBiometric,
+} from '../../services/biometricService';
 import { Logo, Field, TextInput, PhoneInput, Btn } from '../../components/Shared';
 import { LanguageSheet } from '../../components/LanguageSheet';
 import {
@@ -81,6 +90,42 @@ export const LoginScreen = ({ navigation }) => {
   const [showForgotNewPw, setShowForgotNewPw] = useState(false);
   const [forgotPwdLoading, setForgotPwdLoading] = useState(false);
 
+  const [biometricType, setBiometricType] = useState('none');
+
+  useEffect(() => {
+    const checkBiometric = async () => {
+      const enrolled = await isBiometricEnrolled();
+      if (!enrolled) { setBiometricType('none'); return; }
+      const cap = await getBiometricCapability();
+      setBiometricType(cap);
+    };
+    checkBiometric();
+  }, []);
+
+  const handleBiometricLogin = async () => {
+    const label = biometricType === 'face' ? 'Face ID' : 'Fingerprint';
+    const token = await authenticateWithBiometric(`Sign in with ${label}`, 'Use Password');
+    if (!token) return;
+
+    try {
+      const profile = await getBiometricProfile();
+      if (!profile) {
+        await revokeBiometric();
+        setBiometricType('none');
+        return;
+      }
+      login(
+        { token, ...profile.userProfile },
+        { keepSignedIn: false, navTarget: profile.navTarget, navParams: profile.navParams },
+      );
+      navigation.replace(profile.navTarget, profile.navParams);
+    } catch {
+      await revokeBiometric();
+      setBiometricType('none');
+      Alert.alert('Session Expired', 'Please log in with your username and password.');
+    }
+  };
+
   const currentLangCode  = (i18n.language || 'en').split('-')[0];
   const currentLangLabel = t(`languages.${currentLangCode}`)?.split(' ')[0] || t('languages.en').split(' ')[0];
 
@@ -92,10 +137,48 @@ export const LoginScreen = ({ navigation }) => {
 
   const startResendCooldown = () => setResendCooldown(RESEND_COOLDOWN);
 
-  const finalizeLogin = (res, ksi) => {
+  const finalizeLogin = async (res, ksi) => {
     const { navTarget, navParams } = resolveNavTarget(res, username);
     login(res, { keepSignedIn: ksi, navTarget, navParams });
-    navigation.replace(navTarget, navParams);
+
+    const capability = await getBiometricCapability();
+    const alreadyEnrolled = await isBiometricEnrolled();
+
+    if (capability !== 'none' && !alreadyEnrolled && res.token) {
+      const label = capability === 'face' ? 'Face ID' : 'Fingerprint';
+      const storedUsername = res.userName || username;
+      const profile = {
+        userProfile: {
+          userName: res.userName,
+          orgName: res.orgName,
+          careSiteCode: res.careSiteCode,
+          userData: res.userData,
+        },
+        navTarget,
+        navParams,
+      };
+      Alert.alert(
+        `Enable ${label} Login`,
+        `Log in faster next time using ${label}. You can disable this by logging out.`,
+        [
+          {
+            text: 'Not Now',
+            style: 'cancel',
+            onPress: () => navigation.replace(navTarget, navParams),
+          },
+          {
+            text: 'Enable',
+            onPress: async () => {
+              await enrollBiometric(storedUsername, res.token, profile);
+              navigation.replace(navTarget, navParams);
+            },
+          },
+        ],
+        { cancelable: false },
+      );
+    } else {
+      navigation.replace(navTarget, navParams);
+    }
   };
 
   const processLoginResponse = (res, ksi = false) => {
@@ -632,6 +715,19 @@ export const LoginScreen = ({ navigation }) => {
             </Btn>
           </View>
 
+          {biometricType !== 'none' && (
+            <TouchableOpacity
+              style={[styles.biometricBtn, isLoading && styles.altBtnDisabled]}
+              onPress={handleBiometricLogin}
+              disabled={isLoading}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.biometricBtnText}>
+                {biometricType === 'face' ? 'Sign in with Face ID' : 'Sign in with Fingerprint'}
+              </Text>
+            </TouchableOpacity>
+          )}
+
           {/* ── OR divider ── */}
           <View style={styles.divider}>
             <View style={styles.dividerLine} />
@@ -728,6 +824,15 @@ const createStyles = (T) => StyleSheet.create({
   keepSignedInText: { fontSize: 13, color: T.textDim, fontWeight: '500' },
   forgotBtn:  { paddingVertical: 6 },
   forgotText: { color: T.accent, fontSize: 13, fontWeight: '500' },
+
+  // ── Biometric button ──────────────────────────────────────────────────────────
+  biometricBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    height: 52, marginTop: 12,
+    borderRadius: 12, borderWidth: 1.5, borderColor: T.accent,
+    backgroundColor: T.surface,
+  },
+  biometricBtnText: { fontSize: 15, fontWeight: '600', color: T.accent },
 
   // ── OR divider ───────────────────────────────────────────────────────────────
   divider: {

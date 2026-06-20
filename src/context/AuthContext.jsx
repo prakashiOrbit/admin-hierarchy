@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import i18n, { LOCALE_STORAGE_KEY } from '../i18n';
 import { userApi, authApi, setTokenRefreshedCallback } from '../services/api';
+import { revokeBiometric } from '../services/biometricService';
 
 const AuthContext = createContext(undefined);
 const SESSION_KEY = '@auth:session';
@@ -110,6 +111,7 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setRestoredNav(null);
     AsyncStorage.removeItem(SESSION_KEY).catch(() => {});
+    revokeBiometric().catch(() => {});
   };
 
   const changeLanguage = (newLocale) => {
